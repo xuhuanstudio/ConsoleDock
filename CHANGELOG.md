@@ -12,3 +12,4 @@ The project follows Semantic Versioning after public releases begin.
 - Added minimal unit tests for lifecycle and configuration behavior.
 - Added open-source governance files.
 - Refined Swift start failure handling to preserve core error details.
+- Added core log entry model, bounded in-memory Native API storage, basic redaction, message truncation, and read/clear APIs.

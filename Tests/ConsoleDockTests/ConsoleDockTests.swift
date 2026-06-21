@@ -3,6 +3,7 @@ import XCTest
 
 final class ConsoleDockTests: XCTestCase {
     override func tearDown() {
+        ConsoleDock.clear()
         ConsoleDock.stop()
         super.tearDown()
     }
@@ -30,6 +31,7 @@ final class ConsoleDockTests: XCTestCase {
         let configuration = ConsoleDock.Configuration.default
 
         XCTAssertEqual(configuration.maximumEntries, 2_000)
+        XCTAssertEqual(configuration.maximumMessageLength, 8_192)
         XCTAssertTrue(configuration.captureStandardOutput)
         XCTAssertTrue(configuration.captureStandardError)
         XCTAssertTrue(configuration.showsFloatingButton)
@@ -51,12 +53,51 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertFalse(ConsoleDock.isRunning)
     }
 
-    func testLoggingAPIsAreSafeNoOpsInSkeletonStage() {
+    func testLoggingAPIsAreSafeNoOpsWhenNotRunning() {
         ConsoleDock.debug("debug")
         ConsoleDock.info("info")
         ConsoleDock.warning("warning")
         ConsoleDock.error("error")
 
         XCTAssertFalse(ConsoleDock.isRunning)
+        XCTAssertTrue(ConsoleDock.entries.isEmpty)
+    }
+
+    func testSwiftFacadeLogReadAndClear() {
+        XCTAssertEqual(ConsoleDock.start(), .started)
+
+        ConsoleDock.debug("debug")
+        ConsoleDock.info("info")
+        ConsoleDock.warning("warning")
+        ConsoleDock.error("error")
+
+        let entries = ConsoleDock.entries
+        XCTAssertEqual(entries.map(\.level), [.debug, .info, .warning, .error])
+        XCTAssertEqual(entries.map(\.source), [.native, .native, .native, .native])
+        XCTAssertEqual(entries.map(\.message), ["debug", "info", "warning", "error"])
+
+        ConsoleDock.clear()
+
+        XCTAssertTrue(ConsoleDock.entries.isEmpty)
+    }
+
+    func testSwiftConfigurationBridgesStoreLimitsAndRedactor() {
+        let configuration = ConsoleDock.Configuration(
+            maximumEntries: 1,
+            maximumMessageLength: 6,
+            redactor: { message in
+                message.replacingOccurrences(of: "private", with: "public")
+            }
+        )
+        XCTAssertEqual(ConsoleDock.start(configuration: configuration), .started)
+
+        ConsoleDock.info("first")
+        ConsoleDock.error("private-value")
+
+        let entries = ConsoleDock.entries
+        XCTAssertEqual(entries.count, 1)
+        XCTAssertEqual(entries[0].level, .error)
+        XCTAssertEqual(entries[0].source, .native)
+        XCTAssertEqual(entries[0].message, "public")
     }
 }

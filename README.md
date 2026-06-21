@@ -6,15 +6,15 @@ ConsoleDock is a planned iOS debug SDK that lets testers inspect app logs direct
 
 ## Status
 
-ConsoleDock is currently in the package skeleton and public API stub phase. The repository contains a Swift Package manifest, minimal `ConsoleDockCore` and `ConsoleDock` targets, and focused lifecycle/configuration tests.
+ConsoleDock is currently in the core in-memory store phase. The repository contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, bounded in-memory entries, basic redaction, and focused tests.
 
-Current stub limitations:
+Current limitations:
 
 - stdout/stderr capture is not implemented yet.
-- `dup2`, pipe readers, line framing, ring buffer storage, and redaction are not implemented yet.
+- `dup2`, pipe readers, and line framing are not implemented yet.
 - The UIKit floating button and console panel are not implemented yet.
 - Third-party adapters, CocoaPods, and XCFramework distribution are not implemented yet.
-- The current logging APIs are safe no-ops intended to establish API shape.
+- Redaction is a local in-memory baseline, not a complete privacy guarantee.
 
 ## Core Boundary
 
@@ -99,9 +99,19 @@ Use ConsoleDock's explicit API for the most reliable logs:
 ConsoleDock.info("Login succeeded")
 ```
 
-The future implementation can write to both ConsoleDock's internal store and Apple unified logging where appropriate, but ConsoleDock's on-device panel must read from its own store. In the current skeleton stage, these logging methods are safe no-ops.
+Current Native Mode stores entries in a bounded local memory store only after ConsoleDock has started:
 
-### Objective-C Core Stub
+```swift
+ConsoleDock.start()
+ConsoleDock.info("Login succeeded")
+
+let entries = ConsoleDock.entries
+ConsoleDock.clear()
+```
+
+The future implementation may write to both ConsoleDock's internal store and Apple unified logging where appropriate, but ConsoleDock's on-device panel must read from its own store. ConsoleDock does not write files, upload logs, or read unified logging entries in the current implementation.
+
+### Objective-C Core
 
 ```objc
 #import <ConsoleDockCore/ConsoleDockCore.h>
@@ -109,6 +119,8 @@ The future implementation can write to both ConsoleDock's internal store and App
 CDKConfiguration *configuration = [CDKConfiguration defaultConfiguration];
 CDKStartResult result = [CDKConsoleDock startWithConfiguration:configuration];
 [CDKConsoleDock info:@"Login succeeded"];
+NSArray<CDKLogEntry *> *entries = [CDKConsoleDock entries];
+[CDKConsoleDock clearEntries];
 [CDKConsoleDock stop];
 ```
 

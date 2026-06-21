@@ -3,6 +3,52 @@
 NSErrorDomain const CDKConsoleDockErrorDomain = @"CDKConsoleDockErrorDomain";
 
 static BOOL CDKConsoleDockRunning = NO;
+static CDKConfiguration *CDKConsoleDockConfiguration = nil;
+static NSMutableArray<CDKLogEntry *> *CDKConsoleDockEntries = nil;
+
+static NSString *CDKStringByReplacingMatches(NSString *message, NSString *pattern, NSString *replacement)
+{
+    NSRegularExpression *expression = [NSRegularExpression regularExpressionWithPattern:pattern
+                                                                                options:NSRegularExpressionCaseInsensitive
+                                                                                  error:nil];
+    NSRange range = NSMakeRange(0, message.length);
+    return [expression stringByReplacingMatchesInString:message
+                                                options:0
+                                                  range:range
+                                           withTemplate:replacement];
+}
+
+static NSString *CDKDefaultRedactedMessage(NSString *message)
+{
+    NSString *redacted = [message copy];
+    redacted = CDKStringByReplacingMatches(redacted,
+                                           @"Authorization\\s*[:=]\\s*Bearer\\s+[^\\s,;]+",
+                                           @"Authorization: Bearer <redacted>");
+    redacted = CDKStringByReplacingMatches(redacted,
+                                           @"(\"?(?:password|token|api[_-]?key|key|secret)\"?\\s*[:=]\\s*\")([^\"]+)(\")",
+                                           @"$1<redacted>$3");
+    redacted = CDKStringByReplacingMatches(redacted,
+                                           @"\\b(password|token|api[_-]?key|key|secret)\\b\\s*[:=]\\s*[^\\s,;&]+",
+                                           @"$1=<redacted>");
+    return redacted;
+}
+
+static NSString *CDKPreparedMessage(NSString *message, CDKConfiguration *configuration)
+{
+    NSString *prepared = CDKDefaultRedactedMessage(message ?: @"");
+    if (configuration.redactionBlock != nil) {
+        NSString *customRedacted = configuration.redactionBlock(prepared);
+        if (customRedacted != nil) {
+            prepared = customRedacted;
+        }
+    }
+
+    if (prepared.length > configuration.maximumMessageLength) {
+        prepared = [prepared substringToIndex:configuration.maximumMessageLength];
+    }
+
+    return prepared;
+}
 
 @implementation CDKConsoleDock
 
@@ -29,7 +75,17 @@ static BOOL CDKConsoleDockRunning = NO;
             }
             return CDKStartResultFailed;
         }
+        if (effectiveConfiguration.maximumMessageLength == 0) {
+            if (error != nil) {
+                *error = [NSError errorWithDomain:CDKConsoleDockErrorDomain
+                                             code:2
+                                         userInfo:@{NSLocalizedDescriptionKey: @"maximumMessageLength must be greater than zero"}];
+            }
+            return CDKStartResultFailed;
+        }
 
+        CDKConsoleDockConfiguration = [effectiveConfiguration copy];
+        CDKConsoleDockEntries = [NSMutableArray arrayWithCapacity:MIN(CDKConsoleDockConfiguration.maximumEntries, 64)];
         CDKConsoleDockRunning = YES;
         return CDKStartResultStarted;
     }
@@ -56,10 +112,41 @@ static BOOL CDKConsoleDockRunning = NO;
     }
 }
 
++ (NSArray<CDKLogEntry *> *)entries
+{
+    @synchronized(self) {
+        return [CDKConsoleDockEntries copy] ?: @[];
+    }
+}
+
++ (void)clearEntries
+{
+    @synchronized(self) {
+        [CDKConsoleDockEntries removeAllObjects];
+    }
+}
+
 + (void)logWithLevel:(CDKLogLevel)level message:(NSString *)message
 {
-    (void)level;
-    (void)message;
+    @synchronized(self) {
+        if (!CDKConsoleDockRunning || CDKConsoleDockConfiguration == nil) {
+            return;
+        }
+
+        NSString *preparedMessage = CDKPreparedMessage(message, CDKConsoleDockConfiguration);
+        CDKLogEntry *entry = [[CDKLogEntry alloc] initWithTimestamp:[NSDate date]
+                                                              level:level
+                                                             source:CDKLogSourceNative
+                                                            message:preparedMessage];
+        if (CDKConsoleDockEntries == nil) {
+            CDKConsoleDockEntries = [NSMutableArray array];
+        }
+        [CDKConsoleDockEntries addObject:entry];
+
+        while (CDKConsoleDockEntries.count > CDKConsoleDockConfiguration.maximumEntries) {
+            [CDKConsoleDockEntries removeObjectAtIndex:0];
+        }
+    }
 }
 
 + (void)debug:(NSString *)message
