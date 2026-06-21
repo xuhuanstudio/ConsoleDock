@@ -6,7 +6,15 @@ ConsoleDock is a planned iOS debug SDK that lets testers inspect app logs direct
 
 ## Status
 
-ConsoleDock is currently in the architecture and project-specification phase. The repository does not yet contain SDK source code, a Swift package manifest, or a sample app.
+ConsoleDock is currently in the package skeleton and public API stub phase. The repository contains a Swift Package manifest, minimal `ConsoleDockCore` and `ConsoleDock` targets, and focused lifecycle/configuration tests.
+
+Current stub limitations:
+
+- stdout/stderr capture is not implemented yet.
+- `dup2`, pipe readers, line framing, ring buffer storage, and redaction are not implemented yet.
+- The UIKit floating button and console panel are not implemented yet.
+- Third-party adapters, CocoaPods, and XCFramework distribution are not implemented yet.
+- The current logging APIs are safe no-ops intended to establish API shape.
 
 ## Core Boundary
 
@@ -30,6 +38,23 @@ ConsoleDock cannot promise complete, reliable, live, zero-intrusion capture of:
 
 Reliable complete logging should go through ConsoleDock's explicit API or an adapter for an existing logging framework.
 
+## Package Skeleton
+
+Current package products:
+
+- `ConsoleDock`: Swift facade stub for app-facing API.
+- `ConsoleDockCore`: Objective-C/C-compatible core stub with `CDK`-prefixed symbols.
+
+The package includes macOS as a development/test platform so `swift build` and `swift test` can run on local development machines and CI. ConsoleDock's product goal remains an iOS debug SDK.
+
+Local validation:
+
+```sh
+swift package dump-package
+swift build
+swift test
+```
+
 ## Intended Distribution
 
 Primary distribution:
@@ -45,13 +70,15 @@ Secondary distribution after the SPM package is stable:
 
 ### Base Mode
 
-One-line startup integration for stdout/stderr capture:
+Planned one-line startup integration for stdout/stderr capture:
 
 ```swift
 import ConsoleDock
 
 ConsoleDock.start()
 ```
+
+In the current skeleton stage, `start()` only updates stub lifecycle state. It does not install stdout/stderr capture.
 
 ### Adapter Mode
 
@@ -72,7 +99,18 @@ Use ConsoleDock's explicit API for the most reliable logs:
 ConsoleDock.info("Login succeeded")
 ```
 
-The implementation can write to both ConsoleDock's internal store and Apple unified logging where appropriate, but ConsoleDock's on-device panel must read from its own store.
+The future implementation can write to both ConsoleDock's internal store and Apple unified logging where appropriate, but ConsoleDock's on-device panel must read from its own store. In the current skeleton stage, these logging methods are safe no-ops.
+
+### Objective-C Core Stub
+
+```objc
+#import <ConsoleDockCore/ConsoleDockCore.h>
+
+CDKConfiguration *configuration = [CDKConfiguration defaultConfiguration];
+CDKStartResult result = [CDKConsoleDock startWithConfiguration:configuration];
+[CDKConsoleDock info:@"Login succeeded"];
+[CDKConsoleDock stop];
+```
 
 ## Design Documents
 
@@ -94,4 +132,3 @@ The implementation can write to both ConsoleDock's internal store and Apple unif
 - Do not enable release-build debug UI by default.
 - Treat privacy redaction as a core data path, not a later add-on.
 - Prefer standards-based packaging, versioning, documentation, and CI.
-

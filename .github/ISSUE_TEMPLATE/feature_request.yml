@@ -1,0 +1,41 @@
+name: Feature request
+description: Suggest a ConsoleDock improvement
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What developer or tester problem would this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the smallest useful solution.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Core capture
+        - Swift API
+        - Objective-C API
+        - UI
+        - Redaction and privacy
+        - Documentation
+        - Packaging
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: boundaries
+    attributes:
+      label: Boundary check
+      description: Does this rely on full zero-intrusion Swift Logger/os_log capture, system logs, or other-process logs?
+    validations:
+      required: true
