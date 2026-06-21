@@ -2,7 +2,7 @@
 
 This roadmap is intentionally conservative. ConsoleDock should ship small, verified releases rather than over-promising Xcode-level logging behavior.
 
-## v0.1.0 - MVP Capture and Console
+## v0.1 - MVP Capture and Console
 
 Goal: prove the basic product value.
 
@@ -29,7 +29,7 @@ Not included:
 - crash reporting.
 - full `Logger` / `os_log` ingestion.
 
-## v0.2.0 - Developer Experience
+## v0.2 - Developer Experience
 
 Goal: make the SDK comfortable for real project trials.
 
@@ -50,7 +50,7 @@ Not included:
 - large third-party adapter suite.
 - network request inspection.
 
-## v0.3.0 - Compatibility and Adapters
+## v0.3 - Compatibility and Adapters
 
 Goal: improve adoption in existing apps.
 
@@ -69,7 +69,7 @@ Not included:
 - automatic network upload.
 - system log reading.
 
-## v1.0.0 - Stable Public SDK
+## v1.0 - Stable Public SDK
 
 Goal: provide a stable, documented debug SDK for broad open-source use.
 
@@ -103,4 +103,3 @@ Future features should be driven by real user demand:
 - SwiftUI-specific presentation helpers.
 
 Each post-1.0 feature should preserve the default local-only, debug-first safety model.
-

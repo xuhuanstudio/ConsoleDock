@@ -1,8 +1,8 @@
-# Open-Source Readiness
+# ConsoleDock Open Source Readiness Plan
 
 ConsoleDock should be structured as a professional global open-source SDK, not just a local debugging experiment.
 
-## Repository Voice and Language
+## README Internationalization Strategy
 
 Primary repository language: English.
 
@@ -45,7 +45,7 @@ Add before the first public release:
 
 `SECURITY.md` should state that ConsoleDock is a debug tool and that reports involving accidental sensitive data exposure, release-build activation, or unsafe export behavior are security-relevant.
 
-## Versioning
+## Semantic Versioning
 
 Use Semantic Versioning:
 
@@ -58,7 +58,7 @@ Version gates:
 - breaking public API changes require a major bump after `1.0`;
 - bug fixes and documentation improvements use patch releases.
 
-## Distribution Strategy
+## Package Distribution Strategy
 
 ### Swift Package Manager
 
@@ -137,7 +137,7 @@ Documentation must include examples for:
 - redaction customization;
 - disabling ConsoleDock in Release.
 
-## API Stability
+## API Stability And Version Compatibility
 
 Public APIs should be small in the MVP.
 
@@ -187,4 +187,3 @@ Before `v1.0.0`:
 - redaction has focused tests;
 - Release safety behavior is tested;
 - documentation is clear enough for external contributors.
-
