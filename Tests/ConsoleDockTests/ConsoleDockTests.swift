@@ -39,7 +39,15 @@ final class ConsoleDockTests: XCTestCase {
     func testInvalidConfigurationMapsToFailure() {
         let configuration = ConsoleDock.Configuration(maximumEntries: 0)
 
-        XCTAssertEqual(ConsoleDock.start(configuration: configuration), .failed)
+        let result = ConsoleDock.start(configuration: configuration)
+
+        guard case let .failed(failure) = result else {
+            return XCTFail("Expected invalid configuration to fail, got \(result)")
+        }
+
+        XCTAssertEqual(failure.domain, "CDKConsoleDockErrorDomain")
+        XCTAssertEqual(failure.code, 1)
+        XCTAssertEqual(failure.message, "maximumEntries must be greater than zero")
         XCTAssertFalse(ConsoleDock.isRunning)
     }
 

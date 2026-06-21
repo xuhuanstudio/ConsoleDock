@@ -15,22 +15,24 @@ static BOOL CDKConsoleDockRunning = NO;
                                    error:(NSError **)error
 {
 #if defined(DEBUG) || defined(CONSOLEDOCK_ENABLE_RELEASE)
-    if (CDKConsoleDockRunning) {
-        return CDKStartResultAlreadyRunning;
-    }
-
-    CDKConfiguration *effectiveConfiguration = configuration ?: [CDKConfiguration defaultConfiguration];
-    if (effectiveConfiguration.maximumEntries == 0) {
-        if (error != nil) {
-            *error = [NSError errorWithDomain:CDKConsoleDockErrorDomain
-                                         code:1
-                                     userInfo:@{NSLocalizedDescriptionKey: @"maximumEntries must be greater than zero"}];
+    @synchronized(self) {
+        if (CDKConsoleDockRunning) {
+            return CDKStartResultAlreadyRunning;
         }
-        return CDKStartResultFailed;
-    }
 
-    CDKConsoleDockRunning = YES;
-    return CDKStartResultStarted;
+        CDKConfiguration *effectiveConfiguration = configuration ?: [CDKConfiguration defaultConfiguration];
+        if (effectiveConfiguration.maximumEntries == 0) {
+            if (error != nil) {
+                *error = [NSError errorWithDomain:CDKConsoleDockErrorDomain
+                                             code:1
+                                         userInfo:@{NSLocalizedDescriptionKey: @"maximumEntries must be greater than zero"}];
+            }
+            return CDKStartResultFailed;
+        }
+
+        CDKConsoleDockRunning = YES;
+        return CDKStartResultStarted;
+    }
 #else
     (void)configuration;
     if (error != nil) {
@@ -42,12 +44,16 @@ static BOOL CDKConsoleDockRunning = NO;
 
 + (void)stop
 {
-    CDKConsoleDockRunning = NO;
+    @synchronized(self) {
+        CDKConsoleDockRunning = NO;
+    }
 }
 
 + (BOOL)isRunning
 {
-    return CDKConsoleDockRunning;
+    @synchronized(self) {
+        return CDKConsoleDockRunning;
+    }
 }
 
 + (void)logWithLevel:(CDKLogLevel)level message:(NSString *)message

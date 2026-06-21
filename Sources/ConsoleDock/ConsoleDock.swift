@@ -40,13 +40,38 @@ public enum ConsoleDock {
         case started
         case alreadyRunning
         case disabled
-        case failed
+        case failed(StartFailure)
+    }
+
+    public struct StartFailure: Equatable {
+        public let domain: String
+        public let code: Int
+        public let message: String
+
+        public init(domain: String, code: Int, message: String) {
+            self.domain = domain
+            self.code = code
+            self.message = message
+        }
+
+        init(error: NSError) {
+            domain = error.domain
+            code = error.code
+            message = error.localizedDescription
+        }
+
+        static let unknown = StartFailure(
+            domain: "CDKConsoleDockErrorDomain",
+            code: -1,
+            message: "ConsoleDock failed to start, but the core did not provide an NSError."
+        )
     }
 
     @discardableResult
     public static func start(configuration: Configuration = .default) -> StartResult {
-        let result = CDKConsoleDock.start(with: configuration.makeCoreConfiguration())
-        return StartResult(coreResult: result)
+        var error: NSError?
+        let result = CDKConsoleDock.start(with: configuration.makeCoreConfiguration(), error: &error)
+        return StartResult(coreResult: result, error: error)
     }
 
     public static func stop() {
@@ -75,7 +100,7 @@ public enum ConsoleDock {
 }
 
 private extension ConsoleDock.StartResult {
-    init(coreResult: CDKStartResult) {
+    init(coreResult: CDKStartResult, error: NSError?) {
         switch coreResult {
         case .started:
             self = .started
@@ -84,9 +109,9 @@ private extension ConsoleDock.StartResult {
         case .disabled:
             self = .disabled
         case .failed:
-            self = .failed
+            self = .failed(error.map(ConsoleDock.StartFailure.init(error:)) ?? .unknown)
         @unknown default:
-            self = .failed
+            self = .failed(error.map(ConsoleDock.StartFailure.init(error:)) ?? .unknown)
         }
     }
 }

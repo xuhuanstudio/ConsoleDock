@@ -11,3 +11,4 @@ The project follows Semantic Versioning after public releases begin.
 - Added `ConsoleDock` Swift facade stub API.
 - Added minimal unit tests for lifecycle and configuration behavior.
 - Added open-source governance files.
+- Refined Swift start failure handling to preserve core error details.

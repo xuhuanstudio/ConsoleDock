@@ -45,4 +45,18 @@ final class ConsoleDockCoreTests: XCTestCase {
         XCTAssertEqual(CDKConsoleDock.start(with: configuration), .failed)
         XCTAssertFalse(CDKConsoleDock.isRunning())
     }
+
+    func testInvalidConfigurationPopulatesNSError() {
+        let configuration = CDKConfiguration.default()
+        configuration.maximumEntries = 0
+        var error: NSError?
+
+        let result = CDKConsoleDock.start(with: configuration, error: &error)
+
+        XCTAssertEqual(result, .failed)
+        XCTAssertEqual(error?.domain, "CDKConsoleDockErrorDomain")
+        XCTAssertEqual(error?.code, 1)
+        XCTAssertEqual(error?.localizedDescription, "maximumEntries must be greater than zero")
+        XCTAssertFalse(CDKConsoleDock.isRunning())
+    }
 }
