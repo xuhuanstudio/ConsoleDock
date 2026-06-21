@@ -78,7 +78,7 @@ import ConsoleDock
 ConsoleDock.start()
 ```
 
-In the current skeleton stage, `start()` only updates stub lifecycle state. It does not install stdout/stderr capture.
+In the current core-store stage, `start()` initializes the local Native API store. It still does not install stdout/stderr capture.
 
 ### Adapter Mode
 
