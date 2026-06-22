@@ -2,14 +2,20 @@
 
 All notable changes to ConsoleDock will be documented in this file.
 
-The project follows Semantic Versioning after public releases begin.
+The project follows Semantic Versioning for public releases.
 
 ## Unreleased
+
+### Added
+
+- Added Dependabot configuration for weekly GitHub Actions update checks.
 
 ### Changed
 
 - Updated README status and installation guidance now that `v0.1.0` is publicly released.
 - Added public README badges for CI, release validation, latest release, and license status.
+- Updated GitHub Actions checkout usage to the Node 24-compatible `actions/checkout@v6` runtime.
+- Aligned contribution and security policy status wording with the public `v0.x` preview stage.
 
 ## v0.1.0 - 2026-06-22
 
