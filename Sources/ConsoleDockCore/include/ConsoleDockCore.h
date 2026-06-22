@@ -30,9 +30,9 @@ FOUNDATION_EXPORT NSNotificationName const CDKConsoleDockEntriesDidChangeNotific
 
 @interface CDKConfiguration : NSObject <NSCopying>
 
-/// Maximum number of entries retained in memory before oldest entries are evicted.
+/// Maximum number of entries retained in memory before oldest entries are evicted. Must be greater than zero.
 @property (nonatomic) NSUInteger maximumEntries;
-/// Maximum stored message length after redaction.
+/// Maximum stored message length after redaction. Must be greater than zero.
 @property (nonatomic) NSUInteger maximumMessageLength;
 /// Captures stdout writes from the app process when enabled.
 @property (nonatomic) BOOL captureStandardOutput;

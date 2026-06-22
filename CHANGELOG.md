@@ -17,6 +17,7 @@ Initial public preview of ConsoleDock as a source-first Swift Package Manager iO
 - Added the `ConsoleDockCore` Objective-C-compatible core target with `CDK`-prefixed APIs.
 - Added the `ConsoleDock` Swift facade target with startup, shutdown, native logging, entry snapshot, clear, and UIKit console controls.
 - Added bounded in-memory log storage with message truncation, read/clear APIs, and entries-changed notifications.
+- Added startup validation for invalid memory and message length limits, with Swift facade handling for negative values without runtime crashes.
 - Added default redaction before storage for obvious authorization bearer values, cookie headers, token, password, passwd, access token, refresh token, API key, client secret, key, and secret patterns.
 - Added app-specific redaction configuration hooks in both Swift and Objective-C-compatible APIs.
 - Added byte-to-line framing for stdout/stderr chunks, including CRLF normalization, partial flushes, independent source buffers, bounded partial lines, and invalid UTF-8 replacement.

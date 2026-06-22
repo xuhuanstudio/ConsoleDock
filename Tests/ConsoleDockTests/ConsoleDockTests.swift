@@ -73,6 +73,36 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertFalse(ConsoleDock.isRunning)
     }
 
+    func testNegativeEntryLimitMapsToFailureWithoutCrashing() {
+        let configuration = ConsoleDock.Configuration(maximumEntries: -1)
+
+        let result = ConsoleDock.start(configuration: configuration)
+
+        guard case let .failed(failure) = result else {
+            return XCTFail("Expected negative entry limit to fail, got \(result)")
+        }
+
+        XCTAssertEqual(failure.domain, "CDKConsoleDockErrorDomain")
+        XCTAssertEqual(failure.code, 1)
+        XCTAssertEqual(failure.message, "maximumEntries must be greater than zero")
+        XCTAssertFalse(ConsoleDock.isRunning)
+    }
+
+    func testNegativeMessageLengthMapsToFailureWithoutCrashing() {
+        let configuration = ConsoleDock.Configuration(maximumMessageLength: -1)
+
+        let result = ConsoleDock.start(configuration: configuration)
+
+        guard case let .failed(failure) = result else {
+            return XCTFail("Expected negative message length to fail, got \(result)")
+        }
+
+        XCTAssertEqual(failure.domain, "CDKConsoleDockErrorDomain")
+        XCTAssertEqual(failure.code, 2)
+        XCTAssertEqual(failure.message, "maximumMessageLength must be greater than zero")
+        XCTAssertFalse(ConsoleDock.isRunning)
+    }
+
     func testLoggingAPIsAreSafeNoOpsWhenNotRunning() {
         ConsoleDock.debug("debug")
         ConsoleDock.info("info")

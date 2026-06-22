@@ -5,9 +5,9 @@ import Foundation
 public enum ConsoleDock {
     /// Runtime options for the local in-app console.
     public struct Configuration: Equatable {
-        /// Maximum number of entries retained in memory before oldest entries are evicted.
+        /// Maximum number of entries retained in memory before oldest entries are evicted. Must be greater than zero.
         public var maximumEntries: Int
-        /// Maximum stored message length after redaction.
+        /// Maximum stored message length after redaction. Must be greater than zero.
         public var maximumMessageLength: Int
         /// Captures stdout writes from the app process when enabled.
         public var captureStandardOutput: Bool
@@ -53,8 +53,8 @@ public enum ConsoleDock {
 
         func makeCoreConfiguration() -> CDKConfiguration {
             let configuration = CDKConfiguration()
-            configuration.maximumEntries = UInt(maximumEntries)
-            configuration.maximumMessageLength = UInt(maximumMessageLength)
+            configuration.maximumEntries = UInt(max(0, maximumEntries))
+            configuration.maximumMessageLength = UInt(max(0, maximumMessageLength))
             configuration.captureStandardOutput = captureStandardOutput
             configuration.captureStandardError = captureStandardError
             configuration.showsFloatingButton = showsFloatingButton
