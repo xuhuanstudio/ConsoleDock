@@ -23,6 +23,19 @@ jobs:
         run: swift test -c release --filter ConsoleDockCoreTests/testReleaseBuild
       - name: Test Release explicit opt-in gate
         run: swift test -c release -Xcc -DCONSOLEDOCK_ENABLE_RELEASE -Xswiftc -DCONSOLEDOCK_ENABLE_RELEASE --filter ConsoleDockCoreTests/testReleaseBuild
+      - name: Build DocC documentation
+        run: |
+          swift package dump-symbol-graph --minimum-access-level public --skip-synthesized-members
+          SYMBOL_GRAPH_DIR="$(find .build -type d -name symbolgraph | head -n 1)"
+          test -n "$SYMBOL_GRAPH_DIR"
+          xcrun docc convert Sources/ConsoleDock/Documentation.docc \
+            --additional-symbol-graph-dir "$SYMBOL_GRAPH_DIR" \
+            --output-dir .build/ConsoleDock.doccarchive \
+            --fallback-display-name ConsoleDock \
+            --fallback-bundle-identifier io.github.consoledock.ConsoleDock \
+            --fallback-default-module-kind framework \
+            --default-code-listing-language swift \
+            --warnings-as-errors
       - name: Build package for iOS Simulator
         run: xcodebuild -scheme ConsoleDock-Package -destination 'generic/platform=iOS Simulator' build
       - name: Build Swift sample app

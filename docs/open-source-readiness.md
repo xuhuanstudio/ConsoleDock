@@ -101,6 +101,7 @@ Initial checks:
 - Swift package build;
 - xcodebuild build for iOS simulator;
 - unit tests;
+- DocC conversion with warnings treated as errors;
 - documentation link check where practical;
 - formatting or lint check once a formatter is selected.
 
@@ -126,7 +127,7 @@ Minimum public docs:
 - migration guide for existing loggers;
 - sample app walkthrough.
 
-DocC should be added once public Swift APIs exist.
+An initial DocC catalog exists for the `ConsoleDock` Swift facade. It should remain focused on public Swift API usage, logging boundaries, privacy, Release safety, and Objective-C integration guidance.
 
 Documentation must include examples for:
 
@@ -178,6 +179,7 @@ Before `v0.1.0`:
 - security policy is present;
 - `Logger` / `os_log` boundary is documented;
 - release notes are written.
+- DocC documentation builds without warnings.
 
 Before `v1.0.0`:
 

@@ -1,0 +1,68 @@
+# Getting Started
+
+Start ConsoleDock in a Debug build and write logs through the explicit API or supported stdout/stderr paths.
+
+## Add The Package
+
+Add ConsoleDock as a Swift Package dependency, then depend on the `ConsoleDock` product for Swift API access and the bundled UIKit console.
+
+For Objective-C-compatible core APIs without the Swift facade, depend on `ConsoleDockCore`.
+
+## Start ConsoleDock
+
+Call ``ConsoleDock/start(configuration:)`` during debug startup, before generating logs you expect ConsoleDock to capture.
+
+```swift
+import ConsoleDock
+
+@discardableResult
+func startDebugConsole() -> ConsoleDock.StartResult {
+    ConsoleDock.start()
+}
+```
+
+The default configuration:
+
+- captures supported stdout and stderr writes from the current app process;
+- installs the floating UIKit `CD` button when UIKit is available;
+- redacts obvious secrets before storage;
+- truncates very long messages;
+- stores entries in local memory only;
+- returns `.disabled` in Release builds unless the explicit Release opt-in gate is enabled.
+
+## Write Native Entries
+
+The explicit API is the most reliable way to get app-authored logs into the panel.
+
+```swift
+ConsoleDock.info("Login succeeded")
+ConsoleDock.warning("Retrying request")
+ConsoleDock.error("Request failed")
+ConsoleDock.fault("Invariant failed")
+```
+
+## Customize Redaction
+
+ConsoleDock runs its default redactor first. Add a custom redactor for app-specific fields.
+
+```swift
+let configuration = ConsoleDock.Configuration(redactor: { message in
+    message.replacingOccurrences(
+        of: "tenant_id=internal",
+        with: "tenant_id=<redacted>"
+    )
+})
+
+ConsoleDock.start(configuration: configuration)
+```
+
+## Read Or Clear Entries
+
+Use ``ConsoleDock/entries`` for a snapshot and ``ConsoleDock/clear()`` to clear the local in-memory store.
+
+```swift
+let snapshot = ConsoleDock.entries
+ConsoleDock.clear()
+```
+
+Use ``ConsoleDock/entriesDidChangeNotification`` when building a custom debug surface. Notification handlers should dispatch to the main queue before touching UIKit.

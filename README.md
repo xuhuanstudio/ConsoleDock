@@ -116,7 +116,23 @@ swift test -c release -Xcc -DCONSOLEDOCK_ENABLE_RELEASE -Xswiftc -DCONSOLEDOCK_E
 xcodebuild -scheme ConsoleDock-Package -destination 'generic/platform=iOS Simulator' build
 ```
 
-GitHub Actions currently validates the SwiftPM manifest, SwiftPM build/test, Release safety gates, the package iOS Simulator build, and both sample app builds.
+Local DocC validation:
+
+```sh
+swift package dump-symbol-graph --minimum-access-level public --skip-synthesized-members
+SYMBOL_GRAPH_DIR="$(find .build -type d -name symbolgraph | head -n 1)"
+test -n "$SYMBOL_GRAPH_DIR"
+xcrun docc convert Sources/ConsoleDock/Documentation.docc \
+  --additional-symbol-graph-dir "$SYMBOL_GRAPH_DIR" \
+  --output-dir .build/ConsoleDock.doccarchive \
+  --fallback-display-name ConsoleDock \
+  --fallback-bundle-identifier io.github.consoledock.ConsoleDock \
+  --fallback-default-module-kind framework \
+  --default-code-listing-language swift \
+  --warnings-as-errors
+```
+
+GitHub Actions currently validates the SwiftPM manifest, SwiftPM build/test, Release safety gates, DocC documentation, the package iOS Simulator build, and both sample app builds.
 
 ## Examples And Walkthrough
 
@@ -237,6 +253,7 @@ Use `ConsoleDockCore` directly when an Objective-C app only needs capture, stora
 ## Design Documents
 
 - [Product brief](docs/product-brief.md)
+- [DocC catalog](Sources/ConsoleDock/Documentation.docc/ConsoleDock.md)
 - [MVP architecture](docs/specs/2026-06-22-mvp-architecture.md)
 - [Open-source readiness](docs/open-source-readiness.md)
 - [Release build safety](docs/release-build-safety.md)

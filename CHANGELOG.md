@@ -29,3 +29,4 @@ The project follows Semantic Versioning after public releases begin.
 - Added UIKit selected-entry copy for visible redacted log rows.
 - Added UIKit log level filtering for visible entries, share/export snapshots, and selected-entry copy.
 - Added public `fault` logging convenience APIs and expanded public API documentation comments.
+- Added an initial DocC catalog for public Swift API usage, logging boundaries, privacy, Release safety, and Objective-C integration, with CI validation.
