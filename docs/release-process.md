@@ -103,6 +103,8 @@ Use the matching changelog section as the source of truth. Keep release notes fa
 python3 scripts/verify-public-release.py --repository <OWNER>/ConsoleDock --tag v0.1.0 --check-spi
 ```
 
+The verifier retries transient network failures such as GitHub API EOFs and connection timeouts, but it still treats persistent missing releases, missing workflow runs, missing tags, and unavailable Swift Package Index pages as failures.
+
 2. Verify Xcode can add the repository URL as a Swift Package dependency at the tag.
 3. Verify the `ConsoleDock` and `ConsoleDockCore` products resolve.
 4. Open the generated DocC archive locally if documentation changed materially.

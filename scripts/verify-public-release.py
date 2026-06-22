@@ -11,12 +11,28 @@ import subprocess
 import sys
 import tempfile
 import textwrap
+import time
 import urllib.error
 import urllib.request
 
 
 SEMVER_TAG_RE = re.compile(r"^v?(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)$")
 DEFAULT_WORKFLOW = "Release Validation"
+DEFAULT_NETWORK_ATTEMPTS = 3
+DEFAULT_RETRY_DELAY_SECONDS = 2.0
+TRANSIENT_PROCESS_FAILURE_SNIPPETS = (
+    "connection reset",
+    "connection timed out",
+    "could not resolve host",
+    "eof",
+    "network is unreachable",
+    "operation timed out",
+    "temporarily unavailable",
+    "temporary failure",
+    "the network connection was lost",
+    "timed out",
+    "tls handshake timeout",
+)
 
 
 def run(command: list[str], cwd: pathlib.Path | None = None) -> subprocess.CompletedProcess[str]:
@@ -27,6 +43,41 @@ def run(command: list[str], cwd: pathlib.Path | None = None) -> subprocess.Compl
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
+
+
+def is_transient_process_failure(result: subprocess.CompletedProcess[str]) -> bool:
+    if result.returncode == 0:
+        return False
+
+    combined_output = f"{result.stderr}\n{result.stdout}".lower()
+    return any(snippet in combined_output for snippet in TRANSIENT_PROCESS_FAILURE_SNIPPETS)
+
+
+def run_network(
+    command: list[str],
+    cwd: pathlib.Path | None = None,
+    *,
+    attempts: int = DEFAULT_NETWORK_ATTEMPTS,
+    retry_delay_seconds: float = DEFAULT_RETRY_DELAY_SECONDS,
+) -> subprocess.CompletedProcess[str]:
+    last_result: subprocess.CompletedProcess[str] | None = None
+    for attempt in range(1, attempts + 1):
+        result = run(command, cwd)
+        if result.returncode == 0 or not is_transient_process_failure(result) or attempt == attempts:
+            if result.returncode != 0 and attempt > 1:
+                return subprocess.CompletedProcess(
+                    result.args,
+                    result.returncode,
+                    result.stdout,
+                    f"{result.stderr.rstrip()}\nRetried {attempts} times for a transient network failure.".strip(),
+                )
+            return result
+
+        last_result = result
+        time.sleep(retry_delay_seconds)
+
+    assert last_result is not None
+    return last_result
 
 
 def normalize_repository(repository: str) -> tuple[str, str]:
@@ -61,7 +112,7 @@ def package_version(tag: str) -> str:
 def check_github_release(repository_slug: str, tag: str, workflow: str) -> list[str]:
     errors: list[str] = []
 
-    repo = run(
+    repo = run_network(
         [
             "gh",
             "repo",
@@ -74,7 +125,7 @@ def check_github_release(repository_slug: str, tag: str, workflow: str) -> list[
     if repo.returncode != 0:
         return [repo.stderr.strip() or repo.stdout.strip() or f"unable to view repository {repository_slug}"]
 
-    release = run(
+    release = run_network(
         [
             "gh",
             "release",
@@ -95,7 +146,7 @@ def check_github_release(repository_slug: str, tag: str, workflow: str) -> list[
         if release_payload.get("isDraft"):
             errors.append(f"GitHub Release {tag} must not be a draft")
 
-    tag_lookup = run(["git", "ls-remote", "--exit-code", "--tags", f"https://github.com/{repository_slug}.git", tag])
+    tag_lookup = run_network(["git", "ls-remote", "--exit-code", "--tags", f"https://github.com/{repository_slug}.git", tag])
     if tag_lookup.returncode != 0:
         errors.append(f"remote tag {tag} was not found on https://github.com/{repository_slug}.git")
 
@@ -115,14 +166,14 @@ def check_github_release(repository_slug: str, tag: str, workflow: str) -> list[
         "--limit",
         "20",
     ]
-    workflow_runs = run([*workflow_command, "--branch", tag])
+    workflow_runs = run_network([*workflow_command, "--branch", tag])
     if workflow_runs.returncode != 0:
         errors.append(workflow_runs.stderr.strip() or workflow_runs.stdout.strip() or "unable to list workflow runs")
     else:
         runs = json.loads(workflow_runs.stdout)
         matching_runs = [item for item in runs if item.get("headBranch") == tag]
         if not matching_runs:
-            fallback_runs = run(workflow_command)
+            fallback_runs = run_network(workflow_command)
             if fallback_runs.returncode == 0:
                 runs = json.loads(fallback_runs.stdout)
                 matching_runs = [item for item in runs if item.get("headBranch") == tag]
@@ -196,7 +247,7 @@ def check_spm_consumer(repository_url: str, tag: str) -> list[str]:
             encoding="utf-8",
         )
 
-        resolve = run(["swift", "package", "resolve"], root)
+        resolve = run_network(["swift", "package", "resolve"], root)
         if resolve.returncode != 0:
             errors.append(resolve.stderr.strip() or resolve.stdout.strip() or "SwiftPM resolve failed")
             return errors
@@ -208,16 +259,28 @@ def check_spm_consumer(repository_url: str, tag: str) -> list[str]:
     return errors
 
 
-def check_url(url: str) -> tuple[bool, str]:
+def check_url(url: str, attempts: int = DEFAULT_NETWORK_ATTEMPTS) -> tuple[bool, str]:
     request = urllib.request.Request(url, headers={"User-Agent": "ConsoleDock release verifier"})
-    try:
-        with urllib.request.urlopen(request, timeout=20) as response:
-            status = getattr(response, "status", 200)
-            return 200 <= status < 400, f"HTTP {status}"
-    except urllib.error.HTTPError as error:
-        return False, f"HTTP {error.code}"
-    except urllib.error.URLError as error:
-        return False, str(error.reason)
+    last_message = ""
+    for attempt in range(1, attempts + 1):
+        try:
+            with urllib.request.urlopen(request, timeout=20) as response:
+                status = getattr(response, "status", 200)
+                if 200 <= status < 400:
+                    return True, f"HTTP {status}"
+                last_message = f"HTTP {status}"
+        except urllib.error.HTTPError as error:
+            if error.code not in {408, 429, 500, 502, 503, 504}:
+                return False, f"HTTP {error.code}"
+            last_message = f"HTTP {error.code}"
+        except urllib.error.URLError as error:
+            last_message = str(error.reason)
+
+        if attempt < attempts:
+            time.sleep(DEFAULT_RETRY_DELAY_SECONDS)
+
+    retry_suffix = f" after {attempts} attempts" if attempts > 1 else ""
+    return False, f"{last_message}{retry_suffix}"
 
 
 def check_spi(repository_slug: str) -> list[str]:
@@ -275,7 +338,29 @@ def self_test() -> list[str]:
     except ValueError:
         pass
 
+    errors.extend(self_test_transient_process_detection())
     errors.extend(self_test_swiftpm_v_tag_resolution())
+    return errors
+
+
+def self_test_transient_process_detection() -> list[str]:
+    errors: list[str] = []
+    transient = subprocess.CompletedProcess(["gh", "run", "view"], 1, "", "Get https://api.github.com/example: EOF")
+    if not is_transient_process_failure(transient):
+        errors.append("is_transient_process_failure should detect GitHub API EOF")
+
+    timeout = subprocess.CompletedProcess(["gh", "api"], 1, "", "connect: operation timed out")
+    if not is_transient_process_failure(timeout):
+        errors.append("is_transient_process_failure should detect operation timed out")
+
+    not_found = subprocess.CompletedProcess(["gh", "release", "view"], 1, "", "release not found")
+    if is_transient_process_failure(not_found):
+        errors.append("is_transient_process_failure should not retry permanent release-not-found errors")
+
+    success = subprocess.CompletedProcess(["gh", "api"], 0, "{}", "")
+    if is_transient_process_failure(success):
+        errors.append("is_transient_process_failure should not retry successful commands")
+
     return errors
 
 
