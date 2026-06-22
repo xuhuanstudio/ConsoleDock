@@ -84,11 +84,27 @@ public enum ConsoleDock {
     }
 
     /// A redacted log entry retained in ConsoleDock's in-memory store.
-    public struct LogEntry: Equatable {
+    public struct LogEntry: Equatable, Identifiable {
+        /// Stable identifier assigned when the entry is stored in the current ConsoleDock session.
+        public let id: UInt64
         public let timestamp: Date
         public let level: LogLevel
         public let source: LogSource
         public let message: String
+
+        public init(
+            id: UInt64 = 0,
+            timestamp: Date,
+            level: LogLevel,
+            source: LogSource,
+            message: String
+        ) {
+            self.id = id
+            self.timestamp = timestamp
+            self.level = level
+            self.source = source
+            self.message = message
+        }
     }
 
     /// Startup result returned by `start(configuration:)`.
@@ -231,6 +247,7 @@ extension ConsoleDock {
 
 extension ConsoleDock.LogEntry {
     fileprivate init(coreEntry: CDKLogEntry) {
+        id = coreEntry.identifier
         timestamp = coreEntry.timestamp
         level = ConsoleDock.LogLevel(coreLevel: coreEntry.level)
         source = ConsoleDock.LogSource(coreSource: coreEntry.source)

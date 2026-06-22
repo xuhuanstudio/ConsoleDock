@@ -150,6 +150,27 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertTrue(ConsoleDock.entries.isEmpty)
     }
 
+    func testSwiftFacadeEntriesExposeStableIdentifiers() {
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+
+        ConsoleDock.info("first")
+        ConsoleDock.error("second")
+
+        XCTAssertEqual(ConsoleDock.entries.map(\.id), [1, 2])
+    }
+
+    func testSwiftLogEntryInitializerDefaultsIdentifierForFixtures() {
+        let entry = ConsoleDock.LogEntry(
+            timestamp: Date(timeIntervalSince1970: 1),
+            level: .info,
+            source: .native,
+            message: "fixture"
+        )
+
+        XCTAssertEqual(entry.id, 0)
+        XCTAssertEqual(entry.message, "fixture")
+    }
+
     func testSnapshotFormatterExportsStablePlainText() {
         let generatedAt = Date(timeIntervalSince1970: 0)
         let entries = [

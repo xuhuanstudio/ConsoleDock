@@ -53,6 +53,8 @@ FOUNDATION_EXPORT NSNotificationName const CDKConsoleDockEntriesDidChangeNotific
 
 @interface CDKLogEntry : NSObject <NSCopying>
 
+/// Stable identifier assigned when the entry is stored in the current ConsoleDock session.
+@property (nonatomic, readonly) unsigned long long identifier;
 /// The time this entry was stored.
 @property (nonatomic, copy, readonly) NSDate *timestamp;
 /// The severity associated with this entry.
@@ -64,10 +66,15 @@ FOUNDATION_EXPORT NSNotificationName const CDKConsoleDockEntriesDidChangeNotific
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
+- (instancetype)initWithIdentifier:(unsigned long long)identifier
+                         timestamp:(NSDate *)timestamp
+                             level:(CDKLogLevel)level
+                            source:(CDKLogSource)source
+                           message:(NSString *)message NS_DESIGNATED_INITIALIZER;
 - (instancetype)initWithTimestamp:(NSDate *)timestamp
                             level:(CDKLogLevel)level
                            source:(CDKLogSource)source
-                          message:(NSString *)message NS_DESIGNATED_INITIALIZER;
+                          message:(NSString *)message;
 
 @end
 

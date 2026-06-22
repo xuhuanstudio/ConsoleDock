@@ -9,6 +9,7 @@ static BOOL CDKConsoleDockStopping = NO;
 static CDKConfiguration *CDKConsoleDockConfiguration = nil;
 static NSMutableArray<CDKLogEntry *> *CDKConsoleDockEntries = nil;
 static CDKStandardOutputCapture *CDKConsoleDockCapture = nil;
+static unsigned long long CDKConsoleDockNextEntryIdentifier = 0;
 
 static NSString *CDKStringByReplacingMatches(NSString *message, NSString *pattern, NSString *replacement)
 {
@@ -118,6 +119,7 @@ static void CDKPostEntriesDidChangeNotification(void)
         didResetEntries = CDKConsoleDockEntries.count > 0;
         CDKConsoleDockConfiguration = [effectiveConfiguration copy];
         CDKConsoleDockEntries = [NSMutableArray arrayWithCapacity:MIN(CDKConsoleDockConfiguration.maximumEntries, 64)];
+        CDKConsoleDockNextEntryIdentifier = 0;
         CDKStandardOutputCapture *capture = [[CDKStandardOutputCapture alloc] initWithConfiguration:CDKConsoleDockConfiguration];
         NSError *captureError = nil;
         if (![capture startWithError:&captureError]) {
@@ -206,10 +208,12 @@ static void CDKPostEntriesDidChangeNotification(void)
         }
 
         NSString *preparedMessage = CDKPreparedMessage(message, CDKConsoleDockConfiguration);
-        CDKLogEntry *entry = [[CDKLogEntry alloc] initWithTimestamp:[NSDate date]
-                                                              level:level
-                                                             source:source
-                                                            message:preparedMessage];
+        CDKConsoleDockNextEntryIdentifier += 1;
+        CDKLogEntry *entry = [[CDKLogEntry alloc] initWithIdentifier:CDKConsoleDockNextEntryIdentifier
+                                                           timestamp:[NSDate date]
+                                                               level:level
+                                                              source:source
+                                                             message:preparedMessage];
         if (CDKConsoleDockEntries == nil) {
             CDKConsoleDockEntries = [NSMutableArray array];
         }

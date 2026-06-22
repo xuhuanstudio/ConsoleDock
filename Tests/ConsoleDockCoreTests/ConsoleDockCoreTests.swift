@@ -124,6 +124,50 @@ final class ConsoleDockCoreTests: XCTestCase {
         XCTAssertLessThanOrEqual(entries[0].timestamp.timeIntervalSince1970, after.timeIntervalSince1970)
     }
 
+    func testStoredEntriesReceiveIncreasingIdentifiers() {
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+
+        CDKConsoleDock.info("first")
+        CDKConsoleDock.append(CDKLineEvent(source: .stdout, message: "second", isPartial: false))
+        CDKConsoleDock.error("third")
+
+        XCTAssertEqual(CDKConsoleDock.entries().map(\.identifier), [1, 2, 3])
+    }
+
+    func testStartResetsEntryIdentifiersWithSessionStore() {
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+        CDKConsoleDock.info("previous session")
+        XCTAssertEqual(CDKConsoleDock.entries().map(\.identifier), [1])
+
+        CDKConsoleDock.stop()
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+        CDKConsoleDock.info("current session")
+
+        XCTAssertEqual(CDKConsoleDock.entries().map(\.identifier), [1])
+    }
+
+    func testLogEntryInitializersExposeIdentifier() {
+        let timestamp = Date(timeIntervalSince1970: 1)
+
+        let identifiedEntry = CDKLogEntry(
+            identifier: 42,
+            timestamp: timestamp,
+            level: .info,
+            source: .native,
+            message: "identified"
+        )
+        let compatibilityEntry = CDKLogEntry(
+            timestamp: timestamp,
+            level: .info,
+            source: .native,
+            message: "compatibility"
+        )
+
+        XCTAssertEqual(identifiedEntry.identifier, 42)
+        XCTAssertEqual(identifiedEntry.timestamp, timestamp)
+        XCTAssertEqual(compatibilityEntry.identifier, 0)
+    }
+
     func testNativeFaultLogAppendsFaultEntry() {
         XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
 

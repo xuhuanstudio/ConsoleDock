@@ -4,7 +4,7 @@ Inspect debug logs inside an iOS app without attaching Xcode.
 
 ## Overview
 
-ConsoleDock is a debug and test SDK for iOS apps. It stores redacted log entries in local memory, displays them in a bundled UIKit console, and keeps Release builds disabled by default.
+ConsoleDock is a debug and test SDK for iOS apps. It stores redacted log entries in local memory with stable session identifiers, displays them in a bundled UIKit console, and keeps Release builds disabled by default.
 
 Use ConsoleDock when testers need to inspect useful app logs on a device or Simulator without a live Xcode session. It can capture supported stdout and stderr writes from the app process, and its explicit native logging API is the most reliable way to send messages into the in-app console.
 
