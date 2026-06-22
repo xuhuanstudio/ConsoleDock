@@ -17,3 +17,4 @@ The project follows Semantic Versioning after public releases begin.
 - Added core stdout/stderr file-descriptor capture lifecycle with pass-through, restore, line framing, partial flush on stop, and capture configuration support.
 - Added entries-changed notification for append and clear operations as a snapshot refresh foundation.
 - Added UIKit console foundation with floating button, live snapshot panel, clear, close, and lifecycle teardown.
+- Added a Swift UIKit sample app that imports the local package and validates Native API, stdout, stderr, `NSLog`, redaction, clear, stop, and restart behavior on Simulator.

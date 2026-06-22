@@ -12,6 +12,7 @@ Current limitations:
 
 - stdout/stderr capture exists in the core and is connected to line framing and in-memory storage.
 - Direct descriptor writes and flushed C stdio output can be captured; unflushed `printf` / `fprintf` output depends on standard stream buffering.
+- File-descriptor capture can include framework or runtime warnings written through the app process descriptors, not only application-authored messages.
 - Entry change notification exists as the refresh foundation for UI; notification handlers should fetch a snapshot through `entries`.
 - The UIKit floating button and console panel foundation can show, live refresh, clear, and close the current in-memory snapshot.
 - Search, pause/resume, copy, share/export, persistence, and advanced filtering are not implemented yet.
@@ -55,6 +56,21 @@ Local validation:
 swift package dump-package
 swift build
 swift test
+```
+
+## Examples
+
+The repository includes a minimal UIKit sample app:
+
+- [SwiftSampleApp](Examples/SwiftSampleApp/README.md): Swift UIKit app that imports the local package, starts ConsoleDock at launch, shows the floating console button, and generates Native API, Swift `print`, C `printf`, C `fprintf(stderr)`, and `NSLog` messages.
+
+Build it from the package root:
+
+```sh
+xcodebuild -project Examples/SwiftSampleApp/SwiftSampleApp.xcodeproj \
+  -scheme SwiftSampleApp \
+  -destination 'generic/platform=iOS Simulator' \
+  build
 ```
 
 ## Intended Distribution
@@ -150,6 +166,7 @@ NSArray<CDKLogEntry *> *entries = [CDKConsoleDock entries];
 ## Workspace Layout
 
 - `docs/`: project design notes, specifications, and release planning.
+- `Examples/`: sample apps that exercise package integration and runtime behavior.
 - `work/`: temporary research, scripts, and experiments.
 - `outputs/`: user-facing deliverables.
 
