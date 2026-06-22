@@ -256,12 +256,14 @@ Use `ConsoleDockCore` directly when an Objective-C app only needs capture, stora
 - [Sample app walkthrough](docs/sample-app-walkthrough.md)
 - [Roadmap](docs/roadmap.md)
 
-## Workspace Layout
+## Repository Layout
 
-- `docs/`: project design notes, specifications, and release planning.
-- `Examples/`: sample apps that exercise package integration and runtime behavior.
-- `work/`: temporary research, scripts, and experiments.
-- `outputs/`: user-facing deliverables.
+- `Sources/`: package targets for the Objective-C-compatible core and Swift facade.
+- `Tests/`: focused package tests for lifecycle, capture, redaction, filtering, export formatting, and Release safety.
+- `Examples/`: Swift and Objective-C sample apps that exercise package integration and runtime behavior.
+- `docs/`: architecture notes, release planning, migration guidance, and sample walkthroughs.
+- `scripts/`: local validation helpers used by CI and release checks.
+- `.github/`: issue templates, pull request template, CI, and release validation workflow.
 
 ## Project Principles
 

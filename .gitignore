@@ -14,12 +14,3 @@ Package.resolved
 
 # CocoaPods
 Pods/
-
-# Local scratch
-work/*
-!work/.gitkeep
-
-# Generated outputs can be kept selectively.
-outputs/*
-!outputs/.gitkeep
-
