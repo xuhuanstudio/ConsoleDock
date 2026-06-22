@@ -5,15 +5,24 @@
 @import ConsoleDock;
 @import ConsoleDockCore;
 
+@interface AppDelegate ()
+
+- (void)startConsoleDockForUISmokeRun:(BOOL)isUISmokeRun;
+
+@end
+
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    [self startConsoleDock];
+    BOOL isUISmokeRun = [NSProcessInfo.processInfo.arguments containsObject:@"--consoledock-ui-smoke"];
+    [self startConsoleDockForUISmokeRun:isUISmokeRun];
     [CDKConsoleDock info:@"ObjCSampleApp launched"];
-    printf("ConsoleDock Objective-C sample launch printf token=objc-launch-secret\n");
-    fflush(stdout);
-    NSLog(@"ConsoleDock Objective-C sample launch NSLog token=objc-nslog-secret");
+    if (!isUISmokeRun) {
+        printf("ConsoleDock Objective-C sample launch printf token=objc-launch-secret\n");
+        fflush(stdout);
+        NSLog(@"ConsoleDock Objective-C sample launch NSLog token=objc-nslog-secret");
+    }
 
     if (@available(iOS 13.0, *)) {
         return YES;
@@ -39,13 +48,13 @@ configurationForConnectingSceneSession:(UISceneSession *)connectingSceneSession
     [CDKConsoleDockUIKit stop];
 }
 
-- (void)startConsoleDock
+- (void)startConsoleDockForUISmokeRun:(BOOL)isUISmokeRun
 {
     CDKConfiguration *configuration = [CDKConfiguration defaultConfiguration];
-    configuration.maximumEntries = 500;
+    configuration.maximumEntries = isUISmokeRun ? 100 : 500;
     configuration.maximumMessageLength = 4096;
-    configuration.captureStandardOutput = YES;
-    configuration.captureStandardError = YES;
+    configuration.captureStandardOutput = !isUISmokeRun;
+    configuration.captureStandardError = !isUISmokeRun;
     configuration.showsFloatingButton = YES;
     configuration.allowsReleaseBuilds = NO;
 

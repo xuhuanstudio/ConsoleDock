@@ -132,7 +132,7 @@ Initial checks:
 - Swift sample app build;
 - Swift format lint;
 - distribution documentation claim validation;
-- focused Swift sample UI smoke test on iOS Simulator in GitHub workflows.
+- focused Swift and Objective-C sample UI smoke tests on iOS Simulator in GitHub workflows.
 
 Future checks:
 

@@ -27,11 +27,12 @@ The project follows Semantic Versioning for public releases.
 - Added app-specific logger sink forwarding controls to the Swift and Objective-C sample apps.
 - Added stable accessibility identifiers to bundled console and sample controls for future UI smoke automation.
 - Added an opt-in Swift sample UI smoke test and validation script for Simulator-based release checks.
+- Added an opt-in Objective-C sample UI smoke test and validation script for Simulator-based release checks.
 - Added visible redaction assertions to the Swift sample UI smoke test.
 
 ### Changed
 
-- Enabled the focused Swift sample UI smoke test in GitHub CI and release-validation workflows.
+- Enabled focused Swift and Objective-C sample UI smoke tests in GitHub CI and release-validation workflows.
 - Broadened default redaction for common mobile token names including ID, auth, session, CSRF, and `x-api-key` forms.
 - Redacted stdout/stderr partial-line continuations from the same source after a sensitive oversized fragment is detected.
 - Updated README status and installation guidance now that `v0.1.0` is publicly released.

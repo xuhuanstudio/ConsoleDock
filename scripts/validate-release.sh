@@ -99,9 +99,11 @@ xcodebuild -project Examples/ObjCSampleApp/ObjCSampleApp.xcodeproj \
 if [[ "${CONSOLEDOCK_RUN_UI_SMOKE:-0}" == "1" ]]; then
   section "Run Swift sample UI smoke test"
   scripts/validate-swift-sample-ui-smoke.sh
+  section "Run Objective-C sample UI smoke test"
+  scripts/validate-objc-sample-ui-smoke.sh
 else
-  section "Skip Swift sample UI smoke test"
-  echo "Set CONSOLEDOCK_RUN_UI_SMOKE=1 to run the simulator UI smoke test."
+  section "Skip sample UI smoke tests"
+  echo "Set CONSOLEDOCK_RUN_UI_SMOKE=1 to run the simulator UI smoke tests."
 fi
 
 section "Validate source archive"

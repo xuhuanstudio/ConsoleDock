@@ -34,20 +34,20 @@ Run these from the package root:
 scripts/validate-release.sh
 ```
 
-The script validates the working tree is clean, then validates the SwiftPM manifest, package identity, Swift Package Index metadata, Objective-C API surface, Swift API surface, Swift formatting, package build, package tests, Release safety gates, documentation links, logging boundary claims, governance metadata, distribution documentation claims and tracked distribution artifacts, release helper script dry-runs, release content audit, DocC conversion, iOS package build, Swift and Objective-C sample app builds, source archive creation, source archive contents, and source archive build/test from a temporary extraction. GitHub workflows set `CONSOLEDOCK_RUN_UI_SMOKE=1` so the focused Swift sample UI smoke test also runs in CI.
+The script validates the working tree is clean, then validates the SwiftPM manifest, package identity, Swift Package Index metadata, Objective-C API surface, Swift API surface, Swift formatting, package build, package tests, Release safety gates, documentation links, logging boundary claims, governance metadata, distribution documentation claims and tracked distribution artifacts, release helper script dry-runs, release content audit, DocC conversion, iOS package build, Swift and Objective-C sample app builds, source archive creation, source archive contents, and source archive build/test from a temporary extraction. GitHub workflows set `CONSOLEDOCK_RUN_UI_SMOKE=1` so the focused Swift and Objective-C sample UI smoke tests also run in CI.
 
 Release helper dry-runs use `CONSOLEDOCK_RELEASE_TAG` when set, use `GITHUB_REF_NAME` when the workflow is running on a tag, and otherwise default to `v0.1.0` for local main-branch validation.
 
 ## Manual Sample Smoke Check
 
-GitHub release validation runs the focused Swift sample UI smoke test automatically. For local release rehearsals, run at least one iOS Simulator smoke check before the first public release in a minor series:
+GitHub release validation runs the focused Swift and Objective-C sample UI smoke tests automatically. For local release rehearsals, run at least one iOS Simulator smoke check before the first public release in a minor series:
 
 1. Launch `SwiftSampleApp`.
 2. Generate native, stdout, stderr, and `NSLog` entries.
 3. Confirm generated `token=...` values are displayed as `token=<redacted>`.
 4. Open the ConsoleDock panel.
 5. Verify search, source filter, level filter, pause/resume, selected-entry copy, share, clear, stop, and restart behavior.
-6. Repeat the import/start/logging path in `ObjCSampleApp` when Objective-C compatibility changed.
+6. Run `scripts/validate-objc-sample-ui-smoke.sh` when Objective-C compatibility changed.
 
 ## Tag And Validate
 
@@ -108,7 +108,7 @@ The verifier retries transient network failures such as GitHub API EOFs and conn
 2. Verify Xcode can add the repository URL as a Swift Package dependency at the tag.
 3. Verify the `ConsoleDock` and `ConsoleDockCore` products resolve.
 4. Open the generated DocC archive locally if documentation changed materially.
-5. Run `CONSOLEDOCK_RUN_UI_SMOKE=1 scripts/validate-release.sh` or `scripts/validate-swift-sample-ui-smoke.sh` when validating a minor release on a machine with an available iOS Simulator.
+5. Run `CONSOLEDOCK_RUN_UI_SMOKE=1 scripts/validate-release.sh`, `scripts/validate-swift-sample-ui-smoke.sh`, or `scripts/validate-objc-sample-ui-smoke.sh` when validating a minor release on a machine with an available iOS Simulator.
 6. Submit or verify the package on Swift Package Index after the public repository URL and release tag are available. Use Swift Package Index's current package request issue flow instead of opening a direct PackageList pull request.
 7. Confirm Swift Package Index hosts DocC documentation for the `ConsoleDock` target declared in `.spi.yml`.
 8. Leave the working tree clean.

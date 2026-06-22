@@ -115,7 +115,7 @@ The verifier checks the GitHub repository, remote tag, GitHub Release, `Release 
    - `ConsoleDock`
    - `ConsoleDockCore`
 5. Build the package in an iOS Simulator target.
-6. Run `CONSOLEDOCK_RUN_UI_SMOKE=1 scripts/validate-release.sh` or `scripts/validate-swift-sample-ui-smoke.sh` on a machine with an available iOS Simulator.
+6. Run `CONSOLEDOCK_RUN_UI_SMOKE=1 scripts/validate-release.sh`, `scripts/validate-swift-sample-ui-smoke.sh`, or `scripts/validate-objc-sample-ui-smoke.sh` on a machine with an available iOS Simulator.
 7. Confirm the README, release notes, and `SECURITY.md` still describe the shipped behavior accurately.
 8. Submit or verify the package on Swift Package Index after the public repository URL and release tag are available. Use Swift Package Index's current package request issue flow instead of opening a direct PackageList pull request.
 9. Confirm Swift Package Index builds the package and hosts DocC documentation for the `ConsoleDock` target.
