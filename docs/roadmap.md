@@ -33,6 +33,8 @@ Not included:
 
 Goal: make the SDK comfortable for real project trials.
 
+Many developer-experience items may land before the first public tag when they reduce release risk.
+
 Deliverables:
 
 - Swift sample app.
@@ -59,7 +61,7 @@ Deliverables:
 - CocoaLumberjack adapter.
 - XCGLogger or SwiftyBeaver adapter, selected by real adoption demand.
 - CocoaPods podspec if the SPM package has stabilized.
-- app-specific custom adapter guide.
+- packaged adapter examples based on the existing logger migration guide.
 - improved Objective-C documentation.
 - optional disk export file generation, still local-only and user-initiated.
 
@@ -82,7 +84,7 @@ Deliverables:
 - complete privacy/redaction documentation.
 - release-build safety tests.
 - optional XCFramework build pipeline.
-- clear migration guide from `print`, `NSLog`, and common logger frameworks.
+- maintained migration guide from `print`, `NSLog`, and common logger frameworks.
 
 Not included:
 

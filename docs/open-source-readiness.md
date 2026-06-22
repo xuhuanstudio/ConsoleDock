@@ -125,7 +125,7 @@ Minimum public docs:
 - logging boundary document;
 - privacy and redaction guide;
 - release-build safety guide;
-- migration guide for existing loggers;
+- [migration guide for existing loggers](migration-existing-loggers.md);
 - sample app walkthrough.
 
 An initial DocC catalog exists for the `ConsoleDock` Swift facade. It should remain focused on public Swift API usage, logging boundaries, privacy, Release safety, and Objective-C integration guidance.

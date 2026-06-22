@@ -33,3 +33,5 @@ if (result == CDKStartResultStarted || result == CDKStartResultAlreadyRunning) {
 For older Objective-C projects, prefer adding a sink or appender to the existing logger instead of rewriting every call site. The appender can forward formatted messages to `CDKConsoleDock` while the original logger keeps its current outputs.
 
 ConsoleDock cannot fully capture Swift `Logger`, `os_log`, or Apple unified logging from inside the app, so adapters should forward to ConsoleDock explicitly when reliable in-app visibility is required.
+
+See <doc:ExistingLoggerMigration> for a macro-based forwarding example.

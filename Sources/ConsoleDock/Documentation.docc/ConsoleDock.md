@@ -16,6 +16,7 @@ ConsoleDock is not a full replacement for Xcode Console or Apple unified logging
 
 - <doc:GettingStarted>
 - <doc:LoggingBoundaries>
+- <doc:ExistingLoggerMigration>
 - <doc:PrivacyAndReleaseSafety>
 - <doc:ObjectiveCIntegration>
 

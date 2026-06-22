@@ -2,7 +2,7 @@
 
 Date: 2026-06-22
 
-Status: accepted architecture specification for the MVP implementation phase. This document describes planned behavior; the repository does not yet contain SDK source code or a Swift package manifest.
+Status: accepted architecture specification for the MVP implementation phase. This document records the original planned behavior; see the README, DocC catalog, roadmap, and changelog for the current implemented state.
 
 ## Objective
 
@@ -70,7 +70,7 @@ Later versions may add:
 - CocoaPods packaging after SPM stabilizes.
 - XCFramework distribution with reproducible build scripts.
 - Third-party logging adapters selected by real adoption demand.
-- DocC documentation for public Swift APIs.
+- Expanded DocC documentation as public APIs stabilize.
 - More complete Swift and Objective-C sample apps.
 - User-initiated local export workflows.
 - Optional local persistence with explicit opt-in and clear privacy controls.

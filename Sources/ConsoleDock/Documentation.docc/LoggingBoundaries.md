@@ -37,3 +37,5 @@ ConsoleDock.error("Payment failed")
 ```
 
 For an existing logger, add a sink, appender, or transport that forwards the already-formatted message to ConsoleDock. This preserves most old call sites while avoiding unsupported system-log capture assumptions.
+
+See <doc:ExistingLoggerMigration> for Swift and Objective-C migration patterns.
