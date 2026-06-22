@@ -126,6 +126,8 @@ Future checks:
 
 CI should avoid tests that require private signing identities.
 
+Workflows should use least-privilege read permissions, explicit job timeouts, concurrency controls, and checkout settings that do not persist credentials after checkout.
+
 ## Documentation Plan
 
 Minimum public docs:
