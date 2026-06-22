@@ -17,11 +17,11 @@ struct ConsoleDockSnapshotFormatter {
             return lines.joined(separator: "\n")
         }
 
-        lines.append(contentsOf: entries.map(formatEntry))
+        lines.append(contentsOf: entries.map(entryText))
         return lines.joined(separator: "\n")
     }
 
-    private static func formatEntry(_ entry: ConsoleDock.LogEntry) -> String {
+    static func entryText(_ entry: ConsoleDock.LogEntry) -> String {
         "[\(timestampString(entry.timestamp))] [\(sourceLabel(entry.source))] [\(levelLabel(entry.level))] \(singleLine(entry.message))"
     }
 

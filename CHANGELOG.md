@@ -26,3 +26,4 @@ The project follows Semantic Versioning after public releases begin.
 - Added a UIKit share action for user-initiated plain-text export of the current redacted in-memory log snapshot.
 - Added UIKit console text search and source filtering for the visible in-memory log list.
 - Added UIKit pause/resume live follow so the panel can freeze visible logs while capture continues.
+- Added UIKit selected-entry copy for visible redacted log rows.

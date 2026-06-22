@@ -200,7 +200,7 @@ private final class ConsoleDockPassthroughWindow: UIWindow {
     }
 }
 
-private final class ConsoleDockPanelViewController: UIViewController, UITableViewDataSource, UISearchResultsUpdating, UISearchBarDelegate {
+private final class ConsoleDockPanelViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UISearchResultsUpdating, UISearchBarDelegate {
     var onClose: (() -> Void)?
 
     private let tableView = UITableView(frame: .zero, style: .plain)
@@ -278,6 +278,7 @@ private final class ConsoleDockPanelViewController: UIViewController, UITableVie
         tableView.backgroundColor = UIColor(white: 0.06, alpha: 1)
         tableView.separatorColor = UIColor(white: 0.18, alpha: 1)
         tableView.dataSource = self
+        tableView.delegate = self
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 54
         view.addSubview(tableView)
@@ -382,10 +383,18 @@ private final class ConsoleDockPanelViewController: UIViewController, UITableVie
         cell.textLabel?.font = ConsoleDockFonts.monospace(size: 12, weight: .regular)
         cell.textLabel?.textColor = .white
         cell.textLabel?.text = entry.message
+        cell.selectionStyle = .default
         cell.detailTextLabel?.font = ConsoleDockFonts.monospace(size: 10, weight: .regular)
         cell.detailTextLabel?.textColor = color(for: entry.level)
         cell.detailTextLabel?.text = "\(formatter.string(from: entry.timestamp))  \(entry.source.label)  \(entry.level.label)"
         return cell
+    }
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard visibleEntries.indices.contains(indexPath.row) else { return }
+        UIPasteboard.general.string = ConsoleDockSnapshotFormatter.entryText(visibleEntries[indexPath.row])
+        UIAccessibility.post(notification: .announcement, argument: "Copied log entry")
+        tableView.deselectRow(at: indexPath, animated: true)
     }
 
     private func color(for level: ConsoleDock.LogLevel) -> UIColor {

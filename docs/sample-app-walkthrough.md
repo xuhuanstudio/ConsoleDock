@@ -10,7 +10,7 @@ Use the samples to verify:
 - explicit native logging APIs;
 - `NSLog` output that reaches process stderr;
 - redaction before storage;
-- UIKit floating button, search, source filtering, pause/resume live follow, panel refresh, share/export, clear, stop, and restart behavior.
+- UIKit floating button, search, source filtering, pause/resume live follow, selected-entry copy, panel refresh, share/export, clear, stop, and restart behavior.
 
 ![ConsoleDock Swift sample console](assets/swift-sample-console.png)
 
@@ -38,10 +38,11 @@ Manual check:
 7. Change the source scope to `stdout` or `stderr` and confirm only matching entries remain visible.
 8. Tap the pause button, generate another message from the sample, and confirm the visible list does not auto-refresh.
 9. Tap the play/resume button and confirm the panel catches up to the latest stored entries.
-10. Tap the share button and confirm the system share sheet opens with a plain-text redacted log snapshot for the visible entries.
-11. Tap `Clear` in the panel and confirm the list refreshes.
-12. Tap `Stop ConsoleDock`, generate another message, and confirm it is not stored.
-13. Tap `Start ConsoleDock`, generate another message, and confirm entries resume.
+10. Tap a visible log row and confirm the selected redacted entry is copied to the clipboard.
+11. Tap the share button and confirm the system share sheet opens with a plain-text redacted log snapshot for the visible entries.
+12. Tap `Clear` in the panel and confirm the list refreshes.
+13. Tap `Stop ConsoleDock`, generate another message, and confirm it is not stored.
+14. Tap `Start ConsoleDock`, generate another message, and confirm entries resume.
 
 Expected sources:
 
@@ -74,10 +75,11 @@ Manual check:
 7. Change the source scope to `stdout` or `stderr` and confirm only matching entries remain visible.
 8. Tap the pause button, generate another message from the sample, and confirm the visible list does not auto-refresh.
 9. Tap the play/resume button and confirm the panel catches up to the latest stored entries.
-10. Tap the share button and confirm the system share sheet opens with a plain-text redacted log snapshot for the visible entries.
-11. Tap `Clear` in the panel and confirm the list refreshes.
-12. Tap `Stop ConsoleDock`, generate another message, and confirm it is not stored.
-13. Tap `Start ConsoleDock`, generate another message, and confirm entries resume.
+10. Tap a visible log row and confirm the selected redacted entry is copied to the clipboard.
+11. Tap the share button and confirm the system share sheet opens with a plain-text redacted log snapshot for the visible entries.
+12. Tap `Clear` in the panel and confirm the list refreshes.
+13. Tap `Stop ConsoleDock`, generate another message, and confirm it is not stored.
+14. Tap `Start ConsoleDock`, generate another message, and confirm entries resume.
 
 Expected sources:
 
@@ -96,5 +98,7 @@ Swift `Logger`, `os_log`, and Apple unified logging are not validated by these s
 Search and source filtering only affect the visible list and the share sheet's exported snapshot. ConsoleDock does not delete or mutate stored entries when a filter is active.
 
 Pause/resume only affects live UI follow. ConsoleDock continues capturing and storing entries while the panel is paused.
+
+Tapping a row copies only that visible, already-redacted entry. It does not copy hidden filtered entries.
 
 The share sheet exports the current visible in-memory ConsoleDock entries only. ConsoleDock does not write an export file by default, does not persist logs by default, and does not upload logs.

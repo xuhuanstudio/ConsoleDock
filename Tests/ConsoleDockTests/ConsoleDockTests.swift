@@ -151,6 +151,20 @@ final class ConsoleDockTests: XCTestCase {
         )
     }
 
+    func testSnapshotFormatterFormatsSingleEntryForCopy() {
+        let entry = ConsoleDock.LogEntry(
+            timestamp: Date(timeIntervalSince1970: 3.75),
+            level: .warning,
+            source: .stdout,
+            message: "line one\r\nline two token=<redacted>"
+        )
+
+        XCTAssertEqual(
+            ConsoleDockSnapshotFormatter.entryText(entry),
+            "[1970-01-01T00:00:03.750Z] [stdout] [WARN] line one\\nline two token=<redacted>"
+        )
+    }
+
     func testEntryFilterReturnsAllEntriesForEmptyQueryAndAllSources() {
         let entries = filterFixtureEntries()
 
