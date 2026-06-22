@@ -106,6 +106,7 @@ Initial checks:
 - DocC conversion with warnings treated as errors;
 - tag-triggered release validation for `v*` tags;
 - documentation link validation;
+- release content audit for generated paths, key material, common token shapes, and local absolute paths;
 - Objective-C sample app build;
 - Swift sample app build;
 - formatting or lint check once a formatter is selected.

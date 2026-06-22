@@ -71,7 +71,7 @@ After the first push:
 2. Confirm the workflow uses `scripts/validate-release.sh`.
 3. Confirm the repository landing page shows the README screenshot.
 4. Confirm all documentation links resolve on GitHub.
-5. Confirm no generated `.build` files, derived data, private logs, secrets, or local screenshots were pushed.
+5. Confirm `scripts/audit-release-content.py` passes and no generated `.build` files, derived data, private logs, secrets, or local screenshots were pushed.
 
 If branch protection is enabled, require the `CI` workflow after it has run successfully once.
 
@@ -81,6 +81,7 @@ Only after the first `main` workflow passes:
 
 ```sh
 python3 scripts/validate-release-metadata.py --tag v0.1.0
+python3 scripts/audit-release-content.py
 scripts/validate-release.sh
 git status --short
 git push origin main

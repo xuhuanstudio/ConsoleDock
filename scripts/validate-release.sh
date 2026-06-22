@@ -30,6 +30,9 @@ swift test -c release -Xcc -DCONSOLEDOCK_ENABLE_RELEASE -Xswiftc -DCONSOLEDOCK_E
 section "Validate documentation links"
 python3 scripts/validate-doc-links.py
 
+section "Audit release content"
+python3 scripts/audit-release-content.py
+
 section "Build DocC documentation"
 scripts/validate-docc.sh
 
