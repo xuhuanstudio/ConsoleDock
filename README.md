@@ -147,7 +147,7 @@ Local DocC validation:
 scripts/validate-docc.sh
 ```
 
-GitHub Actions runs the shared release validation script for pull requests, pushes to `main`, and `v*` tag validation. The script validates the working tree is clean, then validates the SwiftPM manifest, package identity, Swift Package Index metadata, Objective-C API surface, UI accessibility identifiers, Swift formatting, SwiftPM build/test, Release safety gates, documentation links, governance metadata, release content audit, DocC documentation, the package iOS Simulator build, both sample app builds, source archive creation, source archive contents, and source archive build/test before a GitHub Release is published. Set `CONSOLEDOCK_RUN_UI_SMOKE=1` to include the opt-in Swift sample simulator UI smoke test.
+GitHub Actions runs the shared release validation script for pull requests, pushes to `main`, and `v*` tag validation. The script validates the working tree is clean, then validates the SwiftPM manifest, package identity, Swift Package Index metadata, Objective-C API surface, Swift API surface, UI accessibility identifiers, Swift formatting, SwiftPM build/test, Release safety gates, documentation links, governance metadata, release content audit, DocC documentation, the package iOS Simulator build, both sample app builds, source archive creation, source archive contents, and source archive build/test before a GitHub Release is published. Set `CONSOLEDOCK_RUN_UI_SMOKE=1` to include the opt-in Swift sample simulator UI smoke test.
 
 ## Examples And Walkthrough
 

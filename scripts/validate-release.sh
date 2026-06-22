@@ -36,6 +36,9 @@ python3 scripts/validate-spi-manifest.py
 section "Validate Objective-C API surface"
 python3 scripts/validate-objc-api-surface.py
 
+section "Validate Swift API surface"
+python3 scripts/validate-swift-api-surface.py
+
 section "Validate UI accessibility identifiers"
 python3 scripts/validate-ui-accessibility-identifiers.py
 

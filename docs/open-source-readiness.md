@@ -125,6 +125,7 @@ Initial checks:
 - source archive package build/test validation;
 - Swift Package Index metadata validation;
 - Objective-C API surface validation;
+- Swift API surface validation;
 - Objective-C sample app build;
 - Swift sample app build;
 - Swift format lint.
