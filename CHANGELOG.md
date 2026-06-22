@@ -8,6 +8,7 @@ The project follows Semantic Versioning for public releases.
 
 ### Added
 
+- Added clear-button refresh assertions to the Swift sample UI smoke test.
 - Added Dependabot configuration for weekly GitHub Actions update checks.
 - Added a distribution strategy document and validation gate for SPM, future CocoaPods compatibility, and future XCFramework distribution claims.
 - Added distribution artifact validation to prevent premature CocoaPods, XCFramework, framework, Xcode archive, debug symbol, static library, or packaged archive distribution files.

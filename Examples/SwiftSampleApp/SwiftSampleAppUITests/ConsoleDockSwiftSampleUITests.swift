@@ -39,6 +39,12 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
         resumeButton.tap()
         XCTAssertTrue(pauseButton.waitForExistence(timeout: 5))
 
+        let clearButton = app.buttons["consoledock.clear"]
+        XCTAssertTrue(clearButton.waitForExistence(timeout: 5))
+        clearButton.tap()
+        XCTAssertTrue(waitForNoTableEntries(in: entriesTable, timeout: 5))
+        XCTAssertTrue(waitForLabel(containing: "Entries: 0 visible 0", in: statusLabel, timeout: 5))
+
         let closeButton = app.buttons["consoledock.close"]
         XCTAssertTrue(closeButton.waitForExistence(timeout: 5))
         closeButton.tap()
@@ -49,6 +55,17 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
         let deadline = Date().addingTimeInterval(timeout)
         repeat {
             if table.descendants(matching: .cell).count > 0 {
+                return true
+            }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.1))
+        } while Date() < deadline
+        return false
+    }
+
+    private func waitForNoTableEntries(in table: XCUIElement, timeout: TimeInterval) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        repeat {
+            if table.descendants(matching: .cell).count == 0 {
                 return true
             }
             RunLoop.current.run(until: Date().addingTimeInterval(0.1))
@@ -73,5 +90,16 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
             .matching(NSPredicate(format: "label CONTAINS %@", text))
             .firstMatch
             .exists
+    }
+
+    private func waitForLabel(containing text: String, in element: XCUIElement, timeout: TimeInterval) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        repeat {
+            if element.label.contains(text) {
+                return true
+            }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.1))
+        } while Date() < deadline
+        return false
     }
 }
