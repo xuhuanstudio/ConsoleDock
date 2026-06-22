@@ -1,5 +1,5 @@
-import Darwin
 import ConsoleDockCore
+import Darwin
 import XCTest
 
 final class ConsoleDockCoreTests: XCTestCase {
@@ -28,11 +28,11 @@ final class ConsoleDockCoreTests: XCTestCase {
         let result = CDKConsoleDock.start(with: configuration)
 
         #if DEBUG
-        XCTAssertEqual(result, .started)
-        XCTAssertTrue(CDKConsoleDock.isRunning())
+            XCTAssertEqual(result, .started)
+            XCTAssertTrue(CDKConsoleDock.isRunning())
         #else
-        XCTAssertEqual(result, .disabled)
-        XCTAssertFalse(CDKConsoleDock.isRunning())
+            XCTAssertEqual(result, .disabled)
+            XCTAssertFalse(CDKConsoleDock.isRunning())
         #endif
     }
 
@@ -43,11 +43,11 @@ final class ConsoleDockCoreTests: XCTestCase {
         let result = CDKConsoleDock.start(with: configuration)
 
         #if DEBUG || CONSOLEDOCK_ENABLE_RELEASE
-        XCTAssertEqual(result, .started)
-        XCTAssertTrue(CDKConsoleDock.isRunning())
+            XCTAssertEqual(result, .started)
+            XCTAssertTrue(CDKConsoleDock.isRunning())
         #else
-        XCTAssertEqual(result, .disabled)
-        XCTAssertFalse(CDKConsoleDock.isRunning())
+            XCTAssertEqual(result, .disabled)
+            XCTAssertFalse(CDKConsoleDock.isRunning())
         #endif
     }
 
@@ -247,7 +247,7 @@ final class ConsoleDockCoreTests: XCTestCase {
         CDKConsoleDock.info("notify native")
 
         XCTAssertEqual(notifications.count, 1)
-        XCTAssertNotificationObjectIsConsoleDock(notifications[0])
+        assertNotificationObjectIsConsoleDock(notifications[0])
     }
 
     func testAppendLineEventPostsEntriesDidChangeNotification() {
@@ -261,7 +261,7 @@ final class ConsoleDockCoreTests: XCTestCase {
         CDKConsoleDock.append(CDKLineEvent(source: .stdout, message: "notify line event", isPartial: false))
 
         XCTAssertEqual(notifications.count, 1)
-        XCTAssertNotificationObjectIsConsoleDock(notifications[0])
+        assertNotificationObjectIsConsoleDock(notifications[0])
     }
 
     func testClearEntriesAfterStoredEntriesPostsNotification() {
@@ -276,7 +276,7 @@ final class ConsoleDockCoreTests: XCTestCase {
         CDKConsoleDock.clearEntries()
 
         XCTAssertEqual(notifications.count, 1)
-        XCTAssertNotificationObjectIsConsoleDock(notifications[0])
+        assertNotificationObjectIsConsoleDock(notifications[0])
     }
 
     func testClearEntriesWhenEmptyDoesNotPostNotification() {
@@ -307,7 +307,7 @@ final class ConsoleDockCoreTests: XCTestCase {
 
         XCTAssertTrue(CDKConsoleDock.entries().isEmpty)
         XCTAssertEqual(notifications.count, 1)
-        XCTAssertNotificationObjectIsConsoleDock(notifications[0])
+        assertNotificationObjectIsConsoleDock(notifications[0])
     }
 
     func testLoggingWhileNotRunningDoesNotPostNotification() {
@@ -607,8 +607,8 @@ final class ConsoleDockCoreTests: XCTestCase {
     }
 }
 
-private extension ConsoleDockCoreTests {
-    func observeEntriesDidChange(_ handler: @escaping (Notification) -> Void) -> NSObjectProtocol {
+extension ConsoleDockCoreTests {
+    fileprivate func observeEntriesDidChange(_ handler: @escaping (Notification) -> Void) -> NSObjectProtocol {
         NotificationCenter.default.addObserver(
             forName: Notification.Name.CDKConsoleDockEntriesDidChange,
             object: CDKConsoleDock.self,
@@ -617,7 +617,7 @@ private extension ConsoleDockCoreTests {
         )
     }
 
-    func XCTAssertNotificationObjectIsConsoleDock(
+    fileprivate func assertNotificationObjectIsConsoleDock(
         _ notification: Notification,
         file: StaticString = #filePath,
         line: UInt = #line
@@ -625,14 +625,14 @@ private extension ConsoleDockCoreTests {
         XCTAssertTrue(notification.object as AnyObject === CDKConsoleDock.self, file: file, line: line)
     }
 
-    func noCaptureConfiguration() -> CDKConfiguration {
+    fileprivate func noCaptureConfiguration() -> CDKConfiguration {
         let configuration = CDKConfiguration.default()
         configuration.captureStandardOutput = false
         configuration.captureStandardError = false
         return configuration
     }
 
-    func withOriginalDescriptorPipe(_ descriptor: Int32, body: (Int32) throws -> Void) throws {
+    fileprivate func withOriginalDescriptorPipe(_ descriptor: Int32, body: (Int32) throws -> Void) throws {
         Self.descriptorLock.lock()
         defer { Self.descriptorLock.unlock() }
 
@@ -661,7 +661,7 @@ private extension ConsoleDockCoreTests {
         try body(readDescriptor)
     }
 
-    func writeAll(_ string: String, to descriptor: Int32) throws {
+    fileprivate func writeAll(_ string: String, to descriptor: Int32) throws {
         let bytes = Array(string.utf8)
         try bytes.withUnsafeBytes { rawBuffer in
             guard let baseAddress = rawBuffer.baseAddress else {
@@ -684,7 +684,9 @@ private extension ConsoleDockCoreTests {
         }
     }
 
-    func waitForEntry(message: String, source: CDKLogSource, timeout: TimeInterval = 1.0) throws -> CDKLogEntry {
+    fileprivate func waitForEntry(message: String, source: CDKLogSource, timeout: TimeInterval = 1.0) throws
+        -> CDKLogEntry
+    {
         let deadline = Date().addingTimeInterval(timeout)
         while Date() < deadline {
             if let entry = CDKConsoleDock.entries().first(where: { $0.message == message && $0.source == source }) {
@@ -696,7 +698,7 @@ private extension ConsoleDockCoreTests {
         throw POSIXError(.ETIMEDOUT)
     }
 
-    func waitForEntryIfPresent(message: String, source: CDKLogSource, timeout: TimeInterval = 0.1) -> Bool {
+    fileprivate func waitForEntryIfPresent(message: String, source: CDKLogSource, timeout: TimeInterval = 0.1) -> Bool {
         let deadline = Date().addingTimeInterval(timeout)
         while Date() < deadline {
             if CDKConsoleDock.entries().contains(where: { $0.message == message && $0.source == source }) {
@@ -707,7 +709,9 @@ private extension ConsoleDockCoreTests {
         return false
     }
 
-    func waitForDescriptor(_ descriptor: Int32, toContain expected: String, timeout: TimeInterval = 1.0) throws -> Bool {
+    fileprivate func waitForDescriptor(_ descriptor: Int32, toContain expected: String, timeout: TimeInterval = 1.0)
+        throws -> Bool
+    {
         let deadline = Date().addingTimeInterval(timeout)
         var collected = Data()
 
@@ -740,11 +744,11 @@ private extension ConsoleDockCoreTests {
         return false
     }
 
-    func fdZero(_ set: inout fd_set) {
+    fileprivate func fdZero(_ set: inout fd_set) {
         set = fd_set()
     }
 
-    func fdSet(_ descriptor: Int32, set: inout fd_set) {
+    fileprivate func fdSet(_ descriptor: Int32, set: inout fd_set) {
         let bitsPerMask = 32
         let intOffset = Int(descriptor) / bitsPerMask
         let bitOffset = Int(descriptor) % bitsPerMask

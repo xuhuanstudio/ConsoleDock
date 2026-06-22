@@ -22,6 +22,9 @@ fi
 section "Validate package manifest"
 swift package dump-package
 
+section "Validate Swift formatting"
+scripts/validate-swift-format.sh
+
 section "Build Swift package"
 swift build
 

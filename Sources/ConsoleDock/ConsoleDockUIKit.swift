@@ -48,25 +48,25 @@ public final class ConsoleDockUIKit: NSObject {
 
     private static func installUIIfAvailable() {
         #if canImport(UIKit)
-        ConsoleDockUIController.shared.install()
+            ConsoleDockUIController.shared.install()
         #endif
     }
 
     private static func teardownUIIfAvailable() {
         #if canImport(UIKit)
-        ConsoleDockUIController.shared.teardown()
+            ConsoleDockUIController.shared.teardown()
         #endif
     }
 
     private static func showConsoleIfAvailable() {
         #if canImport(UIKit)
-        ConsoleDockUIController.shared.showConsole()
+            ConsoleDockUIController.shared.showConsole()
         #endif
     }
 
     private static func hideConsoleIfAvailable() {
         #if canImport(UIKit)
-        ConsoleDockUIController.shared.hideConsole()
+            ConsoleDockUIController.shared.hideConsole()
         #endif
     }
 }

@@ -42,13 +42,12 @@ public enum ConsoleDock {
         public static let `default` = Configuration()
 
         public static func == (lhs: Configuration, rhs: Configuration) -> Bool {
-            lhs.maximumEntries == rhs.maximumEntries &&
-                lhs.maximumMessageLength == rhs.maximumMessageLength &&
-                lhs.captureStandardOutput == rhs.captureStandardOutput &&
-                lhs.captureStandardError == rhs.captureStandardError &&
-                lhs.showsFloatingButton == rhs.showsFloatingButton &&
-                lhs.allowsReleaseBuilds == rhs.allowsReleaseBuilds &&
-                (lhs.redactor == nil) == (rhs.redactor == nil)
+            lhs.maximumEntries == rhs.maximumEntries && lhs.maximumMessageLength == rhs.maximumMessageLength
+                && lhs.captureStandardOutput == rhs.captureStandardOutput
+                && lhs.captureStandardError == rhs.captureStandardError
+                && lhs.showsFloatingButton == rhs.showsFloatingButton
+                && lhs.allowsReleaseBuilds == rhs.allowsReleaseBuilds
+                && (lhs.redactor == nil) == (rhs.redactor == nil)
         }
 
         func makeCoreConfiguration() -> CDKConfiguration {
@@ -204,34 +203,34 @@ extension ConsoleDock {
     }
 }
 
-private extension ConsoleDock {
-    static func installUIIfAvailable() {
+extension ConsoleDock {
+    fileprivate static func installUIIfAvailable() {
         #if canImport(UIKit)
-        ConsoleDockUIController.shared.install()
+            ConsoleDockUIController.shared.install()
         #endif
     }
 
-    static func teardownUIIfAvailable() {
+    fileprivate static func teardownUIIfAvailable() {
         #if canImport(UIKit)
-        ConsoleDockUIController.shared.teardown()
+            ConsoleDockUIController.shared.teardown()
         #endif
     }
 
-    static func showConsoleIfAvailable() {
+    fileprivate static func showConsoleIfAvailable() {
         #if canImport(UIKit)
-        ConsoleDockUIController.shared.showConsole()
+            ConsoleDockUIController.shared.showConsole()
         #endif
     }
 
-    static func hideConsoleIfAvailable() {
+    fileprivate static func hideConsoleIfAvailable() {
         #if canImport(UIKit)
-        ConsoleDockUIController.shared.hideConsole()
+            ConsoleDockUIController.shared.hideConsole()
         #endif
     }
 }
 
-private extension ConsoleDock.LogEntry {
-    init(coreEntry: CDKLogEntry) {
+extension ConsoleDock.LogEntry {
+    fileprivate init(coreEntry: CDKLogEntry) {
         timestamp = coreEntry.timestamp
         level = ConsoleDock.LogLevel(coreLevel: coreEntry.level)
         source = ConsoleDock.LogSource(coreSource: coreEntry.source)
@@ -239,8 +238,8 @@ private extension ConsoleDock.LogEntry {
     }
 }
 
-private extension ConsoleDock.LogLevel {
-    init(coreLevel: CDKLogLevel) {
+extension ConsoleDock.LogLevel {
+    fileprivate init(coreLevel: CDKLogLevel) {
         switch coreLevel {
         case .debug:
             self = .debug
@@ -258,8 +257,8 @@ private extension ConsoleDock.LogLevel {
     }
 }
 
-private extension ConsoleDock.LogSource {
-    init(coreSource: CDKLogSource) {
+extension ConsoleDock.LogSource {
+    fileprivate init(coreSource: CDKLogSource) {
         switch coreSource {
         case .native:
             self = .native
@@ -273,8 +272,8 @@ private extension ConsoleDock.LogSource {
     }
 }
 
-private extension ConsoleDock.StartResult {
-    init(coreResult: CDKStartResult, error: NSError?) {
+extension ConsoleDock.StartResult {
+    fileprivate init(coreResult: CDKStartResult, error: NSError?) {
         switch coreResult {
         case .started:
             self = .started

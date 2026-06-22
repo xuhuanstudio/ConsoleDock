@@ -110,7 +110,7 @@ Initial checks:
 - source archive content audit;
 - Objective-C sample app build;
 - Swift sample app build;
-- formatting or lint check once a formatter is selected.
+- Swift format lint.
 
 Future checks:
 

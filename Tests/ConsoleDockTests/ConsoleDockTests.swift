@@ -1,6 +1,7 @@
-@testable import ConsoleDock
 import ConsoleDockCore
 import XCTest
+
+@testable import ConsoleDock
 
 final class ConsoleDockTests: XCTestCase {
     override func tearDown() {
@@ -79,7 +80,7 @@ final class ConsoleDockTests: XCTestCase {
 
         let result = ConsoleDock.start(configuration: configuration)
 
-        guard case let .failed(failure) = result else {
+        guard case .failed(let failure) = result else {
             return XCTFail("Expected invalid configuration to fail, got \(result)")
         }
 
@@ -94,7 +95,7 @@ final class ConsoleDockTests: XCTestCase {
 
         let result = ConsoleDock.start(configuration: configuration)
 
-        guard case let .failed(failure) = result else {
+        guard case .failed(let failure) = result else {
             return XCTFail("Expected negative entry limit to fail, got \(result)")
         }
 
@@ -109,7 +110,7 @@ final class ConsoleDockTests: XCTestCase {
 
         let result = ConsoleDock.start(configuration: configuration)
 
-        guard case let .failed(failure) = result else {
+        guard case .failed(let failure) = result else {
             return XCTFail("Expected negative message length to fail, got \(result)")
         }
 
@@ -218,13 +219,15 @@ final class ConsoleDockTests: XCTestCase {
 
         let filtered = ConsoleDockEntryFilter.filteredEntries(entries, query: "  ")
 
-        XCTAssertEqual(filtered.map(\.message), [
-            "Native login succeeded",
-            "stdout response",
-            "stderr network failure",
-            "cache warning",
-            "fatal fault"
-        ])
+        XCTAssertEqual(
+            filtered.map(\.message),
+            [
+                "Native login succeeded",
+                "stdout response",
+                "stderr network failure",
+                "cache warning",
+                "fatal fault"
+            ])
     }
 
     func testEntryFilterMatchesMessageLevelAndSourceCaseInsensitively() {
@@ -322,13 +325,15 @@ final class ConsoleDockTests: XCTestCase {
         buffer.resume(latestEntries: initialEntries)
 
         XCTAssertFalse(buffer.isPaused)
-        XCTAssertEqual(buffer.displayedEntries.map(\.message), [
-            "Native login succeeded",
-            "stdout response",
-            "stderr network failure",
-            "cache warning",
-            "fatal fault"
-        ])
+        XCTAssertEqual(
+            buffer.displayedEntries.map(\.message),
+            [
+                "Native login succeeded",
+                "stdout response",
+                "stderr network failure",
+                "cache warning",
+                "fatal fault"
+            ])
     }
 
     func testLiveUpdateBufferReplaceDisplayedEntriesClearsPendingSnapshot() {
@@ -432,15 +437,15 @@ final class ConsoleDockTests: XCTestCase {
     }
 }
 
-private extension ConsoleDock.Configuration {
-    static let nativeOnly = ConsoleDock.Configuration(
+extension ConsoleDock.Configuration {
+    fileprivate static let nativeOnly = ConsoleDock.Configuration(
         captureStandardOutput: false,
         captureStandardError: false
     )
 }
 
-private extension ConsoleDockTests {
-    func filterFixtureEntries() -> [ConsoleDock.LogEntry] {
+extension ConsoleDockTests {
+    fileprivate func filterFixtureEntries() -> [ConsoleDock.LogEntry] {
         [
             ConsoleDock.LogEntry(
                 timestamp: Date(timeIntervalSince1970: 1),

@@ -23,9 +23,9 @@ struct ConsoleDockEntryFilter {
         func contains(_ source: ConsoleDock.LogSource) -> Bool {
             switch (self, source) {
             case (.all, _),
-                 (.native, .native),
-                 (.stdout, .stdout),
-                 (.stderr, .stderr):
+                (.native, .native),
+                (.stdout, .stdout),
+                (.stderr, .stderr):
                 return true
             default:
                 return false
@@ -61,11 +61,11 @@ struct ConsoleDockEntryFilter {
         func contains(_ level: ConsoleDock.LogLevel) -> Bool {
             switch (self, level) {
             case (.all, _),
-                 (.debug, .debug),
-                 (.info, .info),
-                 (.warning, .warning),
-                 (.error, .error),
-                 (.fault, .fault):
+                (.debug, .debug),
+                (.info, .info),
+                (.warning, .warning),
+                (.error, .error),
+                (.fault, .fault):
                 return true
             default:
                 return false

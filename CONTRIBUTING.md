@@ -20,6 +20,7 @@ Use a recent Xcode toolchain with Swift Package Manager support.
 Recommended checks before opening a pull request:
 
 ```sh
+scripts/validate-swift-format.sh
 scripts/validate-release.sh
 ```
 
