@@ -3,6 +3,11 @@ description: Suggest a ConsoleDock improvement
 title: "[Feature]: "
 labels: ["enhancement"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include secrets, tokens, credentials, or production logs.
+        If this request includes vulnerability details or sensitive-data exposure, follow SECURITY.md instead of filing public details.
   - type: textarea
     id: problem
     attributes:
