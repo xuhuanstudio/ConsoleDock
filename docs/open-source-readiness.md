@@ -45,6 +45,8 @@ Add before the first public release:
 
 `SECURITY.md` should state that ConsoleDock is a debug tool and that reports involving accidental sensitive data exposure, release-build activation, or unsafe export behavior are security-relevant.
 
+Before making the repository public, use the [GitHub repository setup](github-repository-setup.md) checklist to configure repository identity, topics, Actions, vulnerability reporting, first push, and first tag validation.
+
 ## Semantic Versioning
 
 Use Semantic Versioning:
@@ -183,6 +185,7 @@ Before `v0.1.0`:
 - documentation links are validated;
 - DocC documentation builds without warnings;
 - release process is documented and the tag validation workflow passes.
+- GitHub repository setup is complete before public announcement.
 
 Before `v1.0.0`:
 

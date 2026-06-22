@@ -14,9 +14,10 @@ ConsoleDock releases are source-first Swift Package Manager releases. A public r
 
 1. Decide the version, for example `v0.1.0`.
 2. Move completed `CHANGELOG.md` entries from `Unreleased` into a heading that matches the tag, for example `## v0.1.0 - 2026-06-22`.
-3. Confirm README, DocC, sample app walkthrough, release-build safety, security policy, and roadmap still describe the current shipped behavior.
+3. Confirm README, DocC, sample app walkthrough, release-build safety, security policy, GitHub repository setup, and roadmap still describe the current shipped behavior.
 4. Confirm there are no secrets, production logs, credentials, tokens, or private screenshots in docs, examples, or screenshots.
-5. Confirm `git status --short` is clean before the final validation run.
+5. Confirm the public repository remote, Actions, topics, and vulnerability reporting are configured as described in [GitHub repository setup](github-repository-setup.md).
+6. Confirm `git status --short` is clean before the final validation run.
 
 ## Required Local Validation
 

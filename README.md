@@ -241,6 +241,7 @@ Use `ConsoleDockCore` directly when an Objective-C app only needs capture, stora
 
 - [Product brief](docs/product-brief.md)
 - [DocC catalog](Sources/ConsoleDock/Documentation.docc/ConsoleDock.md)
+- [GitHub repository setup](docs/github-repository-setup.md)
 - [Migrating existing loggers](docs/migration-existing-loggers.md)
 - [MVP architecture](docs/specs/2026-06-22-mvp-architecture.md)
 - [Open-source readiness](docs/open-source-readiness.md)
