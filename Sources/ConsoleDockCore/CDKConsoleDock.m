@@ -29,10 +29,13 @@ static NSString *CDKDefaultRedactedMessage(NSString *message)
                                            @"Authorization\\s*[:=]\\s*Bearer\\s+[^\\s,;]+",
                                            @"Authorization: Bearer <redacted>");
     redacted = CDKStringByReplacingMatches(redacted,
-                                           @"(\"?(?:password|token|api[_-]?key|key|secret)\"?\\s*[:=]\\s*\")([^\"]+)(\")",
+                                           @"\\b(Set-Cookie|Cookie)\\s*:\\s*[^\\r\\n]+",
+                                           @"$1: <redacted>");
+    redacted = CDKStringByReplacingMatches(redacted,
+                                           @"(\"?(?:password|passwd|token|access[_-]?token|refresh[_-]?token|api[_-]?key|client[_-]?secret|key|secret)\"?\\s*[:=]\\s*\")([^\"]+)(\")",
                                            @"$1<redacted>$3");
     redacted = CDKStringByReplacingMatches(redacted,
-                                           @"\\b(password|token|api[_-]?key|key|secret)\\b\\s*[:=]\\s*[^\\s,;&]+",
+                                           @"\\b(password|passwd|token|access[_-]?token|refresh[_-]?token|api[_-]?key|client[_-]?secret|key|secret)\\b\\s*[:=]\\s*[^\\s,;&]+",
                                            @"$1=<redacted>");
     return redacted;
 }

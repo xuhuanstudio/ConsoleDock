@@ -176,16 +176,36 @@ final class ConsoleDockCoreTests: XCTestCase {
     func testDefaultRedactionRunsBeforeStorage() throws {
         XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
 
-        CDKConsoleDock.info("Authorization: Bearer bearer123 password=hunter2 token=tok123 api_key=api123 key=key123 secret=secret123")
+        CDKConsoleDock.info(
+            """
+            Authorization: Bearer bearer123
+            Cookie: session=cookie123; refresh=cookie456
+            Set-Cookie: session=setcookie123
+            password=hunter2 passwd=pass123 token=tok123 access_token=access123 refresh-token=refresh123 api_key=api123 client_secret=client123 key=key123 secret=secret123
+            {"refresh_token":"jsonRefresh123","client_secret":"jsonClient123"}
+            """
+        )
 
         let message = try XCTUnwrap(CDKConsoleDock.entries().first?.message)
         XCTAssertTrue(message.contains("<redacted>"))
+        XCTAssertTrue(message.contains("Authorization: Bearer <redacted>"))
+        XCTAssertTrue(message.contains("Cookie: <redacted>"))
+        XCTAssertTrue(message.contains("Set-Cookie: <redacted>"))
         XCTAssertFalse(message.contains("bearer123"))
+        XCTAssertFalse(message.contains("cookie123"))
+        XCTAssertFalse(message.contains("cookie456"))
+        XCTAssertFalse(message.contains("setcookie123"))
         XCTAssertFalse(message.contains("hunter2"))
+        XCTAssertFalse(message.contains("pass123"))
         XCTAssertFalse(message.contains("tok123"))
+        XCTAssertFalse(message.contains("access123"))
+        XCTAssertFalse(message.contains("refresh123"))
         XCTAssertFalse(message.contains("api123"))
+        XCTAssertFalse(message.contains("client123"))
         XCTAssertFalse(message.contains("key123"))
         XCTAssertFalse(message.contains("secret123"))
+        XCTAssertFalse(message.contains("jsonRefresh123"))
+        XCTAssertFalse(message.contains("jsonClient123"))
     }
 
     func testCustomRedactionRunsBeforeStorage() {

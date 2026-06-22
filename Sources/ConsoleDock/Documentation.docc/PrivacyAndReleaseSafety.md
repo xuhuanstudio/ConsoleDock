@@ -10,7 +10,7 @@ Copy and share actions are user-initiated from the UIKit console. They use alrea
 
 ## Redaction Runs Before Storage
 
-ConsoleDock redacts obvious token, password, API key, secret, key, and bearer authorization patterns before storing entries.
+ConsoleDock redacts obvious authorization bearer values, cookie headers, token, password, passwd, access token, refresh token, API key, client secret, key, and secret patterns before storing entries.
 
 Add an app-specific redactor for internal identifiers or domain-specific sensitive fields:
 
