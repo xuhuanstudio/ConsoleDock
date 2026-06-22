@@ -66,6 +66,7 @@ Debug 构建下，默认配置会启用 stdout/stderr 捕获，安装浮动 `CD`
 ## 运行诊断
 
 Runtime diagnostics 是 `v0.1.0` 之后在 `main` 上新增的能力，会进入下一个 release tag。
+如果你的依赖固定在 `v0.1.0`，请先跳过本节，等下一个 tag 发布后再使用这些符号。
 
 接入时可以读取 diagnostics，确认 ConsoleDock 是否正在运行、stdout/stderr capture 是否启用、当前内存中有多少条日志，以及 redacted/truncated/partial 计数：
 

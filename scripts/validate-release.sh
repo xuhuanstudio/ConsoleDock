@@ -63,6 +63,9 @@ swift test -c release -Xcc -DCONSOLEDOCK_ENABLE_RELEASE -Xswiftc -DCONSOLEDOCK_E
 section "Validate documentation links"
 python3 scripts/validate-doc-links.py
 
+section "Validate versioned public documentation"
+python3 scripts/validate-versioned-docs.py
+
 section "Validate logging boundary documentation"
 python3 scripts/validate-logging-boundaries.py
 

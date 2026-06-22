@@ -86,6 +86,7 @@ print("Visible through stdout capture")
 ### Check Runtime Diagnostics
 
 Runtime diagnostics are available on `main` after `v0.1.0` and will be included in the next release tag.
+If your package dependency is pinned to `v0.1.0`, skip this section until the next tag ships.
 
 Use diagnostics to confirm the active configuration and current bounded in-memory store counts during integration:
 
@@ -147,7 +148,7 @@ Local DocC validation:
 scripts/validate-docc.sh
 ```
 
-GitHub Actions runs the shared release validation script for pull requests, pushes to `main`, and `v*` tag validation. The script validates the working tree is clean, then validates the SwiftPM manifest, package identity, Swift Package Index metadata, Objective-C API surface, Swift API surface, UI accessibility identifiers, sample app documentation and automation, Swift formatting, SwiftPM build/test, Release safety gates, documentation links, governance metadata, distribution documentation and artifacts, release content audit, DocC documentation, the package iOS Simulator build, both sample app builds, source archive creation, source archive contents, and source archive build/test before a GitHub Release is published. GitHub workflows enable `CONSOLEDOCK_RUN_UI_SMOKE=1` so the Swift and Objective-C sample simulator UI smoke tests run in CI; set the same environment variable locally when you want the full simulator smoke path.
+GitHub Actions runs the shared release validation script for pull requests, pushes to `main`, and `v*` tag validation. The script validates the working tree is clean, then validates the SwiftPM manifest, package identity, Swift Package Index metadata, Objective-C API surface, Swift API surface, UI accessibility identifiers, sample app documentation and automation, Swift formatting, SwiftPM build/test, Release safety gates, documentation links, versioned public documentation, governance metadata, distribution documentation and artifacts, release content audit, DocC documentation, the package iOS Simulator build, both sample app builds, source archive creation, source archive contents, and source archive build/test before a GitHub Release is published. GitHub workflows enable `CONSOLEDOCK_RUN_UI_SMOKE=1` so the Swift and Objective-C sample simulator UI smoke tests run in CI; set the same environment variable locally when you want the full simulator smoke path.
 
 ## Examples And Walkthrough
 
