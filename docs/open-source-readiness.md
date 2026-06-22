@@ -110,6 +110,7 @@ Initial checks:
 - documentation link validation;
 - release content audit for generated paths, key material, common token shapes, and local absolute paths;
 - source archive content audit;
+- source archive package build/test validation;
 - Swift Package Index metadata validation;
 - Objective-C API surface validation;
 - Objective-C sample app build;

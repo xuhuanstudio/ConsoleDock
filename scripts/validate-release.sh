@@ -75,6 +75,7 @@ rm -f "$archive_path"
 swift package archive-source --output "$archive_path"
 test -s "$archive_path"
 python3 scripts/audit-source-archive.py "$archive_path"
+python3 scripts/validate-source-archive-package.py "$archive_path"
 ls -lh "$archive_path"
 
 section "Release validation passed"
