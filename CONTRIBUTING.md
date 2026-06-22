@@ -4,7 +4,7 @@ ConsoleDock is an in-app debug console for iOS testing. Contributions should kee
 
 ## Current Stage
 
-The repository is in the UIKit console foundation stage. Current code includes `ConsoleDockCore`, the Swift facade, stdout/stderr file-descriptor capture, in-memory storage, redaction, a UIKit floating console foundation, Swift and Objective-C sample apps, and Release safety gates.
+The repository is in the pre-release MVP hardening stage. Current code includes `ConsoleDockCore`, the Swift facade, stdout/stderr file-descriptor capture, in-memory storage, redaction, a UIKit floating button and console panel, Swift and Objective-C sample apps, release validation, and Release safety gates.
 
 Still out of scope for the current stage:
 

@@ -161,7 +161,7 @@ Secondary distribution after the SPM package is stable:
 
 ### Base Mode
 
-Planned one-line startup integration for stdout/stderr capture:
+One-line startup integration for stdout/stderr capture:
 
 ```swift
 import ConsoleDock
@@ -169,7 +169,7 @@ import ConsoleDock
 ConsoleDock.start()
 ```
 
-In the current core capture stage, `start()` initializes the local store and installs stdout/stderr capture according to configuration. Captured bytes are passed through to the original descriptors where possible, normalized through the line framer, redacted, truncated, and stored in memory.
+In the current implementation, `start()` initializes the local store and installs stdout/stderr capture according to configuration. Captured bytes are passed through to the original descriptors where possible, normalized through the line framer, redacted, truncated, and stored in memory.
 
 ```swift
 ConsoleDock.start(

@@ -8,11 +8,11 @@ Build a reusable iOS debug SDK that testers can integrate into an app to view ru
 
 ConsoleDock should be distributed as an SDK/library, not as a copy-pasted source folder.
 
-Primary distribution targets:
+Distribution priority:
 
-1. Swift Package Manager
-2. CocoaPods
-3. XCFramework
+1. Swift Package Manager for the first public release.
+2. CocoaPods after the SPM package stabilizes for older Objective-C or mixed projects.
+3. XCFramework after the public API is stable enough for binary distribution.
 
 ## Capability Tiers
 
@@ -20,8 +20,10 @@ Primary distribution targets:
 
 One-line startup integration:
 
-```objc
-[ConsoleDock start];
+```swift
+import ConsoleDock
+
+ConsoleDock.start()
 ```
 
 Expected capture:
@@ -50,7 +52,7 @@ Use ConsoleDock's explicit API for the most reliable logs:
 ConsoleDock.info("Login succeeded")
 ```
 
-The implementation can write to both ConsoleDock's internal store and Apple unified logging where appropriate.
+The current implementation writes to ConsoleDock's internal in-memory store. A future adapter may also write to Apple unified logging where appropriate, but the in-app console must not depend on reading Apple unified logging back from inside the app.
 
 ## Non-Goals
 
@@ -69,4 +71,3 @@ Reasoning:
 - Avoids Apple/iOS/Xcode trademark-heavy naming.
 - Avoids confusion with the existing `iConsole` project.
 - Works as a package name and product brand.
-

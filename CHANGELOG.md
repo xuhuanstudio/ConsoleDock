@@ -11,6 +11,7 @@ The project follows Semantic Versioning after public releases begin.
 - Added a standalone privacy and redaction guide covering the core redaction order, default patterns, app-specific redactors, copy/share behavior, and Release-build privacy checklist.
 - Added a reusable release validation script shared by local release checks, CI, and tag validation.
 - Clarified the security reporting path for vulnerability and sensitive-data exposure reports before the first public stable release.
+- Updated public project-stage documentation to match the implemented MVP capture, UIKit console, and SPM-first distribution state.
 
 ## v0.1.0 - 2026-06-22
 
