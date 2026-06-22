@@ -231,6 +231,24 @@ final class ConsoleDockCoreTests: XCTestCase {
         XCTAssertTrue(notifications.isEmpty)
     }
 
+    func testStartResettingStoredEntriesPostsNotification() {
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+        CDKConsoleDock.info("previous session")
+        CDKConsoleDock.stop()
+
+        var notifications: [Notification] = []
+        let observer = observeEntriesDidChange { notification in
+            notifications.append(notification)
+        }
+        defer { NotificationCenter.default.removeObserver(observer) }
+
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+
+        XCTAssertTrue(CDKConsoleDock.entries().isEmpty)
+        XCTAssertEqual(notifications.count, 1)
+        XCTAssertNotificationObjectIsConsoleDock(notifications[0])
+    }
+
     func testLoggingWhileNotRunningDoesNotPostNotification() {
         var notifications: [Notification] = []
         let observer = observeEntriesDidChange { notification in

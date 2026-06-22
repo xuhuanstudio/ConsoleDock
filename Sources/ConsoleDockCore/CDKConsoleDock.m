@@ -83,6 +83,7 @@ static void CDKPostEntriesDidChangeNotification(void)
                                    error:(NSError **)error
 {
 #if defined(DEBUG) || defined(CONSOLEDOCK_ENABLE_RELEASE)
+    BOOL didResetEntries = NO;
     @synchronized(self) {
         if (CDKConsoleDockRunning || CDKConsoleDockStopping) {
             return CDKStartResultAlreadyRunning;
@@ -106,6 +107,7 @@ static void CDKPostEntriesDidChangeNotification(void)
             return CDKStartResultFailed;
         }
 
+        didResetEntries = CDKConsoleDockEntries.count > 0;
         CDKConsoleDockConfiguration = [effectiveConfiguration copy];
         CDKConsoleDockEntries = [NSMutableArray arrayWithCapacity:MIN(CDKConsoleDockConfiguration.maximumEntries, 64)];
         CDKStandardOutputCapture *capture = [[CDKStandardOutputCapture alloc] initWithConfiguration:CDKConsoleDockConfiguration];
@@ -124,8 +126,11 @@ static void CDKPostEntriesDidChangeNotification(void)
 
         CDKConsoleDockCapture = capture;
         CDKConsoleDockRunning = YES;
-        return CDKStartResultStarted;
     }
+    if (didResetEntries) {
+        CDKPostEntriesDidChangeNotification();
+    }
+    return CDKStartResultStarted;
 #else
     (void)configuration;
     if (error != nil) {
