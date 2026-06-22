@@ -6,6 +6,10 @@ The project follows Semantic Versioning for public releases.
 
 ## Unreleased
 
+No changes yet.
+
+## v0.2.0 - 2026-06-23
+
 ### Added
 
 - Added Release safety coverage for the Swift facade and Objective-C/UIKit facade entry points.

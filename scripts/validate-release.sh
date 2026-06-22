@@ -8,7 +8,7 @@ release_tag="${CONSOLEDOCK_RELEASE_TAG:-}"
 if [[ -z "$release_tag" && "${GITHUB_REF_TYPE:-}" == "tag" ]]; then
   release_tag="${GITHUB_REF_NAME:-}"
 fi
-release_tag="${release_tag:-v0.1.0}"
+release_tag="${release_tag:-v0.2.0}"
 
 section() {
   printf '\n==> %s\n' "$1"

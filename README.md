@@ -15,9 +15,9 @@ ConsoleDock is an early-stage iOS debug SDK that lets testers inspect app logs d
 
 ## Status
 
-ConsoleDock `v0.1.0` is published as a source-first Swift Package Manager preview release. The current `main` branch contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, bounded in-memory entries with stable session identifiers and partial/redacted/truncated flags, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, runtime diagnostics, entry change notification, Release startup safety gates, a UIKit-only floating button/panel foundation, Swift and Objective-C sample apps, DocC documentation, release validation workflow, and focused tests.
+ConsoleDock `v0.2.0` is the current source-first Swift Package Manager preview release. It contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, bounded in-memory entries with stable session identifiers and partial/redacted/truncated flags, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, runtime diagnostics, entry change notification, Release startup safety gates, a UIKit-only floating button/panel foundation, Swift and Objective-C sample apps, DocC documentation, release validation workflow, and focused tests.
 
-Current `main` limitations:
+Current limitations:
 
 - stdout/stderr capture exists in the core and is connected to line framing and in-memory storage.
 - Direct descriptor writes and flushed C stdio output can be captured; unflushed `printf` / `fprintf` output depends on standard stream buffering.
@@ -63,7 +63,7 @@ Add the public repository URL through Xcode's package dependency UI:
 https://github.com/xuhuanstudio/ConsoleDock.git
 ```
 
-Use the `v0.1.0` tag for the first public preview. Then depend on:
+Use the latest release tag from GitHub Releases. `v0.2.0` includes runtime diagnostics and the current release-validation hardening. Then depend on:
 
 - `ConsoleDock` for Swift API plus the bundled UIKit console.
 - `ConsoleDockCore` for Objective-C/C-compatible core APIs.
@@ -85,8 +85,7 @@ print("Visible through stdout capture")
 
 ### Check Runtime Diagnostics
 
-Runtime diagnostics are available on `main` after `v0.1.0` and will be included in the next release tag.
-If your package dependency is pinned to `v0.1.0`, skip this section until the next tag ships.
+Runtime diagnostics are available in `v0.2.0` and later.
 
 Use diagnostics to confirm the active configuration and current bounded in-memory store counts during integration:
 
