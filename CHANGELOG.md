@@ -10,6 +10,7 @@ The project follows Semantic Versioning for public releases.
 
 - Added Dependabot configuration for weekly GitHub Actions update checks.
 - Added `.editorconfig` and `.gitattributes` to standardize editor behavior and line endings for global contributors.
+- Added the v0.2 integration diagnostics design specification for runtime state, UIKit status, snapshot export, tests, and documentation.
 
 ### Changed
 

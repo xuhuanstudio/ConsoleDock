@@ -43,6 +43,7 @@ Deliverables:
 - DocC for public Swift APIs.
 - better search and filtering in UI.
 - share/export redacted log snapshot.
+- integration diagnostics for runtime state, capture configuration, store counts, and snapshot context.
 - GitHub Actions build and test workflow.
 - `LICENSE`, `CONTRIBUTING`, `SECURITY`, `CHANGELOG`, and issue templates.
 
