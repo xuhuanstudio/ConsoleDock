@@ -134,6 +134,8 @@ scripts/validate-release.sh
 2. CocoaPods，等 SPM package 稳定后再考虑；
 3. XCFramework，等公开 API 稳定后再考虑。
 
+更详细的分发策略见 [Distribution strategy](docs/distribution-strategy.md)。当前只有 Swift Package Manager 是已支持的公开分发渠道；CocoaPods 和 XCFramework 仍属于后续兼容/二进制分发计划。
+
 仓库包含 Swift Package Index 元数据。PackageList 条目已通过 [SwiftPackageIndex/PackageList#14098](https://github.com/SwiftPackageIndex/PackageList/pull/14098) 合并；Swift Package Index 完成索引后，托管 package 和 DocC 页面才会稳定可访问。
 
 ConsoleDock 当前不包含 CocoaPods、XCFramework、网络面板、崩溃采集、默认持久化、远程上传或第三方 logger 适配器。

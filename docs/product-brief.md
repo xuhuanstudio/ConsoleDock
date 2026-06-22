@@ -11,8 +11,10 @@ ConsoleDock should be distributed as an SDK/library, not as a copy-pasted source
 Distribution priority:
 
 1. Swift Package Manager for the first public release.
-2. CocoaPods after the SPM package stabilizes for older Objective-C or mixed projects.
+2. CocoaPods compatibility after the SPM package stabilizes for older Objective-C or mixed projects.
 3. XCFramework after the public API is stable enough for binary distribution.
+
+See [Distribution strategy](distribution-strategy.md) for the current channel policy. ConsoleDock should not claim CocoaPods or XCFramework support until those paths are implemented, validated, and documented.
 
 ## Capability Tiers
 

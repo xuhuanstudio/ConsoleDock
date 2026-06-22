@@ -61,7 +61,7 @@ Deliverables:
 
 - CocoaLumberjack adapter.
 - XCGLogger or SwiftyBeaver adapter, selected by real adoption demand.
-- CocoaPods podspec if the SPM package has stabilized.
+- CocoaPods compatibility bridge if the SPM package has stabilized and a podspec validation path is available.
 - packaged adapter examples based on the existing logger migration guide.
 - improved Objective-C documentation.
 - optional disk export file generation, still local-only and user-initiated.
@@ -84,7 +84,7 @@ Deliverables:
 - CI coverage for package, sample apps, and focused UI smoke tests.
 - complete privacy/redaction documentation.
 - release-build safety tests.
-- optional XCFramework build pipeline.
+- optional binary XCFramework build pipeline.
 - maintained migration guide from `print`, `NSLog`, and common logger frameworks.
 
 Not included:

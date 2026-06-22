@@ -65,6 +65,8 @@ Version gates:
 
 ## Package Distribution Strategy
 
+The detailed channel policy is maintained in [Distribution strategy](distribution-strategy.md). Keep that document and this readiness checklist aligned before every release.
+
 ### Swift Package Manager
 
 SPM is the primary distribution channel.
@@ -81,11 +83,14 @@ Requirements:
 
 CocoaPods support should come after the SPM package is stable.
 
+CocoaPods should be treated as a compatibility bridge for older Objective-C and mixed projects, not as ConsoleDock's primary release path. Account for CocoaPods trunk's announced read-only future before deciding whether public trunk publication, a private specs repository, or local podspec consumption is the right first step.
+
 Requirements:
 
 - public headers for `ConsoleDockCore`;
 - a podspec that does not require source copying;
 - clear compatibility guidance for older Objective-C apps.
+- podspec lint validation that does not require private signing credentials.
 
 ### XCFramework
 
@@ -94,8 +99,10 @@ XCFramework support should come after the core API is stable.
 Requirements:
 
 - reproducible build script;
+- explicit iOS device and iOS Simulator slices;
 - signed or checksummed release artifacts when appropriate;
 - release notes for each binary artifact.
+- validation that the binary artifact preserves Release startup safety and local-only behavior.
 
 ## CI Plan
 
@@ -120,6 +127,7 @@ Initial checks:
 - Objective-C sample app build;
 - Swift sample app build;
 - Swift format lint.
+- distribution documentation claim validation.
 
 Future checks:
 

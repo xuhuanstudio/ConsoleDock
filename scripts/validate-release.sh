@@ -60,6 +60,9 @@ python3 scripts/validate-doc-links.py
 section "Validate governance metadata"
 python3 scripts/validate-governance-metadata.py
 
+section "Validate distribution documentation"
+python3 scripts/validate-distribution-docs.py
+
 section "Validate release helper scripts"
 printf 'Release helper tag: %s\n' "$release_tag"
 python3 scripts/validate-public-release-preflight.py --tag "$release_tag" --local-only --dry-run

@@ -187,6 +187,8 @@ Secondary distribution after the SPM package is stable:
 - CocoaPods for older Objective-C or mixed projects
 - XCFramework for manual or closed-source distribution
 
+For distribution channel boundaries, see [Distribution strategy](docs/distribution-strategy.md).
+
 ## Planned Capability Tiers
 
 ### Base Mode
