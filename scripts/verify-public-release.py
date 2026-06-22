@@ -12,6 +12,7 @@ import sys
 import tempfile
 import textwrap
 import time
+from typing import NamedTuple
 import urllib.error
 import urllib.request
 
@@ -33,6 +34,12 @@ TRANSIENT_PROCESS_FAILURE_SNIPPETS = (
     "timed out",
     "tls handshake timeout",
 )
+
+
+class URLCheckResult(NamedTuple):
+    ok: bool
+    message: str
+    access_challenge: bool = False
 
 
 def run(command: list[str], cwd: pathlib.Path | None = None) -> subprocess.CompletedProcess[str]:
@@ -259,7 +266,11 @@ def check_spm_consumer(repository_url: str, tag: str) -> list[str]:
     return errors
 
 
-def check_url(url: str, attempts: int = DEFAULT_NETWORK_ATTEMPTS) -> tuple[bool, str]:
+def is_access_challenge(error: urllib.error.HTTPError) -> bool:
+    return error.code == 403 and error.headers.get("cf-mitigated", "").lower() == "challenge"
+
+
+def check_url(url: str, attempts: int = DEFAULT_NETWORK_ATTEMPTS) -> URLCheckResult:
     request = urllib.request.Request(url, headers={"User-Agent": "ConsoleDock release verifier"})
     last_message = ""
     for attempt in range(1, attempts + 1):
@@ -267,11 +278,13 @@ def check_url(url: str, attempts: int = DEFAULT_NETWORK_ATTEMPTS) -> tuple[bool,
             with urllib.request.urlopen(request, timeout=20) as response:
                 status = getattr(response, "status", 200)
                 if 200 <= status < 400:
-                    return True, f"HTTP {status}"
+                    return URLCheckResult(True, f"HTTP {status}")
                 last_message = f"HTTP {status}"
         except urllib.error.HTTPError as error:
+            if is_access_challenge(error):
+                return URLCheckResult(False, "HTTP 403 access challenge", True)
             if error.code not in {408, 429, 500, 502, 503, 504}:
-                return False, f"HTTP {error.code}"
+                return URLCheckResult(False, f"HTTP {error.code}")
             last_message = f"HTTP {error.code}"
         except urllib.error.URLError as error:
             last_message = str(error.reason)
@@ -280,24 +293,37 @@ def check_url(url: str, attempts: int = DEFAULT_NETWORK_ATTEMPTS) -> tuple[bool,
             time.sleep(DEFAULT_RETRY_DELAY_SECONDS)
 
     retry_suffix = f" after {attempts} attempts" if attempts > 1 else ""
-    return False, f"{last_message}{retry_suffix}"
+    return URLCheckResult(False, f"{last_message}{retry_suffix}")
 
 
-def check_spi(repository_slug: str) -> list[str]:
+def check_spi(repository_slug: str, *, allow_access_challenge: bool) -> tuple[list[str], list[str]]:
     owner, repo = repository_slug.split("/", maxsplit=1)
     package_url = f"https://swiftpackageindex.com/{owner}/{repo}"
     docs_url = f"https://swiftpackageindex.com/{owner}/{repo}/documentation/consoledock"
     errors: list[str] = []
+    warnings: list[str] = []
 
-    ok, message = check_url(package_url)
-    if not ok:
-        errors.append(f"Swift Package Index package page is unavailable at {package_url}: {message}")
+    result = check_url(package_url)
+    if not result.ok:
+        if result.access_challenge and allow_access_challenge:
+            warnings.append(
+                f"Swift Package Index package page could not be checked automatically at {package_url}: "
+                f"{result.message}. Verify it manually in a browser."
+            )
+        else:
+            errors.append(f"Swift Package Index package page is unavailable at {package_url}: {result.message}")
 
-    ok, message = check_url(docs_url)
-    if not ok:
-        errors.append(f"Swift Package Index DocC page is unavailable at {docs_url}: {message}")
+    result = check_url(docs_url)
+    if not result.ok:
+        if result.access_challenge and allow_access_challenge:
+            warnings.append(
+                f"Swift Package Index DocC page could not be checked automatically at {docs_url}: "
+                f"{result.message}. Verify it manually in a browser."
+            )
+        else:
+            errors.append(f"Swift Package Index DocC page is unavailable at {docs_url}: {result.message}")
 
-    return errors
+    return errors, warnings
 
 
 def self_test() -> list[str]:
@@ -360,6 +386,20 @@ def self_test_transient_process_detection() -> list[str]:
     success = subprocess.CompletedProcess(["gh", "api"], 0, "{}", "")
     if is_transient_process_failure(success):
         errors.append("is_transient_process_failure should not retry successful commands")
+
+    challenge = urllib.error.HTTPError(
+        "https://swiftpackageindex.com/owner/Repo",
+        403,
+        "Forbidden",
+        {"cf-mitigated": "challenge"},
+        None,
+    )
+    if not is_access_challenge(challenge):
+        errors.append("is_access_challenge should detect Cloudflare challenge responses")
+
+    forbidden = urllib.error.HTTPError("https://example.com", 403, "Forbidden", {}, None)
+    if is_access_challenge(forbidden):
+        errors.append("is_access_challenge should not treat every HTTP 403 as an access challenge")
 
     return errors
 
@@ -452,11 +492,17 @@ def main() -> int:
     parser.add_argument("--skip-github", action="store_true", help="Skip GitHub repo, release, tag, and Actions checks.")
     parser.add_argument("--skip-spm", action="store_true", help="Skip external SwiftPM consumer resolve/build check.")
     parser.add_argument("--check-spi", action="store_true", help="Check Swift Package Index package and DocC pages.")
+    parser.add_argument(
+        "--allow-spi-challenge",
+        action="store_true",
+        help="Allow Swift Package Index Cloudflare access challenges after manual browser verification.",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Validate inputs and print the planned checks only.")
     parser.add_argument("--self-test", action="store_true", help="Run local verifier self-tests without network access.")
     args = parser.parse_args()
 
     errors: list[str] = []
+    warnings: list[str] = []
     if args.self_test:
         errors = self_test()
         if errors:
@@ -486,6 +532,7 @@ def main() -> int:
         print(f"GitHub checks: {'no' if args.skip_github else 'yes'}")
         print(f"SwiftPM consumer check: {'no' if args.skip_spm else 'yes'}")
         print(f"Swift Package Index checks: {'yes' if args.check_spi else 'no'}")
+        print(f"Swift Package Index access challenges allowed: {'yes' if args.allow_spi_challenge else 'no'}")
         print("Post-release verification dry run passed.")
         return 0
 
@@ -496,13 +543,18 @@ def main() -> int:
         errors.extend(check_spm_consumer(repository_url, args.tag))
 
     if args.check_spi:
-        errors.extend(check_spi(repository_slug))
+        spi_errors, spi_warnings = check_spi(repository_slug, allow_access_challenge=args.allow_spi_challenge)
+        errors.extend(spi_errors)
+        warnings.extend(spi_warnings)
 
     if errors:
         print("Post-release verification failed:", file=sys.stderr)
         for error in errors:
             print(f"- {error}", file=sys.stderr)
         return 1
+
+    for warning in warnings:
+        print(f"warning: {warning}", file=sys.stderr)
 
     print("Post-release verification passed.")
     return 0

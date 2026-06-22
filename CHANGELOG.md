@@ -16,6 +16,7 @@ The project follows Semantic Versioning for public releases.
 - Added a logging boundary validation gate to keep Swift Logger, os_log, Apple unified logging, Xcode Console, and other-process log claims honest.
 - Added a Swift API surface validation gate to protect app-facing facade and UIKit bridge integration points.
 - Added bounded retry handling to post-release verification for transient GitHub, SwiftPM, and Swift Package Index network failures.
+- Added explicit post-release verifier handling for Swift Package Index access challenges that require manual browser confirmation.
 - Added `.editorconfig` and `.gitattributes` to standardize editor behavior and line endings for global contributors.
 - Added `.gitignore` governance validation and expanded generated-artifact ignores for Xcode, SwiftPM, DocC, CocoaPods, and future binary distribution outputs.
 - Added the v0.2 integration diagnostics design specification for runtime state, UIKit status, snapshot export, tests, and documentation.

@@ -104,6 +104,11 @@ python3 scripts/verify-public-release.py --repository <OWNER>/ConsoleDock --tag 
 ```
 
 The verifier retries transient network failures such as GitHub API EOFs and connection timeouts, but it still treats persistent missing releases, missing workflow runs, missing tags, and unavailable Swift Package Index pages as failures.
+If Swift Package Index returns a Cloudflare access challenge to automated HTTP checks, manually open both the package and DocC pages in a browser. After that manual confirmation, rerun the verifier with `--allow-spi-challenge` to keep the rest of the automated checks strict while recording the SPI challenge as a warning:
+
+```sh
+python3 scripts/verify-public-release.py --repository <OWNER>/ConsoleDock --tag v0.1.0 --check-spi --allow-spi-challenge
+```
 
 2. Verify Xcode can add the repository URL as a Swift Package dependency at the tag.
 3. Verify the `ConsoleDock` and `ConsoleDockCore` products resolve.

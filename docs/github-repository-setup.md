@@ -108,6 +108,7 @@ python3 scripts/verify-public-release.py --repository <OWNER>/ConsoleDock --tag 
 ```
 
 The verifier checks the GitHub repository, remote tag, GitHub Release, `Release Validation` workflow, a clean external SwiftPM consumer build, and Swift Package Index package/DocC pages when `--check-spi` is supplied.
+If Swift Package Index returns a Cloudflare access challenge to automated HTTP checks, manually verify the package and DocC pages in a browser, then rerun with `--allow-spi-challenge` so the challenge is reported as a warning rather than hiding the rest of the post-release checks.
 
 2. Create a temporary iOS app or use a clean sample workspace when you need a manual Xcode UI check.
 3. Add the public repository URL through Swift Package Manager at tag `v0.1.0`.
