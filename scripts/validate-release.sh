@@ -57,6 +57,9 @@ swift test -c release -Xcc -DCONSOLEDOCK_ENABLE_RELEASE -Xswiftc -DCONSOLEDOCK_E
 section "Validate documentation links"
 python3 scripts/validate-doc-links.py
 
+section "Validate logging boundary documentation"
+python3 scripts/validate-logging-boundaries.py
+
 section "Validate governance metadata"
 python3 scripts/validate-governance-metadata.py
 

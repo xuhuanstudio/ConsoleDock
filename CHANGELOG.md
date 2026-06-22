@@ -10,6 +10,7 @@ The project follows Semantic Versioning for public releases.
 
 - Added Dependabot configuration for weekly GitHub Actions update checks.
 - Added a distribution strategy document and validation gate for SPM, future CocoaPods compatibility, and future XCFramework distribution claims.
+- Added a logging boundary validation gate to keep Swift Logger, os_log, Apple unified logging, Xcode Console, and other-process log claims honest.
 - Added `.editorconfig` and `.gitattributes` to standardize editor behavior and line endings for global contributors.
 - Added the v0.2 integration diagnostics design specification for runtime state, UIKit status, snapshot export, tests, and documentation.
 - Added `CDKDiagnostics` and `ConsoleDock.Diagnostics` for runtime state, capture configuration, store limits, and current entry flag counts.

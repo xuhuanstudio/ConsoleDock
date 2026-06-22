@@ -14,7 +14,7 @@ ConsoleDock releases are source-first Swift Package Manager releases. A public r
 
 1. Decide the version, for example `v0.1.0`.
 2. Move completed `CHANGELOG.md` entries from `Unreleased` into a heading that matches the tag, for example `## v0.1.0 - 2026-06-22`.
-3. Confirm README, DocC, sample app walkthrough, release-build safety, security policy, GitHub repository setup, and roadmap still describe the current shipped behavior.
+3. Confirm README, DocC, sample app walkthrough, release-build safety, logging boundaries, security policy, GitHub repository setup, and roadmap still describe the current shipped behavior.
 4. Confirm the [distribution strategy](distribution-strategy.md) still says SPM is the supported channel unless CocoaPods or XCFramework support has actually been implemented and validated.
 5. Confirm there are no secrets, production logs, credentials, tokens, or private screenshots in docs, examples, or screenshots. `scripts/audit-release-content.py` covers generated paths, private key blocks, common token shapes, and local absolute paths; review app-specific sensitive content manually.
 6. Confirm the public repository remote, Actions, topics, and vulnerability reporting are configured as described in [GitHub repository setup](github-repository-setup.md).
@@ -34,7 +34,7 @@ Run these from the package root:
 scripts/validate-release.sh
 ```
 
-The script validates the working tree is clean, then validates the SwiftPM manifest, package identity, Swift Package Index metadata, Objective-C API surface, Swift formatting, package build, package tests, Release safety gates, documentation links, governance metadata, distribution documentation claims, release helper script dry-runs, release content audit, DocC conversion, iOS package build, Swift and Objective-C sample app builds, source archive creation, source archive contents, and source archive build/test from a temporary extraction.
+The script validates the working tree is clean, then validates the SwiftPM manifest, package identity, Swift Package Index metadata, Objective-C API surface, Swift formatting, package build, package tests, Release safety gates, documentation links, logging boundary claims, governance metadata, distribution documentation claims, release helper script dry-runs, release content audit, DocC conversion, iOS package build, Swift and Objective-C sample app builds, source archive creation, source archive contents, and source archive build/test from a temporary extraction.
 
 Release helper dry-runs use `CONSOLEDOCK_RELEASE_TAG` when set, use `GITHUB_REF_NAME` when the workflow is running on a tag, and otherwise default to `v0.1.0` for local main-branch validation.
 

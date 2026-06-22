@@ -25,6 +25,7 @@ ConsoleDock does not promise complete, reliable, live, zero-intrusion capture of
 - debugger-only output, breakpoints, LLDB expressions, or sanitizer diagnostics.
 
 Those systems are not equivalent to ordinary stdout/stderr writes, and iOS apps have system restrictions around reading unified logging data.
+ConsoleDock does not read Apple unified logging back from inside the app.
 
 ## Use Native Logging For Reliability
 

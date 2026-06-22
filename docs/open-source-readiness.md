@@ -119,6 +119,7 @@ Initial checks:
 - governance metadata validation;
 - tag-triggered release validation for `v*` tags;
 - documentation link validation;
+- logging boundary claim validation;
 - release content audit for generated paths, key material, common token shapes, and local absolute paths;
 - source archive content audit;
 - source archive package build/test validation;
