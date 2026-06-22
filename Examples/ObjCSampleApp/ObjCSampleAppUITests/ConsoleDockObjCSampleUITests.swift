@@ -15,6 +15,12 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         let nativeInfoButton = app.buttons["objc-sample.cdkconsoledock-info"]
         XCTAssertTrue(nativeInfoButton.waitForExistence(timeout: 5))
         nativeInfoButton.tap()
+        let nativeErrorButton = app.buttons["objc-sample.cdkconsoledock-error"]
+        XCTAssertTrue(nativeErrorButton.waitForExistence(timeout: 5))
+        nativeErrorButton.tap()
+        let nativeFaultButton = app.buttons["objc-sample.cdkconsoledock-fault"]
+        XCTAssertTrue(nativeFaultButton.waitForExistence(timeout: 5))
+        nativeFaultButton.tap()
 
         let showConsoleButton = app.buttons["objc-sample.show-console"]
         XCTAssertTrue(showConsoleButton.waitForExistence(timeout: 5))
@@ -29,7 +35,22 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         XCTAssertTrue(waitForTableEntry(in: entriesTable, timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "token=<redacted>", in: entriesTable, timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "objc native info", in: entriesTable, timeout: 5))
+        XCTAssertTrue(waitForTableEntry(containing: "objc native error", in: entriesTable, timeout: 5))
+        XCTAssertTrue(waitForTableEntry(containing: "objc native fault", in: entriesTable, timeout: 5))
         XCTAssertFalse(tableEntry(containing: "objc-secret", existsIn: entriesTable))
+        XCTAssertTrue(app.searchFields.firstMatch.waitForExistence(timeout: 5))
+
+        let levelFilter = app.segmentedControls["consoledock.level-filter"]
+        XCTAssertTrue(levelFilter.waitForExistence(timeout: 5))
+        levelFilter.buttons["Error"].tap()
+        XCTAssertTrue(waitForTableEntry(containing: "objc native error", in: entriesTable, timeout: 5))
+        XCTAssertTrue(waitForNoTableEntry(containing: "objc native info", in: entriesTable, timeout: 5))
+        XCTAssertTrue(waitForNoTableEntry(containing: "objc native fault", in: entriesTable, timeout: 5))
+        levelFilter.buttons["Fault"].tap()
+        XCTAssertTrue(waitForTableEntry(containing: "objc native fault", in: entriesTable, timeout: 5))
+        XCTAssertTrue(waitForNoTableEntry(containing: "objc native error", in: entriesTable, timeout: 5))
+        levelFilter.buttons["All"].tap()
+        XCTAssertTrue(waitForTableEntry(containing: "objc native info", in: entriesTable, timeout: 5))
         let redactedEntry = tableStaticText(containing: "token=<redacted>", in: entriesTable)
         redactedEntry.tap()
         XCTAssertTrue(redactedEntry.exists)
@@ -81,6 +102,17 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         let deadline = Date().addingTimeInterval(timeout)
         repeat {
             if tableEntry(containing: text, existsIn: table) {
+                return true
+            }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.1))
+        } while Date() < deadline
+        return false
+    }
+
+    private func waitForNoTableEntry(containing text: String, in table: XCUIElement, timeout: TimeInterval) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        repeat {
+            if !tableEntry(containing: text, existsIn: table) {
                 return true
             }
             RunLoop.current.run(until: Date().addingTimeInterval(0.1))

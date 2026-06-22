@@ -17,6 +17,7 @@ The project follows Semantic Versioning for public releases.
 - Added a Swift API surface validation gate to protect app-facing facade and UIKit bridge integration points.
 - Added bounded retry handling to post-release verification for transient GitHub, SwiftPM, and Swift Package Index network failures.
 - Added explicit post-release verifier handling for Swift Package Index access challenges that require manual browser confirmation.
+- Added search-control rendering and level-filtering assertions to the Swift and Objective-C sample UI smoke tests.
 - Added selected-row tap assertions to the Swift and Objective-C sample UI smoke tests.
 - Added `.editorconfig` and `.gitattributes` to standardize editor behavior and line endings for global contributors.
 - Added `.gitignore` governance validation and expanded generated-artifact ignores for Xcode, SwiftPM, DocC, CocoaPods, and future binary distribution outputs.
