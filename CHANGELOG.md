@@ -27,3 +27,4 @@ The project follows Semantic Versioning after public releases begin.
 - Added UIKit console text search and source filtering for the visible in-memory log list.
 - Added UIKit pause/resume live follow so the panel can freeze visible logs while capture continues.
 - Added UIKit selected-entry copy for visible redacted log rows.
+- Added UIKit log level filtering for visible entries, share/export snapshots, and selected-entry copy.

@@ -205,10 +205,14 @@ private final class ConsoleDockPanelViewController: UIViewController, UITableVie
 
     private let tableView = UITableView(frame: .zero, style: .plain)
     private let searchController = UISearchController(searchResultsController: nil)
+    private let levelSegmentedControl = UISegmentedControl(
+        items: ConsoleDockEntryFilter.LevelScope.allCases.map(\.title)
+    )
     private var liveUpdateBuffer = ConsoleDockLiveUpdateBuffer()
     private var visibleEntries: [ConsoleDock.LogEntry] = []
     private var searchQuery = ""
     private var sourceScope = ConsoleDockEntryFilter.SourceScope.all
+    private var levelScope = ConsoleDockEntryFilter.LevelScope.all
     private var observer: ConsoleDockEntriesObserver?
     private var pauseButton: UIBarButtonItem?
     private var shareButton: UIBarButtonItem?
@@ -225,6 +229,7 @@ private final class ConsoleDockPanelViewController: UIViewController, UITableVie
         view.backgroundColor = UIColor(white: 0.06, alpha: 1)
         configureNavigationItems()
         configureSearchController()
+        configureLevelSegmentedControl()
         configureTableView()
         observer = ConsoleDockEntriesObserver(deliveryQueue: .main) { [weak self] snapshot in
             self?.receive(snapshot: snapshot)
@@ -273,6 +278,16 @@ private final class ConsoleDockPanelViewController: UIViewController, UITableVie
         definesPresentationContext = true
     }
 
+    private func configureLevelSegmentedControl() {
+        levelSegmentedControl.translatesAutoresizingMaskIntoConstraints = false
+        levelSegmentedControl.selectedSegmentIndex = ConsoleDockEntryFilter.LevelScope.all.rawValue
+        levelSegmentedControl.backgroundColor = UIColor(white: 0.1, alpha: 1)
+        levelSegmentedControl.setTitleTextAttributes([.foregroundColor: UIColor.white], for: .selected)
+        levelSegmentedControl.setTitleTextAttributes([.foregroundColor: UIColor(white: 0.82, alpha: 1)], for: .normal)
+        levelSegmentedControl.addTarget(self, action: #selector(levelScopeDidChange), for: .valueChanged)
+        view.addSubview(levelSegmentedControl)
+    }
+
     private func configureTableView() {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.backgroundColor = UIColor(white: 0.06, alpha: 1)
@@ -284,9 +299,13 @@ private final class ConsoleDockPanelViewController: UIViewController, UITableVie
         view.addSubview(tableView)
 
         NSLayoutConstraint.activate([
+            levelSegmentedControl.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
+            levelSegmentedControl.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
+            levelSegmentedControl.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            levelSegmentedControl.heightAnchor.constraint(equalToConstant: 32),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.topAnchor.constraint(equalTo: view.topAnchor),
+            tableView.topAnchor.constraint(equalTo: levelSegmentedControl.bottomAnchor, constant: 8),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
@@ -301,7 +320,8 @@ private final class ConsoleDockPanelViewController: UIViewController, UITableVie
         visibleEntries = ConsoleDockEntryFilter.filteredEntries(
             liveUpdateBuffer.displayedEntries,
             query: searchQuery,
-            sourceScope: sourceScope
+            sourceScope: sourceScope,
+            levelScope: levelScope
         )
         shareButton?.isEnabled = !visibleEntries.isEmpty
         tableView.reloadData()
@@ -366,6 +386,11 @@ private final class ConsoleDockPanelViewController: UIViewController, UITableVie
 
     func searchBar(_ searchBar: UISearchBar, selectedScopeButtonIndexDidChange selectedScope: Int) {
         sourceScope = ConsoleDockEntryFilter.SourceScope(rawValue: selectedScope) ?? .all
+        reloadVisibleEntries(scrollToBottom: false)
+    }
+
+    @objc private func levelScopeDidChange() {
+        levelScope = ConsoleDockEntryFilter.LevelScope(rawValue: levelSegmentedControl.selectedSegmentIndex) ?? .all
         reloadVisibleEntries(scrollToBottom: false)
     }
 

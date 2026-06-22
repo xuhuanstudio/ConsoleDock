@@ -33,15 +33,59 @@ struct ConsoleDockEntryFilter {
         }
     }
 
+    enum LevelScope: Int, CaseIterable {
+        case all
+        case debug
+        case info
+        case warning
+        case error
+        case fault
+
+        var title: String {
+            switch self {
+            case .all:
+                return "All"
+            case .debug:
+                return "Debug"
+            case .info:
+                return "Info"
+            case .warning:
+                return "Warn"
+            case .error:
+                return "Error"
+            case .fault:
+                return "Fault"
+            }
+        }
+
+        func contains(_ level: ConsoleDock.LogLevel) -> Bool {
+            switch (self, level) {
+            case (.all, _),
+                 (.debug, .debug),
+                 (.info, .info),
+                 (.warning, .warning),
+                 (.error, .error),
+                 (.fault, .fault):
+                return true
+            default:
+                return false
+            }
+        }
+    }
+
     static func filteredEntries(
         _ entries: [ConsoleDock.LogEntry],
         query: String,
-        sourceScope: SourceScope = .all
+        sourceScope: SourceScope = .all,
+        levelScope: LevelScope = .all
     ) -> [ConsoleDock.LogEntry] {
         let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
 
         return entries.filter { entry in
             guard sourceScope.contains(entry.source) else {
+                return false
+            }
+            guard levelScope.contains(entry.level) else {
                 return false
             }
             guard !trimmedQuery.isEmpty else {
