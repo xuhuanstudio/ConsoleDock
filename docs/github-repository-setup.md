@@ -83,6 +83,7 @@ Only after the first `main` workflow passes:
 python3 scripts/validate-release-metadata.py --tag v0.1.0
 python3 scripts/audit-release-content.py
 scripts/validate-release.sh
+python3 scripts/audit-source-archive.py .build/ConsoleDock-source.zip
 git status --short
 git push origin main
 git tag -a v0.1.0 -m "ConsoleDock v0.1.0"

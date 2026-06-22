@@ -27,7 +27,7 @@ Run these from the package root:
 scripts/validate-release.sh
 ```
 
-The script validates the SwiftPM manifest, package build, package tests, Release safety gates, documentation links, release content audit, DocC conversion, iOS package build, Swift and Objective-C sample app builds, and source archive creation.
+The script validates the working tree is clean, then validates the SwiftPM manifest, package build, package tests, Release safety gates, documentation links, release content audit, DocC conversion, iOS package build, Swift and Objective-C sample app builds, source archive creation, and source archive contents.
 
 ## Manual Sample Smoke Check
 

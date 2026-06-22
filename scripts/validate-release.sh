@@ -12,6 +12,13 @@ section() {
 section "Show Swift version"
 swift --version
 
+section "Validate clean working tree"
+if [[ -n "$(git status --short)" ]]; then
+  echo "error: release validation requires a clean working tree because source archive creation uses Git state." >&2
+  git status --short >&2
+  exit 1
+fi
+
 section "Validate package manifest"
 swift package dump-package
 
@@ -55,6 +62,7 @@ section "Validate source archive"
 rm -f "$archive_path"
 swift package archive-source --output "$archive_path"
 test -s "$archive_path"
+python3 scripts/audit-source-archive.py "$archive_path"
 ls -lh "$archive_path"
 
 section "Release validation passed"

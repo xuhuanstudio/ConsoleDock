@@ -46,7 +46,7 @@ SENSITIVE_PATTERNS = [
     ),
     (
         "Xcode DerivedData path",
-        re.compile(rb"/Library/Developer/Xcode/DerivedData/"),
+        re.compile(b"/Library/Developer/Xcode/" + b"DerivedData/"),
     ),
 ]
 
