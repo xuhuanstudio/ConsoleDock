@@ -1,6 +1,6 @@
 # Distribution Strategy
 
-ConsoleDock is a source-first Swift Package Manager SDK. Other distribution channels are compatibility work, not the primary release path.
+ConsoleDock is a source-first Swift Package Manager SDK. Other distribution channels are not active release targets unless real consumer demand proves SPM is insufficient.
 
 ## Current Channel
 
@@ -23,18 +23,18 @@ SPM release validation must prove package resolution, package build/test, DocC m
 
 Distribution validation also rejects tracked CocoaPods podspecs, Pods output, SwiftPM lock files, XCFrameworks, frameworks, Xcode archives, debug symbol bundles, static libraries, and packaged archives until those channels are intentionally implemented and validated.
 
-## Future Channel: CocoaPods
+## Demand-Driven Compatibility Evaluation: CocoaPods
 
 No CocoaPods podspec is shipped yet.
 
-CocoaPods should be treated as a legacy compatibility bridge for older Objective-C and mixed projects. It should not become ConsoleDock's primary distribution channel because the CocoaPods maintainers have announced plans for the trunk service to become read-only in the future. Keep SPM as the canonical source of public releases.
+CocoaPods is not an active release target. It should be treated only as a legacy compatibility bridge for older Objective-C and mixed projects that cannot consume the Swift Package. It should not become ConsoleDock's primary distribution channel because the CocoaPods maintainers have announced plans for the trunk service to become read-only in the future. Keep SPM as the canonical source of public releases.
 
 References:
 
 - [CocoaPods trunk read-only announcement](https://blog.cocoapods.org/CocoaPods-Specs-Repo/)
 - [CocoaPods support for Swift packages](https://blog.cocoapods.org/CocoaPods-Swift-Packages/)
 
-Before adding a podspec, confirm all of these are true:
+Before evaluating or adding a podspec, confirm all of these are true:
 
 - the SPM package has a stable tagged release used by external consumers;
 - the podspec consumes source from the repository tag rather than requiring source copying;
@@ -53,11 +53,11 @@ Acceptable first CocoaPods shape:
 
 Do not add a CocoaPods release until a validation script can check the podspec and CI can run that script.
 
-## Future Channel: XCFramework
+## Demand-Driven Binary Evaluation: XCFramework
 
 No XCFramework artifact is shipped yet.
 
-XCFramework distribution should come after the public API is stable enough for binary consumers. It is useful for teams that cannot or do not want to resolve source packages, but it adds artifact integrity, architecture, signing, and release-note obligations.
+XCFramework is not an active release target. It should be evaluated only after the public API is stable enough and real binary consumers cannot use source packages. It can help teams that cannot or do not want to resolve source packages, but it adds artifact integrity, architecture, signing, and release-note obligations.
 
 Before shipping an XCFramework artifact, require:
 
@@ -72,11 +72,12 @@ Do not publish XCFramework binaries from an ad hoc local Xcode build.
 
 ## Release Communication Rules
 
-Use this wording until the future channels are actually implemented:
+Use this wording until any additional channel is actually implemented:
 
 - Supported: Swift Package Manager.
-- Planned compatibility channel: CocoaPods.
-- Planned binary distribution channel: XCFramework.
+- Not supported today: CocoaPods.
+- Not supported today: XCFramework.
+- CocoaPods and XCFramework are demand-driven compatibility options, not active release targets.
 
 Avoid these claims until they are true and validated:
 
@@ -85,4 +86,4 @@ Avoid these claims until they are true and validated:
 - "Download the XCFramework"
 - "Binary release available"
 
-When CocoaPods or XCFramework support is added later, update this document, `README.md`, `README.zh-CN.md`, `docs/open-source-readiness.md`, `docs/roadmap.md`, release notes, and release validation scripts in the same change.
+When CocoaPods or XCFramework support is intentionally added later, update this document, `README.md`, `README.zh-CN.md`, `docs/open-source-readiness.md`, `docs/roadmap.md`, release notes, and release validation scripts in the same change.

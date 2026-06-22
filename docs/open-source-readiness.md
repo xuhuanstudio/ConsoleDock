@@ -82,9 +82,9 @@ Requirements:
 
 ### CocoaPods
 
-CocoaPods support should come after the SPM package is stable.
+CocoaPods support is not an active release target.
 
-CocoaPods should be treated as a compatibility bridge for older Objective-C and mixed projects, not as ConsoleDock's primary release path. Account for CocoaPods trunk's announced read-only future before deciding whether public trunk publication, a private specs repository, or local podspec consumption is the right first step.
+CocoaPods should be treated as a demand-driven compatibility bridge for older Objective-C and mixed projects that cannot consume the Swift Package, not as ConsoleDock's primary release path. Account for CocoaPods trunk's announced read-only future before deciding whether public trunk publication, a private specs repository, or local podspec consumption is the right first step.
 
 Requirements:
 
@@ -95,7 +95,9 @@ Requirements:
 
 ### XCFramework
 
-XCFramework support should come after the core API is stable.
+XCFramework support is not an active release target.
+
+Evaluate XCFramework distribution only after the core API is stable and real binary consumers cannot use source packages.
 
 Requirements:
 
@@ -137,8 +139,8 @@ Initial checks:
 
 Future checks:
 
-- XCFramework packaging validation;
-- CocoaPods lint.
+- XCFramework packaging validation only after binary distribution is intentionally approved;
+- CocoaPods lint only after CocoaPods compatibility is intentionally approved.
 
 CI should avoid tests that require private signing identities.
 

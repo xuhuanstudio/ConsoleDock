@@ -8,11 +8,11 @@ Build a reusable iOS debug SDK that testers can integrate into an app to view ru
 
 ConsoleDock should be distributed as an SDK/library, not as a copy-pasted source folder.
 
-Distribution priority:
+Distribution policy:
 
-1. Swift Package Manager for the first public release.
-2. CocoaPods compatibility after the SPM package stabilizes for older Objective-C or mixed projects.
-3. XCFramework after the public API is stable enough for binary distribution.
+1. Swift Package Manager as the canonical public release channel.
+2. Swift Package Index and hosted DocC as discovery and documentation surfaces.
+3. CocoaPods and XCFramework are demand-driven compatibility evaluations, not active release targets.
 
 See [Distribution strategy](distribution-strategy.md) for the current channel policy. ConsoleDock should not claim CocoaPods or XCFramework support until those paths are implemented, validated, and documented.
 

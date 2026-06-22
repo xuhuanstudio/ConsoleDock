@@ -178,14 +178,14 @@ xcodebuild -project Examples/ObjCSampleApp/ObjCSampleApp.xcodeproj \
 
 ## Intended Distribution
 
-Primary distribution:
+Current supported distribution:
 
 - Swift Package Manager
 
-Secondary distribution after the SPM package is stable:
+Demand-driven compatibility channels, not active release targets:
 
-- CocoaPods for older Objective-C or mixed projects
-- XCFramework for manual or closed-source distribution
+- CocoaPods only if real older Objective-C or mixed projects cannot adopt the Swift Package.
+- XCFramework only if binary consumers need it after the public API is stable.
 
 For distribution channel boundaries, see [Distribution strategy](docs/distribution-strategy.md).
 

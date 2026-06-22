@@ -15,8 +15,10 @@ REQUIRED_SNIPPETS = {
     "docs/distribution-strategy.md": [
         "SPM is the only supported public distribution channel today.",
         "No CocoaPods podspec is shipped yet.",
-        "CocoaPods should be treated as a legacy compatibility bridge",
+        "CocoaPods is not an active release target.",
         "No XCFramework artifact is shipped yet.",
+        "XCFramework is not an active release target.",
+        "demand-driven compatibility options, not active release targets",
         "Release startup remains gated by both `CONSOLEDOCK_ENABLE_RELEASE` and `allowsReleaseBuilds`",
         "no default network upload, no default disk persistence, and no private API",
         "Distribution validation also rejects tracked CocoaPods podspecs",
@@ -25,26 +27,28 @@ REQUIRED_SNIPPETS = {
     "README.md": [
         "For distribution channel boundaries, see [Distribution strategy](docs/distribution-strategy.md).",
         "distribution documentation and artifacts",
-        "CocoaPods for older Objective-C or mixed projects",
-        "XCFramework for manual or closed-source distribution",
+        "Demand-driven compatibility channels, not active release targets",
+        "CocoaPods only if real older Objective-C or mixed projects cannot adopt the Swift Package.",
+        "XCFramework only if binary consumers need it after the public API is stable.",
     ],
     "README.zh-CN.md": [
         "分发策略",
-        "CocoaPods",
-        "XCFramework",
+        "当前唯一支持的公开分发渠道",
+        "CocoaPods 和 XCFramework 不是当前主动发布目标",
     ],
     "docs/open-source-readiness.md": [
         "[Distribution strategy](distribution-strategy.md)",
-        "CocoaPods support should come after the SPM package is stable.",
-        "XCFramework support should come after the core API is stable.",
+        "CocoaPods support is not an active release target.",
+        "XCFramework support is not an active release target.",
     ],
     "docs/release-process.md": [
         "distribution strategy",
-        "CocoaPods and XCFramework artifacts remain future distribution channels",
+        "CocoaPods and XCFramework artifacts remain unsupported demand-driven channels",
     ],
     "docs/roadmap.md": [
-        "CocoaPods compatibility bridge",
-        "binary XCFramework",
+        "Demand-Driven Compatibility Candidates",
+        "CocoaPods compatibility evaluation",
+        "documented decision to keep CocoaPods and XCFramework out of scope unless real consumer demand justifies them",
     ],
 }
 
@@ -53,11 +57,18 @@ FORBIDDEN_PATTERNS = {
         re.compile(r"\bpod\s+['\"]ConsoleDock", re.IGNORECASE),
         re.compile(r"\bCocoaPods\s+supported\b", re.IGNORECASE),
         re.compile(r"\bDownload the XCFramework\b", re.IGNORECASE),
+        re.compile(r"\bSecondary distribution after the SPM package is stable\b", re.IGNORECASE),
     ],
     "README.zh-CN.md": [
         re.compile(r"\bpod\s+['\"]ConsoleDock", re.IGNORECASE),
         re.compile(r"已支持\s*CocoaPods", re.IGNORECASE),
         re.compile(r"下载\s*XCFramework", re.IGNORECASE),
+        re.compile(r"CocoaPods，等 SPM package 稳定后再考虑", re.IGNORECASE),
+        re.compile(r"XCFramework，等公开 API 稳定后再考虑", re.IGNORECASE),
+    ],
+    "docs/distribution-strategy.md": [
+        re.compile(r"Planned compatibility channel", re.IGNORECASE),
+        re.compile(r"Planned binary distribution channel", re.IGNORECASE),
     ],
 }
 

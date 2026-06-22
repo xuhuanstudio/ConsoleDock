@@ -53,15 +53,15 @@ Not included:
 - large third-party adapter suite.
 - network request inspection.
 
-## v0.3 - Compatibility and Adapters
+## Post-v0.2 - Demand-Driven Compatibility Candidates
 
-Goal: improve adoption in existing apps.
+Goal: improve adoption in existing apps only when real integration feedback shows SPM and the current explicit API are not enough.
 
-Deliverables:
+Candidate work, not committed deliverables:
 
-- CocoaLumberjack adapter.
+- CocoaLumberjack adapter if real users need it.
 - XCGLogger or SwiftyBeaver adapter, selected by real adoption demand.
-- CocoaPods compatibility bridge if the SPM package has stabilized and a podspec validation path is available.
+- CocoaPods compatibility evaluation only if real older Objective-C or mixed projects cannot adopt the Swift Package.
 - packaged adapter examples based on the existing logger migration guide.
 - improved Objective-C documentation.
 - optional disk export file generation, still local-only and user-initiated.
@@ -84,7 +84,7 @@ Deliverables:
 - CI coverage for package, sample apps, and focused UI smoke tests.
 - complete privacy/redaction documentation.
 - release-build safety tests.
-- optional binary XCFramework build pipeline.
+- documented decision to keep CocoaPods and XCFramework out of scope unless real consumer demand justifies them.
 - maintained migration guide from `print`, `NSLog`, and common logger frameworks.
 
 Not included:

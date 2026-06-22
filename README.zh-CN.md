@@ -126,15 +126,15 @@ scripts/validate-release.sh
 
 该脚本会先确认工作区干净，再验证 SwiftPM manifest、package identity、Swift Package Index 元数据、Objective-C API surface、Swift API surface、UI accessibility identifiers、sample app 文档和自动化、Swift 格式、构建、测试、Release safety gates、文档链接、开源治理元数据、分发文档和产物、公开发布内容审计、DocC、iOS package build、Swift/Objective-C 示例 App 构建、source archive 生成、source archive 内容和 source archive 独立构建/测试。GitHub workflow 会设置 `CONSOLEDOCK_RUN_UI_SMOKE=1`，因此 CI 会运行 Swift 和 Objective-C 示例 App 的 iOS Simulator UI smoke test；本地需要完整模拟器 smoke 路径时也可以设置同一个环境变量。
 
-## 分发计划
+## 分发策略
 
-当前优先级：
+当前唯一支持的公开分发渠道：
 
-1. Swift Package Manager；
-2. CocoaPods，等 SPM package 稳定后再考虑；
-3. XCFramework，等公开 API 稳定后再考虑。
+1. Swift Package Manager。
 
-更详细的分发策略见 [Distribution strategy](docs/distribution-strategy.md)。当前只有 Swift Package Manager 是已支持的公开分发渠道；CocoaPods 和 XCFramework 仍属于后续兼容/二进制分发计划。
+CocoaPods 和 XCFramework 不是当前主动发布目标。只有当真实旧项目或二进制分发需求证明 SPM 不够用时，才会重新评估。
+
+更详细的分发策略见 [Distribution strategy](docs/distribution-strategy.md)。
 
 仓库包含 Swift Package Index 元数据。PackageList 条目已通过 [SwiftPackageIndex/PackageList#14098](https://github.com/SwiftPackageIndex/PackageList/pull/14098) 合并；Swift Package Index 完成索引后，托管 package 和 DocC 页面才会稳定可访问。
 

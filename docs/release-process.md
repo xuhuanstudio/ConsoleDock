@@ -1,6 +1,6 @@
 # Release Process
 
-ConsoleDock releases are source-first Swift Package Manager releases. A public release is a git tag plus release notes; CocoaPods and XCFramework artifacts remain future distribution channels.
+ConsoleDock releases are source-first Swift Package Manager releases. A public release is a git tag plus release notes; CocoaPods and XCFramework artifacts remain unsupported demand-driven channels.
 
 ## Release Principles
 
