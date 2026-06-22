@@ -56,7 +56,10 @@ Local validation:
 swift package dump-package
 swift build
 swift test
+xcodebuild -scheme ConsoleDock-Package -destination 'generic/platform=iOS Simulator' build
 ```
+
+GitHub Actions currently validates the SwiftPM manifest, SwiftPM build/test, the package iOS Simulator build, and both sample app builds.
 
 ## Examples
 

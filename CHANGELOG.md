@@ -19,3 +19,4 @@ The project follows Semantic Versioning after public releases begin.
 - Added UIKit console foundation with floating button, live snapshot panel, clear, close, and lifecycle teardown.
 - Added a Swift UIKit sample app that imports the local package and validates Native API, stdout, stderr, `NSLog`, redaction, clear, stop, and restart behavior on Simulator.
 - Added `CDKConsoleDockUIKit` for Objective-C access to the bundled UIKit console and an Objective-C UIKit sample app that validates Native API, stdout, stderr, direct descriptor writes, `NSLog`, redaction, clear, stop, and restart behavior on Simulator.
+- Expanded CI to build the package for iOS Simulator and build both Swift and Objective-C sample apps.

@@ -19,3 +19,17 @@ jobs:
         run: swift build
       - name: Test
         run: swift test
+      - name: Build package for iOS Simulator
+        run: xcodebuild -scheme ConsoleDock-Package -destination 'generic/platform=iOS Simulator' build
+      - name: Build Swift sample app
+        run: |
+          xcodebuild -project Examples/SwiftSampleApp/SwiftSampleApp.xcodeproj \
+            -scheme SwiftSampleApp \
+            -destination 'generic/platform=iOS Simulator' \
+            build
+      - name: Build Objective-C sample app
+        run: |
+          xcodebuild -project Examples/ObjCSampleApp/ObjCSampleApp.xcodeproj \
+            -scheme ObjCSampleApp \
+            -destination 'generic/platform=iOS Simulator' \
+            build
