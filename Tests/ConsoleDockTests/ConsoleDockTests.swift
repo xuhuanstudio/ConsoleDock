@@ -169,6 +169,8 @@ final class ConsoleDockTests: XCTestCase {
 
         XCTAssertEqual(entry.id, 0)
         XCTAssertEqual(entry.message, "fixture")
+        XCTAssertFalse(entry.redacted)
+        XCTAssertFalse(entry.truncated)
     }
 
     func testSnapshotFormatterExportsStablePlainText() {
@@ -392,6 +394,8 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertEqual(entries[0].level, .error)
         XCTAssertEqual(entries[0].source, .native)
         XCTAssertEqual(entries[0].message, "public")
+        XCTAssertTrue(entries[0].redacted)
+        XCTAssertTrue(entries[0].truncated)
     }
 
     func testEntriesObserverDeliversInitialSnapshot() {

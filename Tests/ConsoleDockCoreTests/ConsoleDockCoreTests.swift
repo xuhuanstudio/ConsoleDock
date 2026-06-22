@@ -120,6 +120,8 @@ final class ConsoleDockCoreTests: XCTestCase {
         XCTAssertEqual(entries[0].level, .info)
         XCTAssertEqual(entries[0].source, .native)
         XCTAssertEqual(entries[0].message, "Login succeeded")
+        XCTAssertFalse(entries[0].redacted)
+        XCTAssertFalse(entries[0].truncated)
         XCTAssertGreaterThanOrEqual(entries[0].timestamp.timeIntervalSince1970, before.timeIntervalSince1970)
         XCTAssertLessThanOrEqual(entries[0].timestamp.timeIntervalSince1970, after.timeIntervalSince1970)
     }
@@ -146,7 +148,7 @@ final class ConsoleDockCoreTests: XCTestCase {
         XCTAssertEqual(CDKConsoleDock.entries().map(\.identifier), [1])
     }
 
-    func testLogEntryInitializersExposeIdentifier() {
+    func testLogEntryInitializersExposeEntryMetadata() {
         let timestamp = Date(timeIntervalSince1970: 1)
 
         let identifiedEntry = CDKLogEntry(
@@ -155,6 +157,15 @@ final class ConsoleDockCoreTests: XCTestCase {
             level: .info,
             source: .native,
             message: "identified"
+        )
+        let processedEntry = CDKLogEntry(
+            identifier: 43,
+            timestamp: timestamp,
+            level: .warning,
+            source: .stderr,
+            message: "processed",
+            redacted: true,
+            truncated: true
         )
         let compatibilityEntry = CDKLogEntry(
             timestamp: timestamp,
@@ -166,6 +177,11 @@ final class ConsoleDockCoreTests: XCTestCase {
         XCTAssertEqual(identifiedEntry.identifier, 42)
         XCTAssertEqual(identifiedEntry.timestamp, timestamp)
         XCTAssertEqual(compatibilityEntry.identifier, 0)
+        XCTAssertFalse(identifiedEntry.redacted)
+        XCTAssertFalse(identifiedEntry.truncated)
+        XCTAssertEqual(processedEntry.identifier, 43)
+        XCTAssertTrue(processedEntry.redacted)
+        XCTAssertTrue(processedEntry.truncated)
     }
 
     func testNativeFaultLogAppendsFaultEntry() {
@@ -230,11 +246,14 @@ final class ConsoleDockCoreTests: XCTestCase {
             """
         )
 
-        let message = try XCTUnwrap(CDKConsoleDock.entries().first?.message)
+        let entry = try XCTUnwrap(CDKConsoleDock.entries().first)
+        let message = entry.message
         XCTAssertTrue(message.contains("<redacted>"))
         XCTAssertTrue(message.contains("Authorization: Bearer <redacted>"))
         XCTAssertTrue(message.contains("Cookie: <redacted>"))
         XCTAssertTrue(message.contains("Set-Cookie: <redacted>"))
+        XCTAssertTrue(entry.redacted)
+        XCTAssertFalse(entry.truncated)
         XCTAssertFalse(message.contains("bearer123"))
         XCTAssertFalse(message.contains("cookie123"))
         XCTAssertFalse(message.contains("cookie456"))
@@ -261,7 +280,10 @@ final class ConsoleDockCoreTests: XCTestCase {
 
         CDKConsoleDock.info("Loaded user_id=42")
 
-        XCTAssertEqual(CDKConsoleDock.entries().first?.message, "Loaded user_id=<redacted>")
+        let entry = CDKConsoleDock.entries().first
+        XCTAssertEqual(entry?.message, "Loaded user_id=<redacted>")
+        XCTAssertEqual(entry?.redacted, true)
+        XCTAssertEqual(entry?.truncated, false)
     }
 
     func testMessageIsTruncatedBeforeStorage() {
@@ -271,7 +293,10 @@ final class ConsoleDockCoreTests: XCTestCase {
 
         CDKConsoleDock.info("123456789")
 
-        XCTAssertEqual(CDKConsoleDock.entries().first?.message, "12345")
+        let entry = CDKConsoleDock.entries().first
+        XCTAssertEqual(entry?.message, "12345")
+        XCTAssertEqual(entry?.redacted, false)
+        XCTAssertEqual(entry?.truncated, true)
     }
 
     func testNativeLoggingIsNoOpWhenNotRunning() {

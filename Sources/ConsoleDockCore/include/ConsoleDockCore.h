@@ -63,6 +63,10 @@ FOUNDATION_EXPORT NSNotificationName const CDKConsoleDockEntriesDidChangeNotific
 @property (nonatomic, readonly) CDKLogSource source;
 /// The redacted, truncated message stored by ConsoleDock.
 @property (nonatomic, copy, readonly) NSString *message;
+/// Whether ConsoleDock changed the message while applying default or app-specific redaction.
+@property (nonatomic, readonly) BOOL redacted;
+/// Whether ConsoleDock shortened the message to respect maximumMessageLength.
+@property (nonatomic, readonly) BOOL truncated;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
@@ -70,7 +74,14 @@ FOUNDATION_EXPORT NSNotificationName const CDKConsoleDockEntriesDidChangeNotific
                          timestamp:(NSDate *)timestamp
                              level:(CDKLogLevel)level
                             source:(CDKLogSource)source
-                           message:(NSString *)message NS_DESIGNATED_INITIALIZER;
+                           message:(NSString *)message;
+- (instancetype)initWithIdentifier:(unsigned long long)identifier
+                         timestamp:(NSDate *)timestamp
+                             level:(CDKLogLevel)level
+                            source:(CDKLogSource)source
+                           message:(NSString *)message
+                          redacted:(BOOL)redacted
+                         truncated:(BOOL)truncated NS_DESIGNATED_INITIALIZER;
 - (instancetype)initWithTimestamp:(NSDate *)timestamp
                             level:(CDKLogLevel)level
                            source:(CDKLogSource)source

@@ -41,18 +41,34 @@ static NSString *CDKDefaultRedactedMessage(NSString *message)
     return redacted;
 }
 
-static NSString *CDKPreparedMessage(NSString *message, CDKConfiguration *configuration)
+static NSString *CDKPreparedMessage(NSString *message,
+                                    CDKConfiguration *configuration,
+                                    BOOL *redacted,
+                                    BOOL *truncated)
 {
-    NSString *prepared = CDKDefaultRedactedMessage(message ?: @"");
+    NSString *original = message ?: @"";
+    NSString *prepared = CDKDefaultRedactedMessage(original);
+    BOOL didRedact = ![prepared isEqualToString:original];
     if (configuration.redactionBlock != nil) {
+        NSString *beforeCustomRedaction = prepared;
         NSString *customRedacted = configuration.redactionBlock(prepared);
         if (customRedacted != nil) {
             prepared = customRedacted;
+            didRedact = didRedact || ![prepared isEqualToString:beforeCustomRedaction];
         }
     }
 
+    BOOL didTruncate = NO;
     if (prepared.length > configuration.maximumMessageLength) {
         prepared = [prepared substringToIndex:configuration.maximumMessageLength];
+        didTruncate = YES;
+    }
+
+    if (redacted != NULL) {
+        *redacted = didRedact;
+    }
+    if (truncated != NULL) {
+        *truncated = didTruncate;
     }
 
     return prepared;
@@ -207,13 +223,17 @@ static void CDKPostEntriesDidChangeNotification(void)
             return;
         }
 
-        NSString *preparedMessage = CDKPreparedMessage(message, CDKConsoleDockConfiguration);
+        BOOL redacted = NO;
+        BOOL truncated = NO;
+        NSString *preparedMessage = CDKPreparedMessage(message, CDKConsoleDockConfiguration, &redacted, &truncated);
         CDKConsoleDockNextEntryIdentifier += 1;
         CDKLogEntry *entry = [[CDKLogEntry alloc] initWithIdentifier:CDKConsoleDockNextEntryIdentifier
                                                            timestamp:[NSDate date]
                                                                level:level
                                                               source:source
-                                                             message:preparedMessage];
+                                                             message:preparedMessage
+                                                            redacted:redacted
+                                                           truncated:truncated];
         if (CDKConsoleDockEntries == nil) {
             CDKConsoleDockEntries = [NSMutableArray array];
         }

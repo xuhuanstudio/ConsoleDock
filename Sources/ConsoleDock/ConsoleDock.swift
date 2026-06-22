@@ -91,19 +91,27 @@ public enum ConsoleDock {
         public let level: LogLevel
         public let source: LogSource
         public let message: String
+        /// Whether ConsoleDock changed the message while applying default or app-specific redaction.
+        public let redacted: Bool
+        /// Whether ConsoleDock shortened the message to respect `maximumMessageLength`.
+        public let truncated: Bool
 
         public init(
             id: UInt64 = 0,
             timestamp: Date,
             level: LogLevel,
             source: LogSource,
-            message: String
+            message: String,
+            redacted: Bool = false,
+            truncated: Bool = false
         ) {
             self.id = id
             self.timestamp = timestamp
             self.level = level
             self.source = source
             self.message = message
+            self.redacted = redacted
+            self.truncated = truncated
         }
     }
 
@@ -252,6 +260,8 @@ extension ConsoleDock.LogEntry {
         level = ConsoleDock.LogLevel(coreLevel: coreEntry.level)
         source = ConsoleDock.LogSource(coreSource: coreEntry.source)
         message = coreEntry.message
+        redacted = coreEntry.redacted
+        truncated = coreEntry.truncated
     }
 }
 
