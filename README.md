@@ -2,6 +2,8 @@
 
 In-app debug console for iOS testing.
 
+[简体中文概览](README.zh-CN.md)
+
 ConsoleDock is an early-stage iOS debug SDK that lets testers inspect app logs directly on device without connecting Xcode. The project is designed for real iOS app integration: existing Objective-C apps should get useful baseline coverage, while Swift and mixed projects can opt into a more reliable explicit logging API.
 
 <img src="docs/assets/swift-sample-console.png" alt="ConsoleDock iOS sample console showing native, stdout, stderr, NSLog, and redacted token entries" width="320">

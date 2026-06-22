@@ -8,7 +8,7 @@ Primary repository language: English.
 
 Recommended secondary material:
 
-- short Chinese overview in `README.zh-CN.md` after the English README stabilizes;
+- short Chinese overview in [`README.zh-CN.md`](../README.zh-CN.md);
 - issue templates in English first;
 - documentation examples that avoid region-specific services or private company terminology.
 
