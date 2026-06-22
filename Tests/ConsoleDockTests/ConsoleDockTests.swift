@@ -189,6 +189,53 @@ final class ConsoleDockTests: XCTestCase {
         )
     }
 
+    func testLiveUpdateBufferFreezesDisplayedEntriesWhilePaused() {
+        var buffer = ConsoleDockLiveUpdateBuffer()
+        let initialEntries = [filterFixtureEntries()[0]]
+        let updatedEntries = filterFixtureEntries()
+
+        XCTAssertTrue(buffer.receive(snapshot: initialEntries))
+        buffer.pause()
+
+        XCTAssertFalse(buffer.receive(snapshot: updatedEntries))
+
+        XCTAssertTrue(buffer.isPaused)
+        XCTAssertEqual(buffer.displayedEntries.map(\.message), ["Native login succeeded"])
+    }
+
+    func testLiveUpdateBufferResumesWithPendingSnapshot() {
+        var buffer = ConsoleDockLiveUpdateBuffer()
+        let initialEntries = [filterFixtureEntries()[0]]
+        let updatedEntries = filterFixtureEntries()
+
+        XCTAssertTrue(buffer.receive(snapshot: initialEntries))
+        buffer.pause()
+        XCTAssertFalse(buffer.receive(snapshot: updatedEntries))
+        buffer.resume(latestEntries: initialEntries)
+
+        XCTAssertFalse(buffer.isPaused)
+        XCTAssertEqual(buffer.displayedEntries.map(\.message), [
+            "Native login succeeded",
+            "stdout response",
+            "stderr network failure"
+        ])
+    }
+
+    func testLiveUpdateBufferReplaceDisplayedEntriesClearsPendingSnapshot() {
+        var buffer = ConsoleDockLiveUpdateBuffer()
+        let initialEntries = [filterFixtureEntries()[0]]
+        let updatedEntries = filterFixtureEntries()
+
+        XCTAssertTrue(buffer.receive(snapshot: initialEntries))
+        buffer.pause()
+        XCTAssertFalse(buffer.receive(snapshot: updatedEntries))
+        buffer.replaceDisplayedEntries([])
+        buffer.resume(latestEntries: [])
+
+        XCTAssertFalse(buffer.isPaused)
+        XCTAssertTrue(buffer.displayedEntries.isEmpty)
+    }
+
     func testSwiftConfigurationBridgesStoreLimitsAndRedactor() {
         let configuration = ConsoleDock.Configuration(
             maximumEntries: 1,

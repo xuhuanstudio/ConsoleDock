@@ -16,8 +16,8 @@ Current limitations:
 - Direct descriptor writes and flushed C stdio output can be captured; unflushed `printf` / `fprintf` output depends on standard stream buffering.
 - File-descriptor capture can include framework or runtime warnings written through the app process descriptors, not only application-authored messages.
 - Entry change notification exists as the refresh foundation for UI; notification handlers should fetch a snapshot through `entries`.
-- The UIKit floating button and console panel foundation can show, search, source-filter, live refresh, clear, share/export, and close the current in-memory snapshot.
-- Pause/resume, selected-entry copy, persistence, advanced level filtering, and advanced query syntax are not implemented yet.
+- The UIKit floating button and console panel foundation can show, search, source-filter, pause/resume live follow, live refresh, clear, share/export, and close the current in-memory snapshot.
+- Selected-entry copy, persistence, advanced level filtering, and advanced query syntax are not implemented yet.
 - Third-party adapters, CocoaPods, and XCFramework distribution are not implemented yet.
 - Redaction is a local in-memory baseline, not a complete privacy guarantee.
 

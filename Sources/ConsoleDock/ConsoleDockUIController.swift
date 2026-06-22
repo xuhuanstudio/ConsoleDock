@@ -205,12 +205,14 @@ private final class ConsoleDockPanelViewController: UIViewController, UITableVie
 
     private let tableView = UITableView(frame: .zero, style: .plain)
     private let searchController = UISearchController(searchResultsController: nil)
-    private var entries: [ConsoleDock.LogEntry] = []
+    private var liveUpdateBuffer = ConsoleDockLiveUpdateBuffer()
     private var visibleEntries: [ConsoleDock.LogEntry] = []
     private var searchQuery = ""
     private var sourceScope = ConsoleDockEntryFilter.SourceScope.all
     private var observer: ConsoleDockEntriesObserver?
+    private var pauseButton: UIBarButtonItem?
     private var shareButton: UIBarButtonItem?
+    private var clearButton: UIBarButtonItem?
     private let formatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm:ss.SSS"
@@ -225,7 +227,7 @@ private final class ConsoleDockPanelViewController: UIViewController, UITableVie
         configureSearchController()
         configureTableView()
         observer = ConsoleDockEntriesObserver(deliveryQueue: .main) { [weak self] snapshot in
-            self?.apply(snapshot: snapshot)
+            self?.receive(snapshot: snapshot)
         }
     }
 
@@ -253,7 +255,11 @@ private final class ConsoleDockPanelViewController: UIViewController, UITableVie
             target: self,
             action: #selector(clear)
         )
-        navigationItem.rightBarButtonItems = [clearButton, shareButton]
+        self.clearButton = clearButton
+
+        let pauseButton = makePauseButton()
+        self.pauseButton = pauseButton
+        navigationItem.rightBarButtonItems = [clearButton, shareButton, pauseButton]
     }
 
     private func configureSearchController() {
@@ -284,14 +290,15 @@ private final class ConsoleDockPanelViewController: UIViewController, UITableVie
         ])
     }
 
-    private func apply(snapshot: [ConsoleDock.LogEntry]) {
-        entries = snapshot
-        reloadVisibleEntries(scrollToBottom: true)
+    private func receive(snapshot: [ConsoleDock.LogEntry]) {
+        if liveUpdateBuffer.receive(snapshot: snapshot) {
+            reloadVisibleEntries(scrollToBottom: true)
+        }
     }
 
     private func reloadVisibleEntries(scrollToBottom: Bool) {
         visibleEntries = ConsoleDockEntryFilter.filteredEntries(
-            entries,
+            liveUpdateBuffer.displayedEntries,
             query: searchQuery,
             sourceScope: sourceScope
         )
@@ -305,7 +312,8 @@ private final class ConsoleDockPanelViewController: UIViewController, UITableVie
     @objc private func clear() {
         ConsoleDock.clear()
         if ConsoleDock.entries.isEmpty {
-            apply(snapshot: [])
+            liveUpdateBuffer.replaceDisplayedEntries([])
+            reloadVisibleEntries(scrollToBottom: false)
         }
     }
 
@@ -321,6 +329,33 @@ private final class ConsoleDockPanelViewController: UIViewController, UITableVie
         let activityController = UIActivityViewController(activityItems: [snapshot], applicationActivities: nil)
         activityController.popoverPresentationController?.barButtonItem = shareButton
         present(activityController, animated: true)
+    }
+
+    @objc private func toggleLiveUpdates() {
+        if liveUpdateBuffer.isPaused {
+            liveUpdateBuffer.resume(latestEntries: ConsoleDock.entries)
+            updatePauseButton()
+            reloadVisibleEntries(scrollToBottom: true)
+        } else {
+            liveUpdateBuffer.pause()
+            updatePauseButton()
+        }
+    }
+
+    private func makePauseButton() -> UIBarButtonItem {
+        let item = UIBarButtonItem(
+            barButtonSystemItem: liveUpdateBuffer.isPaused ? .play : .pause,
+            target: self,
+            action: #selector(toggleLiveUpdates)
+        )
+        item.accessibilityLabel = liveUpdateBuffer.isPaused ? "Resume Live Updates" : "Pause Live Updates"
+        return item
+    }
+
+    private func updatePauseButton() {
+        let pauseButton = makePauseButton()
+        self.pauseButton = pauseButton
+        navigationItem.rightBarButtonItems = [clearButton, shareButton, pauseButton].compactMap { $0 }
     }
 
     func updateSearchResults(for searchController: UISearchController) {
