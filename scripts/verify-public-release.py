@@ -34,6 +34,15 @@ TRANSIENT_PROCESS_FAILURE_SNIPPETS = (
     "timed out",
     "tls handshake timeout",
 )
+REQUIRED_RELEASE_BODY_SNIPPETS = (
+    "### Boundaries",
+    "Not a full replacement for Xcode Console.",
+    "Does not promise complete Swift Logger, os_log, or Apple unified logging capture.",
+    "No default persistence, upload, network inspector, CocoaPods, or XCFramework distribution.",
+    "### Validation",
+    "Release Validation workflow passed:",
+)
+RELEASE_VALIDATION_URL_RE = re.compile(r"https://github\.com/[^/\s]+/[^/\s]+/actions/runs/\d+")
 
 
 class URLCheckResult(NamedTuple):
@@ -116,6 +125,18 @@ def package_version(tag: str) -> str:
     return match.group(1)
 
 
+def validate_release_body(body: str) -> list[str]:
+    errors: list[str] = []
+    for snippet in REQUIRED_RELEASE_BODY_SNIPPETS:
+        if snippet not in body:
+            errors.append(f"GitHub Release notes must contain: {snippet}")
+
+    if RELEASE_VALIDATION_URL_RE.search(body) is None:
+        errors.append("GitHub Release notes must link to the passing Release Validation workflow run")
+
+    return errors
+
+
 def check_github_release(repository_slug: str, tag: str, workflow: str) -> list[str]:
     errors: list[str] = []
 
@@ -141,7 +162,7 @@ def check_github_release(repository_slug: str, tag: str, workflow: str) -> list[
             "--repo",
             repository_slug,
             "--json",
-            "tagName,isDraft,isPrerelease,name,url,targetCommitish",
+            "tagName,isDraft,isPrerelease,name,url,targetCommitish,body",
         ]
     )
     if release.returncode != 0:
@@ -152,6 +173,7 @@ def check_github_release(repository_slug: str, tag: str, workflow: str) -> list[
             errors.append(f"GitHub Release tagName must be {tag}, got {release_payload.get('tagName')}")
         if release_payload.get("isDraft"):
             errors.append(f"GitHub Release {tag} must not be a draft")
+        errors.extend(validate_release_body(release_payload.get("body") or ""))
 
     tag_lookup = run_network(["git", "ls-remote", "--exit-code", "--tags", f"https://github.com/{repository_slug}.git", tag])
     if tag_lookup.returncode != 0:
@@ -365,6 +387,7 @@ def self_test() -> list[str]:
         pass
 
     errors.extend(self_test_transient_process_detection())
+    errors.extend(self_test_release_body_validation())
     errors.extend(self_test_swiftpm_v_tag_resolution())
     return errors
 
@@ -400,6 +423,44 @@ def self_test_transient_process_detection() -> list[str]:
     forbidden = urllib.error.HTTPError("https://example.com", 403, "Forbidden", {}, None)
     if is_access_challenge(forbidden):
         errors.append("is_access_challenge should not treat every HTTP 403 as an access challenge")
+
+    return errors
+
+
+def self_test_release_body_validation() -> list[str]:
+    errors: list[str] = []
+    valid_body = textwrap.dedent(
+        """\
+        ## ConsoleDock v0.1.0
+
+        ### Highlights
+
+        - In-app UIKit debug console for iOS test/debug use.
+
+        ### Boundaries
+
+        - Not a full replacement for Xcode Console.
+        - Does not promise complete Swift Logger, os_log, or Apple unified logging capture.
+        - No default persistence, upload, network inspector, CocoaPods, or XCFramework distribution.
+
+        ### Validation
+
+        - Release Validation workflow passed: https://github.com/xuhuanstudio/ConsoleDock/actions/runs/27929173406
+        """
+    )
+    if validate_release_body(valid_body):
+        errors.append("validate_release_body should accept the documented release-notes shape")
+
+    missing_boundaries = valid_body.replace("### Boundaries\n", "")
+    if not validate_release_body(missing_boundaries):
+        errors.append("validate_release_body should reject release notes without the Boundaries section")
+
+    missing_validation_url = valid_body.replace(
+        "https://github.com/xuhuanstudio/ConsoleDock/actions/runs/27929173406",
+        "Release Validation workflow",
+    )
+    if not validate_release_body(missing_validation_url):
+        errors.append("validate_release_body should reject release notes without a workflow run URL")
 
     return errors
 

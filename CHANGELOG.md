@@ -19,6 +19,7 @@ The project follows Semantic Versioning for public releases.
 - Added explicit post-release verifier handling for Swift Package Index access challenges that require manual browser confirmation.
 - Added search-control rendering and level-filtering assertions to the Swift and Objective-C sample UI smoke tests.
 - Added selected-row tap assertions to the Swift and Objective-C sample UI smoke tests.
+- Added GitHub Release notes boundary and validation-link checks to the post-release verifier.
 - Added `.editorconfig` and `.gitattributes` to standardize editor behavior and line endings for global contributors.
 - Added `.gitignore` governance validation and expanded generated-artifact ignores for Xcode, SwiftPM, DocC, CocoaPods, and future binary distribution outputs.
 - Added the v0.2 integration diagnostics design specification for runtime state, UIKit status, snapshot export, tests, and documentation.
