@@ -110,6 +110,7 @@ def main() -> int:
         action="store_true",
         help="Allow the release tag to exist locally when rechecking after tag creation.",
     )
+    parser.add_argument("--dry-run", action="store_true", help="Validate inputs and print the planned checks only.")
     parser.add_argument(
         "root",
         nargs="?",
@@ -118,6 +119,14 @@ def main() -> int:
         help="Repository root. Defaults to the parent of the scripts directory.",
     )
     args = parser.parse_args()
+
+    if args.dry_run:
+        print(f"Tag: {args.tag}")
+        print(f"Remote: {args.remote}")
+        print(f"Branch: {args.branch}")
+        print(f"Remote checks: {'no' if args.local_only else 'yes'}")
+        print("Public release preflight dry run passed.")
+        return 0
 
     errors = validate(
         args.root.resolve(),

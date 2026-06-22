@@ -33,7 +33,7 @@ Run these from the package root:
 scripts/validate-release.sh
 ```
 
-The script validates the working tree is clean, then validates the SwiftPM manifest, package identity, Swift Package Index metadata, Objective-C API surface, Swift formatting, package build, package tests, Release safety gates, documentation links, governance metadata, release content audit, DocC conversion, iOS package build, Swift and Objective-C sample app builds, source archive creation, source archive contents, and source archive build/test from a temporary extraction.
+The script validates the working tree is clean, then validates the SwiftPM manifest, package identity, Swift Package Index metadata, Objective-C API surface, Swift formatting, package build, package tests, Release safety gates, documentation links, governance metadata, release helper script dry-runs, release content audit, DocC conversion, iOS package build, Swift and Objective-C sample app builds, source archive creation, source archive contents, and source archive build/test from a temporary extraction.
 
 ## Manual Sample Smoke Check
 
