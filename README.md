@@ -108,14 +108,7 @@ The package includes macOS as a development/test platform so `swift build` and `
 Local validation:
 
 ```sh
-swift package dump-package
-swift build
-swift test
-swift test -c release --filter ConsoleDockCoreTests/testReleaseBuild
-swift test -c release -Xcc -DCONSOLEDOCK_ENABLE_RELEASE -Xswiftc -DCONSOLEDOCK_ENABLE_RELEASE --filter ConsoleDockCoreTests/testReleaseBuild
-python3 scripts/validate-doc-links.py
-scripts/validate-docc.sh
-xcodebuild -scheme ConsoleDock-Package -destination 'generic/platform=iOS Simulator' build
+scripts/validate-release.sh
 ```
 
 Local DocC validation:
@@ -124,7 +117,7 @@ Local DocC validation:
 scripts/validate-docc.sh
 ```
 
-GitHub Actions currently validates the SwiftPM manifest, SwiftPM build/test, Release safety gates, documentation links, DocC documentation, the package iOS Simulator build, and both sample app builds. The release validation workflow repeats those checks for `v*` tags and verifies source archive creation before a GitHub Release is published.
+GitHub Actions runs the shared release validation script for pull requests, pushes to `main`, and `v*` tag validation. The script validates the SwiftPM manifest, SwiftPM build/test, Release safety gates, documentation links, DocC documentation, the package iOS Simulator build, both sample app builds, and source archive creation before a GitHub Release is published.
 
 ## Examples And Walkthrough
 

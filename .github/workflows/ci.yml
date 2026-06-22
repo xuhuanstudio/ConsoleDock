@@ -11,33 +11,5 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Show Swift version
-        run: swift --version
-      - name: Validate package manifest
-        run: swift package dump-package
-      - name: Build
-        run: swift build
-      - name: Test
-        run: swift test
-      - name: Test Release safety defaults
-        run: swift test -c release --filter ConsoleDockCoreTests/testReleaseBuild
-      - name: Test Release explicit opt-in gate
-        run: swift test -c release -Xcc -DCONSOLEDOCK_ENABLE_RELEASE -Xswiftc -DCONSOLEDOCK_ENABLE_RELEASE --filter ConsoleDockCoreTests/testReleaseBuild
-      - name: Validate documentation links
-        run: python3 scripts/validate-doc-links.py
-      - name: Build DocC documentation
-        run: scripts/validate-docc.sh
-      - name: Build package for iOS Simulator
-        run: xcodebuild -scheme ConsoleDock-Package -destination 'generic/platform=iOS Simulator' build
-      - name: Build Swift sample app
-        run: |
-          xcodebuild -project Examples/SwiftSampleApp/SwiftSampleApp.xcodeproj \
-            -scheme SwiftSampleApp \
-            -destination 'generic/platform=iOS Simulator' \
-            build
-      - name: Build Objective-C sample app
-        run: |
-          xcodebuild -project Examples/ObjCSampleApp/ObjCSampleApp.xcodeproj \
-            -scheme ObjCSampleApp \
-            -destination 'generic/platform=iOS Simulator' \
-            build
+      - name: Run release validation
+        run: scripts/validate-release.sh

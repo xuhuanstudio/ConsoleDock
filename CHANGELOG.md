@@ -9,6 +9,7 @@ The project follows Semantic Versioning after public releases begin.
 ### Added
 
 - Added a standalone privacy and redaction guide covering the core redaction order, default patterns, app-specific redactors, copy/share behavior, and Release-build privacy checklist.
+- Added a reusable release validation script shared by local release checks, CI, and tag validation.
 
 ## v0.1.0 - 2026-06-22
 

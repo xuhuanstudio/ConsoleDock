@@ -23,19 +23,10 @@ ConsoleDock releases are source-first Swift Package Manager releases. A public r
 Run these from the package root:
 
 ```sh
-swift package dump-package
-swift build
-swift test
-swift test -c release --filter ConsoleDockCoreTests/testReleaseBuild
-swift test -c release -Xcc -DCONSOLEDOCK_ENABLE_RELEASE -Xswiftc -DCONSOLEDOCK_ENABLE_RELEASE --filter ConsoleDockCoreTests/testReleaseBuild
-python3 scripts/validate-doc-links.py
-scripts/validate-docc.sh
-xcodebuild -scheme ConsoleDock-Package -destination 'generic/platform=iOS Simulator' build
-xcodebuild -project Examples/SwiftSampleApp/SwiftSampleApp.xcodeproj -scheme SwiftSampleApp -destination 'generic/platform=iOS Simulator' build
-xcodebuild -project Examples/ObjCSampleApp/ObjCSampleApp.xcodeproj -scheme ObjCSampleApp -destination 'generic/platform=iOS Simulator' build
-swift package archive-source --output .build/ConsoleDock-source.zip
-test -s .build/ConsoleDock-source.zip
+scripts/validate-release.sh
 ```
+
+The script validates the SwiftPM manifest, package build, package tests, Release safety gates, documentation links, DocC conversion, iOS package build, Swift and Objective-C sample app builds, and source archive creation.
 
 ## Manual Sample Smoke Check
 
@@ -62,13 +53,7 @@ The `Release Validation` GitHub Actions workflow runs on `v*` tags. It verifies:
 
 - semantic version tag shape;
 - matching `CHANGELOG.md` release heading;
-- SwiftPM manifest, build, and tests;
-- Release safety gates;
-- documentation link validation;
-- DocC conversion with warnings treated as errors;
-- iOS package build;
-- Swift and Objective-C sample app builds;
-- source archive creation.
+- the same release validation script used locally and by CI.
 
 Do not publish a GitHub Release until the tag workflow passes.
 

@@ -20,15 +20,7 @@ Use a recent Xcode toolchain with Swift Package Manager support.
 Recommended checks before opening a pull request:
 
 ```sh
-swift package dump-package
-swift build
-swift test
-swift test -c release --filter ConsoleDockCoreTests/testReleaseBuild
-swift test -c release -Xcc -DCONSOLEDOCK_ENABLE_RELEASE -Xswiftc -DCONSOLEDOCK_ENABLE_RELEASE --filter ConsoleDockCoreTests/testReleaseBuild
-scripts/validate-docc.sh
-xcodebuild -scheme ConsoleDock-Package -destination 'generic/platform=iOS Simulator' build
-xcodebuild -project Examples/SwiftSampleApp/SwiftSampleApp.xcodeproj -scheme SwiftSampleApp -destination 'generic/platform=iOS Simulator' build
-xcodebuild -project Examples/ObjCSampleApp/ObjCSampleApp.xcodeproj -scheme ObjCSampleApp -destination 'generic/platform=iOS Simulator' build
+scripts/validate-release.sh
 ```
 
 ## Contribution Rules
