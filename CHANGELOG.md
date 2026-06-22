@@ -29,6 +29,7 @@ The project follows Semantic Versioning for public releases.
 
 ### Changed
 
+- Enabled the focused Swift sample UI smoke test in GitHub CI and release-validation workflows.
 - Broadened default redaction for common mobile token names including ID, auth, session, CSRF, and `x-api-key` forms.
 - Redacted stdout/stderr partial-line continuations from the same source after a sensitive oversized fragment is detected.
 - Updated README status and installation guidance now that `v0.1.0` is publicly released.

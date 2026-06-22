@@ -22,4 +22,6 @@ jobs:
         with:
           persist-credentials: false
       - name: Run release validation
+        env:
+          CONSOLEDOCK_RUN_UI_SMOKE: "1"
         run: scripts/validate-release.sh

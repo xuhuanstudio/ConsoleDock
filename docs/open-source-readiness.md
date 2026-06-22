@@ -130,12 +130,12 @@ Initial checks:
 - Swift API surface validation;
 - Objective-C sample app build;
 - Swift sample app build;
-- Swift format lint.
-- distribution documentation claim validation.
+- Swift format lint;
+- distribution documentation claim validation;
+- focused Swift sample UI smoke test on iOS Simulator in GitHub workflows.
 
 Future checks:
 
-- UI test smoke run on iOS simulator. An opt-in Swift sample smoke script exists and can be enabled in release validation with `CONSOLEDOCK_RUN_UI_SMOKE=1`;
 - XCFramework packaging validation;
 - CocoaPods lint.
 
