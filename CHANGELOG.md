@@ -6,29 +6,34 @@ The project follows Semantic Versioning after public releases begin.
 
 ## Unreleased
 
-- Added Swift Package skeleton.
-- Added `ConsoleDockCore` Objective-C-compatible stub API.
-- Added `ConsoleDock` Swift facade stub API.
-- Added minimal unit tests for lifecycle and configuration behavior.
-- Added open-source governance files.
-- Refined Swift start failure handling to preserve core error details.
-- Added core log entry model, bounded in-memory Native API storage, basic redaction, message truncation, and read/clear APIs.
-- Added isolated core line framing for byte chunks, partial flushes, CRLF normalization, invalid UTF-8 replacement, and stdout/stderr line event storage normalization.
-- Added core stdout/stderr file-descriptor capture lifecycle with pass-through, restore, line framing, partial flush on stop, and capture configuration support.
-- Added entries-changed notification for append and clear operations as a snapshot refresh foundation.
-- Added UIKit console foundation with floating button, live snapshot panel, clear, close, and lifecycle teardown.
-- Added a Swift UIKit sample app that imports the local package and validates Native API, stdout, stderr, `NSLog`, redaction, clear, stop, and restart behavior on Simulator.
-- Added `CDKConsoleDockUIKit` for Objective-C access to the bundled UIKit console and an Objective-C UIKit sample app that validates Native API, stdout, stderr, direct descriptor writes, `NSLog`, redaction, clear, stop, and restart behavior on Simulator.
-- Expanded CI to build the package for iOS Simulator and build both Swift and Objective-C sample apps.
-- Added Release safety gates so Release startup requires both `CONSOLEDOCK_ENABLE_RELEASE` and `allowsReleaseBuilds`, plus focused CI coverage and documentation.
-- Updated contribution and GitHub templates to match the current capture, UIKit, privacy, and Release safety scope.
-- Added README quick start content, a real Simulator screenshot, and a shared Swift/Objective-C sample app walkthrough.
-- Added a UIKit share action for user-initiated plain-text export of the current redacted in-memory log snapshot.
-- Added UIKit console text search and source filtering for the visible in-memory log list.
-- Added UIKit pause/resume live follow so the panel can freeze visible logs while capture continues.
-- Added UIKit selected-entry copy for visible redacted log rows.
-- Added UIKit log level filtering for visible entries, share/export snapshots, and selected-entry copy.
-- Added public `fault` logging convenience APIs and expanded public API documentation comments.
-- Added an initial DocC catalog for public Swift API usage, logging boundaries, privacy, Release safety, and Objective-C integration, with CI validation.
-- Added a release process guide, reusable DocC validation script, and tag-triggered release validation workflow.
-- Added an existing logger migration guide for low-intrusion Swift, Objective-C, and third-party logger integration patterns.
+No changes yet.
+
+## v0.1.0 - 2026-06-22
+
+Initial public preview of ConsoleDock as a source-first Swift Package Manager iOS debug SDK.
+
+### Added
+
+- Added the `ConsoleDockCore` Objective-C-compatible core target with `CDK`-prefixed APIs.
+- Added the `ConsoleDock` Swift facade target with startup, shutdown, native logging, entry snapshot, clear, and UIKit console controls.
+- Added bounded in-memory log storage with message truncation, read/clear APIs, and entries-changed notifications.
+- Added default redaction before storage for obvious token, password, API key, secret, key, and bearer authorization patterns.
+- Added app-specific redaction configuration hooks in both Swift and Objective-C-compatible APIs.
+- Added byte-to-line framing for stdout/stderr chunks, including CRLF normalization, partial flushes, independent source buffers, bounded partial lines, and invalid UTF-8 replacement.
+- Added stdout/stderr file-descriptor capture with pass-through to the original descriptors, safe restore on stop, partial flush on stop, direct descriptor write coverage, and capture enable/disable configuration.
+- Added native logging levels for debug, info, warning, error, and fault.
+- Added Release safety gates so Release startup is disabled by default and requires both `CONSOLEDOCK_ENABLE_RELEASE` and `allowsReleaseBuilds`.
+- Added the bundled UIKit floating button and in-app console panel with live refresh, search, source filtering, level filtering, pause/resume live follow, selected-entry copy, clear, share/export, close, and lifecycle teardown.
+- Added Objective-C access to the bundled UIKit console through `CDKConsoleDockUIKit`.
+- Added Swift and Objective-C UIKit sample apps that exercise package integration, native logs, stdout, stderr, `NSLog`, redaction, clear, stop, and restart behavior.
+- Added README quick start content, a real Simulator screenshot, sample app walkthrough, Release safety documentation, existing logger migration guide, and DocC documentation for public Swift usage.
+- Added open-source governance files, issue templates, pull request template, security policy, and contribution guidance.
+- Added CI coverage for SwiftPM manifest validation, build, tests, Release safety gates, documentation link validation, DocC conversion, iOS package build, and Swift/Objective-C sample app builds.
+- Added release process documentation, reusable DocC and documentation-link validation scripts, tag-triggered release validation, and source archive validation.
+
+### Boundaries
+
+- ConsoleDock is not a full replacement for Xcode Console or Apple unified logging.
+- ConsoleDock does not promise complete zero-intrusion capture of Swift `Logger`, `os_log`, Apple unified logging entries, other-process logs, debugger output, LLDB expressions, or sanitizer diagnostics.
+- Reliable in-app visibility should use ConsoleDock's explicit API or a sink/appender in an existing logger.
+- This release does not include CocoaPods, XCFramework distribution, network inspection, crash reporting, default persistence, remote upload, or packaged third-party logger adapters.
