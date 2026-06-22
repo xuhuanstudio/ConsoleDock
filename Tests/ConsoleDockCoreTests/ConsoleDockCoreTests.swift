@@ -359,6 +359,33 @@ final class ConsoleDockCoreTests: XCTestCase {
         XCTAssertFalse(message.contains("jsonClient123"))
     }
 
+    func testDefaultRedactionCoversCommonMobileTokenNames() throws {
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+
+        CDKConsoleDock.info(
+            """
+            {"idToken":"idToken123","authToken":"authToken123","sessionToken":"sessionToken123","csrfToken":"csrfToken123","x-api-key":"xApiJson123"}
+            id_token=idToken456 auth-token=authToken456 sessionToken=sessionToken456 csrfToken=csrfToken456 x-api-key=xApiHeader456
+            """
+        )
+
+        let entry = try XCTUnwrap(CDKConsoleDock.entries().first)
+        let message = entry.message
+        XCTAssertTrue(entry.redacted)
+        XCTAssertTrue(message.contains(#""idToken":"<redacted>""#))
+        XCTAssertTrue(message.contains(#""x-api-key":"<redacted>""#))
+        XCTAssertFalse(message.contains("idToken123"))
+        XCTAssertFalse(message.contains("authToken123"))
+        XCTAssertFalse(message.contains("sessionToken123"))
+        XCTAssertFalse(message.contains("csrfToken123"))
+        XCTAssertFalse(message.contains("xApiJson123"))
+        XCTAssertFalse(message.contains("idToken456"))
+        XCTAssertFalse(message.contains("authToken456"))
+        XCTAssertFalse(message.contains("sessionToken456"))
+        XCTAssertFalse(message.contains("csrfToken456"))
+        XCTAssertFalse(message.contains("xApiHeader456"))
+    }
+
     func testRedactedPartialLineRedactsContinuationFragmentsUntilLineEnds() throws {
         XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
 

@@ -10,7 +10,7 @@ Copy and share actions are user-initiated from the UIKit console. They use alrea
 
 ## Redaction Runs Before Storage
 
-ConsoleDock redacts obvious authorization header values, cookie headers, token, password, passwd, access token, refresh token, API key, client secret, key, and secret patterns before storing entries.
+ConsoleDock redacts obvious authorization header values, cookie headers, token, ID token, auth token, session token, CSRF token, access token, refresh token, API key, client secret, key, password, passwd, and secret patterns before storing entries.
 
 For oversized stdout or stderr lines split into partial fragments, a redacted partial causes later fragments from the same source to be stored as `<redacted partial continuation>` until that line ends. This protects long secret-bearing lines that are split before the full line is available.
 

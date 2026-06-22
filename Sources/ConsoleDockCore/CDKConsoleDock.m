@@ -39,10 +39,10 @@ static NSString *CDKDefaultRedactedMessage(NSString *message)
                                            @"\\b(Set-Cookie|Cookie)\\s*:\\s*[^\\r\\n]+",
                                            @"$1: <redacted>");
     redacted = CDKStringByReplacingMatches(redacted,
-                                           @"(\"?(?:password|passwd|token|access[_-]?token|refresh[_-]?token|api[_-]?key|client[_-]?secret|key|secret)\"?\\s*[:=]\\s*\")([^\"]+)(\")",
+                                           @"(\"?(?:password|passwd|token|id[_-]?token|auth[_-]?token|session[_-]?token|csrf[_-]?token|access[_-]?token|refresh[_-]?token|x[_-]?api[_-]?key|api[_-]?key|client[_-]?secret|key|secret)\"?\\s*[:=]\\s*\")([^\"]+)(\")",
                                            @"$1<redacted>$3");
     redacted = CDKStringByReplacingMatches(redacted,
-                                           @"\\b(password|passwd|token|access[_-]?token|refresh[_-]?token|api[_-]?key|client[_-]?secret|key|secret)\\b\\s*[:=]\\s*[^\\s,;&]+",
+                                           @"\\b(password|passwd|token|id[_-]?token|auth[_-]?token|session[_-]?token|csrf[_-]?token|access[_-]?token|refresh[_-]?token|x[_-]?api[_-]?key|api[_-]?key|client[_-]?secret|key|secret)\\b\\s*[:=]\\s*[^\\s,;&]+",
                                            @"$1=<redacted>");
     return redacted;
 }

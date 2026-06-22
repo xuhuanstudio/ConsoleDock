@@ -34,10 +34,14 @@ The default redactor is a local safety baseline for obvious secrets. It is case-
 - `password`
 - `passwd`
 - `token`
-- `access_token` and `access-token`
-- `refresh_token` and `refresh-token`
-- `api_key` and `api-key`
-- `client_secret` and `client-secret`
+- `id_token`, `id-token`, and `idToken`
+- `auth_token`, `auth-token`, and `authToken`
+- `session_token`, `session-token`, and `sessionToken`
+- `csrf_token`, `csrf-token`, and `csrfToken`
+- `access_token`, `access-token`, and `accessToken`
+- `refresh_token`, `refresh-token`, and `refreshToken`
+- `api_key`, `api-key`, `apiKey`, and `x-api-key`
+- `client_secret`, `client-secret`, and `clientSecret`
 - `key`
 - `secret`
 
