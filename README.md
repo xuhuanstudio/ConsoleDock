@@ -121,7 +121,7 @@ Local DocC validation:
 scripts/validate-docc.sh
 ```
 
-GitHub Actions runs the shared release validation script for pull requests, pushes to `main`, and `v*` tag validation. The script validates the working tree is clean, then validates the SwiftPM manifest, Swift formatting, SwiftPM build/test, Release safety gates, documentation links, release content audit, DocC documentation, the package iOS Simulator build, both sample app builds, source archive creation, and source archive contents before a GitHub Release is published.
+GitHub Actions runs the shared release validation script for pull requests, pushes to `main`, and `v*` tag validation. The script validates the working tree is clean, then validates the SwiftPM manifest, Swift Package Index metadata, Swift formatting, SwiftPM build/test, Release safety gates, documentation links, release content audit, DocC documentation, the package iOS Simulator build, both sample app builds, source archive creation, and source archive contents before a GitHub Release is published.
 
 ## Examples And Walkthrough
 

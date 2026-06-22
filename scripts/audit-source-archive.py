@@ -29,6 +29,10 @@ ALLOWED_BINARY_PATHS = {
     pathlib.PurePosixPath("docs/assets/swift-sample-console.png"),
 }
 
+REQUIRED_ARCHIVE_PATHS = {
+    pathlib.PurePosixPath(".spi.yml"),
+}
+
 SENSITIVE_PATTERNS = [
     (
         "private key block",
@@ -85,6 +89,15 @@ def audit_archive(archive_path: pathlib.Path) -> list[str]:
         roots = {pathlib.PurePosixPath(name).parts[0] for name in names if pathlib.PurePosixPath(name).parts}
         if len(roots) != 1:
             errors.append(f"{archive_path}: archive should contain exactly one top-level directory")
+
+        normalized_paths = {
+            strip_archive_root(pathlib.PurePosixPath(name))
+            for name in names
+            if not name.endswith("/")
+        }
+        for required_path in REQUIRED_ARCHIVE_PATHS:
+            if required_path not in normalized_paths:
+                errors.append(f"{archive_path}: archive is missing required file {required_path}")
 
         for info in archive.infolist():
             name = info.filename

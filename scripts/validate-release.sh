@@ -22,6 +22,9 @@ fi
 section "Validate package manifest"
 swift package dump-package
 
+section "Validate Swift Package Index metadata"
+python3 scripts/validate-spi-manifest.py
+
 section "Validate Swift formatting"
 scripts/validate-swift-format.sh
 
