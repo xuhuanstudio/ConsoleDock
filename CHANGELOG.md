@@ -32,6 +32,7 @@ The project follows Semantic Versioning for public releases.
 - Updated GitHub Actions checkout usage to the Node 24-compatible `actions/checkout@v6` runtime.
 - Aligned contribution and security policy status wording with the public `v0.x` preview stage.
 - Made release validation helper dry-runs use the active release tag instead of hard-coding `v0.1.0`.
+- Tightened Swift API surface validation for public initializer signatures and duplicated public message fields.
 
 ## v0.1.0 - 2026-06-22
 

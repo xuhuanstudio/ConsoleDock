@@ -29,6 +29,24 @@ REQUIRED_SNIPPETS = {
         "public var showsFloatingButton: Bool",
         "public var allowsReleaseBuilds: Bool",
         "public var redactor: ((String) -> String)?",
+        "maximumEntries: Int = 2_000",
+        "maximumMessageLength: Int = 8_192",
+        "captureStandardOutput: Bool = true",
+        "captureStandardError: Bool = true",
+        "showsFloatingButton: Bool = true",
+        "allowsReleaseBuilds: Bool = false",
+        "redactor: ((String) -> String)? = nil",
+        """
+        public init(
+            maximumEntries: Int = 2_000,
+            maximumMessageLength: Int = 8_192,
+            captureStandardOutput: Bool = true,
+            captureStandardError: Bool = true,
+            showsFloatingButton: Bool = true,
+            allowsReleaseBuilds: Bool = false,
+            redactor: ((String) -> String)? = nil
+        )
+        """,
         "public static let `default` = Configuration()",
         "public enum LogLevel: Equatable",
         "case debug",
@@ -49,6 +67,26 @@ REQUIRED_SNIPPETS = {
         "public let partial: Bool",
         "public let redacted: Bool",
         "public let truncated: Bool",
+        "id: UInt64 = 0",
+        "timestamp: Date",
+        "level: LogLevel",
+        "source: LogSource",
+        "message: String",
+        "partial: Bool = false",
+        "redacted: Bool = false",
+        "truncated: Bool = false",
+        """
+        public init(
+            id: UInt64 = 0,
+            timestamp: Date,
+            level: LogLevel,
+            source: LogSource,
+            message: String,
+            partial: Bool = false,
+            redacted: Bool = false,
+            truncated: Bool = false
+        )
+        """,
         "public struct Diagnostics: Equatable",
         "public let isRunning: Bool",
         "public let capturesStandardOutput: Bool",
@@ -61,6 +99,21 @@ REQUIRED_SNIPPETS = {
         "public let redactedEntryCount: Int",
         "public let truncatedEntryCount: Int",
         "public let partialEntryCount: Int",
+        """
+        public init(
+            isRunning: Bool,
+            capturesStandardOutput: Bool,
+            capturesStandardError: Bool,
+            showsFloatingButton: Bool,
+            allowsReleaseBuilds: Bool,
+            maximumEntries: Int,
+            maximumMessageLength: Int,
+            entryCount: Int,
+            redactedEntryCount: Int,
+            truncatedEntryCount: Int,
+            partialEntryCount: Int
+        )
+        """,
         "public enum StartResult: Equatable",
         "case started",
         "case alreadyRunning",
@@ -69,6 +122,8 @@ REQUIRED_SNIPPETS = {
         "public struct StartFailure: Equatable",
         "public let domain: String",
         "public let code: Int",
+        "public let message: String",
+        "public init(domain: String, code: Int, message: String)",
         "public static func start(configuration: Configuration = .default) -> StartResult",
         "public static func stop()",
         "public static var isRunning: Bool",
@@ -102,6 +157,13 @@ REQUIRED_SNIPPETS = {
     ],
 }
 
+REQUIRED_SNIPPET_COUNTS = {
+    SWIFT_FACADE: {
+        "public init(": 4,
+        "public let message: String": 2,
+    },
+}
+
 DENIED_PUBLIC_SNIPPETS = {
     SWIFT_FACADE: [
         "public class",
@@ -133,6 +195,14 @@ def validate_required_snippets(root: pathlib.Path) -> list[str]:
         for snippet in snippets:
             if normalized(snippet) not in compact_text:
                 errors.append(f"{relative_path}: missing required Swift API snippet: {snippet}")
+
+        for snippet, expected_count in REQUIRED_SNIPPET_COUNTS.get(relative_path, {}).items():
+            actual_count = compact_text.count(normalized(snippet))
+            if actual_count != expected_count:
+                errors.append(
+                    f"{relative_path}: expected {expected_count} occurrences of Swift API snippet "
+                    f"{snippet!r}, found {actual_count}"
+                )
 
         for snippet in DENIED_PUBLIC_SNIPPETS.get(relative_path, []):
             if snippet in text:
