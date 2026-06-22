@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Validate distribution-channel documentation stays honest."""
+"""Validate distribution-channel documentation and shipped artifacts stay honest."""
 
 from __future__ import annotations
 
 import argparse
 import pathlib
 import re
+import subprocess
 import sys
 
 
@@ -17,10 +18,12 @@ REQUIRED_SNIPPETS = {
         "No XCFramework artifact is shipped yet.",
         "Release startup remains gated by both `CONSOLEDOCK_ENABLE_RELEASE` and `allowsReleaseBuilds`",
         "no default network upload, no default disk persistence, and no private API",
+        "Distribution validation also rejects tracked CocoaPods podspecs",
         "Avoid these claims until they are true and validated",
     ],
     "README.md": [
         "For distribution channel boundaries, see [Distribution strategy](docs/distribution-strategy.md).",
+        "distribution documentation and artifacts",
         "CocoaPods for older Objective-C or mixed projects",
         "XCFramework for manual or closed-source distribution",
     ],
@@ -57,6 +60,50 @@ FORBIDDEN_PATTERNS = {
     ],
 }
 
+DENIED_TRACKED_ARTIFACT_PATTERNS = [
+    (
+        "CocoaPods podspec",
+        re.compile(r"(^|/)[^/]+\.podspec(?:\.json)?$", re.IGNORECASE),
+    ),
+    (
+        "CocoaPods install output",
+        re.compile(r"(^|/)Pods(/|$)"),
+    ),
+    (
+        "SwiftPM lock file",
+        re.compile(r"(^|/)Package\.resolved$"),
+    ),
+    (
+        "XCFramework artifact",
+        re.compile(r"(^|/)[^/]+\.xcframework(/|$)", re.IGNORECASE),
+    ),
+    (
+        "Apple framework artifact",
+        re.compile(r"(^|/)[^/]+\.framework(/|$)", re.IGNORECASE),
+    ),
+    (
+        "Xcode archive artifact",
+        re.compile(r"(^|/)[^/]+\.xcarchive(/|$)", re.IGNORECASE),
+    ),
+    (
+        "debug symbol artifact",
+        re.compile(r"(^|/)[^/]+\.dSYM(/|$)", re.IGNORECASE),
+    ),
+    (
+        "static library artifact",
+        re.compile(r"(^|/)[^/]+\.a$", re.IGNORECASE),
+    ),
+    (
+        "packaged binary/archive artifact",
+        re.compile(r"(^|/)[^/]+\.(?:zip|tar|tgz|gz|dmg|pkg)$", re.IGNORECASE),
+    ),
+]
+
+
+def tracked_files(root: pathlib.Path) -> list[str]:
+    output = subprocess.check_output(["git", "ls-files", "-z"], cwd=root)
+    return sorted(path.decode("utf-8") for path in output.split(b"\0") if path)
+
 
 def validate(root: pathlib.Path) -> list[str]:
     errors: list[str] = []
@@ -75,6 +122,13 @@ def validate(root: pathlib.Path) -> list[str]:
             if pattern.search(text):
                 errors.append(f"{relative_path}: contains premature distribution claim matching {pattern.pattern}")
 
+    for relative_path in tracked_files(root):
+        for label, pattern in DENIED_TRACKED_ARTIFACT_PATTERNS:
+            if pattern.search(relative_path):
+                errors.append(
+                    f"{relative_path}: tracked {label} conflicts with current SPM-only distribution policy"
+                )
+
     return errors
 
 
@@ -92,12 +146,12 @@ def main() -> int:
     root = args.root.resolve()
     errors = validate(root)
     if errors:
-        print("Distribution documentation validation failed:", file=sys.stderr)
+        print("Distribution validation failed:", file=sys.stderr)
         for error in errors:
             print(f"- {error}", file=sys.stderr)
         return 1
 
-    print("Distribution documentation validation passed.")
+    print("Distribution validation passed.")
     return 0
 
 

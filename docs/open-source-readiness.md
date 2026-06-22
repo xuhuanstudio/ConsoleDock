@@ -121,6 +121,7 @@ Initial checks:
 - documentation link validation;
 - logging boundary claim validation;
 - release content audit for generated paths, key material, common token shapes, and local absolute paths;
+- distribution artifact validation so future CocoaPods, XCFramework, framework, Xcode archive, debug symbol, static library, and packaged archive files cannot appear before their channel is intentionally implemented;
 - source archive content audit;
 - source archive package build/test validation;
 - Swift Package Index metadata validation;

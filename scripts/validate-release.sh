@@ -66,7 +66,7 @@ python3 scripts/validate-logging-boundaries.py
 section "Validate governance metadata"
 python3 scripts/validate-governance-metadata.py
 
-section "Validate distribution documentation"
+section "Validate distribution documentation and artifacts"
 python3 scripts/validate-distribution-docs.py
 
 section "Validate release helper scripts"

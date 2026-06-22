@@ -10,6 +10,7 @@ The project follows Semantic Versioning for public releases.
 
 - Added Dependabot configuration for weekly GitHub Actions update checks.
 - Added a distribution strategy document and validation gate for SPM, future CocoaPods compatibility, and future XCFramework distribution claims.
+- Added distribution artifact validation to prevent premature CocoaPods, XCFramework, framework, Xcode archive, debug symbol, static library, or packaged archive distribution files.
 - Added a logging boundary validation gate to keep Swift Logger, os_log, Apple unified logging, Xcode Console, and other-process log claims honest.
 - Added a Swift API surface validation gate to protect app-facing facade and UIKit bridge integration points.
 - Added bounded retry handling to post-release verification for transient GitHub, SwiftPM, and Swift Package Index network failures.

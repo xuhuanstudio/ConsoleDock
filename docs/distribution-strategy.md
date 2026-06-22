@@ -21,6 +21,8 @@ Release tags must keep the existing package products stable:
 
 SPM release validation must prove package resolution, package build/test, DocC metadata, iOS Simulator package build, Swift sample app build, Objective-C sample app build, release safety gates, source archive creation, source archive audit, and source archive build/test from a temporary extraction.
 
+Distribution validation also rejects tracked CocoaPods podspecs, Pods output, SwiftPM lock files, XCFrameworks, frameworks, Xcode archives, debug symbol bundles, static libraries, and packaged archives until those channels are intentionally implemented and validated.
+
 ## Future Channel: CocoaPods
 
 No CocoaPods podspec is shipped yet.
