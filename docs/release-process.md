@@ -53,6 +53,7 @@ The `Release Validation` GitHub Actions workflow runs on `v*` tags. It verifies:
 
 - semantic version tag shape;
 - matching `CHANGELOG.md` release heading;
+- cleared `Unreleased` changelog section;
 - the same release validation script used locally and by CI.
 
 Do not publish a GitHub Release until the tag workflow passes.
