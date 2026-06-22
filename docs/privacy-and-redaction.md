@@ -20,6 +20,8 @@ Every entry goes through the same core preparation path before storage:
 
 Stored entries include `partial`, `redacted`, and `truncated` flags. The `redacted` and `truncated` flags mean ConsoleDock changed or shortened the message during preparation; they are processing metadata, not proof that the remaining text is safe to expose.
 
+When stdout or stderr capture has to split an oversized line into partial fragments, ConsoleDock keeps redaction state per source. If one partial fragment is redacted, following fragments from the same source are stored as `<redacted partial continuation>` until that line ends. This favors privacy over preserving every byte of an oversized secret-bearing line.
+
 The UIKit console reads from that in-memory buffer. Selected-entry copy and share/export actions use already-redacted entries from the current visible snapshot. ConsoleDock does not persist logs to disk, upload logs, or collect logs from other apps or system processes by default.
 
 ## Default Redaction Coverage

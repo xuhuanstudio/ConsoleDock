@@ -359,6 +359,52 @@ final class ConsoleDockCoreTests: XCTestCase {
         XCTAssertFalse(message.contains("jsonClient123"))
     }
 
+    func testRedactedPartialLineRedactsContinuationFragmentsUntilLineEnds() throws {
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+
+        CDKConsoleDock.append(CDKLineEvent(source: .stdout, message: "token=first-secret", isPartial: true))
+        CDKConsoleDock.append(CDKLineEvent(source: .stdout, message: "second-secret-fragment", isPartial: true))
+        CDKConsoleDock.append(CDKLineEvent(source: .stdout, message: "final-secret-fragment", isPartial: false))
+        CDKConsoleDock.append(CDKLineEvent(source: .stdout, message: "public next line", isPartial: false))
+
+        let entries = CDKConsoleDock.entries()
+        XCTAssertEqual(
+            entries.map(\.message),
+            [
+                "token=<redacted>",
+                "<redacted partial continuation>",
+                "<redacted partial continuation>",
+                "public next line"
+            ]
+        )
+        XCTAssertEqual(
+            entries.map(\.redacted),
+            [true, true, true, false]
+        )
+    }
+
+    func testRedactedPartialLineContinuationStateIsSourceScoped() throws {
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+
+        CDKConsoleDock.append(CDKLineEvent(source: .stdout, message: "token=stdout-secret", isPartial: true))
+        CDKConsoleDock.append(CDKLineEvent(source: .stderr, message: "stderr public", isPartial: false))
+        CDKConsoleDock.append(CDKLineEvent(source: .stdout, message: "stdout-secret-continuation", isPartial: false))
+
+        let entries = CDKConsoleDock.entries()
+        XCTAssertEqual(
+            entries.map(\.message),
+            [
+                "token=<redacted>",
+                "stderr public",
+                "<redacted partial continuation>"
+            ]
+        )
+        XCTAssertEqual(
+            entries.map(\.redacted),
+            [true, false, true]
+        )
+    }
+
     func testCustomRedactionRunsBeforeStorage() {
         let configuration = noCaptureConfiguration()
         configuration.redactionBlock = { message in

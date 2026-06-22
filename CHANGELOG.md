@@ -29,6 +29,7 @@ The project follows Semantic Versioning for public releases.
 
 ### Changed
 
+- Redacted stdout/stderr partial-line continuations from the same source after a sensitive oversized fragment is detected.
 - Updated README status and installation guidance now that `v0.1.0` is publicly released.
 - Updated Swift Package Index status guidance after the PackageList entry was merged.
 - Added public README badges for CI, release validation, latest release, and license status.

@@ -11,6 +11,11 @@ static CDKConfiguration *CDKConsoleDockConfiguration = nil;
 static NSMutableArray<CDKLogEntry *> *CDKConsoleDockEntries = nil;
 static CDKStandardOutputCapture *CDKConsoleDockCapture = nil;
 static unsigned long long CDKConsoleDockNextEntryIdentifier = 0;
+static BOOL CDKConsoleDockRedactNativeContinuation = NO;
+static BOOL CDKConsoleDockRedactStdoutContinuation = NO;
+static BOOL CDKConsoleDockRedactStderrContinuation = NO;
+
+static NSString *const CDKRedactedPartialContinuationMessage = @"<redacted partial continuation>";
 
 static NSString *CDKStringByReplacingMatches(NSString *message, NSString *pattern, NSString *replacement)
 {
@@ -73,6 +78,42 @@ static NSString *CDKPreparedMessage(NSString *message,
     }
 
     return prepared;
+}
+
+static BOOL CDKShouldRedactContinuationForSource(CDKLogSource source)
+{
+    switch (source) {
+        case CDKLogSourceStdout:
+            return CDKConsoleDockRedactStdoutContinuation;
+        case CDKLogSourceStderr:
+            return CDKConsoleDockRedactStderrContinuation;
+        case CDKLogSourceNative:
+        default:
+            return CDKConsoleDockRedactNativeContinuation;
+    }
+}
+
+static void CDKSetRedactContinuationForSource(CDKLogSource source, BOOL value)
+{
+    switch (source) {
+        case CDKLogSourceStdout:
+            CDKConsoleDockRedactStdoutContinuation = value;
+            break;
+        case CDKLogSourceStderr:
+            CDKConsoleDockRedactStderrContinuation = value;
+            break;
+        case CDKLogSourceNative:
+        default:
+            CDKConsoleDockRedactNativeContinuation = value;
+            break;
+    }
+}
+
+static void CDKClearRedactContinuationState(void)
+{
+    CDKConsoleDockRedactNativeContinuation = NO;
+    CDKConsoleDockRedactStdoutContinuation = NO;
+    CDKConsoleDockRedactStderrContinuation = NO;
 }
 
 static CDKLogLevel CDKDefaultLevelForSource(CDKLogSource source)
@@ -143,6 +184,7 @@ static void CDKPostDiagnosticsDidChangeNotification(void)
         CDKConsoleDockConfiguration = [effectiveConfiguration copy];
         CDKConsoleDockEntries = [NSMutableArray arrayWithCapacity:MIN(CDKConsoleDockConfiguration.maximumEntries, 64)];
         CDKConsoleDockNextEntryIdentifier = 0;
+        CDKClearRedactContinuationState();
         CDKStandardOutputCapture *capture = [[CDKStandardOutputCapture alloc] initWithConfiguration:CDKConsoleDockConfiguration];
         NSError *captureError = nil;
         if (![capture startWithError:&captureError]) {
@@ -191,6 +233,7 @@ static void CDKPostDiagnosticsDidChangeNotification(void)
     @synchronized(self) {
         CDKConsoleDockRunning = NO;
         CDKConsoleDockStopping = NO;
+        CDKClearRedactContinuationState();
     }
     CDKPostDiagnosticsDidChangeNotification();
 }
@@ -277,7 +320,15 @@ static void CDKPostDiagnosticsDidChangeNotification(void)
 
         BOOL redacted = NO;
         BOOL truncated = NO;
-        NSString *preparedMessage = CDKPreparedMessage(message, CDKConsoleDockConfiguration, &redacted, &truncated);
+        BOOL shouldRedactContinuation = CDKShouldRedactContinuationForSource(source);
+        NSString *messageToPrepare = shouldRedactContinuation ? CDKRedactedPartialContinuationMessage : message;
+        NSString *preparedMessage = CDKPreparedMessage(messageToPrepare, CDKConsoleDockConfiguration, &redacted, &truncated);
+        redacted = redacted || shouldRedactContinuation;
+        if (isPartial) {
+            CDKSetRedactContinuationForSource(source, redacted);
+        } else {
+            CDKSetRedactContinuationForSource(source, NO);
+        }
         CDKConsoleDockNextEntryIdentifier += 1;
         CDKLogEntry *entry = [[CDKLogEntry alloc] initWithIdentifier:CDKConsoleDockNextEntryIdentifier
                                                            timestamp:[NSDate date]
