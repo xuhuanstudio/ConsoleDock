@@ -38,6 +38,7 @@ Initial public preview of ConsoleDock as a source-first Swift Package Manager iO
 - Added Swift formatting configuration and lint validation for source, tests, and the Swift sample app.
 - Added Swift Package Index metadata for hosted DocC documentation.
 - Added Swift Package Index metadata validation to the release gate.
+- Added Objective-C API surface validation to protect the `CDK`-prefixed public core API.
 - Added a GitHub repository setup checklist for public repository identity, topics, Actions, vulnerability reporting, first push, first tag, and post-release SPM verification.
 - Added a Simplified Chinese README overview while keeping English README, DocC, and `docs/` as the authoritative documentation.
 - Added a standalone privacy and redaction guide covering the core redaction order, default patterns, app-specific redactors, copy/share behavior, and Release-build privacy checklist.

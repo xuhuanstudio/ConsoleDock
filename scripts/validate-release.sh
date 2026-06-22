@@ -25,6 +25,9 @@ swift package dump-package
 section "Validate Swift Package Index metadata"
 python3 scripts/validate-spi-manifest.py
 
+section "Validate Objective-C API surface"
+python3 scripts/validate-objc-api-surface.py
+
 section "Validate Swift formatting"
 scripts/validate-swift-format.sh
 

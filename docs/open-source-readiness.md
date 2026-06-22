@@ -110,6 +110,7 @@ Initial checks:
 - release content audit for generated paths, key material, common token shapes, and local absolute paths;
 - source archive content audit;
 - Swift Package Index metadata validation;
+- Objective-C API surface validation;
 - Objective-C sample app build;
 - Swift sample app build;
 - Swift format lint.
