@@ -7,6 +7,7 @@ import argparse
 import pathlib
 import re
 import sys
+import tempfile
 
 
 SWIFT_FACADE = pathlib.Path("Sources/ConsoleDock/ConsoleDock.swift")
@@ -239,6 +240,67 @@ def validate(root: pathlib.Path) -> list[str]:
     return errors
 
 
+def write_valid_api_files(root: pathlib.Path) -> None:
+    swift_root = root / SWIFT_SOURCE_ROOT
+    swift_root.mkdir(parents=True)
+    (root / SWIFT_FACADE).write_text(
+        "\n".join(REQUIRED_SNIPPETS[SWIFT_FACADE]) + "\n",
+        encoding="utf-8",
+    )
+    (root / UIKIT_FACADE).write_text(
+        "\n".join(REQUIRED_SNIPPETS[UIKIT_FACADE]) + "\n",
+        encoding="utf-8",
+    )
+    (swift_root / "ConsoleDockEntryFilter.swift").write_text(
+        "struct InternalEntryFilter {}\n",
+        encoding="utf-8",
+    )
+
+
+def self_test() -> list[str]:
+    errors: list[str] = []
+
+    with tempfile.TemporaryDirectory(prefix="consoledock-swift-api-surface-self-test-") as raw_directory:
+        root = pathlib.Path(raw_directory)
+        write_valid_api_files(root)
+        if validate(root):
+            errors.append("validate should accept the expected Swift public API surface")
+
+        missing_required_root = root / "missing-required"
+        write_valid_api_files(missing_required_root)
+        facade = missing_required_root / SWIFT_FACADE
+        facade.write_text(
+            facade.read_text(encoding="utf-8").replace(
+                "public static func fault(_ message: String)\n",
+                "",
+            ),
+            encoding="utf-8",
+        )
+        if not validate(missing_required_root):
+            errors.append("validate should reject missing required Swift facade APIs")
+
+        leaked_public_root = root / "leaked-public"
+        write_valid_api_files(leaked_public_root)
+        (leaked_public_root / SWIFT_SOURCE_ROOT / "ConsoleDockEntryFilter.swift").write_text(
+            "public enum LeakedPublicAPI {}\n",
+            encoding="utf-8",
+        )
+        if not validate(leaked_public_root):
+            errors.append("validate should reject public declarations outside approved Swift facade files")
+
+        forbidden_shape_root = root / "forbidden-shape"
+        write_valid_api_files(forbidden_shape_root)
+        forbidden_facade = forbidden_shape_root / SWIFT_FACADE
+        forbidden_facade.write_text(
+            forbidden_facade.read_text(encoding="utf-8") + "public class AccidentalReferenceType {}\n",
+            encoding="utf-8",
+        )
+        if not validate(forbidden_shape_root):
+            errors.append("validate should reject forbidden public Swift API shapes")
+
+    return errors
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -248,7 +310,19 @@ def main() -> int:
         type=pathlib.Path,
         help="Repository root. Defaults to the parent of the scripts directory.",
     )
+    parser.add_argument("--self-test", action="store_true", help="Run local validator self-tests.")
     args = parser.parse_args()
+
+    if args.self_test:
+        errors = self_test()
+        if errors:
+            print("Swift API surface validator self-test failed:", file=sys.stderr)
+            for error in errors:
+                print(f"- {error}", file=sys.stderr)
+            return 1
+
+        print("Swift API surface validator self-test passed.")
+        return 0
 
     root = args.root.resolve()
     errors = validate(root)

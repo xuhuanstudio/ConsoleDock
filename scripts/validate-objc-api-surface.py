@@ -9,6 +9,7 @@ import pathlib
 import re
 import subprocess
 import sys
+import tempfile
 
 
 CORE_HEADER = pathlib.Path("Sources/ConsoleDockCore/include/ConsoleDockCore.h")
@@ -183,6 +184,93 @@ def validate(root: pathlib.Path) -> list[str]:
     return errors
 
 
+def write_package_manifest(root: pathlib.Path, public_headers_path: str = EXPECTED_PUBLIC_HEADERS_PATH) -> None:
+    root.mkdir(parents=True, exist_ok=True)
+    (root / "Package.swift").write_text(
+        f"""// swift-tools-version: 5.9
+import PackageDescription
+
+let package = Package(
+    name: "ConsoleDock",
+    products: [
+        .library(name: "ConsoleDockCore", targets: ["ConsoleDockCore"])
+    ],
+    targets: [
+        .target(name: "ConsoleDockCore", publicHeadersPath: "{public_headers_path}")
+    ]
+)
+""",
+        encoding="utf-8",
+    )
+
+
+def write_valid_header(root: pathlib.Path, extra_text: str = "") -> None:
+    header_path = root / CORE_HEADER
+    header_path.parent.mkdir(parents=True, exist_ok=True)
+    header_path.write_text(
+        "#import <Foundation/Foundation.h>\n\n"
+        "NS_ASSUME_NONNULL_BEGIN\n\n"
+        + "\n".join(REQUIRED_SNIPPETS)
+        + "\n"
+        + extra_text
+        + "\nNS_ASSUME_NONNULL_END\n",
+        encoding="utf-8",
+    )
+
+
+def write_valid_fixture(root: pathlib.Path, public_headers_path: str = EXPECTED_PUBLIC_HEADERS_PATH) -> None:
+    write_package_manifest(root, public_headers_path)
+    write_valid_header(root)
+
+
+def self_test() -> list[str]:
+    errors: list[str] = []
+
+    with tempfile.TemporaryDirectory(prefix="consoledock-objc-api-surface-self-test-") as raw_directory:
+        root = pathlib.Path(raw_directory)
+        write_valid_fixture(root)
+        if validate(root):
+            errors.append("validate should accept the expected Objective-C public API surface")
+
+        missing_required_root = root / "missing-required"
+        write_valid_fixture(missing_required_root)
+        header = missing_required_root / CORE_HEADER
+        header.write_text(
+            header.read_text(encoding="utf-8").replace(
+                "+ (void)fault:(NSString *)message;\n",
+                "",
+            ),
+            encoding="utf-8",
+        )
+        if not validate(missing_required_root):
+            errors.append("validate should reject missing required Objective-C core APIs")
+
+        unprefixed_root = root / "unprefixed"
+        write_valid_fixture(unprefixed_root)
+        write_valid_header(
+            unprefixed_root,
+            extra_text="@interface ConsoleDockLeak : NSObject\n@end\n",
+        )
+        if not validate(unprefixed_root):
+            errors.append("validate should reject public Objective-C interfaces without the CDK prefix")
+
+        denied_internal_root = root / "denied-internal"
+        write_valid_fixture(denied_internal_root)
+        write_valid_header(
+            denied_internal_root,
+            extra_text="@interface CDKStandardOutputCapture : NSObject\n@end\n",
+        )
+        if not validate(denied_internal_root):
+            errors.append("validate should reject internal capture symbols in the public Objective-C header")
+
+        wrong_headers_path_root = root / "wrong-headers-path"
+        write_valid_fixture(wrong_headers_path_root, public_headers_path="Public")
+        if not validate(wrong_headers_path_root):
+            errors.append("validate should reject a ConsoleDockCore target without publicHeadersPath include")
+
+    return errors
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -192,7 +280,19 @@ def main() -> int:
         type=pathlib.Path,
         help="Repository root. Defaults to the parent of the scripts directory.",
     )
+    parser.add_argument("--self-test", action="store_true", help="Run local validator self-tests.")
     args = parser.parse_args()
+
+    if args.self_test:
+        errors = self_test()
+        if errors:
+            print("Objective-C API surface validator self-test failed:", file=sys.stderr)
+            for error in errors:
+                print(f"- {error}", file=sys.stderr)
+            return 1
+
+        print("Objective-C API surface validator self-test passed.")
+        return 0
 
     root = args.root.resolve()
     errors = validate(root)
