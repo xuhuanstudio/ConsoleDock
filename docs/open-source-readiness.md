@@ -42,6 +42,7 @@ Add before the first public release:
 - `.github/ISSUE_TEMPLATE/bug_report.yml`
 - `.github/ISSUE_TEMPLATE/feature_request.yml`
 - `.github/pull_request_template.md`
+- `.github/dependabot.yml` for GitHub Actions update checks
 
 `SECURITY.md` should state that ConsoleDock is a debug tool and that reports involving accidental sensitive data exposure, release-build activation, or unsafe export behavior are security-relevant.
 

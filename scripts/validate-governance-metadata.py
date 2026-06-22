@@ -15,6 +15,7 @@ REQUIRED_FILES = [
     "CONTRIBUTING.md",
     ".github/workflows/ci.yml",
     ".github/workflows/release-validation.yml",
+    ".github/dependabot.yml",
     ".github/ISSUE_TEMPLATE/bug_report.yml",
     ".github/ISSUE_TEMPLATE/feature_request.yml",
     ".github/pull_request_template.md",
@@ -71,6 +72,11 @@ REQUIRED_SNIPPETS = {
         "persist-credentials: false",
         "python3 scripts/validate-release-metadata.py",
         "scripts/validate-release.sh",
+    ],
+    ".github/dependabot.yml": [
+        "package-ecosystem: \"github-actions\"",
+        "interval: \"weekly\"",
+        "timezone: \"Asia/Shanghai\"",
     ],
     ".github/ISSUE_TEMPLATE/bug_report.yml": [
         "Do not include secrets, tokens, credentials, or production logs.",
