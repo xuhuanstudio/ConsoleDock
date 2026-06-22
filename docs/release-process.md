@@ -35,6 +35,8 @@ scripts/validate-release.sh
 
 The script validates the working tree is clean, then validates the SwiftPM manifest, package identity, Swift Package Index metadata, Objective-C API surface, Swift formatting, package build, package tests, Release safety gates, documentation links, governance metadata, release helper script dry-runs, release content audit, DocC conversion, iOS package build, Swift and Objective-C sample app builds, source archive creation, source archive contents, and source archive build/test from a temporary extraction.
 
+Release helper dry-runs use `CONSOLEDOCK_RELEASE_TAG` when set, use `GITHUB_REF_NAME` when the workflow is running on a tag, and otherwise default to `v0.1.0` for local main-branch validation.
+
 ## Manual Sample Smoke Check
 
 Run at least one iOS Simulator smoke check before the first public release in a minor series:

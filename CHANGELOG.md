@@ -16,6 +16,7 @@ The project follows Semantic Versioning for public releases.
 - Added public README badges for CI, release validation, latest release, and license status.
 - Updated GitHub Actions checkout usage to the Node 24-compatible `actions/checkout@v6` runtime.
 - Aligned contribution and security policy status wording with the public `v0.x` preview stage.
+- Made release validation helper dry-runs use the active release tag instead of hard-coding `v0.1.0`.
 
 ## v0.1.0 - 2026-06-22
 

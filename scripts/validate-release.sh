@@ -4,6 +4,11 @@ set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
 archive_path="${CONSOLEDOCK_SOURCE_ARCHIVE:-.build/ConsoleDock-source.zip}"
+release_tag="${CONSOLEDOCK_RELEASE_TAG:-}"
+if [[ -z "$release_tag" && "${GITHUB_REF_TYPE:-}" == "tag" ]]; then
+  release_tag="${GITHUB_REF_NAME:-}"
+fi
+release_tag="${release_tag:-v0.1.0}"
 
 section() {
   printf '\n==> %s\n' "$1"
@@ -53,9 +58,10 @@ section "Validate governance metadata"
 python3 scripts/validate-governance-metadata.py
 
 section "Validate release helper scripts"
-python3 scripts/validate-public-release-preflight.py --tag v0.1.0 --local-only --dry-run
+printf 'Release helper tag: %s\n' "$release_tag"
+python3 scripts/validate-public-release-preflight.py --tag "$release_tag" --local-only --dry-run
 python3 scripts/verify-public-release.py --self-test
-python3 scripts/verify-public-release.py --repository example/ConsoleDock --tag v0.1.0 --dry-run --check-spi
+python3 scripts/verify-public-release.py --repository example/ConsoleDock --tag "$release_tag" --dry-run --check-spi
 
 section "Audit release content"
 python3 scripts/audit-release-content.py
