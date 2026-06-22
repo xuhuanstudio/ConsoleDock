@@ -23,6 +23,7 @@ Initial public preview of ConsoleDock as a source-first Swift Package Manager iO
 - Added app-specific redaction configuration hooks in both Swift and Objective-C-compatible APIs.
 - Added byte-to-line framing for stdout/stderr chunks, including CRLF normalization, partial flushes, independent source buffers, bounded partial lines, and invalid UTF-8 replacement.
 - Added stdout/stderr file-descriptor capture with pass-through to the original descriptors, safe restore on stop, partial flush on stop, direct descriptor write coverage, and capture enable/disable configuration.
+- Added integration coverage for Swift `print` and flushed C stdio stdout/stderr capture with pass-through.
 - Added native logging levels for debug, info, warning, error, and fault.
 - Added Release safety gates so Release startup is disabled by default and requires both `CONSOLEDOCK_ENABLE_RELEASE` and `allowsReleaseBuilds`.
 - Added the bundled UIKit floating button and in-app console panel with live refresh, search, source filtering, level filtering, pause/resume live follow, selected-entry copy, clear, share/export, close, and lifecycle teardown.

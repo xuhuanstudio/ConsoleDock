@@ -485,6 +485,51 @@ final class ConsoleDockCoreTests: XCTestCase {
         }
     }
 
+    func testCaptureSwiftPrintEntersEntriesAndPassthrough() throws {
+        try withOriginalDescriptorPipe(STDOUT_FILENO) { readDescriptor in
+            let configuration = CDKConfiguration.default()
+            configuration.captureStandardError = false
+            XCTAssertEqual(CDKConsoleDock.start(with: configuration), .started)
+
+            print("cdk swift print")
+            fflush(stdout)
+
+            XCTAssertTrue(try waitForDescriptor(readDescriptor, toContain: "cdk swift print\n"))
+            let entry = try waitForEntry(message: "cdk swift print", source: .stdout)
+            XCTAssertEqual(entry.level, .info)
+        }
+    }
+
+    func testCaptureFlushedCStdoutEntersEntriesAndPassthrough() throws {
+        try withOriginalDescriptorPipe(STDOUT_FILENO) { readDescriptor in
+            let configuration = CDKConfiguration.default()
+            configuration.captureStandardError = false
+            XCTAssertEqual(CDKConsoleDock.start(with: configuration), .started)
+
+            fputs("cdk flushed c stdout\n", stdout)
+            fflush(stdout)
+
+            XCTAssertTrue(try waitForDescriptor(readDescriptor, toContain: "cdk flushed c stdout\n"))
+            let entry = try waitForEntry(message: "cdk flushed c stdout", source: .stdout)
+            XCTAssertEqual(entry.level, .info)
+        }
+    }
+
+    func testCaptureFlushedCStderrEntersEntriesAndPassthrough() throws {
+        try withOriginalDescriptorPipe(STDERR_FILENO) { readDescriptor in
+            let configuration = CDKConfiguration.default()
+            configuration.captureStandardOutput = false
+            XCTAssertEqual(CDKConsoleDock.start(with: configuration), .started)
+
+            fputs("cdk flushed c stderr\n", stderr)
+            fflush(stderr)
+
+            XCTAssertTrue(try waitForDescriptor(readDescriptor, toContain: "cdk flushed c stderr\n"))
+            let entry = try waitForEntry(message: "cdk flushed c stderr", source: .stderr)
+            XCTAssertEqual(entry.level, .error)
+        }
+    }
+
     func testStdoutPassthroughWritesToOriginalDescriptor() throws {
         try withOriginalDescriptorPipe(STDOUT_FILENO) { readDescriptor in
             let configuration = CDKConfiguration.default()
