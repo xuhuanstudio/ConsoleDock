@@ -159,6 +159,15 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertEqual(ConsoleDock.entries.map(\.id), [1, 2])
     }
 
+    func testSwiftFacadeEntriesExposePartialLineMetadata() {
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+
+        CDKConsoleDock.append(CDKLineEvent(source: .stdout, message: "partial", isPartial: true))
+
+        XCTAssertEqual(ConsoleDock.entries.first?.message, "partial")
+        XCTAssertEqual(ConsoleDock.entries.first?.partial, true)
+    }
+
     func testSwiftLogEntryInitializerDefaultsIdentifierForFixtures() {
         let entry = ConsoleDock.LogEntry(
             timestamp: Date(timeIntervalSince1970: 1),
@@ -169,6 +178,7 @@ final class ConsoleDockTests: XCTestCase {
 
         XCTAssertEqual(entry.id, 0)
         XCTAssertEqual(entry.message, "fixture")
+        XCTAssertFalse(entry.partial)
         XCTAssertFalse(entry.redacted)
         XCTAssertFalse(entry.truncated)
     }

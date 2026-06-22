@@ -91,6 +91,8 @@ public enum ConsoleDock {
         public let level: LogLevel
         public let source: LogSource
         public let message: String
+        /// Whether this entry was flushed from an incomplete framed line.
+        public let partial: Bool
         /// Whether ConsoleDock changed the message while applying default or app-specific redaction.
         public let redacted: Bool
         /// Whether ConsoleDock shortened the message to respect `maximumMessageLength`.
@@ -102,6 +104,7 @@ public enum ConsoleDock {
             level: LogLevel,
             source: LogSource,
             message: String,
+            partial: Bool = false,
             redacted: Bool = false,
             truncated: Bool = false
         ) {
@@ -110,6 +113,7 @@ public enum ConsoleDock {
             self.level = level
             self.source = source
             self.message = message
+            self.partial = partial
             self.redacted = redacted
             self.truncated = truncated
         }
@@ -260,6 +264,7 @@ extension ConsoleDock.LogEntry {
         level = ConsoleDock.LogLevel(coreLevel: coreEntry.level)
         source = ConsoleDock.LogSource(coreSource: coreEntry.source)
         message = coreEntry.message
+        partial = coreEntry.isPartial
         redacted = coreEntry.redacted
         truncated = coreEntry.truncated
     }

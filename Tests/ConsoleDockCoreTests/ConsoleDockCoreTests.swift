@@ -120,6 +120,7 @@ final class ConsoleDockCoreTests: XCTestCase {
         XCTAssertEqual(entries[0].level, .info)
         XCTAssertEqual(entries[0].source, .native)
         XCTAssertEqual(entries[0].message, "Login succeeded")
+        XCTAssertFalse(entries[0].isPartial)
         XCTAssertFalse(entries[0].redacted)
         XCTAssertFalse(entries[0].truncated)
         XCTAssertGreaterThanOrEqual(entries[0].timestamp.timeIntervalSince1970, before.timeIntervalSince1970)
@@ -164,6 +165,7 @@ final class ConsoleDockCoreTests: XCTestCase {
             level: .warning,
             source: .stderr,
             message: "processed",
+            isPartial: true,
             redacted: true,
             truncated: true
         )
@@ -180,6 +182,7 @@ final class ConsoleDockCoreTests: XCTestCase {
         XCTAssertFalse(identifiedEntry.redacted)
         XCTAssertFalse(identifiedEntry.truncated)
         XCTAssertEqual(processedEntry.identifier, 43)
+        XCTAssertTrue(processedEntry.isPartial)
         XCTAssertTrue(processedEntry.redacted)
         XCTAssertTrue(processedEntry.truncated)
     }
@@ -510,12 +513,13 @@ final class ConsoleDockCoreTests: XCTestCase {
         XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
 
         CDKConsoleDock.append(CDKLineEvent(source: .stdout, message: "out", isPartial: false))
-        CDKConsoleDock.append(CDKLineEvent(source: .stderr, message: "err", isPartial: false))
+        CDKConsoleDock.append(CDKLineEvent(source: .stderr, message: "err", isPartial: true))
 
         let entries = CDKConsoleDock.entries()
         XCTAssertEqual(entries.map(\.source), [.stdout, .stderr])
         XCTAssertEqual(entries.map(\.level), [.info, .error])
         XCTAssertEqual(entries.map(\.message), ["out", "err"])
+        XCTAssertEqual(entries.map(\.isPartial), [false, true])
     }
 
     func testAppendLineEventUsesRedactionAndTruncation() {
@@ -700,6 +704,7 @@ final class ConsoleDockCoreTests: XCTestCase {
 
             let entry = try waitForEntry(message: "cdk partial stop", source: .stdout)
             XCTAssertEqual(entry.level, .info)
+            XCTAssertTrue(entry.isPartial)
         }
     }
 

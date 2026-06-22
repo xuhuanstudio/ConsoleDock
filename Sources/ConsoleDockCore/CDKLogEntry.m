@@ -13,6 +13,7 @@
                               level:level
                              source:source
                             message:message
+                          isPartial:NO
                            redacted:NO
                           truncated:NO];
 }
@@ -25,6 +26,25 @@
                           redacted:(BOOL)redacted
                          truncated:(BOOL)truncated
 {
+    return [self initWithIdentifier:identifier
+                          timestamp:timestamp
+                              level:level
+                             source:source
+                            message:message
+                          isPartial:NO
+                           redacted:redacted
+                          truncated:truncated];
+}
+
+- (instancetype)initWithIdentifier:(unsigned long long)identifier
+                         timestamp:(NSDate *)timestamp
+                             level:(CDKLogLevel)level
+                            source:(CDKLogSource)source
+                           message:(NSString *)message
+                         isPartial:(BOOL)isPartial
+                          redacted:(BOOL)redacted
+                         truncated:(BOOL)truncated
+{
     self = [super init];
     if (self) {
         _identifier = identifier;
@@ -32,6 +52,7 @@
         _level = level;
         _source = source;
         _message = [message copy];
+        _partial = isPartial;
         _redacted = redacted;
         _truncated = truncated;
     }

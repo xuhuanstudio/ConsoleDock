@@ -215,7 +215,10 @@ static void CDKPostEntriesDidChangeNotification(void)
     }
 }
 
-+ (void)appendEntryWithLevel:(CDKLogLevel)level source:(CDKLogSource)source message:(NSString *)message
++ (void)appendEntryWithLevel:(CDKLogLevel)level
+                      source:(CDKLogSource)source
+                     message:(NSString *)message
+                   isPartial:(BOOL)isPartial
 {
     BOOL didAppend = NO;
     @synchronized(self) {
@@ -232,6 +235,7 @@ static void CDKPostEntriesDidChangeNotification(void)
                                                                level:level
                                                               source:source
                                                              message:preparedMessage
+                                                           isPartial:isPartial
                                                             redacted:redacted
                                                            truncated:truncated];
         if (CDKConsoleDockEntries == nil) {
@@ -254,12 +258,13 @@ static void CDKPostEntriesDidChangeNotification(void)
 {
     [self appendEntryWithLevel:CDKDefaultLevelForSource(event.source)
                         source:event.source
-                       message:event.message];
+                       message:event.message
+                     isPartial:event.partial];
 }
 
 + (void)logWithLevel:(CDKLogLevel)level message:(NSString *)message
 {
-    [self appendEntryWithLevel:level source:CDKLogSourceNative message:message];
+    [self appendEntryWithLevel:level source:CDKLogSourceNative message:message isPartial:NO];
 }
 
 + (void)debug:(NSString *)message

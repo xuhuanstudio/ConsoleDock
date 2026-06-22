@@ -18,7 +18,7 @@ Every entry goes through the same core preparation path before storage:
 3. ConsoleDock truncates the prepared message to `maximumMessageLength`.
 4. ConsoleDock stores the prepared entry in the bounded in-memory buffer.
 
-Stored entries include `redacted` and `truncated` flags. These flags mean ConsoleDock changed or shortened the message during preparation; they are processing metadata, not proof that the remaining text is safe to expose.
+Stored entries include `partial`, `redacted`, and `truncated` flags. The `redacted` and `truncated` flags mean ConsoleDock changed or shortened the message during preparation; they are processing metadata, not proof that the remaining text is safe to expose.
 
 The UIKit console reads from that in-memory buffer. Selected-entry copy and share/export actions use already-redacted entries from the current visible snapshot. ConsoleDock does not persist logs to disk, upload logs, or collect logs from other apps or system processes by default.
 
