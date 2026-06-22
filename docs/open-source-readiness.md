@@ -30,6 +30,7 @@ Before public release, add:
 - `LICENSE`
 - `.editorconfig`
 - `.gitattributes`
+- `.gitignore`
 - copyright owner
 - year
 

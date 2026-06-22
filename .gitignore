@@ -6,6 +6,11 @@ DerivedData/
 *.xcworkspace/xcuserdata/
 *.xcodeproj/xcuserdata/
 *.xcuserstate
+*.xcresult
+*.xcarchive
+*.dSYM/
+*.app
+*.ipa
 
 # Swift Package Manager
 .build/
@@ -14,3 +19,15 @@ Package.resolved
 
 # CocoaPods
 Pods/
+
+# Generated release and binary artifacts
+*.doccarchive
+*.framework/
+*.xcframework/
+*.a
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.dmg
+*.pkg
