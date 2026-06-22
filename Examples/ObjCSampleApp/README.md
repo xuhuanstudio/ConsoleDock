@@ -37,6 +37,16 @@ Open `Examples/ObjCSampleApp/ObjCSampleApp.xcodeproj` in Xcode and run the `ObjC
 
 The project uses a local Swift package reference to the repository root, so changes to `Sources/` are picked up by the sample without publishing a package release.
 
+## Automated Smoke Check
+
+From the package root:
+
+```sh
+scripts/validate-objc-sample-ui-smoke.sh
+```
+
+The script chooses an available iPhone simulator unless `CONSOLEDOCK_UI_SMOKE_DESTINATION` is set. It launches the app with `--consoledock-ui-smoke` so the test focuses on a native `CDKConsoleDock` entry, redaction, the bundled panel, pause/resume, clear refresh, and close behavior without stdout/stderr capture descriptor noise.
+
 ## Manual Check
 
 For the full shared checklist, see [Sample app walkthrough](../../docs/sample-app-walkthrough.md).

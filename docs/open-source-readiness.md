@@ -128,6 +128,7 @@ Initial checks:
 - Swift Package Index metadata validation;
 - Objective-C API surface validation;
 - Swift API surface validation;
+- sample app documentation and automation validation;
 - Objective-C sample app build;
 - Swift sample app build;
 - Swift format lint;

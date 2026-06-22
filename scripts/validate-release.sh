@@ -42,6 +42,9 @@ python3 scripts/validate-swift-api-surface.py
 section "Validate UI accessibility identifiers"
 python3 scripts/validate-ui-accessibility-identifiers.py
 
+section "Validate sample app documentation and automation"
+python3 scripts/validate-sample-apps.py
+
 section "Validate Swift formatting"
 scripts/validate-swift-format.sh
 

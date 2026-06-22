@@ -28,6 +28,7 @@ The project follows Semantic Versioning for public releases.
 - Added stable accessibility identifiers to bundled console and sample controls for future UI smoke automation.
 - Added an opt-in Swift sample UI smoke test and validation script for Simulator-based release checks.
 - Added an opt-in Objective-C sample UI smoke test and validation script for Simulator-based release checks.
+- Added sample app documentation and automation validation to keep smoke-test guidance in sync.
 - Added visible redaction assertions to the Swift sample UI smoke test.
 
 ### Changed
