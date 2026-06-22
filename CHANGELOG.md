@@ -21,6 +21,7 @@ The project follows Semantic Versioning for public releases.
 - Added selected-row tap assertions to the Swift and Objective-C sample UI smoke tests.
 - Added GitHub Release notes boundary and validation-link checks to the post-release verifier.
 - Added public release preflight self-tests and dry-run input validation for malformed release rehearsal tags.
+- Added release metadata validator self-tests for tag shape, changelog heading, and cleared Unreleased checks.
 - Added post-release verification that GitHub Release notes link to the matching repository and tag validation workflow run.
 - Added post-release verification that the tag validation workflow ran against the current remote tag commit.
 - Added logging-boundary validator self-tests and tightened roadmap wording around Swift Logger/os_log ingestion.

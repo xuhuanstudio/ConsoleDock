@@ -78,6 +78,7 @@ python3 scripts/validate-distribution-docs.py
 
 section "Validate release helper scripts"
 printf 'Release helper tag: %s\n' "$release_tag"
+python3 scripts/validate-release-metadata.py --self-test
 python3 scripts/validate-public-release-preflight.py --self-test
 python3 scripts/validate-public-release-preflight.py --tag "$release_tag" --local-only --dry-run
 python3 scripts/verify-public-release.py --self-test
