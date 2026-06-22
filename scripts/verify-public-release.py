@@ -237,10 +237,128 @@ def check_spi(repository_slug: str) -> list[str]:
     return errors
 
 
+def self_test() -> list[str]:
+    errors: list[str] = []
+
+    repository_cases = {
+        "owner/Repo": ("owner/Repo", "https://github.com/owner/Repo.git"),
+        "https://github.com/owner/Repo": ("owner/Repo", "https://github.com/owner/Repo.git"),
+        "https://github.com/owner/Repo.git": ("owner/Repo", "https://github.com/owner/Repo.git"),
+        "git@github.com:owner/Repo.git": ("owner/Repo", "https://github.com/owner/Repo.git"),
+    }
+    for raw_repository, expected in repository_cases.items():
+        try:
+            actual = normalize_repository(raw_repository)
+        except ValueError as error:
+            errors.append(f"normalize_repository({raw_repository!r}) failed: {error}")
+            continue
+        if actual != expected:
+            errors.append(f"normalize_repository({raw_repository!r}) returned {actual}, expected {expected}")
+
+    version_cases = {
+        "v0.1.0": "0.1.0",
+        "0.1.0": "0.1.0",
+        "v1.2.3-beta.1": "1.2.3-beta.1",
+    }
+    for raw_tag, expected in version_cases.items():
+        try:
+            actual = package_version(raw_tag)
+        except ValueError as error:
+            errors.append(f"package_version({raw_tag!r}) failed: {error}")
+            continue
+        if actual != expected:
+            errors.append(f"package_version({raw_tag!r}) returned {actual}, expected {expected}")
+
+    try:
+        package_version("release-0.1.0")
+        errors.append("package_version('release-0.1.0') should reject non-semver tags")
+    except ValueError:
+        pass
+
+    errors.extend(self_test_swiftpm_v_tag_resolution())
+    return errors
+
+
+def self_test_swiftpm_v_tag_resolution() -> list[str]:
+    with tempfile.TemporaryDirectory(prefix="consoledock-verifier-self-test-") as raw_directory:
+        root = pathlib.Path(raw_directory)
+        library_root = root / "TagProbe"
+        consumer_root = root / "Consumer"
+        (library_root / "Sources" / "TagProbe").mkdir(parents=True)
+        (consumer_root / "Sources" / "Consumer").mkdir(parents=True)
+
+        (library_root / "Package.swift").write_text(
+            textwrap.dedent(
+                """\
+                // swift-tools-version: 5.9
+                import PackageDescription
+
+                let package = Package(
+                    name: "TagProbe",
+                    products: [
+                        .library(name: "TagProbe", targets: ["TagProbe"])
+                    ],
+                    targets: [
+                        .target(name: "TagProbe")
+                    ]
+                )
+                """
+            ),
+            encoding="utf-8",
+        )
+        (library_root / "Sources" / "TagProbe" / "TagProbe.swift").write_text(
+            "public enum TagProbe { public static let ok = true }\n",
+            encoding="utf-8",
+        )
+
+        commands = [
+            ["git", "init", "-q"],
+            ["git", "config", "user.email", "release-verifier@example.com"],
+            ["git", "config", "user.name", "ConsoleDock Release Verifier"],
+            ["git", "add", "."],
+            ["git", "commit", "-q", "-m", "Initial tag probe"],
+            ["git", "tag", "v0.1.0"],
+        ]
+        for command in commands:
+            result = run(command, library_root)
+            if result.returncode != 0:
+                return [result.stderr.strip() or result.stdout.strip() or f"{' '.join(command)} failed"]
+
+        (consumer_root / "Package.swift").write_text(
+            textwrap.dedent(
+                f"""\
+                // swift-tools-version: 5.9
+                import PackageDescription
+
+                let package = Package(
+                    name: "TagProbeConsumer",
+                    dependencies: [
+                        .package(url: "{library_root.as_posix()}", exact: "0.1.0")
+                    ],
+                    targets: [
+                        .executableTarget(name: "Consumer", dependencies: ["TagProbe"])
+                    ]
+                )
+                """
+            ),
+            encoding="utf-8",
+        )
+        (consumer_root / "Sources" / "Consumer" / "main.swift").write_text(
+            "import TagProbe\nprint(TagProbe.ok)\n",
+            encoding="utf-8",
+        )
+
+        result = run(["swift", "package", "resolve"], consumer_root)
+        if result.returncode != 0:
+            return [result.stderr.strip() or result.stdout.strip() or "SwiftPM v-prefixed tag resolve self-test failed"]
+
+    return []
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--repository", required=True, help="GitHub repository as OWNER/REPO or URL.")
-    parser.add_argument("--tag", required=True, help="Release tag, for example v0.1.0.")
+    parser.add_argument("--repository", help="GitHub repository as OWNER/REPO or URL.")
+    parser.add_argument("--tag", help="Release tag, for example v0.1.0.")
     parser.add_argument(
         "--workflow",
         default=DEFAULT_WORKFLOW,
@@ -250,9 +368,24 @@ def main() -> int:
     parser.add_argument("--skip-spm", action="store_true", help="Skip external SwiftPM consumer resolve/build check.")
     parser.add_argument("--check-spi", action="store_true", help="Check Swift Package Index package and DocC pages.")
     parser.add_argument("--dry-run", action="store_true", help="Validate inputs and print the planned checks only.")
+    parser.add_argument("--self-test", action="store_true", help="Run local verifier self-tests without network access.")
     args = parser.parse_args()
 
     errors: list[str] = []
+    if args.self_test:
+        errors = self_test()
+        if errors:
+            print("Post-release verifier self-test failed:", file=sys.stderr)
+            for error in errors:
+                print(f"- {error}", file=sys.stderr)
+            return 1
+
+        print("Post-release verifier self-test passed.")
+        return 0
+
+    if args.repository is None or args.tag is None:
+        parser.error("--repository and --tag are required unless --self-test is used")
+
     try:
         repository_slug, repository_url = normalize_repository(args.repository)
         version = package_version(args.tag)

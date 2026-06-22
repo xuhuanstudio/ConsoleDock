@@ -54,6 +54,7 @@ python3 scripts/validate-governance-metadata.py
 
 section "Validate release helper scripts"
 python3 scripts/validate-public-release-preflight.py --tag v0.1.0 --local-only --dry-run
+python3 scripts/verify-public-release.py --self-test
 python3 scripts/verify-public-release.py --repository example/ConsoleDock --tag v0.1.0 --dry-run --check-spi
 
 section "Audit release content"
