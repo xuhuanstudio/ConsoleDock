@@ -32,7 +32,7 @@ Manual check:
 
 1. Launch the app.
 2. Tap `Show Console` or the floating `CD` button.
-3. Tap `ConsoleDock.info`, `ConsoleDock.error`, `ConsoleDock.fault`, `print stdout`, `printf stdout`, `fprintf stderr`, and `NSLog`.
+3. Tap `Log diagnostics`, `ConsoleDock.info`, `ConsoleDock.error`, `ConsoleDock.fault`, `print stdout`, `printf stdout`, `fprintf stderr`, and `NSLog`.
 4. Confirm entries appear in the ConsoleDock panel.
 5. Confirm the diagnostics header reports running state, entry count, stdout/stderr state, limits, and redacted/truncated/partial counts.
 6. Confirm generated `token=...` values are stored as `token=<redacted>`.
@@ -50,6 +50,7 @@ Manual check:
 Expected sources:
 
 - `ConsoleDock.info`, `ConsoleDock.error`, and `ConsoleDock.fault`: `native`
+- `Log diagnostics`: `native`
 - `print` and `printf`: `stdout`
 - `fprintf(stderr)`: `stderr`
 - many `NSLog` messages: `stderr`
@@ -71,7 +72,7 @@ Manual check:
 
 1. Launch the app.
 2. Tap `Show Console` or the floating `CD` button.
-3. Tap the native `CDKConsoleDock`, C stdio, direct descriptor write, and `NSLog` buttons.
+3. Tap `Log diagnostics`, the native `CDKConsoleDock`, C stdio, direct descriptor write, and `NSLog` buttons.
 4. Confirm entries appear in the ConsoleDock panel.
 5. Confirm the diagnostics header reports running state, entry count, stdout/stderr state, limits, and redacted/truncated/partial counts.
 6. Confirm generated `token=...` values are stored as `token=<redacted>`.
@@ -89,6 +90,7 @@ Manual check:
 Expected sources:
 
 - `CDKConsoleDock` APIs: `native`
+- `Log diagnostics`: `native`
 - `printf` and `write(STDOUT_FILENO, ...)`: `stdout`
 - `fprintf(stderr)`, `write(STDERR_FILENO, ...)`, and many `NSLog` messages: `stderr`
 

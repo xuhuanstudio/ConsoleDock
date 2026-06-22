@@ -10,6 +10,7 @@ The sample imports both package products:
 The app starts ConsoleDock on launch, enables stdout/stderr capture, shows the floating `CD` button, and provides buttons that generate:
 
 - Native `CDKConsoleDock` info/error/fault entries
+- Runtime diagnostics through `CDKDiagnostics`
 - C `printf` stdout
 - C `fprintf(stderr)` stderr
 - Direct `write(STDOUT_FILENO, ...)`
@@ -41,8 +42,8 @@ For the full shared checklist, see [Sample app walkthrough](../../docs/sample-ap
 
 1. Launch the app.
 2. Tap `Show Console` or the floating `CD` button.
-3. Tap each logging button.
-4. Confirm entries appear in the console and `token=...` values are displayed as `<redacted>`.
+3. Tap each logging button, including `Log diagnostics`.
+4. Confirm entries appear in the console, diagnostics are readable, and `token=...` values are displayed as `<redacted>`.
 5. Tap `Clear` in the console or `Clear ConsoleDock Entries` in the sample to verify live refresh.
 
 When testing ConsoleDock's own stdout/stderr capture, avoid using `simctl launch --stdout` or `simctl launch --stderr` as the primary validation path because those flags also modify the app process descriptors. Running from Xcode or launching normally through Simulator gives a closer app-integration signal.

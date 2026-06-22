@@ -13,6 +13,7 @@ The project follows Semantic Versioning for public releases.
 - Added the v0.2 integration diagnostics design specification for runtime state, UIKit status, snapshot export, tests, and documentation.
 - Added `CDKDiagnostics` and `ConsoleDock.Diagnostics` for runtime state, capture configuration, store limits, and current entry flag counts.
 - Added a compact UIKit diagnostics header and included diagnostics in share/export snapshots.
+- Added diagnostics controls and status output to the Swift and Objective-C sample apps.
 
 ### Changed
 

@@ -34,6 +34,7 @@ final class MainViewController: UIViewController {
             headingLabel,
             bodyLabel,
             makeButton(title: "Show Console", action: #selector(showConsole)),
+            makeButton(title: "Log diagnostics", action: #selector(logDiagnostics)),
             makeButton(title: "ConsoleDock.info", action: #selector(logNativeInfo)),
             makeButton(title: "ConsoleDock.error", action: #selector(logNativeError)),
             makeButton(title: "ConsoleDock.fault", action: #selector(logNativeFault)),
@@ -91,7 +92,14 @@ final class MainViewController: UIViewController {
     }
 
     private func updateStatus(_ message: String) {
-        statusLabel.text = "\(message)\nStored entries: \(ConsoleDock.entries.count)"
+        let diagnostics = ConsoleDock.diagnostics
+        let status = [
+            "Running: \(diagnostics.isRunning)",
+            "Stored entries: \(diagnostics.entryCount)",
+            "stdout: \(diagnostics.capturesStandardOutput)",
+            "stderr: \(diagnostics.capturesStandardError)"
+        ].joined(separator: "  ")
+        statusLabel.text = "\(message)\n\(status)"
     }
 
     private func updateStatusAfterCapture(_ message: String) {
@@ -103,6 +111,23 @@ final class MainViewController: UIViewController {
     @objc private func showConsole() {
         ConsoleDock.showConsole()
         updateStatus("Requested ConsoleDock panel.")
+    }
+
+    @objc private func logDiagnostics() {
+        let diagnostics = ConsoleDock.diagnostics
+        let message = [
+            "diagnostics",
+            "running=\(diagnostics.isRunning)",
+            "entries=\(diagnostics.entryCount)",
+            "stdout=\(diagnostics.capturesStandardOutput)",
+            "stderr=\(diagnostics.capturesStandardError)",
+            "limits=\(diagnostics.maximumEntries)/\(diagnostics.maximumMessageLength)",
+            "redacted=\(diagnostics.redactedEntryCount)",
+            "truncated=\(diagnostics.truncatedEntryCount)",
+            "partial=\(diagnostics.partialEntryCount)"
+        ].joined(separator: " ")
+        ConsoleDock.info(message)
+        updateStatus("Wrote ConsoleDock diagnostics.")
     }
 
     @objc private func logNativeInfo() {

@@ -48,6 +48,7 @@
         headingLabel,
         bodyLabel,
         [self makeButtonWithTitle:@"Show Console" action:@selector(showConsole)],
+        [self makeButtonWithTitle:@"Log diagnostics" action:@selector(logDiagnostics)],
         [self makeButtonWithTitle:@"CDKConsoleDock info" action:@selector(logNativeInfo)],
         [self makeButtonWithTitle:@"CDKConsoleDock error" action:@selector(logNativeError)],
         [self makeButtonWithTitle:@"CDKConsoleDock fault" action:@selector(logNativeFault)],
@@ -113,9 +114,14 @@
 
 - (void)updateStatus:(NSString *)message
 {
-    self.statusLabel.text = [NSString stringWithFormat:@"%@\nStored entries: %lu",
+    CDKDiagnostics *diagnostics = [CDKConsoleDock diagnostics];
+    self.statusLabel.text = [NSString stringWithFormat:@"%@\nRunning: %@  Stored entries: %lu  "
+                                                       @"stdout: %@  stderr: %@",
                                                        message,
-                                                       (unsigned long)CDKConsoleDock.entries.count];
+                                                       diagnostics.isRunning ? @"YES" : @"NO",
+                                                       (unsigned long)diagnostics.entryCount,
+                                                       diagnostics.captureStandardOutput ? @"YES" : @"NO",
+                                                       diagnostics.captureStandardError ? @"YES" : @"NO"];
 }
 
 - (void)updateStatusAfterCapture:(NSString *)message
@@ -129,6 +135,25 @@
 {
     [CDKConsoleDockUIKit showConsole];
     [self updateStatus:@"Requested ConsoleDock panel."];
+}
+
+- (void)logDiagnostics
+{
+    CDKDiagnostics *diagnostics = [CDKConsoleDock diagnostics];
+    NSString *message = [NSString stringWithFormat:@"objc diagnostics running=%@ entries=%lu "
+                                                   @"stdout=%@ stderr=%@ limits=%lu/%lu "
+                                                   @"redacted=%lu truncated=%lu partial=%lu",
+                                                   diagnostics.isRunning ? @"YES" : @"NO",
+                                                   (unsigned long)diagnostics.entryCount,
+                                                   diagnostics.captureStandardOutput ? @"YES" : @"NO",
+                                                   diagnostics.captureStandardError ? @"YES" : @"NO",
+                                                   (unsigned long)diagnostics.maximumEntries,
+                                                   (unsigned long)diagnostics.maximumMessageLength,
+                                                   (unsigned long)diagnostics.redactedEntryCount,
+                                                   (unsigned long)diagnostics.truncatedEntryCount,
+                                                   (unsigned long)diagnostics.partialEntryCount];
+    [CDKConsoleDock info:message];
+    [self updateStatus:@"Wrote ConsoleDock diagnostics."];
 }
 
 - (void)logNativeInfo
