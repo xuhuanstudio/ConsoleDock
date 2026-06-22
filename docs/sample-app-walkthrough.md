@@ -37,7 +37,7 @@ For a focused simulator UI smoke run of the Swift sample:
 scripts/validate-swift-sample-ui-smoke.sh
 ```
 
-The smoke test launches the sample app in a native-log-only UI automation mode, writes a `ConsoleDock.info` entry, opens the bundled console, and verifies the diagnostics header, entries table, pause/resume, and close controls through stable accessibility identifiers.
+The smoke test launches the sample app in a native-log-only UI automation mode, writes a `ConsoleDock.info` entry containing a sample token, opens the bundled console, and verifies the diagnostics header, entries table, visible redaction, pause/resume, and close controls through stable accessibility identifiers.
 
 Manual check:
 

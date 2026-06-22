@@ -25,6 +25,7 @@ The project follows Semantic Versioning for public releases.
 - Added app-specific logger sink forwarding controls to the Swift and Objective-C sample apps.
 - Added stable accessibility identifiers to bundled console and sample controls for future UI smoke automation.
 - Added an opt-in Swift sample UI smoke test and validation script for Simulator-based release checks.
+- Added visible redaction assertions to the Swift sample UI smoke test.
 
 ### Changed
 
