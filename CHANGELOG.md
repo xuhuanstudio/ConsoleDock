@@ -22,3 +22,4 @@ The project follows Semantic Versioning after public releases begin.
 - Expanded CI to build the package for iOS Simulator and build both Swift and Objective-C sample apps.
 - Added Release safety gates so Release startup requires both `CONSOLEDOCK_ENABLE_RELEASE` and `allowsReleaseBuilds`, plus focused CI coverage and documentation.
 - Updated contribution and GitHub templates to match the current capture, UIKit, privacy, and Release safety scope.
+- Added README quick start content, a real Simulator screenshot, and a shared Swift/Objective-C sample app walkthrough.

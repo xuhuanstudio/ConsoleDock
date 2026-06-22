@@ -1,0 +1,84 @@
+# Sample App Walkthrough
+
+ConsoleDock includes Swift and Objective-C UIKit sample apps that exercise the package through the same public integration paths real apps should use.
+
+Use the samples to verify:
+
+- Swift package integration;
+- Objective-C imports and `CDK` APIs;
+- stdout and stderr file-descriptor capture;
+- explicit native logging APIs;
+- `NSLog` output that reaches process stderr;
+- redaction before storage;
+- UIKit floating button, panel refresh, clear, stop, and restart behavior.
+
+![ConsoleDock Swift sample console](assets/swift-sample-console.png)
+
+## Swift Sample
+
+Build from the package root:
+
+```sh
+xcodebuild -project Examples/SwiftSampleApp/SwiftSampleApp.xcodeproj \
+  -scheme SwiftSampleApp \
+  -destination 'generic/platform=iOS Simulator' \
+  build
+```
+
+Run `SwiftSampleApp` in Xcode or install the built app on Simulator.
+
+Manual check:
+
+1. Launch the app.
+2. Tap `Show Console` or the floating `CD` button.
+3. Tap `ConsoleDock.info`, `ConsoleDock.error`, `print stdout`, `printf stdout`, `fprintf stderr`, and `NSLog`.
+4. Confirm entries appear in the ConsoleDock panel.
+5. Confirm generated `token=...` values are stored as `token=<redacted>`.
+6. Tap `Clear` in the panel and confirm the list refreshes.
+7. Tap `Stop ConsoleDock`, generate another message, and confirm it is not stored.
+8. Tap `Start ConsoleDock`, generate another message, and confirm entries resume.
+
+Expected sources:
+
+- `ConsoleDock.info` and `ConsoleDock.error`: `native`
+- `print` and `printf`: `stdout`
+- `fprintf(stderr)`: `stderr`
+- many `NSLog` messages: `stderr`
+
+## Objective-C Sample
+
+Build from the package root:
+
+```sh
+xcodebuild -project Examples/ObjCSampleApp/ObjCSampleApp.xcodeproj \
+  -scheme ObjCSampleApp \
+  -destination 'generic/platform=iOS Simulator' \
+  build
+```
+
+Run `ObjCSampleApp` in Xcode or install the built app on Simulator.
+
+Manual check:
+
+1. Launch the app.
+2. Tap `Show Console` or the floating `CD` button.
+3. Tap the native `CDKConsoleDock`, C stdio, direct descriptor write, and `NSLog` buttons.
+4. Confirm entries appear in the ConsoleDock panel.
+5. Confirm generated `token=...` values are stored as `token=<redacted>`.
+6. Tap `Clear` in the panel and confirm the list refreshes.
+7. Tap `Stop ConsoleDock`, generate another message, and confirm it is not stored.
+8. Tap `Start ConsoleDock`, generate another message, and confirm entries resume.
+
+Expected sources:
+
+- `CDKConsoleDock` APIs: `native`
+- `printf` and `write(STDOUT_FILENO, ...)`: `stdout`
+- `fprintf(stderr)`, `write(STDERR_FILENO, ...)`, and many `NSLog` messages: `stderr`
+
+## Capture Notes
+
+Do not use `simctl launch --stdout` or `simctl launch --stderr` as the primary validation path for ConsoleDock's own stdout/stderr capture. Those flags also modify the app process descriptors and can hide descriptor-restore issues.
+
+Run from Xcode or launch normally through Simulator when checking integration behavior.
+
+Swift `Logger`, `os_log`, and Apple unified logging are not validated by these samples because ConsoleDock does not promise complete zero-intrusion capture of those systems.

@@ -37,6 +37,8 @@ The project uses a local Swift package reference to the repository root, so chan
 
 ## Manual Check
 
+For the full shared checklist, see [Sample app walkthrough](../../docs/sample-app-walkthrough.md).
+
 1. Launch the app.
 2. Tap `Show Console` or the floating `CD` button.
 3. Tap each logging button.

@@ -2,7 +2,9 @@
 
 In-app debug console for iOS testing.
 
-ConsoleDock is a planned iOS debug SDK that lets testers inspect app logs directly on device without connecting Xcode. The project is designed for real iOS app integration: existing Objective-C apps should get useful baseline coverage, while Swift and mixed projects can opt into a more reliable explicit logging API.
+ConsoleDock is an early-stage iOS debug SDK that lets testers inspect app logs directly on device without connecting Xcode. The project is designed for real iOS app integration: existing Objective-C apps should get useful baseline coverage, while Swift and mixed projects can opt into a more reliable explicit logging API.
+
+<img src="docs/assets/swift-sample-console.png" alt="ConsoleDock iOS sample console showing native, stdout, stderr, NSLog, and redacted token entries" width="320">
 
 ## Status
 
@@ -41,7 +43,60 @@ ConsoleDock cannot promise complete, reliable, live, zero-intrusion capture of:
 
 Reliable complete logging should go through ConsoleDock's explicit API or an adapter for an existing logging framework.
 
-## Package Skeleton
+## Quick Start
+
+### Add The Package
+
+ConsoleDock is SPM-first.
+
+For local evaluation, add this repository folder as a local Swift Package dependency in Xcode:
+
+```text
+/path/to/ConsoleDock
+```
+
+After the repository is published and tagged, add the repository URL through Xcode's package dependency UI or `Package.swift`, then depend on:
+
+- `ConsoleDock` for Swift API plus the bundled UIKit console.
+- `ConsoleDockCore` for Objective-C/C-compatible core APIs.
+
+### Start In Swift
+
+```swift
+import ConsoleDock
+
+ConsoleDock.start()
+
+ConsoleDock.info("Login succeeded")
+print("Visible through stdout capture")
+```
+
+`ConsoleDock.start()` enables stdout/stderr capture by default in Debug builds, installs the floating `CD` button, redacts obvious secrets, truncates long messages, and stores entries in local memory.
+
+### Start In Objective-C
+
+```objc
+@import ConsoleDock;
+@import ConsoleDockCore;
+
+CDKConfiguration *configuration = [CDKConfiguration defaultConfiguration];
+CDKStartResult result = [CDKConsoleDockUIKit startWithConfiguration:configuration error:nil];
+
+[CDKConsoleDock info:@"Login succeeded"];
+```
+
+Use `ConsoleDockCore` directly when an Objective-C app only needs capture, storage, notifications, and explicit logging APIs. Use `ConsoleDock` as well when the app should show the bundled UIKit floating button and console panel.
+
+### Release Safety
+
+Release builds return `disabled` from `start` by default. Starting ConsoleDock in a Release build requires both:
+
+- compiling with `CONSOLEDOCK_ENABLE_RELEASE`;
+- setting `allowsReleaseBuilds` to `true`.
+
+Keep ConsoleDock disabled in App Store production builds. See [Release build safety](docs/release-build-safety.md).
+
+## Package Products
 
 Current package products:
 
@@ -63,12 +118,14 @@ xcodebuild -scheme ConsoleDock-Package -destination 'generic/platform=iOS Simula
 
 GitHub Actions currently validates the SwiftPM manifest, SwiftPM build/test, Release safety gates, the package iOS Simulator build, and both sample app builds.
 
-## Examples
+## Examples And Walkthrough
 
 The repository includes minimal UIKit sample apps:
 
 - [SwiftSampleApp](Examples/SwiftSampleApp/README.md): Swift UIKit app that imports the local package, starts ConsoleDock at launch, shows the floating console button, and generates Native API, Swift `print`, C `printf`, C `fprintf(stderr)`, and `NSLog` messages.
 - [ObjCSampleApp](Examples/ObjCSampleApp/README.md): Objective-C UIKit app that imports the local package, starts ConsoleDock through `CDKConsoleDockUIKit`, shows the floating console button, and generates Native API, C stdio, direct descriptor writes, and `NSLog` messages.
+
+For a guided manual check, see [Sample app walkthrough](docs/sample-app-walkthrough.md).
 
 Build the Swift sample from the package root:
 
@@ -181,6 +238,7 @@ Use `ConsoleDockCore` directly when an Objective-C app only needs capture, stora
 - [MVP architecture](docs/specs/2026-06-22-mvp-architecture.md)
 - [Open-source readiness](docs/open-source-readiness.md)
 - [Release build safety](docs/release-build-safety.md)
+- [Sample app walkthrough](docs/sample-app-walkthrough.md)
 - [Roadmap](docs/roadmap.md)
 
 ## Workspace Layout
