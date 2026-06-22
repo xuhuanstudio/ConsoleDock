@@ -28,6 +28,8 @@ Reasoning:
 Before public release, add:
 
 - `LICENSE`
+- `.editorconfig`
+- `.gitattributes`
 - copyright owner
 - year
 

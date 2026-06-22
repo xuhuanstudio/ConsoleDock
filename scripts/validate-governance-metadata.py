@@ -10,6 +10,8 @@ import sys
 
 REQUIRED_FILES = [
     "LICENSE",
+    ".editorconfig",
+    ".gitattributes",
     "CODE_OF_CONDUCT.md",
     "SECURITY.md",
     "CONTRIBUTING.md",
@@ -25,6 +27,20 @@ REQUIRED_SNIPPETS = {
     "LICENSE": [
         "MIT License",
         "Copyright (c) 2026 ConsoleDock contributors",
+    ],
+    ".editorconfig": [
+        "root = true",
+        "end_of_line = lf",
+        "insert_final_newline = true",
+        "trim_trailing_whitespace = true",
+        "[*.{swift,h,m,c,py}]",
+        "[*.{sh,yml,yaml,json}]",
+    ],
+    ".gitattributes": [
+        "* text=auto eol=lf",
+        "*.png binary",
+        "*.swift text eol=lf",
+        "*.pbxproj text eol=lf",
     ],
     "CODE_OF_CONDUCT.md": [
         "Contributor Covenant",

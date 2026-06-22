@@ -17,6 +17,8 @@ Still out of scope for the current stage:
 
 Use a recent Xcode toolchain with Swift Package Manager support.
 
+Respect the checked-in `.editorconfig`, `.gitattributes`, and `.swift-format` settings. They keep Swift, Objective-C, scripts, Markdown, YAML, and Xcode project files consistent across editors and operating systems.
+
 Recommended checks before opening a pull request:
 
 ```sh

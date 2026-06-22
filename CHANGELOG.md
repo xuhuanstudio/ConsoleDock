@@ -9,6 +9,7 @@ The project follows Semantic Versioning for public releases.
 ### Added
 
 - Added Dependabot configuration for weekly GitHub Actions update checks.
+- Added `.editorconfig` and `.gitattributes` to standardize editor behavior and line endings for global contributors.
 
 ### Changed
 
