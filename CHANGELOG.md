@@ -39,6 +39,7 @@ Initial public preview of ConsoleDock as a source-first Swift Package Manager iO
 - Added release content audit for generated paths, private key blocks, common token shapes, and local absolute paths before publishing.
 - Added source archive content audit before publishing release artifacts.
 - Added source archive package build/test validation before publishing release artifacts.
+- Added public release preflight validation for tag metadata, repository governance, content audit, remote branch readiness, and remote tag collision checks.
 - Added clean working tree enforcement to release validation so source archive checks match the committed state being released.
 - Added package identity validation for Swift tools version, public products, platforms, targets, and target dependencies.
 - Added Swift formatting configuration and lint validation for source, tests, and the Swift sample app.

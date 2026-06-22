@@ -64,6 +64,7 @@ Then add the remote and push:
 
 ```sh
 git remote add origin <REMOTE_URL>
+python3 scripts/validate-public-release-preflight.py --tag v0.1.0 --local-only
 git push -u origin main
 ```
 
@@ -82,6 +83,7 @@ If branch protection is enabled, require the `CI` workflow after it has run succ
 Only after the first `main` workflow passes:
 
 ```sh
+python3 scripts/validate-public-release-preflight.py --tag v0.1.0
 python3 scripts/validate-release-metadata.py --tag v0.1.0
 python3 scripts/audit-release-content.py
 scripts/validate-release.sh

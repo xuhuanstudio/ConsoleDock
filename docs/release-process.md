@@ -17,7 +17,13 @@ ConsoleDock releases are source-first Swift Package Manager releases. A public r
 3. Confirm README, DocC, sample app walkthrough, release-build safety, security policy, GitHub repository setup, and roadmap still describe the current shipped behavior.
 4. Confirm there are no secrets, production logs, credentials, tokens, or private screenshots in docs, examples, or screenshots. `scripts/audit-release-content.py` covers generated paths, private key blocks, common token shapes, and local absolute paths; review app-specific sensitive content manually.
 5. Confirm the public repository remote, Actions, topics, and vulnerability reporting are configured as described in [GitHub repository setup](github-repository-setup.md).
-6. Confirm `git status --short` is clean before the final validation run.
+6. Confirm public release preflight passes for the intended tag:
+
+```sh
+python3 scripts/validate-public-release-preflight.py --tag v0.1.0
+```
+
+7. Confirm `git status --short` is clean before the final validation run.
 
 ## Required Local Validation
 
