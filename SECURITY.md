@@ -4,7 +4,7 @@ ConsoleDock is a debug SDK. Logs may contain sensitive data, so privacy and Rele
 
 ## Supported Versions
 
-ConsoleDock has not published a stable release yet. Security handling is best effort until the first public tag.
+ConsoleDock has published a `v0.x` public preview, but has not reached a stable `1.0` release yet. Security handling is best effort for the latest public `v0.x` tag and active development on `main`.
 
 | Version | Security support |
 | --- | --- |
