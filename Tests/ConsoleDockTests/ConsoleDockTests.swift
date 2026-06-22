@@ -408,6 +408,28 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertTrue(entries[0].truncated)
     }
 
+    func testSwiftStartUsesConfigurationSnapshotAfterCallerMutatesConfiguration() {
+        var configuration = ConsoleDock.Configuration(
+            maximumMessageLength: 5,
+            captureStandardOutput: false,
+            captureStandardError: false,
+            redactor: { message in
+                message.replacingOccurrences(of: "secret", with: "public")
+            }
+        )
+        XCTAssertEqual(ConsoleDock.start(configuration: configuration), .started)
+
+        configuration.maximumMessageLength = 100
+        configuration.redactor = nil
+
+        ConsoleDock.info("secret-value")
+
+        let entry = ConsoleDock.entries.first
+        XCTAssertEqual(entry?.message, "publi")
+        XCTAssertEqual(entry?.redacted, true)
+        XCTAssertEqual(entry?.truncated, true)
+    }
+
     func testEntriesObserverDeliversInitialSnapshot() {
         XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
         ConsoleDock.info("initial")

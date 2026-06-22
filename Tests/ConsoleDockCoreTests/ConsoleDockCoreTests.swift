@@ -302,6 +302,25 @@ final class ConsoleDockCoreTests: XCTestCase {
         XCTAssertEqual(entry?.truncated, true)
     }
 
+    func testStartUsesConfigurationSnapshotAfterCallerMutatesConfiguration() {
+        let configuration = noCaptureConfiguration()
+        configuration.maximumMessageLength = 5
+        configuration.redactionBlock = { message in
+            message.replacingOccurrences(of: "secret", with: "public")
+        }
+        XCTAssertEqual(CDKConsoleDock.start(with: configuration), .started)
+
+        configuration.maximumMessageLength = 100
+        configuration.redactionBlock = nil
+
+        CDKConsoleDock.info("secret-value")
+
+        let entry = CDKConsoleDock.entries().first
+        XCTAssertEqual(entry?.message, "publi")
+        XCTAssertEqual(entry?.redacted, true)
+        XCTAssertEqual(entry?.truncated, true)
+    }
+
     func testNativeLoggingIsNoOpWhenNotRunning() {
         CDKConsoleDock.info("Should not be stored")
 
