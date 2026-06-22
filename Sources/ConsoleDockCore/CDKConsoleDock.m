@@ -28,8 +28,8 @@ static NSString *CDKDefaultRedactedMessage(NSString *message)
 {
     NSString *redacted = [message copy];
     redacted = CDKStringByReplacingMatches(redacted,
-                                           @"Authorization\\s*[:=]\\s*Bearer\\s+[^\\s,;]+",
-                                           @"Authorization: Bearer <redacted>");
+                                           @"\\bAuthorization\\s*[:=]\\s*[^\\r\\n]+",
+                                           @"Authorization: <redacted>");
     redacted = CDKStringByReplacingMatches(redacted,
                                            @"\\b(Set-Cookie|Cookie)\\s*:\\s*[^\\r\\n]+",
                                            @"$1: <redacted>");

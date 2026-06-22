@@ -26,7 +26,7 @@ The UIKit console reads from that in-memory buffer. Selected-entry copy and shar
 
 The default redactor is a local safety baseline for obvious secrets. It is case-insensitive and currently covers common forms of:
 
-- `Authorization: Bearer ...`
+- `Authorization: ...`
 - `Cookie: ...`
 - `Set-Cookie: ...`
 - `password`

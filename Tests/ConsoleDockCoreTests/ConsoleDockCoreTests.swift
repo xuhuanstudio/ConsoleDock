@@ -321,6 +321,9 @@ final class ConsoleDockCoreTests: XCTestCase {
         CDKConsoleDock.info(
             """
             Authorization: Bearer bearer123
+            authorization=Basic basic123
+            Authorization: Custom custom123
+            Authorization=opaque123
             Cookie: session=cookie123; refresh=cookie456
             Set-Cookie: session=setcookie123
             password=hunter2 passwd=pass123 token=tok123 access_token=access123 refresh-token=refresh123 api_key=api123 client_secret=client123 key=key123 secret=secret123
@@ -331,12 +334,15 @@ final class ConsoleDockCoreTests: XCTestCase {
         let entry = try XCTUnwrap(CDKConsoleDock.entries().first)
         let message = entry.message
         XCTAssertTrue(message.contains("<redacted>"))
-        XCTAssertTrue(message.contains("Authorization: Bearer <redacted>"))
+        XCTAssertTrue(message.contains("Authorization: <redacted>"))
         XCTAssertTrue(message.contains("Cookie: <redacted>"))
         XCTAssertTrue(message.contains("Set-Cookie: <redacted>"))
         XCTAssertTrue(entry.redacted)
         XCTAssertFalse(entry.truncated)
         XCTAssertFalse(message.contains("bearer123"))
+        XCTAssertFalse(message.contains("basic123"))
+        XCTAssertFalse(message.contains("custom123"))
+        XCTAssertFalse(message.contains("opaque123"))
         XCTAssertFalse(message.contains("cookie123"))
         XCTAssertFalse(message.contains("cookie456"))
         XCTAssertFalse(message.contains("setcookie123"))
