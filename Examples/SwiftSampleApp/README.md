@@ -4,7 +4,7 @@ Minimal UIKit sample app for validating local ConsoleDock package integration.
 
 The sample starts ConsoleDock on launch, enables stdout/stderr capture, shows the UIKit floating `CD` button, and provides buttons that generate:
 
-- Native ConsoleDock info/error entries
+- Native ConsoleDock info/error/fault entries
 - Swift `print` stdout
 - C `printf` stdout
 - C `fprintf(stderr)` stderr

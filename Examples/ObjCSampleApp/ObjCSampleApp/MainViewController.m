@@ -50,6 +50,7 @@
         [self makeButtonWithTitle:@"Show Console" action:@selector(showConsole)],
         [self makeButtonWithTitle:@"CDKConsoleDock info" action:@selector(logNativeInfo)],
         [self makeButtonWithTitle:@"CDKConsoleDock error" action:@selector(logNativeError)],
+        [self makeButtonWithTitle:@"CDKConsoleDock fault" action:@selector(logNativeFault)],
         [self makeButtonWithTitle:@"printf stdout" action:@selector(logPrintf)],
         [self makeButtonWithTitle:@"fprintf stderr" action:@selector(logStderr)],
         [self makeButtonWithTitle:@"write stdout" action:@selector(logWriteStdout)],
@@ -142,6 +143,13 @@
     NSString *message = [self nextMessageWithPrefix:@"objc native error"];
     [CDKConsoleDock error:message];
     [self updateStatus:@"Wrote CDKConsoleDock error."];
+}
+
+- (void)logNativeFault
+{
+    NSString *message = [self nextMessageWithPrefix:@"objc native fault"];
+    [CDKConsoleDock fault:message];
+    [self updateStatus:@"Wrote CDKConsoleDock fault."];
 }
 
 - (void)logPrintf

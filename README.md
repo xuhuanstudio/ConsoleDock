@@ -122,8 +122,8 @@ GitHub Actions currently validates the SwiftPM manifest, SwiftPM build/test, Rel
 
 The repository includes minimal UIKit sample apps:
 
-- [SwiftSampleApp](Examples/SwiftSampleApp/README.md): Swift UIKit app that imports the local package, starts ConsoleDock at launch, shows the floating console button, and generates Native API, Swift `print`, C `printf`, C `fprintf(stderr)`, and `NSLog` messages.
-- [ObjCSampleApp](Examples/ObjCSampleApp/README.md): Objective-C UIKit app that imports the local package, starts ConsoleDock through `CDKConsoleDockUIKit`, shows the floating console button, and generates Native API, C stdio, direct descriptor writes, and `NSLog` messages.
+- [SwiftSampleApp](Examples/SwiftSampleApp/README.md): Swift UIKit app that imports the local package, starts ConsoleDock at launch, shows the floating console button, and generates Native API info/error/fault, Swift `print`, C `printf`, C `fprintf(stderr)`, and `NSLog` messages.
+- [ObjCSampleApp](Examples/ObjCSampleApp/README.md): Objective-C UIKit app that imports the local package, starts ConsoleDock through `CDKConsoleDockUIKit`, shows the floating console button, and generates Native API info/error/fault, C stdio, direct descriptor writes, and `NSLog` messages.
 
 For a guided manual check, see [Sample app walkthrough](docs/sample-app-walkthrough.md).
 
@@ -199,6 +199,7 @@ Use ConsoleDock's explicit API for the most reliable logs:
 
 ```swift
 ConsoleDock.info("Login succeeded")
+ConsoleDock.fault("Invariant failed")
 ```
 
 Current Native Mode stores entries in a bounded local memory store only after ConsoleDock has started:
@@ -224,6 +225,7 @@ The future implementation may write to both ConsoleDock's internal store and App
 CDKConfiguration *configuration = [CDKConfiguration defaultConfiguration];
 CDKStartResult result = [CDKConsoleDockUIKit startWithConfiguration:configuration error:nil];
 [CDKConsoleDock info:@"Login succeeded"];
+[CDKConsoleDock fault:@"Invariant failed"];
 NSArray<CDKLogEntry *> *entries = [CDKConsoleDock entries];
 [CDKConsoleDock clearEntries];
 [CDKConsoleDockUIKit showConsole];

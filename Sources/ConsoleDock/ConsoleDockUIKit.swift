@@ -1,8 +1,10 @@
 import ConsoleDockCore
 import Foundation
 
+/// Objective-C-callable facade for using ConsoleDock with the bundled UIKit console.
 @objc(CDKConsoleDockUIKit)
 public final class ConsoleDockUIKit: NSObject {
+    /// Starts ConsoleDock and installs the floating UIKit button when configured.
     @discardableResult
     @objc(startWithConfiguration:error:)
     public static func start(configuration: CDKConfiguration?, error: NSErrorPointer) -> CDKStartResult {
@@ -13,23 +15,27 @@ public final class ConsoleDockUIKit: NSObject {
         return result
     }
 
+    /// Stops ConsoleDock and tears down the bundled UIKit console.
     @objc(stop)
     public static func stop() {
         CDKConsoleDock.stop()
         teardownUIIfAvailable()
     }
 
+    /// Whether ConsoleDock is currently running.
     @objc(isRunning)
     public static func isRunning() -> Bool {
         CDKConsoleDock.isRunning()
     }
 
+    /// Shows the bundled UIKit console when ConsoleDock is running.
     @objc(showConsole)
     public static func showConsole() {
         guard CDKConsoleDock.isRunning() else { return }
         showConsoleIfAvailable()
     }
 
+    /// Hides the bundled UIKit console.
     @objc(hideConsole)
     public static func hideConsole() {
         hideConsoleIfAvailable()

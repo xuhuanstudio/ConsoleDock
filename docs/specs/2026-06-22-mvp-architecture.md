@@ -119,6 +119,7 @@ configuration.maximumEntries = 2000;
 NSError *error = nil;
 CDKStartResult result = [CDKConsoleDock startWithConfiguration:configuration error:&error];
 [CDKConsoleDock logWithLevel:CDKLogLevelInfo message:@"Login succeeded"];
+[CDKConsoleDock fault:@"Invariant failed"];
 [CDKConsoleDock stop];
 ```
 
@@ -136,7 +137,8 @@ ConsoleDock.start(
 )
 
 ConsoleDock.info("Login succeeded")
-ConsoleDock.error("Request failed", metadata: ["endpoint": "/v1/session"])
+ConsoleDock.error("Request failed")
+ConsoleDock.fault("Invariant failed")
 ConsoleDock.stop()
 ```
 

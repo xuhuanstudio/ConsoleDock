@@ -9,7 +9,7 @@ The sample imports both package products:
 
 The app starts ConsoleDock on launch, enables stdout/stderr capture, shows the floating `CD` button, and provides buttons that generate:
 
-- Native `CDKConsoleDock` info/error entries
+- Native `CDKConsoleDock` info/error/fault entries
 - C `printf` stdout
 - C `fprintf(stderr)` stderr
 - Direct `write(STDOUT_FILENO, ...)`

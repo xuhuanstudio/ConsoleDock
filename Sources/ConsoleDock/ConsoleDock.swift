@@ -1,15 +1,23 @@
 import ConsoleDockCore
 import Foundation
 
+/// App-facing Swift facade for starting ConsoleDock and writing native log entries.
 public enum ConsoleDock {
+    /// Runtime options for the local in-app console.
     public struct Configuration: Equatable {
+        /// Maximum number of entries retained in memory before oldest entries are evicted.
         public var maximumEntries: Int
+        /// Maximum stored message length after redaction.
         public var maximumMessageLength: Int
+        /// Captures stdout writes from the app process when enabled.
         public var captureStandardOutput: Bool
+        /// Captures stderr writes from the app process when enabled.
         public var captureStandardError: Bool
+        /// Installs the bundled UIKit floating button when UIKit is available.
         public var showsFloatingButton: Bool
         /// Allows ConsoleDock to start in Release builds only when the app also defines CONSOLEDOCK_ENABLE_RELEASE.
         public var allowsReleaseBuilds: Bool
+        /// Optional app-specific redaction hook. The default redactor runs before this closure.
         public var redactor: ((String) -> String)?
 
         public init(
@@ -30,6 +38,7 @@ public enum ConsoleDock {
             self.redactor = redactor
         }
 
+        /// The debug-safe default configuration.
         public static let `default` = Configuration()
 
         public static func == (lhs: Configuration, rhs: Configuration) -> Bool {
@@ -59,6 +68,7 @@ public enum ConsoleDock {
         }
     }
 
+    /// Severity stored with a ConsoleDock entry.
     public enum LogLevel: Equatable {
         case debug
         case info
@@ -67,12 +77,14 @@ public enum ConsoleDock {
         case fault
     }
 
+    /// Where a ConsoleDock entry came from.
     public enum LogSource: Equatable {
         case native
         case stdout
         case stderr
     }
 
+    /// A redacted log entry retained in ConsoleDock's in-memory store.
     public struct LogEntry: Equatable {
         public let timestamp: Date
         public let level: LogLevel
@@ -80,6 +92,7 @@ public enum ConsoleDock {
         public let message: String
     }
 
+    /// Startup result returned by `start(configuration:)`.
     public enum StartResult: Equatable {
         case started
         case alreadyRunning
@@ -87,6 +100,7 @@ public enum ConsoleDock {
         case failed(StartFailure)
     }
 
+    /// Error information returned when ConsoleDock fails to start.
     public struct StartFailure: Equatable {
         public let domain: String
         public let code: Int
@@ -111,6 +125,7 @@ public enum ConsoleDock {
         )
     }
 
+    /// Starts ConsoleDock with local in-memory storage, redaction, optional stdout/stderr capture, and optional UIKit UI.
     @discardableResult
     public static func start(configuration: Configuration = .default) -> StartResult {
         var error: NSError?
@@ -122,48 +137,64 @@ public enum ConsoleDock {
         return startResult
     }
 
+    /// Stops ConsoleDock and tears down capture/UI state.
     public static func stop() {
         CDKConsoleDock.stop()
         teardownUIIfAvailable()
     }
 
+    /// Whether ConsoleDock is currently running.
     public static var isRunning: Bool {
         CDKConsoleDock.isRunning()
     }
 
+    /// Snapshot of the current in-memory entries.
     public static var entries: [LogEntry] {
         CDKConsoleDock.entries().map(LogEntry.init(coreEntry:))
     }
 
+    /// Notification posted after entries are appended, reset, or cleared.
     public static let entriesDidChangeNotification = Notification.Name.CDKConsoleDockEntriesDidChange
 
+    /// Clears the in-memory entry store.
     public static func clear() {
         CDKConsoleDock.clearEntries()
     }
 
+    /// Shows the bundled UIKit console when ConsoleDock is running and UIKit is available.
     public static func showConsole() {
         guard isRunning else { return }
         showConsoleIfAvailable()
     }
 
+    /// Hides the bundled UIKit console when UIKit is available.
     public static func hideConsole() {
         hideConsoleIfAvailable()
     }
 
+    /// Appends a native debug entry.
     public static func debug(_ message: String) {
         CDKConsoleDock.debug(message)
     }
 
+    /// Appends a native info entry.
     public static func info(_ message: String) {
         CDKConsoleDock.info(message)
     }
 
+    /// Appends a native warning entry.
     public static func warning(_ message: String) {
         CDKConsoleDock.warning(message)
     }
 
+    /// Appends a native error entry.
     public static func error(_ message: String) {
         CDKConsoleDock.error(message)
+    }
+
+    /// Appends a native fault entry.
+    public static func fault(_ message: String) {
+        CDKConsoleDock.fault(message)
     }
 }
 

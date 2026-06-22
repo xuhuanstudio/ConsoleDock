@@ -28,3 +28,4 @@ The project follows Semantic Versioning after public releases begin.
 - Added UIKit pause/resume live follow so the panel can freeze visible logs while capture continues.
 - Added UIKit selected-entry copy for visible redacted log rows.
 - Added UIKit log level filtering for visible entries, share/export snapshots, and selected-entry copy.
+- Added public `fault` logging convenience APIs and expanded public API documentation comments.

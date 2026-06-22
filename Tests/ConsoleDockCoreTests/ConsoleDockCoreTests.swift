@@ -124,6 +124,18 @@ final class ConsoleDockCoreTests: XCTestCase {
         XCTAssertLessThanOrEqual(entries[0].timestamp.timeIntervalSince1970, after.timeIntervalSince1970)
     }
 
+    func testNativeFaultLogAppendsFaultEntry() {
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+
+        CDKConsoleDock.fault("Disk corruption detected")
+
+        let entries = CDKConsoleDock.entries()
+        XCTAssertEqual(entries.count, 1)
+        XCTAssertEqual(entries[0].level, .fault)
+        XCTAssertEqual(entries[0].source, .native)
+        XCTAssertEqual(entries[0].message, "Disk corruption detected")
+    }
+
     func testRingBufferEvictsOldestEntries() {
         let configuration = noCaptureConfiguration()
         configuration.maximumEntries = 2

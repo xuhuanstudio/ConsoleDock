@@ -255,4 +255,9 @@ static void CDKPostEntriesDidChangeNotification(void)
     [self logWithLevel:CDKLogLevelError message:message];
 }
 
++ (void)fault:(NSString *)message
+{
+    [self logWithLevel:CDKLogLevelFault message:message];
+}
+
 @end

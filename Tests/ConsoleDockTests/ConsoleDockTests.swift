@@ -78,6 +78,7 @@ final class ConsoleDockTests: XCTestCase {
         ConsoleDock.info("info")
         ConsoleDock.warning("warning")
         ConsoleDock.error("error")
+        ConsoleDock.fault("fault")
 
         XCTAssertFalse(ConsoleDock.isRunning)
         XCTAssertTrue(ConsoleDock.entries.isEmpty)
@@ -90,11 +91,12 @@ final class ConsoleDockTests: XCTestCase {
         ConsoleDock.info("info")
         ConsoleDock.warning("warning")
         ConsoleDock.error("error")
+        ConsoleDock.fault("fault")
 
         let entries = ConsoleDock.entries
-        XCTAssertEqual(entries.map(\.level), [.debug, .info, .warning, .error])
-        XCTAssertEqual(entries.map(\.source), [.native, .native, .native, .native])
-        XCTAssertEqual(entries.map(\.message), ["debug", "info", "warning", "error"])
+        XCTAssertEqual(entries.map(\.level), [.debug, .info, .warning, .error, .fault])
+        XCTAssertEqual(entries.map(\.source), [.native, .native, .native, .native, .native])
+        XCTAssertEqual(entries.map(\.message), ["debug", "info", "warning", "error", "fault"])
 
         ConsoleDock.clear()
 

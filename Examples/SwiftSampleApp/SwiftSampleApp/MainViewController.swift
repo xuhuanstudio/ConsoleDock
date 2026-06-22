@@ -36,6 +36,7 @@ final class MainViewController: UIViewController {
             makeButton(title: "Show Console", action: #selector(showConsole)),
             makeButton(title: "ConsoleDock.info", action: #selector(logNativeInfo)),
             makeButton(title: "ConsoleDock.error", action: #selector(logNativeError)),
+            makeButton(title: "ConsoleDock.fault", action: #selector(logNativeFault)),
             makeButton(title: "print stdout", action: #selector(logPrint)),
             makeButton(title: "printf stdout", action: #selector(logPrintf)),
             makeButton(title: "fprintf stderr", action: #selector(logStderr)),
@@ -114,6 +115,12 @@ final class MainViewController: UIViewController {
         let message = nextMessage("native error")
         ConsoleDock.error(message)
         updateStatus("Wrote ConsoleDock.error.")
+    }
+
+    @objc private func logNativeFault() {
+        let message = nextMessage("native fault")
+        ConsoleDock.fault(message)
+        updateStatus("Wrote ConsoleDock.fault.")
     }
 
     @objc private func logPrint() {

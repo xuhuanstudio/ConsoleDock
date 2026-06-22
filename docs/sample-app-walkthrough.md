@@ -31,7 +31,7 @@ Manual check:
 
 1. Launch the app.
 2. Tap `Show Console` or the floating `CD` button.
-3. Tap `ConsoleDock.info`, `ConsoleDock.error`, `print stdout`, `printf stdout`, `fprintf stderr`, and `NSLog`.
+3. Tap `ConsoleDock.info`, `ConsoleDock.error`, `ConsoleDock.fault`, `print stdout`, `printf stdout`, `fprintf stderr`, and `NSLog`.
 4. Confirm entries appear in the ConsoleDock panel.
 5. Confirm generated `token=...` values are stored as `token=<redacted>`.
 6. Search for `stderr` or `token` and confirm the visible list filters without changing stored entries.
@@ -47,7 +47,7 @@ Manual check:
 
 Expected sources:
 
-- `ConsoleDock.info` and `ConsoleDock.error`: `native`
+- `ConsoleDock.info`, `ConsoleDock.error`, and `ConsoleDock.fault`: `native`
 - `print` and `printf`: `stdout`
 - `fprintf(stderr)`: `stderr`
 - many `NSLog` messages: `stderr`
