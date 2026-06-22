@@ -238,7 +238,7 @@ Recommended guidance for unified logging users:
 ConsoleDock.info("Login succeeded")
 ```
 
-The ConsoleDock API may also forward to Apple unified logging, but the in-app panel must be populated from ConsoleDock's internal store.
+If a future adapter keeps Apple unified logging output for an app, it must also explicitly populate ConsoleDock's internal store. The in-app panel must not depend on reading Apple unified logging back from inside the app.
 
 ## Entry Model
 

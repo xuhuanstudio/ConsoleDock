@@ -54,7 +54,7 @@ Use ConsoleDock's explicit API for the most reliable logs:
 ConsoleDock.info("Login succeeded")
 ```
 
-The current implementation writes to ConsoleDock's internal in-memory store. A future adapter may also write to Apple unified logging where appropriate, but the in-app console must not depend on reading Apple unified logging back from inside the app.
+ConsoleDock's in-app console reads from ConsoleDock's internal in-memory store. The current implementation does not write to Apple unified logging or read Apple unified logging back from inside the app. If an app also needs Apple unified logging output, that output should remain in the app's existing logger while the same already-formatted message is forwarded to ConsoleDock.
 
 ## Non-Goals
 

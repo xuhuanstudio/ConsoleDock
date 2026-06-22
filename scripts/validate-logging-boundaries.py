@@ -14,6 +14,7 @@ REQUIRED_SNIPPETS = {
         "ConsoleDock must not be described as a full replacement for Xcode Console or Apple unified logging.",
         "ConsoleDock cannot promise complete, reliable, live, zero-intrusion capture of:",
         "Reliable complete logging should go through ConsoleDock's explicit API or an adapter for an existing logging framework.",
+        "ConsoleDock's on-device panel reads from ConsoleDock's own in-memory store.",
     ],
     "README.zh-CN.md": [
         "ConsoleDock 不能被描述成 Xcode Console 或 Apple unified logging 的完整替代品。",
@@ -73,6 +74,13 @@ FORBIDDEN_PATTERNS = [
     (
         re.compile(r"\bConsoleDock\s+(?:can\s+)?reads?\s+logs\s+from\s+other\s+(?:apps|processes)\b", re.IGNORECASE),
         "ConsoleDock must not claim other-process log access",
+    ),
+    (
+        re.compile(
+            r"\b(?:future\s+)?(?:implementation|adapter|api)\s+(?:may\s+)?(?:also\s+)?(?:write|forward)s?\s+to\s+Apple\s+unified\s+logging\b",
+            re.IGNORECASE,
+        ),
+        "ConsoleDock must not frame Apple unified logging writes as a future public capability promise",
     ),
 ]
 
