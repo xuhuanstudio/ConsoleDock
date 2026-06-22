@@ -1,3 +1,4 @@
+import ConsoleDockCore
 import Foundation
 
 final class ConsoleDockEntriesObserver {
@@ -21,7 +22,7 @@ final class ConsoleDockEntriesObserver {
         self.handler = handler
         token = notificationCenter.addObserver(
             forName: ConsoleDock.entriesDidChangeNotification,
-            object: nil,
+            object: CDKConsoleDock.self,
             queue: nil
         ) { [weak self] _ in
             self?.scheduleSnapshot()

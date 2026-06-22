@@ -471,6 +471,37 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertEqual(snapshots.last?.map(\.message), ["appended"])
     }
 
+    func testEntriesObserverIgnoresSameNameNotificationsFromOtherObjects() {
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+        let notificationCenter = NotificationCenter()
+        let deliveryQueue = DispatchQueue(label: "ConsoleDockTests.ObserverDelivery")
+        let initialExpectation = expectation(description: "Initial snapshot delivered")
+        let sourceExpectation = expectation(description: "ConsoleDock object snapshot delivered")
+        var snapshots: [[ConsoleDock.LogEntry]] = []
+        let observer = ConsoleDockEntriesObserver(
+            notificationCenter: notificationCenter,
+            deliveryQueue: deliveryQueue
+        ) { snapshot in
+            snapshots.append(snapshot)
+            if snapshots.count == 1 {
+                initialExpectation.fulfill()
+            } else if snapshots.count == 2 {
+                sourceExpectation.fulfill()
+            }
+        }
+        defer { observer.invalidate() }
+
+        wait(for: [initialExpectation], timeout: 1.0)
+        notificationCenter.post(name: ConsoleDock.entriesDidChangeNotification, object: NSObject())
+        let snapshotsAfterUnrelatedNotification = deliveryQueue.sync { snapshots.count }
+        XCTAssertEqual(snapshotsAfterUnrelatedNotification, 1)
+
+        notificationCenter.post(name: ConsoleDock.entriesDidChangeNotification, object: CDKConsoleDock.self)
+        wait(for: [sourceExpectation], timeout: 1.0)
+
+        XCTAssertEqual(snapshots.count, 2)
+    }
+
     func testEntriesObserverStopsAfterInvalidate() {
         XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
 
