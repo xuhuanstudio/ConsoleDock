@@ -2,6 +2,7 @@
 #import "CDKStandardOutputCapture.h"
 
 NSErrorDomain const CDKConsoleDockErrorDomain = @"CDKConsoleDockErrorDomain";
+NSNotificationName const CDKConsoleDockEntriesDidChangeNotification = @"CDKConsoleDockEntriesDidChangeNotification";
 
 static BOOL CDKConsoleDockRunning = NO;
 static BOOL CDKConsoleDockStopping = NO;
@@ -63,6 +64,12 @@ static CDKLogLevel CDKDefaultLevelForSource(CDKLogSource source)
         default:
             return CDKLogLevelInfo;
     }
+}
+
+static void CDKPostEntriesDidChangeNotification(void)
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:CDKConsoleDockEntriesDidChangeNotification
+                                                        object:CDKConsoleDock.class];
 }
 
 @implementation CDKConsoleDock
@@ -164,13 +171,22 @@ static CDKLogLevel CDKDefaultLevelForSource(CDKLogSource source)
 
 + (void)clearEntries
 {
+    BOOL didClear = NO;
     @synchronized(self) {
-        [CDKConsoleDockEntries removeAllObjects];
+        didClear = CDKConsoleDockEntries.count > 0;
+        if (didClear) {
+            [CDKConsoleDockEntries removeAllObjects];
+        }
+    }
+
+    if (didClear) {
+        CDKPostEntriesDidChangeNotification();
     }
 }
 
 + (void)appendEntryWithLevel:(CDKLogLevel)level source:(CDKLogSource)source message:(NSString *)message
 {
+    BOOL didAppend = NO;
     @synchronized(self) {
         if (!CDKConsoleDockRunning || CDKConsoleDockConfiguration == nil) {
             return;
@@ -189,6 +205,11 @@ static CDKLogLevel CDKDefaultLevelForSource(CDKLogSource source)
         while (CDKConsoleDockEntries.count > CDKConsoleDockConfiguration.maximumEntries) {
             [CDKConsoleDockEntries removeObjectAtIndex:0];
         }
+        didAppend = YES;
+    }
+
+    if (didAppend) {
+        CDKPostEntriesDidChangeNotification();
     }
 }
 

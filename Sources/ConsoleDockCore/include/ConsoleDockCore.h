@@ -26,6 +26,7 @@ typedef NS_ENUM(NSInteger, CDKStartResult) {
 typedef NSString * _Nonnull (^CDKRedactionBlock)(NSString *message);
 
 FOUNDATION_EXPORT NSErrorDomain const CDKConsoleDockErrorDomain;
+FOUNDATION_EXPORT NSNotificationName const CDKConsoleDockEntriesDidChangeNotification;
 
 @interface CDKConfiguration : NSObject <NSCopying>
 

@@ -6,12 +6,13 @@ ConsoleDock is a planned iOS debug SDK that lets testers inspect app logs direct
 
 ## Status
 
-ConsoleDock is currently in the core stdout/stderr capture phase. The repository contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, bounded in-memory entries, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, and focused tests.
+ConsoleDock is currently in the core stdout/stderr capture and snapshot refresh foundation phase. The repository contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, bounded in-memory entries, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, entry change notification, and focused tests.
 
 Current limitations:
 
 - stdout/stderr capture exists in the core and is connected to line framing and in-memory storage.
 - Direct descriptor writes and flushed C stdio output can be captured; unflushed `printf` / `fprintf` output depends on standard stream buffering.
+- Entry change notification exists as the refresh foundation for future UI; notification handlers should fetch a snapshot through `entries`.
 - The UIKit floating button and console panel are not implemented yet.
 - Third-party adapters, CocoaPods, and XCFramework distribution are not implemented yet.
 - Redaction is a local in-memory baseline, not a complete privacy guarantee.
@@ -120,6 +121,8 @@ ConsoleDock.info("Login succeeded")
 let entries = ConsoleDock.entries
 ConsoleDock.clear()
 ```
+
+Future UI or custom debug surfaces can observe `ConsoleDock.entriesDidChangeNotification` and then read `ConsoleDock.entries`. Notifications are posted on the thread that changed the store, so UI code should dispatch to the main queue before touching UIKit.
 
 The future implementation may write to both ConsoleDock's internal store and Apple unified logging where appropriate, but ConsoleDock's on-device panel must read from its own store. ConsoleDock does not write files, upload logs, or read unified logging entries in the current implementation.
 

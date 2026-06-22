@@ -175,6 +175,87 @@ final class ConsoleDockCoreTests: XCTestCase {
         XCTAssertTrue(CDKConsoleDock.entries().isEmpty)
     }
 
+    func testNativeLogAppendPostsEntriesDidChangeNotification() {
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+        var notifications: [Notification] = []
+        let observer = observeEntriesDidChange { notification in
+            notifications.append(notification)
+        }
+        defer { NotificationCenter.default.removeObserver(observer) }
+
+        CDKConsoleDock.info("notify native")
+
+        XCTAssertEqual(notifications.count, 1)
+        XCTAssertNotificationObjectIsConsoleDock(notifications[0])
+    }
+
+    func testAppendLineEventPostsEntriesDidChangeNotification() {
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+        var notifications: [Notification] = []
+        let observer = observeEntriesDidChange { notification in
+            notifications.append(notification)
+        }
+        defer { NotificationCenter.default.removeObserver(observer) }
+
+        CDKConsoleDock.append(CDKLineEvent(source: .stdout, message: "notify line event", isPartial: false))
+
+        XCTAssertEqual(notifications.count, 1)
+        XCTAssertNotificationObjectIsConsoleDock(notifications[0])
+    }
+
+    func testClearEntriesAfterStoredEntriesPostsNotification() {
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+        CDKConsoleDock.info("before clear notification")
+        var notifications: [Notification] = []
+        let observer = observeEntriesDidChange { notification in
+            notifications.append(notification)
+        }
+        defer { NotificationCenter.default.removeObserver(observer) }
+
+        CDKConsoleDock.clearEntries()
+
+        XCTAssertEqual(notifications.count, 1)
+        XCTAssertNotificationObjectIsConsoleDock(notifications[0])
+    }
+
+    func testClearEntriesWhenEmptyDoesNotPostNotification() {
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+        var notifications: [Notification] = []
+        let observer = observeEntriesDidChange { notification in
+            notifications.append(notification)
+        }
+        defer { NotificationCenter.default.removeObserver(observer) }
+
+        CDKConsoleDock.clearEntries()
+
+        XCTAssertTrue(notifications.isEmpty)
+    }
+
+    func testLoggingWhileNotRunningDoesNotPostNotification() {
+        var notifications: [Notification] = []
+        let observer = observeEntriesDidChange { notification in
+            notifications.append(notification)
+        }
+        defer { NotificationCenter.default.removeObserver(observer) }
+
+        CDKConsoleDock.info("not running notification")
+
+        XCTAssertTrue(notifications.isEmpty)
+    }
+
+    func testEntriesCanBeReadFromNotificationObserver() {
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+        var snapshotMessages: [String] = []
+        let observer = observeEntriesDidChange { _ in
+            snapshotMessages = CDKConsoleDock.entries().map(\.message)
+        }
+        defer { NotificationCenter.default.removeObserver(observer) }
+
+        CDKConsoleDock.info("reentrant snapshot")
+
+        XCTAssertEqual(snapshotMessages, ["reentrant snapshot"])
+    }
+
     func testLineFramerEmitsSingleLine() {
         let framer = CDKLineFramer()
 
@@ -448,6 +529,23 @@ final class ConsoleDockCoreTests: XCTestCase {
 }
 
 private extension ConsoleDockCoreTests {
+    func observeEntriesDidChange(_ handler: @escaping (Notification) -> Void) -> NSObjectProtocol {
+        NotificationCenter.default.addObserver(
+            forName: Notification.Name.CDKConsoleDockEntriesDidChange,
+            object: CDKConsoleDock.self,
+            queue: nil,
+            using: handler
+        )
+    }
+
+    func XCTAssertNotificationObjectIsConsoleDock(
+        _ notification: Notification,
+        file: StaticString = #filePath,
+        line: UInt = #line
+    ) {
+        XCTAssertTrue(notification.object as AnyObject === CDKConsoleDock.self, file: file, line: line)
+    }
+
     func noCaptureConfiguration() -> CDKConfiguration {
         let configuration = CDKConfiguration.default()
         configuration.captureStandardOutput = false

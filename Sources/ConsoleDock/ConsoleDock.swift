@@ -129,6 +129,8 @@ public enum ConsoleDock {
         CDKConsoleDock.entries().map(LogEntry.init(coreEntry:))
     }
 
+    public static let entriesDidChangeNotification = Notification.Name.CDKConsoleDockEntriesDidChange
+
     public static func clear() {
         CDKConsoleDock.clearEntries()
     }
