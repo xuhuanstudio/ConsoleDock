@@ -246,7 +246,7 @@ let diagnostics = ConsoleDock.diagnostics
 ConsoleDock.clear()
 ```
 
-Future UI or custom debug surfaces can observe `ConsoleDock.entriesDidChangeNotification` and then read `ConsoleDock.entries`. Notifications are posted on the thread that changed the store, so UI code should dispatch to the main queue before touching UIKit.
+Future UI or custom debug surfaces can observe `ConsoleDock.entriesDidChangeNotification` and then read `ConsoleDock.entries`. Observe `ConsoleDock.diagnosticsDidChangeNotification` when the surface also needs to refresh running state, capture configuration, or store counts after start, stop, append, or clear operations. Notifications are posted on the thread that changed ConsoleDock state, so UI code should dispatch to the main queue before touching UIKit.
 
 The future implementation may write to both ConsoleDock's internal store and Apple unified logging where appropriate, but ConsoleDock's on-device panel must read from its own store. ConsoleDock does not write files, upload logs, or read unified logging entries in the current implementation.
 

@@ -27,6 +27,7 @@ typedef NSString * _Nonnull (^CDKRedactionBlock)(NSString *message);
 
 FOUNDATION_EXPORT NSErrorDomain const CDKConsoleDockErrorDomain;
 FOUNDATION_EXPORT NSNotificationName const CDKConsoleDockEntriesDidChangeNotification;
+FOUNDATION_EXPORT NSNotificationName const CDKConsoleDockDiagnosticsDidChangeNotification;
 
 @interface CDKConfiguration : NSObject <NSCopying>
 

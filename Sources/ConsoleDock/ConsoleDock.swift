@@ -239,6 +239,8 @@ public enum ConsoleDock {
 
     /// Notification posted after entries are appended, reset, or cleared.
     public static let entriesDidChangeNotification = Notification.Name.CDKConsoleDockEntriesDidChange
+    /// Notification posted after diagnostics values may have changed.
+    public static let diagnosticsDidChangeNotification = Notification.Name.CDKConsoleDockDiagnosticsDidChange
 
     /// Clears the in-memory entry store.
     public static func clear() {

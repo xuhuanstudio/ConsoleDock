@@ -434,6 +434,61 @@ final class ConsoleDockCoreTests: XCTestCase {
         assertNotificationObjectIsConsoleDock(notifications[0])
     }
 
+    func testStartPostsDiagnosticsDidChangeNotification() {
+        var notifications: [Notification] = []
+        let observer = observeDiagnosticsDidChange { notification in
+            notifications.append(notification)
+        }
+        defer { NotificationCenter.default.removeObserver(observer) }
+
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+
+        XCTAssertEqual(notifications.count, 1)
+        assertNotificationObjectIsConsoleDock(notifications[0])
+        XCTAssertTrue(CDKConsoleDock.diagnostics().isRunning)
+    }
+
+    func testAlreadyRunningDoesNotPostDiagnosticsDidChangeNotification() {
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+        var notifications: [Notification] = []
+        let observer = observeDiagnosticsDidChange { notification in
+            notifications.append(notification)
+        }
+        defer { NotificationCenter.default.removeObserver(observer) }
+
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .alreadyRunning)
+
+        XCTAssertTrue(notifications.isEmpty)
+    }
+
+    func testStopPostsDiagnosticsDidChangeNotification() {
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+        var notifications: [Notification] = []
+        let observer = observeDiagnosticsDidChange { notification in
+            notifications.append(notification)
+        }
+        defer { NotificationCenter.default.removeObserver(observer) }
+
+        CDKConsoleDock.stop()
+
+        XCTAssertEqual(notifications.count, 1)
+        assertNotificationObjectIsConsoleDock(notifications[0])
+        XCTAssertFalse(CDKConsoleDock.diagnostics().isRunning)
+    }
+
+    func testAppendLineEventPostsDiagnosticsDidChangeNotification() {
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+        var entryCounts: [UInt] = []
+        let observer = observeDiagnosticsDidChange { _ in
+            entryCounts.append(UInt(CDKConsoleDock.diagnostics().entryCount))
+        }
+        defer { NotificationCenter.default.removeObserver(observer) }
+
+        CDKConsoleDock.append(CDKLineEvent(source: .stdout, message: "notify diagnostics", isPartial: false))
+
+        XCTAssertEqual(entryCounts, [1])
+    }
+
     func testClearEntriesAfterStoredEntriesPostsNotification() {
         XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
         CDKConsoleDock.info("before clear notification")
@@ -447,6 +502,20 @@ final class ConsoleDockCoreTests: XCTestCase {
 
         XCTAssertEqual(notifications.count, 1)
         assertNotificationObjectIsConsoleDock(notifications[0])
+    }
+
+    func testClearEntriesAfterStoredEntriesPostsDiagnosticsDidChangeNotification() {
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+        CDKConsoleDock.info("before clear diagnostics")
+        var entryCounts: [UInt] = []
+        let observer = observeDiagnosticsDidChange { _ in
+            entryCounts.append(UInt(CDKConsoleDock.diagnostics().entryCount))
+        }
+        defer { NotificationCenter.default.removeObserver(observer) }
+
+        CDKConsoleDock.clearEntries()
+
+        XCTAssertEqual(entryCounts, [0])
     }
 
     func testClearEntriesWhenEmptyDoesNotPostNotification() {
@@ -828,6 +897,15 @@ extension ConsoleDockCoreTests {
     fileprivate func observeEntriesDidChange(_ handler: @escaping (Notification) -> Void) -> NSObjectProtocol {
         NotificationCenter.default.addObserver(
             forName: Notification.Name.CDKConsoleDockEntriesDidChange,
+            object: CDKConsoleDock.self,
+            queue: nil,
+            using: handler
+        )
+    }
+
+    fileprivate func observeDiagnosticsDidChange(_ handler: @escaping (Notification) -> Void) -> NSObjectProtocol {
+        NotificationCenter.default.addObserver(
+            forName: Notification.Name.CDKConsoleDockDiagnosticsDidChange,
             object: CDKConsoleDock.self,
             queue: nil,
             using: handler

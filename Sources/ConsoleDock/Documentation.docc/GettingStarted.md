@@ -66,6 +66,6 @@ let diagnostics = ConsoleDock.diagnostics
 ConsoleDock.clear()
 ```
 
-Use ``ConsoleDock/entriesDidChangeNotification`` when building a custom debug surface. Notification handlers should dispatch to the main queue before touching UIKit.
+Use ``ConsoleDock/entriesDidChangeNotification`` when building a custom debug surface that displays entries. Use ``ConsoleDock/diagnosticsDidChangeNotification`` when the surface also displays running state, capture configuration, or store counts. Notification handlers should dispatch to the main queue before touching UIKit.
 
 Diagnostics report ConsoleDock's local runtime state only. They do not imply complete capture of Swift `Logger`, `os_log`, Apple unified logging, other-process logs, or debugger-only output.

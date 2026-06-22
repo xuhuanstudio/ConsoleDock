@@ -1,4 +1,5 @@
 #if canImport(UIKit)
+    import ConsoleDockCore
     import UIKit
 
     final class ConsoleDockUIController {
@@ -217,6 +218,7 @@
         private var sourceScope = ConsoleDockEntryFilter.SourceScope.all
         private var levelScope = ConsoleDockEntryFilter.LevelScope.all
         private var observer: ConsoleDockEntriesObserver?
+        private var diagnosticsObserver: NSObjectProtocol?
         private var pauseButton: UIBarButtonItem?
         private var shareButton: UIBarButtonItem?
         private var clearButton: UIBarButtonItem?
@@ -238,6 +240,13 @@
             observer = ConsoleDockEntriesObserver(deliveryQueue: .main) { [weak self] snapshot in
                 self?.receive(snapshot: snapshot)
             }
+            diagnosticsObserver = NotificationCenter.default.addObserver(
+                forName: ConsoleDock.diagnosticsDidChangeNotification,
+                object: CDKConsoleDock.self,
+                queue: .main
+            ) { [weak self] _ in
+                self?.updateStatusHeader()
+            }
         }
 
         override func viewWillAppear(_ animated: Bool) {
@@ -247,6 +256,9 @@
 
         deinit {
             observer?.invalidate()
+            if let diagnosticsObserver {
+                NotificationCenter.default.removeObserver(diagnosticsObserver)
+            }
         }
 
         private func configureNavigationItems() {

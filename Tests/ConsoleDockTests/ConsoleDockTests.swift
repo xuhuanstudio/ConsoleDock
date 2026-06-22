@@ -106,6 +106,13 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertEqual(ConsoleDock.entriesDidChangeNotification.rawValue, "CDKConsoleDockEntriesDidChangeNotification")
     }
 
+    func testDiagnosticsDidChangeNotificationNameIsExposed() {
+        XCTAssertEqual(
+            ConsoleDock.diagnosticsDidChangeNotification.rawValue,
+            "CDKConsoleDockDiagnosticsDidChangeNotification"
+        )
+    }
+
     func testInvalidConfigurationMapsToFailure() {
         let configuration = ConsoleDock.Configuration(maximumEntries: 0)
 

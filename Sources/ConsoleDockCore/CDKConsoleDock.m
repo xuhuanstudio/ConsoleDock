@@ -3,6 +3,7 @@
 
 NSErrorDomain const CDKConsoleDockErrorDomain = @"CDKConsoleDockErrorDomain";
 NSNotificationName const CDKConsoleDockEntriesDidChangeNotification = @"CDKConsoleDockEntriesDidChangeNotification";
+NSNotificationName const CDKConsoleDockDiagnosticsDidChangeNotification = @"CDKConsoleDockDiagnosticsDidChangeNotification";
 
 static BOOL CDKConsoleDockRunning = NO;
 static BOOL CDKConsoleDockStopping = NO;
@@ -92,6 +93,12 @@ static void CDKPostEntriesDidChangeNotification(void)
                                                         object:CDKConsoleDock.class];
 }
 
+static void CDKPostDiagnosticsDidChangeNotification(void)
+{
+    [[NSNotificationCenter defaultCenter] postNotificationName:CDKConsoleDockDiagnosticsDidChangeNotification
+                                                        object:CDKConsoleDock.class];
+}
+
 @implementation CDKConsoleDock
 
 + (CDKStartResult)startWithConfiguration:(CDKConfiguration *)configuration
@@ -156,6 +163,7 @@ static void CDKPostEntriesDidChangeNotification(void)
     if (didResetEntries) {
         CDKPostEntriesDidChangeNotification();
     }
+    CDKPostDiagnosticsDidChangeNotification();
     return CDKStartResultStarted;
 #else
     (void)configuration;
@@ -184,6 +192,7 @@ static void CDKPostEntriesDidChangeNotification(void)
         CDKConsoleDockRunning = NO;
         CDKConsoleDockStopping = NO;
     }
+    CDKPostDiagnosticsDidChangeNotification();
 }
 
 + (BOOL)isRunning
@@ -251,6 +260,7 @@ static void CDKPostEntriesDidChangeNotification(void)
 
     if (didClear) {
         CDKPostEntriesDidChangeNotification();
+        CDKPostDiagnosticsDidChangeNotification();
     }
 }
 
@@ -290,6 +300,7 @@ static void CDKPostEntriesDidChangeNotification(void)
 
     if (didAppend) {
         CDKPostEntriesDidChangeNotification();
+        CDKPostDiagnosticsDidChangeNotification();
     }
 }
 

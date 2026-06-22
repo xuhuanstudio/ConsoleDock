@@ -33,6 +33,7 @@ REQUIRED_SNIPPETS = [
     "CDKStartResultFailed",
     "FOUNDATION_EXPORT NSErrorDomain const CDKConsoleDockErrorDomain;",
     "FOUNDATION_EXPORT NSNotificationName const CDKConsoleDockEntriesDidChangeNotification;",
+    "FOUNDATION_EXPORT NSNotificationName const CDKConsoleDockDiagnosticsDidChangeNotification;",
     "typedef NSString * _Nonnull (^CDKRedactionBlock)(NSString *message);",
     "@interface CDKConfiguration : NSObject <NSCopying>",
     "@property (nonatomic) NSUInteger maximumEntries;",

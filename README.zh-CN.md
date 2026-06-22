@@ -83,6 +83,8 @@ NSLog(@"Stored entries: %lu", (unsigned long)diagnostics.entryCount);
 
 diagnostics 只反映 ConsoleDock 本地运行状态和当前有界内存 store，不代表已经完整捕获 Swift `Logger`、`os_log` 或 Apple unified logging。
 
+如果你要自己做调试面板，可以观察 `ConsoleDock.entriesDidChangeNotification` 刷新日志列表，观察 `ConsoleDock.diagnosticsDidChangeNotification` 刷新运行状态、capture 配置和 store 计数。通知会在改变 ConsoleDock 状态的线程发出，UIKit 更新需要切回主线程。
+
 ## Objective-C 快速开始
 
 ```objc
