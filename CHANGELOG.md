@@ -46,7 +46,7 @@ Initial public preview of ConsoleDock as a source-first Swift Package Manager iO
 - Added a local post-release verifier self-test for repository parsing, semantic version tag parsing, and SwiftPM `v*` tag exact-version resolution.
 - Added clean working tree enforcement to release validation so source archive checks match the committed state being released.
 - Added package identity validation for Swift tools version, public products, platforms, targets, and target dependencies.
-- Added Swift formatting configuration and lint validation for source, tests, and the Swift sample app.
+- Added Swift formatting lint validation with a minimal cross-runner configuration for source, tests, and the Swift sample app.
 - Added Swift Package Index metadata for hosted DocC documentation.
 - Added Swift Package Index metadata validation to the release gate.
 - Added Objective-C API surface validation to protect the `CDK`-prefixed public core API.
