@@ -28,6 +28,22 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertFalse(ConsoleDock.isRunning)
     }
 
+    func testSwiftFacadeCanAttachUIWhenCoreIsAlreadyRunning() {
+        XCTAssertEqual(CDKConsoleDock.start(with: CDKConfiguration.default()), .started)
+
+        let result = ConsoleDock.start(configuration: .default)
+
+        XCTAssertEqual(result, .alreadyRunning)
+        XCTAssertTrue(ConsoleDock.shouldInstallUI(startResult: result, configuration: .default))
+    }
+
+    func testSwiftFacadeDoesNotAttachUIWhenDisabledByConfiguration() {
+        let configuration = ConsoleDock.Configuration(showsFloatingButton: false)
+
+        XCTAssertFalse(ConsoleDock.shouldInstallUI(startResult: .started, configuration: configuration))
+        XCTAssertFalse(ConsoleDock.shouldInstallUI(startResult: .alreadyRunning, configuration: configuration))
+    }
+
     func testObjectiveCUIKitFacadeStartStopLifecycle() {
         let configuration = CDKConfiguration()
         configuration.captureStandardOutput = false

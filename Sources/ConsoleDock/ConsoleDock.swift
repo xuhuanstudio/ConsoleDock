@@ -131,7 +131,7 @@ public enum ConsoleDock {
         var error: NSError?
         let result = CDKConsoleDock.start(with: configuration.makeCoreConfiguration(), error: &error)
         let startResult = StartResult(coreResult: result, error: error)
-        if case .started = startResult, configuration.showsFloatingButton {
+        if shouldInstallUI(startResult: startResult, configuration: configuration) {
             installUIIfAvailable()
         }
         return startResult
@@ -195,6 +195,12 @@ public enum ConsoleDock {
     /// Appends a native fault entry.
     public static func fault(_ message: String) {
         CDKConsoleDock.fault(message)
+    }
+}
+
+extension ConsoleDock {
+    static func shouldInstallUI(startResult: StartResult, configuration: Configuration) -> Bool {
+        configuration.showsFloatingButton && (startResult == .started || startResult == .alreadyRunning)
     }
 }
 
