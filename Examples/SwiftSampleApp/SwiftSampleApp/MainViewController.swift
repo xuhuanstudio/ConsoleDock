@@ -1,6 +1,14 @@
 import ConsoleDock
 import UIKit
 
+private enum SampleAppLog {
+    static func info(_ message: String) {
+        let formattedMessage = "[sample app logger] \(message)"
+        print(formattedMessage)
+        ConsoleDock.info(formattedMessage)
+    }
+}
+
 final class MainViewController: UIViewController {
     private let statusLabel = UILabel()
     private var counter = 0
@@ -35,6 +43,7 @@ final class MainViewController: UIViewController {
             bodyLabel,
             makeButton(title: "Show Console", action: #selector(showConsole)),
             makeButton(title: "Log diagnostics", action: #selector(logDiagnostics)),
+            makeButton(title: "App logger sink", action: #selector(logAppLoggerSink)),
             makeButton(title: "ConsoleDock.info", action: #selector(logNativeInfo)),
             makeButton(title: "ConsoleDock.error", action: #selector(logNativeError)),
             makeButton(title: "ConsoleDock.fault", action: #selector(logNativeFault)),
@@ -128,6 +137,12 @@ final class MainViewController: UIViewController {
         ].joined(separator: " ")
         ConsoleDock.info(message)
         updateStatus("Wrote ConsoleDock diagnostics.")
+    }
+
+    @objc private func logAppLoggerSink() {
+        SampleAppLog.info(nextMessage("app logger sink"))
+        fflush(stdout)
+        updateStatusAfterCapture("Wrote app logger sink.")
     }
 
     @objc private func logNativeInfo() {

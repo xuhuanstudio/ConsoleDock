@@ -30,6 +30,8 @@ enum AppLog {
 
 Existing call sites keep using `AppLog.info(...)` and `AppLog.error(...)`.
 
+The Swift sample app includes an `App logger sink` button that demonstrates this pattern with a small app-owned wrapper.
+
 If the wrapper also writes to Swift `Logger` or `os_log`, keep that output and explicitly forward to ConsoleDock. ConsoleDock does not promise complete zero-intrusion capture of Apple unified logging.
 
 ## Objective-C Logger Wrapper
@@ -47,6 +49,8 @@ For Objective-C projects, add the forward inside the existing macro, function, o
 ```
 
 Use `CDKConsoleDockUIKit` from the `ConsoleDock` product when the app also wants the bundled UIKit floating button and panel.
+
+The Objective-C sample app includes an `App logger sink` button that demonstrates this pattern with an `NSLog`-style central forwarding function.
 
 ## Integration Rules
 

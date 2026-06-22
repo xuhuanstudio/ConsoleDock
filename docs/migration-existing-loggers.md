@@ -74,6 +74,8 @@ enum AppLog {
 
 Existing call sites keep using `AppLog.info(...)` and `AppLog.error(...)`. ConsoleDock becomes one additional destination.
 
+The Swift sample app includes an `App logger sink` button that follows this pattern: it writes through the app's logger wrapper and forwards the already-formatted message to ConsoleDock.
+
 If the existing logger writes to Swift `Logger`, keep that output and also forward to ConsoleDock:
 
 ```swift
@@ -113,6 +115,8 @@ For Objective-C projects, the best migration point is usually the existing macro
 ```
 
 Existing call sites keep using `AppLogInfo(...)` and `AppLogError(...)`. The original output remains, and ConsoleDock receives the same formatted message through the native storage path.
+
+The Objective-C sample app includes an `App logger sink` button that follows this pattern with an `NSLog`-style central forwarding function.
 
 Use `@import ConsoleDock;` and `CDKConsoleDockUIKit` when the Objective-C app also wants the bundled floating button and panel.
 

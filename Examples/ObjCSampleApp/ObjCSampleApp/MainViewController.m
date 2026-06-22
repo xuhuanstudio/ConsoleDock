@@ -7,6 +7,13 @@
 @import ConsoleDock;
 @import ConsoleDockCore;
 
+static void SampleAppLogInfo(NSString *message)
+{
+    NSString *formattedMessage = [NSString stringWithFormat:@"[sample app logger] %@", message];
+    NSLog(@"%@", formattedMessage);
+    [CDKConsoleDock info:formattedMessage];
+}
+
 @interface MainViewController ()
 
 @property (nonatomic, strong) UILabel *statusLabel;
@@ -49,6 +56,7 @@
         bodyLabel,
         [self makeButtonWithTitle:@"Show Console" action:@selector(showConsole)],
         [self makeButtonWithTitle:@"Log diagnostics" action:@selector(logDiagnostics)],
+        [self makeButtonWithTitle:@"App logger sink" action:@selector(logAppLoggerSink)],
         [self makeButtonWithTitle:@"CDKConsoleDock info" action:@selector(logNativeInfo)],
         [self makeButtonWithTitle:@"CDKConsoleDock error" action:@selector(logNativeError)],
         [self makeButtonWithTitle:@"CDKConsoleDock fault" action:@selector(logNativeFault)],
@@ -154,6 +162,12 @@
                                                    (unsigned long)diagnostics.partialEntryCount];
     [CDKConsoleDock info:message];
     [self updateStatus:@"Wrote ConsoleDock diagnostics."];
+}
+
+- (void)logAppLoggerSink
+{
+    SampleAppLogInfo([self nextMessageWithPrefix:@"objc app logger sink"]);
+    [self updateStatusAfterCapture:@"Wrote app logger sink."];
 }
 
 - (void)logNativeInfo

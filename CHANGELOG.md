@@ -15,6 +15,7 @@ The project follows Semantic Versioning for public releases.
 - Added `CDKConsoleDockDiagnosticsDidChangeNotification` and `ConsoleDock.diagnosticsDidChangeNotification` for custom debug surfaces that need to refresh diagnostics independently from entry-list updates.
 - Added a compact UIKit diagnostics header and included diagnostics in share/export snapshots.
 - Added diagnostics controls and status output to the Swift and Objective-C sample apps.
+- Added app-specific logger sink forwarding controls to the Swift and Objective-C sample apps.
 
 ### Changed
 

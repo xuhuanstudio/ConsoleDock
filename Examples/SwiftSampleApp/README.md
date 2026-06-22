@@ -6,6 +6,7 @@ The sample starts ConsoleDock on launch, enables stdout/stderr capture, shows th
 
 - Native ConsoleDock info/error/fault entries
 - Runtime diagnostics through `ConsoleDock.diagnostics`
+- App-specific logger sink forwarding
 - Swift `print` stdout
 - C `printf` stdout
 - C `fprintf(stderr)` stderr
@@ -36,7 +37,7 @@ For the full shared checklist, see [Sample app walkthrough](../../docs/sample-ap
 
 1. Launch the app.
 2. Tap `Show Console` or the floating `CD` button.
-3. Tap each logging button, including `Log diagnostics`.
+3. Tap each logging button, including `Log diagnostics` and `App logger sink`.
 4. Confirm entries appear in the console, diagnostics are readable, and `token=...` values are displayed as `<redacted>`.
 5. Tap `Clear` in the console or `Clear ConsoleDock Entries` in the sample to verify live refresh.
 

@@ -11,6 +11,7 @@ The app starts ConsoleDock on launch, enables stdout/stderr capture, shows the f
 
 - Native `CDKConsoleDock` info/error/fault entries
 - Runtime diagnostics through `CDKDiagnostics`
+- App-specific logger sink forwarding
 - C `printf` stdout
 - C `fprintf(stderr)` stderr
 - Direct `write(STDOUT_FILENO, ...)`
@@ -42,7 +43,7 @@ For the full shared checklist, see [Sample app walkthrough](../../docs/sample-ap
 
 1. Launch the app.
 2. Tap `Show Console` or the floating `CD` button.
-3. Tap each logging button, including `Log diagnostics`.
+3. Tap each logging button, including `Log diagnostics` and `App logger sink`.
 4. Confirm entries appear in the console, diagnostics are readable, and `token=...` values are displayed as `<redacted>`.
 5. Tap `Clear` in the console or `Clear ConsoleDock Entries` in the sample to verify live refresh.
 
