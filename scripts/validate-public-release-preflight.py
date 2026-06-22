@@ -5,12 +5,14 @@ from __future__ import annotations
 
 import argparse
 import pathlib
+import re
 import subprocess
 import sys
 
 
 DEFAULT_REMOTE = "origin"
 DEFAULT_BRANCH = "main"
+SEMVER_TAG_RE = re.compile(r"v\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?")
 
 
 def run(
@@ -33,6 +35,21 @@ def output(command: list[str], root: pathlib.Path) -> str:
     return run(command, root, check=True).stdout.strip()
 
 
+def validate_input_shape(tag: str, remote: str, branch: str) -> list[str]:
+    errors: list[str] = []
+    if not tag.strip():
+        errors.append("release tag must not be empty")
+    elif not SEMVER_TAG_RE.fullmatch(tag):
+        errors.append(f"release tag must use semantic version form like v0.1.0, got {tag}")
+
+    if not remote.strip():
+        errors.append("git remote name must not be empty")
+    if not branch.strip():
+        errors.append("release branch name must not be empty")
+
+    return errors
+
+
 def validate(
     root: pathlib.Path,
     tag: str,
@@ -43,6 +60,9 @@ def validate(
     allow_existing_local_tag: bool,
 ) -> list[str]:
     errors: list[str] = []
+    input_errors = validate_input_shape(tag, remote, branch)
+    if input_errors:
+        return input_errors
 
     status = output(["git", "status", "--short"], root)
     if status:
@@ -95,9 +115,30 @@ def validate(
     return errors
 
 
+def self_test() -> list[str]:
+    errors: list[str] = []
+
+    if validate_input_shape("v0.1.0", "origin", "main"):
+        errors.append("validate_input_shape should accept a stable semantic release tag")
+    if validate_input_shape("v1.2.3-beta.1+build.5", "upstream", "release"):
+        errors.append("validate_input_shape should accept semantic prerelease and build metadata")
+
+    invalid_tags = ["", "0.1.0", "v1", "v1.2", "release-1.2.3", "v1.2.3 invalid"]
+    for invalid_tag in invalid_tags:
+        if not validate_input_shape(invalid_tag, "origin", "main"):
+            errors.append(f"validate_input_shape should reject invalid tag {invalid_tag!r}")
+
+    if not validate_input_shape("v0.1.0", "", "main"):
+        errors.append("validate_input_shape should reject an empty remote name")
+    if not validate_input_shape("v0.1.0", "origin", ""):
+        errors.append("validate_input_shape should reject an empty branch name")
+
+    return errors
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--tag", required=True, help="Release tag to validate, for example v0.1.0.")
+    parser.add_argument("--tag", help="Release tag to validate, for example v0.1.0.")
     parser.add_argument("--remote", default=DEFAULT_REMOTE, help=f"Git remote name. Defaults to {DEFAULT_REMOTE}.")
     parser.add_argument("--branch", default=DEFAULT_BRANCH, help=f"Release branch name. Defaults to {DEFAULT_BRANCH}.")
     parser.add_argument(
@@ -110,6 +151,7 @@ def main() -> int:
         action="store_true",
         help="Allow the release tag to exist locally when rechecking after tag creation.",
     )
+    parser.add_argument("--self-test", action="store_true", help="Run local self-tests for preflight input validation.")
     parser.add_argument("--dry-run", action="store_true", help="Validate inputs and print the planned checks only.")
     parser.add_argument(
         "root",
@@ -120,7 +162,26 @@ def main() -> int:
     )
     args = parser.parse_args()
 
+    if args.self_test:
+        errors = self_test()
+        if errors:
+            print("Public release preflight self-test failed:", file=sys.stderr)
+            for error in errors:
+                print(f"- {error}", file=sys.stderr)
+            return 1
+        print("Public release preflight self-test passed.")
+        return 0
+
+    if args.tag is None:
+        parser.error("--tag is required unless --self-test is supplied")
+
     if args.dry_run:
+        errors = validate_input_shape(args.tag, args.remote, args.branch)
+        if errors:
+            print("Public release preflight dry run failed:", file=sys.stderr)
+            for error in errors:
+                print(f"- {error}", file=sys.stderr)
+            return 1
         print(f"Tag: {args.tag}")
         print(f"Remote: {args.remote}")
         print(f"Branch: {args.branch}")
