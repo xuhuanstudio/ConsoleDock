@@ -27,7 +27,7 @@ Not included:
 - remote upload.
 - network inspector.
 - crash reporting.
-- full `Logger` / `os_log` ingestion.
+- automatic Swift `Logger` / `os_log` ingestion.
 
 ## v0.2 - Developer Experience
 

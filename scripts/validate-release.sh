@@ -67,6 +67,7 @@ section "Validate versioned public documentation"
 python3 scripts/validate-versioned-docs.py
 
 section "Validate logging boundary documentation"
+python3 scripts/validate-logging-boundaries.py --self-test
 python3 scripts/validate-logging-boundaries.py
 
 section "Validate governance metadata"

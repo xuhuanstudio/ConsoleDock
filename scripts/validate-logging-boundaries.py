@@ -7,6 +7,7 @@ import argparse
 import pathlib
 import re
 import sys
+import tempfile
 
 
 REQUIRED_SNIPPETS = {
@@ -82,6 +83,10 @@ FORBIDDEN_PATTERNS = [
         ),
         "ConsoleDock must not frame Apple unified logging writes as a future public capability promise",
     ),
+    (
+        re.compile(r"\bfull\s+`?Logger`?\s*/\s*`?os_log`?\s+ingestion\b", re.IGNORECASE),
+        "ConsoleDock roadmap language must not imply full Logger/os_log ingestion",
+    ),
 ]
 
 
@@ -124,10 +129,16 @@ def validate_forbidden_claims(root: pathlib.Path) -> list[str]:
     for path in iter_public_docs(root):
         text = path.read_text(encoding="utf-8")
         relative_path = path.relative_to(root).as_posix()
-        for pattern, message in FORBIDDEN_PATTERNS:
-            match = pattern.search(text)
-            if match:
-                errors.append(f"{relative_path}: {message}: {match.group(0)}")
+        errors.extend(forbidden_claim_errors(relative_path, text))
+    return errors
+
+
+def forbidden_claim_errors(relative_path: str, text: str) -> list[str]:
+    errors: list[str] = []
+    for pattern, message in FORBIDDEN_PATTERNS:
+        match = pattern.search(text)
+        if match:
+            errors.append(f"{relative_path}: {message}: {match.group(0)}")
     return errors
 
 
@@ -135,6 +146,55 @@ def validate(root: pathlib.Path) -> list[str]:
     errors: list[str] = []
     errors.extend(validate_required_snippets(root))
     errors.extend(validate_forbidden_claims(root))
+    return errors
+
+
+def write_text(root: pathlib.Path, relative_path: str, text: str) -> None:
+    path = root / relative_path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
+def self_test() -> list[str]:
+    errors: list[str] = []
+    for index, bad_text in enumerate(
+        [
+            "ConsoleDock is a replacement for Xcode Console.",
+            "ConsoleDock captures all Swift Logger messages.",
+            "ConsoleDock captures os_log entries.",
+            "ConsoleDock captures Apple unified logging.",
+            "zero-intrusion os_log capture is supported.",
+            "ConsoleDock reads logs from other apps.",
+            "future adapter may also write to Apple unified logging.",
+            "- full `Logger` / `os_log` ingestion.",
+        ]
+    ):
+        if not forbidden_claim_errors(f"bad-{index}.md", bad_text):
+            errors.append(f"forbidden_claim_errors should reject bad boundary claim: {bad_text}")
+
+    allowed_text = (
+        "ConsoleDock is not a full replacement for Xcode Console or Apple unified logging.\n"
+        "It does not promise complete zero-intrusion capture of Swift `Logger`, `os_log`, "
+        "or Apple unified logging.\n"
+        "Later scope must keep the same technical boundary: reliable `Logger` and `os_log` "
+        "visibility requires active integration through ConsoleDock APIs or adapters.\n"
+    )
+    if forbidden_claim_errors("allowed.md", allowed_text):
+        errors.append("forbidden_claim_errors should allow explicit negative boundary language")
+
+    with tempfile.TemporaryDirectory(prefix="consoledock-logging-boundary-self-test-") as raw_directory:
+        root = pathlib.Path(raw_directory)
+        for relative_path, snippets in REQUIRED_SNIPPETS.items():
+            write_text(root, relative_path, "\n".join(snippets))
+
+        write_text(root, "docs/roadmap.md", "Not included:\n- automatic Swift Logger / os_log ingestion.\n")
+        if validate(root):
+            errors.append("validate should accept required snippets plus non-promissory roadmap language")
+
+        write_text(root, "docs/roadmap.md", "Future deliverables:\n- full `Logger` / `os_log` ingestion.\n")
+        if not validate(root):
+            errors.append("validate should reject full Logger/os_log ingestion language in public docs")
+
     return errors
 
 
@@ -147,7 +207,19 @@ def main() -> int:
         type=pathlib.Path,
         help="Repository root. Defaults to the parent of the scripts directory.",
     )
+    parser.add_argument("--self-test", action="store_true", help="Run local validator self-tests.")
     args = parser.parse_args()
+
+    if args.self_test:
+        errors = self_test()
+        if errors:
+            print("Logging boundary validator self-test failed:", file=sys.stderr)
+            for error in errors:
+                print(f"- {error}", file=sys.stderr)
+            return 1
+
+        print("Logging boundary validator self-test passed.")
+        return 0
 
     root = args.root.resolve()
     errors = validate(root)
