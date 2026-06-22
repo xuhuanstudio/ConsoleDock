@@ -23,7 +23,7 @@ final class ConsoleDockCoreTests: XCTestCase {
     }
 
     func testStartStopLifecycle() {
-        let result = CDKConsoleDock.start(with: .default())
+        let result = CDKConsoleDock.start(with: noCaptureConfiguration())
 
         XCTAssertEqual(result, .started)
         XCTAssertTrue(CDKConsoleDock.isRunning())
@@ -34,8 +34,8 @@ final class ConsoleDockCoreTests: XCTestCase {
     }
 
     func testRepeatedStartAndStopAreStable() {
-        XCTAssertEqual(CDKConsoleDock.start(with: .default()), .started)
-        XCTAssertEqual(CDKConsoleDock.start(with: .default()), .alreadyRunning)
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .alreadyRunning)
 
         CDKConsoleDock.stop()
         CDKConsoleDock.stop()
@@ -80,7 +80,7 @@ final class ConsoleDockCoreTests: XCTestCase {
     }
 
     func testNativeLogAppendsReadableEntry() {
-        XCTAssertEqual(CDKConsoleDock.start(with: .default()), .started)
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
 
         let before = Date()
         CDKConsoleDock.info("Login succeeded")
@@ -96,7 +96,7 @@ final class ConsoleDockCoreTests: XCTestCase {
     }
 
     func testRingBufferEvictsOldestEntries() {
-        let configuration = CDKConfiguration.default()
+        let configuration = noCaptureConfiguration()
         configuration.maximumEntries = 2
         XCTAssertEqual(CDKConsoleDock.start(with: configuration), .started)
 
@@ -110,19 +110,19 @@ final class ConsoleDockCoreTests: XCTestCase {
     }
 
     func testStartResetsSessionStore() {
-        XCTAssertEqual(CDKConsoleDock.start(with: .default()), .started)
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
         CDKConsoleDock.info("previous")
         XCTAssertEqual(CDKConsoleDock.entries().map(\.message), ["previous"])
 
         CDKConsoleDock.stop()
-        XCTAssertEqual(CDKConsoleDock.start(with: .default()), .started)
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
         CDKConsoleDock.info("current")
 
         XCTAssertEqual(CDKConsoleDock.entries().map(\.message), ["current"])
     }
 
     func testClearEntriesRemovesStoredEntries() {
-        XCTAssertEqual(CDKConsoleDock.start(with: .default()), .started)
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
         CDKConsoleDock.warning("Retrying")
 
         XCTAssertEqual(CDKConsoleDock.entries().count, 1)
@@ -133,7 +133,7 @@ final class ConsoleDockCoreTests: XCTestCase {
     }
 
     func testDefaultRedactionRunsBeforeStorage() throws {
-        XCTAssertEqual(CDKConsoleDock.start(with: .default()), .started)
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
 
         CDKConsoleDock.info("Authorization: Bearer bearer123 password=hunter2 token=tok123 api_key=api123 key=key123 secret=secret123")
 
@@ -148,7 +148,7 @@ final class ConsoleDockCoreTests: XCTestCase {
     }
 
     func testCustomRedactionRunsBeforeStorage() {
-        let configuration = CDKConfiguration.default()
+        let configuration = noCaptureConfiguration()
         configuration.redactionBlock = { message in
             message.replacingOccurrences(of: "user_id=42", with: "user_id=<redacted>")
         }
@@ -160,7 +160,7 @@ final class ConsoleDockCoreTests: XCTestCase {
     }
 
     func testMessageIsTruncatedBeforeStorage() {
-        let configuration = CDKConfiguration.default()
+        let configuration = noCaptureConfiguration()
         configuration.maximumMessageLength = 5
         XCTAssertEqual(CDKConsoleDock.start(with: configuration), .started)
 
@@ -278,7 +278,7 @@ final class ConsoleDockCoreTests: XCTestCase {
     }
 
     func testAppendLineEventStoresStdoutAndStderrEntries() {
-        XCTAssertEqual(CDKConsoleDock.start(with: .default()), .started)
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
 
         CDKConsoleDock.append(CDKLineEvent(source: .stdout, message: "out", isPartial: false))
         CDKConsoleDock.append(CDKLineEvent(source: .stderr, message: "err", isPartial: false))
@@ -290,7 +290,7 @@ final class ConsoleDockCoreTests: XCTestCase {
     }
 
     func testAppendLineEventUsesRedactionAndTruncation() {
-        let configuration = CDKConfiguration.default()
+        let configuration = noCaptureConfiguration()
         configuration.maximumMessageLength = 18
         XCTAssertEqual(CDKConsoleDock.start(with: configuration), .started)
 
@@ -448,6 +448,13 @@ final class ConsoleDockCoreTests: XCTestCase {
 }
 
 private extension ConsoleDockCoreTests {
+    func noCaptureConfiguration() -> CDKConfiguration {
+        let configuration = CDKConfiguration.default()
+        configuration.captureStandardOutput = false
+        configuration.captureStandardError = false
+        return configuration
+    }
+
     func withOriginalDescriptorPipe(_ descriptor: Int32, body: (Int32) throws -> Void) throws {
         Self.descriptorLock.lock()
         defer { Self.descriptorLock.unlock() }

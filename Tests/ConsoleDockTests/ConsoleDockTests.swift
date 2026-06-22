@@ -18,8 +18,8 @@ final class ConsoleDockTests: XCTestCase {
     }
 
     func testSwiftFacadeRepeatedStartAndStop() {
-        XCTAssertEqual(ConsoleDock.start(), .started)
-        XCTAssertEqual(ConsoleDock.start(), .alreadyRunning)
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .alreadyRunning)
 
         ConsoleDock.stop()
         ConsoleDock.stop()
@@ -64,7 +64,7 @@ final class ConsoleDockTests: XCTestCase {
     }
 
     func testSwiftFacadeLogReadAndClear() {
-        XCTAssertEqual(ConsoleDock.start(), .started)
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
 
         ConsoleDock.debug("debug")
         ConsoleDock.info("info")
@@ -85,6 +85,8 @@ final class ConsoleDockTests: XCTestCase {
         let configuration = ConsoleDock.Configuration(
             maximumEntries: 1,
             maximumMessageLength: 6,
+            captureStandardOutput: false,
+            captureStandardError: false,
             redactor: { message in
                 message.replacingOccurrences(of: "private", with: "public")
             }
@@ -100,4 +102,11 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertEqual(entries[0].source, .native)
         XCTAssertEqual(entries[0].message, "public")
     }
+}
+
+private extension ConsoleDock.Configuration {
+    static let nativeOnly = ConsoleDock.Configuration(
+        captureStandardOutput: false,
+        captureStandardError: false
+    )
 }
