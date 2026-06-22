@@ -219,6 +219,10 @@ ConsoleDock.stop()
 
 Integrate with existing logging systems by adding a sink/appender/logger target.
 
+```swift
+ConsoleDock.log(level: .warning, message: "Retrying checkout")
+```
+
 Examples:
 
 - CocoaLumberjack

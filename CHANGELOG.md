@@ -15,6 +15,7 @@ The project follows Semantic Versioning for public releases.
 - Added `.editorconfig` and `.gitattributes` to standardize editor behavior and line endings for global contributors.
 - Added the v0.2 integration diagnostics design specification for runtime state, UIKit status, snapshot export, tests, and documentation.
 - Added `CDKDiagnostics` and `ConsoleDock.Diagnostics` for runtime state, capture configuration, store limits, and current entry flag counts.
+- Added `ConsoleDock.log(level:message:)` for Swift logger sinks and adapters that already carry a severity value.
 - Added `CDKConsoleDockDiagnosticsDidChangeNotification` and `ConsoleDock.diagnosticsDidChangeNotification` for custom debug surfaces that need to refresh diagnostics independently from entry-list updates.
 - Added a compact UIKit diagnostics header and included diagnostics in share/export snapshots.
 - Added diagnostics controls and status output to the Swift and Objective-C sample apps.

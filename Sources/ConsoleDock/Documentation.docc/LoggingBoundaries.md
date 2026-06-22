@@ -34,6 +34,7 @@ For logs that must appear in the in-app panel, call the explicit API or add an a
 ```swift
 ConsoleDock.debug("Cache hit")
 ConsoleDock.info("Checkout started")
+ConsoleDock.log(level: .warning, message: "Retrying checkout")
 ConsoleDock.error("Payment failed")
 ```
 

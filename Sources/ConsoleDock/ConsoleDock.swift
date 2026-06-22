@@ -263,6 +263,11 @@ public enum ConsoleDock {
         CDKConsoleDock.debug(message)
     }
 
+    /// Appends a native entry at a specific level.
+    public static func log(level: LogLevel, message: String) {
+        CDKConsoleDock.log(with: level.coreLevel, message: message)
+    }
+
     /// Appends a native info entry.
     public static func info(_ message: String) {
         CDKConsoleDock.info(message)
@@ -346,6 +351,21 @@ extension ConsoleDock.Diagnostics {
 }
 
 extension ConsoleDock.LogLevel {
+    fileprivate var coreLevel: CDKLogLevel {
+        switch self {
+        case .debug:
+            return .debug
+        case .info:
+            return .info
+        case .warning:
+            return .warning
+        case .error:
+            return .error
+        case .fault:
+            return .fault
+        }
+    }
+
     fileprivate init(coreLevel: CDKLogLevel) {
         switch coreLevel {
         case .debug:

@@ -188,6 +188,21 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertTrue(ConsoleDock.entries.isEmpty)
     }
 
+    func testSwiftFacadeLogWithLevelRoutesNativeEntries() {
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+
+        ConsoleDock.log(level: .debug, message: "debug")
+        ConsoleDock.log(level: .info, message: "info")
+        ConsoleDock.log(level: .warning, message: "warning")
+        ConsoleDock.log(level: .error, message: "error")
+        ConsoleDock.log(level: .fault, message: "fault")
+
+        let entries = ConsoleDock.entries
+        XCTAssertEqual(entries.map(\.level), [.debug, .info, .warning, .error, .fault])
+        XCTAssertEqual(entries.map(\.source), [.native, .native, .native, .native, .native])
+        XCTAssertEqual(entries.map(\.message), ["debug", "info", "warning", "error", "fault"])
+    }
+
     func testSwiftFacadeEntriesExposeStableIdentifiers() {
         XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
 

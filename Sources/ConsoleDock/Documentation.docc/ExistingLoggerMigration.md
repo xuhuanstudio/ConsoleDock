@@ -18,12 +18,12 @@ import ConsoleDock
 enum AppLog {
     static func info(_ message: String) {
         print("[info] \(message)")
-        ConsoleDock.info(message)
+        ConsoleDock.log(level: .info, message: message)
     }
 
     static func error(_ message: String) {
         print("[error] \(message)")
-        ConsoleDock.error(message)
+        ConsoleDock.log(level: .error, message: message)
     }
 }
 ```
@@ -31,6 +31,7 @@ enum AppLog {
 Existing call sites keep using `AppLog.info(...)` and `AppLog.error(...)`.
 
 The Swift sample app includes an `App logger sink` button that demonstrates this pattern with a small app-owned wrapper.
+Use ``ConsoleDock/log(level:message:)`` when the existing logger already has a severity value to preserve during forwarding.
 
 If the wrapper also writes to Swift `Logger` or `os_log`, keep that output and explicitly forward to ConsoleDock. ConsoleDock does not promise complete zero-intrusion capture of Apple unified logging.
 

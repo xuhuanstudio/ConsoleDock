@@ -62,17 +62,18 @@ import ConsoleDock
 enum AppLog {
     static func info(_ message: String) {
         print("[info] \(message)")
-        ConsoleDock.info(message)
+        ConsoleDock.log(level: .info, message: message)
     }
 
     static func error(_ message: String) {
         print("[error] \(message)")
-        ConsoleDock.error(message)
+        ConsoleDock.log(level: .error, message: message)
     }
 }
 ```
 
 Existing call sites keep using `AppLog.info(...)` and `AppLog.error(...)`. ConsoleDock becomes one additional destination.
+Use `ConsoleDock.log(level:message:)` when the existing logger already carries a severity value. Convenience methods such as `ConsoleDock.info(_:)` remain useful for simple direct calls.
 
 The Swift sample app includes an `App logger sink` button that follows this pattern: it writes through the app's logger wrapper and forwards the already-formatted message to ConsoleDock.
 
@@ -87,7 +88,7 @@ enum AppLog {
 
     static func info(_ message: String) {
         logger.info("\(message, privacy: .public)")
-        ConsoleDock.info(message)
+        ConsoleDock.log(level: .info, message: message)
     }
 }
 ```
@@ -126,9 +127,9 @@ ConsoleDock does not currently ship packaged CocoaLumberjack, XCGLogger, or Swif
 
 Until those adapters exist, use the framework's extension point if it has one:
 
-- CocoaLumberjack: add a logger that forwards formatted messages to `CDKConsoleDock` or `ConsoleDock`.
-- XCGLogger: add a destination that forwards level and message to ConsoleDock.
-- SwiftyBeaver: add a destination that forwards level and message to ConsoleDock.
+- CocoaLumberjack: add a logger that forwards formatted messages and mapped severity to `CDKConsoleDock` or `ConsoleDock.log(level:message:)`.
+- XCGLogger: add a destination that forwards level and message to `ConsoleDock.log(level:message:)`.
+- SwiftyBeaver: add a destination that forwards level and message to `ConsoleDock.log(level:message:)`.
 
 Keep the existing framework's file, console, or remote outputs unchanged unless the app has a separate reason to remove them.
 
