@@ -6,13 +6,12 @@ ConsoleDock is a planned iOS debug SDK that lets testers inspect app logs direct
 
 ## Status
 
-ConsoleDock is currently in the core in-memory store and isolated line-framing phase. The repository contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, bounded in-memory entries, basic redaction, byte-to-line framing utilities, and focused tests.
+ConsoleDock is currently in the core stdout/stderr capture phase. The repository contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, bounded in-memory entries, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, and focused tests.
 
 Current limitations:
 
-- stdout/stderr capture is not implemented yet.
-- `dup2`, pipe readers, descriptor restoration, and pass-through are not implemented yet.
-- Line framing exists as isolated core logic, but it is not connected to real stdout/stderr capture yet.
+- stdout/stderr capture exists in the core and is connected to line framing and in-memory storage.
+- Direct descriptor writes and flushed C stdio output can be captured; unflushed `printf` / `fprintf` output depends on standard stream buffering.
 - The UIKit floating button and console panel are not implemented yet.
 - Third-party adapters, CocoaPods, and XCFramework distribution are not implemented yet.
 - Redaction is a local in-memory baseline, not a complete privacy guarantee.
@@ -21,7 +20,7 @@ Current limitations:
 
 ConsoleDock must not be described as a full replacement for Xcode Console or Apple unified logging.
 
-Planned zero-intrusion capture can cover:
+ConsoleDock's stdout/stderr capture can cover:
 
 - stdout
 - stderr
@@ -79,7 +78,19 @@ import ConsoleDock
 ConsoleDock.start()
 ```
 
-In the current core-store and line-framing stage, `start()` initializes the local Native API store. It still does not install stdout/stderr capture.
+In the current core capture stage, `start()` initializes the local store and installs stdout/stderr capture according to configuration. Captured bytes are passed through to the original descriptors where possible, normalized through the line framer, redacted, truncated, and stored in memory.
+
+```swift
+ConsoleDock.start(
+    configuration: .init(
+        captureStandardOutput: true,
+        captureStandardError: true
+    )
+)
+
+print("Visible through stdout capture")
+ConsoleDock.stop()
+```
 
 ### Adapter Mode
 

@@ -1,7 +1,10 @@
+import Darwin
 import ConsoleDockCore
 import XCTest
 
 final class ConsoleDockCoreTests: XCTestCase {
+    private static let descriptorLock = NSLock()
+
     override func tearDown() {
         CDKConsoleDock.clearEntries()
         CDKConsoleDock.stop()
@@ -294,5 +297,341 @@ final class ConsoleDockCoreTests: XCTestCase {
         CDKConsoleDock.append(CDKLineEvent(source: .stdout, message: "password=hunter2 suffix", isPartial: false))
 
         XCTAssertEqual(CDKConsoleDock.entries().first?.message, "password=<redacted")
+    }
+
+    func testCaptureStdoutDirectWriteEntersEntries() throws {
+        try withOriginalDescriptorPipe(STDOUT_FILENO) { _ in
+            let configuration = CDKConfiguration.default()
+            configuration.captureStandardError = false
+            XCTAssertEqual(CDKConsoleDock.start(with: configuration), .started)
+
+            try writeAll("cdk stdout direct\n", to: STDOUT_FILENO)
+
+            let entry = try waitForEntry(message: "cdk stdout direct", source: .stdout)
+            XCTAssertEqual(entry.level, .info)
+        }
+    }
+
+    func testCaptureStderrDirectWriteEntersEntries() throws {
+        try withOriginalDescriptorPipe(STDERR_FILENO) { _ in
+            let configuration = CDKConfiguration.default()
+            configuration.captureStandardOutput = false
+            XCTAssertEqual(CDKConsoleDock.start(with: configuration), .started)
+
+            try writeAll("cdk stderr direct\n", to: STDERR_FILENO)
+
+            let entry = try waitForEntry(message: "cdk stderr direct", source: .stderr)
+            XCTAssertEqual(entry.level, .error)
+        }
+    }
+
+    func testStdoutPassthroughWritesToOriginalDescriptor() throws {
+        try withOriginalDescriptorPipe(STDOUT_FILENO) { readDescriptor in
+            let configuration = CDKConfiguration.default()
+            configuration.captureStandardError = false
+            XCTAssertEqual(CDKConsoleDock.start(with: configuration), .started)
+
+            try writeAll("cdk stdout passthrough\n", to: STDOUT_FILENO)
+
+            XCTAssertTrue(try waitForDescriptor(readDescriptor, toContain: "cdk stdout passthrough\n"))
+            _ = try waitForEntry(message: "cdk stdout passthrough", source: .stdout)
+        }
+    }
+
+    func testStderrPassthroughWritesToOriginalDescriptor() throws {
+        try withOriginalDescriptorPipe(STDERR_FILENO) { readDescriptor in
+            let configuration = CDKConfiguration.default()
+            configuration.captureStandardOutput = false
+            XCTAssertEqual(CDKConsoleDock.start(with: configuration), .started)
+
+            try writeAll("cdk stderr passthrough\n", to: STDERR_FILENO)
+
+            XCTAssertTrue(try waitForDescriptor(readDescriptor, toContain: "cdk stderr passthrough\n"))
+            _ = try waitForEntry(message: "cdk stderr passthrough", source: .stderr)
+        }
+    }
+
+    func testDisabledStdoutCaptureDoesNotEnterEntries() throws {
+        try withOriginalDescriptorPipe(STDOUT_FILENO) { readDescriptor in
+            let configuration = CDKConfiguration.default()
+            configuration.captureStandardOutput = false
+            configuration.captureStandardError = false
+            XCTAssertEqual(CDKConsoleDock.start(with: configuration), .started)
+
+            try writeAll("cdk stdout disabled\n", to: STDOUT_FILENO)
+
+            XCTAssertTrue(try waitForDescriptor(readDescriptor, toContain: "cdk stdout disabled\n"))
+            XCTAssertFalse(waitForEntryIfPresent(message: "cdk stdout disabled", source: .stdout))
+        }
+    }
+
+    func testDisabledStderrCaptureDoesNotEnterEntries() throws {
+        try withOriginalDescriptorPipe(STDERR_FILENO) { readDescriptor in
+            let configuration = CDKConfiguration.default()
+            configuration.captureStandardOutput = false
+            configuration.captureStandardError = false
+            XCTAssertEqual(CDKConsoleDock.start(with: configuration), .started)
+
+            try writeAll("cdk stderr disabled\n", to: STDERR_FILENO)
+
+            XCTAssertTrue(try waitForDescriptor(readDescriptor, toContain: "cdk stderr disabled\n"))
+            XCTAssertFalse(waitForEntryIfPresent(message: "cdk stderr disabled", source: .stderr))
+        }
+    }
+
+    func testStopRestoresStdoutDescriptor() throws {
+        try withOriginalDescriptorPipe(STDOUT_FILENO) { readDescriptor in
+            let configuration = CDKConfiguration.default()
+            configuration.captureStandardError = false
+            XCTAssertEqual(CDKConsoleDock.start(with: configuration), .started)
+
+            try writeAll("cdk before stop\n", to: STDOUT_FILENO)
+            _ = try waitForEntry(message: "cdk before stop", source: .stdout)
+
+            CDKConsoleDock.stop()
+            CDKConsoleDock.clearEntries()
+            try writeAll("cdk after stop\n", to: STDOUT_FILENO)
+
+            XCTAssertTrue(try waitForDescriptor(readDescriptor, toContain: "cdk after stop\n"))
+            XCTAssertFalse(waitForEntryIfPresent(message: "cdk after stop", source: .stdout))
+        }
+    }
+
+    func testStopRestoresStderrDescriptor() throws {
+        try withOriginalDescriptorPipe(STDERR_FILENO) { readDescriptor in
+            let configuration = CDKConfiguration.default()
+            configuration.captureStandardOutput = false
+            XCTAssertEqual(CDKConsoleDock.start(with: configuration), .started)
+
+            try writeAll("cdk stderr before stop\n", to: STDERR_FILENO)
+            _ = try waitForEntry(message: "cdk stderr before stop", source: .stderr)
+
+            CDKConsoleDock.stop()
+            CDKConsoleDock.clearEntries()
+            try writeAll("cdk stderr after stop\n", to: STDERR_FILENO)
+
+            XCTAssertTrue(try waitForDescriptor(readDescriptor, toContain: "cdk stderr after stop\n"))
+            XCTAssertFalse(waitForEntryIfPresent(message: "cdk stderr after stop", source: .stderr))
+        }
+    }
+
+    func testPartialLineIsFlushedOnStop() throws {
+        try withOriginalDescriptorPipe(STDOUT_FILENO) { _ in
+            let configuration = CDKConfiguration.default()
+            configuration.captureStandardError = false
+            XCTAssertEqual(CDKConsoleDock.start(with: configuration), .started)
+
+            try writeAll("cdk partial stop", to: STDOUT_FILENO)
+            CDKConsoleDock.stop()
+
+            let entry = try waitForEntry(message: "cdk partial stop", source: .stdout)
+            XCTAssertEqual(entry.level, .info)
+        }
+    }
+
+    func testCaptureRepeatedStartAndStopRemainsStable() throws {
+        try withOriginalDescriptorPipe(STDOUT_FILENO) { _ in
+            let configuration = CDKConfiguration.default()
+            configuration.captureStandardError = false
+
+            XCTAssertEqual(CDKConsoleDock.start(with: configuration), .started)
+            XCTAssertEqual(CDKConsoleDock.start(with: configuration), .alreadyRunning)
+            CDKConsoleDock.stop()
+            CDKConsoleDock.stop()
+
+            XCTAssertFalse(CDKConsoleDock.isRunning())
+            XCTAssertEqual(CDKConsoleDock.start(with: configuration), .started)
+            CDKConsoleDock.stop()
+            XCTAssertFalse(CDKConsoleDock.isRunning())
+        }
+    }
+}
+
+private extension ConsoleDockCoreTests {
+    func withOriginalDescriptorPipe(_ descriptor: Int32, body: (Int32) throws -> Void) throws {
+        Self.descriptorLock.lock()
+        defer { Self.descriptorLock.unlock() }
+
+        fflush(stdout)
+        fflush(stderr)
+
+        let savedDescriptor = dup(descriptor)
+        XCTAssertGreaterThanOrEqual(savedDescriptor, 0)
+        var pipeDescriptors: [Int32] = [0, 0]
+        XCTAssertEqual(pipe(&pipeDescriptors), 0)
+
+        let readDescriptor = pipeDescriptors[0]
+        let writeDescriptor = pipeDescriptors[1]
+        XCTAssertGreaterThanOrEqual(dup2(writeDescriptor, descriptor), 0)
+        close(writeDescriptor)
+
+        defer {
+            CDKConsoleDock.stop()
+            fflush(stdout)
+            fflush(stderr)
+            dup2(savedDescriptor, descriptor)
+            close(savedDescriptor)
+            close(readDescriptor)
+        }
+
+        try body(readDescriptor)
+    }
+
+    func writeAll(_ string: String, to descriptor: Int32) throws {
+        let bytes = Array(string.utf8)
+        try bytes.withUnsafeBytes { rawBuffer in
+            guard let baseAddress = rawBuffer.baseAddress else {
+                return
+            }
+            var written = 0
+            while written < rawBuffer.count {
+                let result = Darwin.write(descriptor, baseAddress.advanced(by: written), rawBuffer.count - written)
+                if result < 0 {
+                    if errno == EINTR {
+                        continue
+                    }
+                    throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO)
+                }
+                if result == 0 {
+                    throw POSIXError(.EIO)
+                }
+                written += result
+            }
+        }
+    }
+
+    func waitForEntry(message: String, source: CDKLogSource, timeout: TimeInterval = 1.0) throws -> CDKLogEntry {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if let entry = CDKConsoleDock.entries().first(where: { $0.message == message && $0.source == source }) {
+                return entry
+            }
+            usleep(10_000)
+        }
+        XCTFail("Timed out waiting for ConsoleDock entry: \(message)")
+        throw POSIXError(.ETIMEDOUT)
+    }
+
+    func waitForEntryIfPresent(message: String, source: CDKLogSource, timeout: TimeInterval = 0.1) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if CDKConsoleDock.entries().contains(where: { $0.message == message && $0.source == source }) {
+                return true
+            }
+            usleep(10_000)
+        }
+        return false
+    }
+
+    func waitForDescriptor(_ descriptor: Int32, toContain expected: String, timeout: TimeInterval = 1.0) throws -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        var collected = Data()
+
+        while Date() < deadline {
+            var readSet = fd_set()
+            fdZero(&readSet)
+            fdSet(descriptor, set: &readSet)
+            var interval = timeval(tv_sec: 0, tv_usec: 10_000)
+            let result = select(descriptor + 1, &readSet, nil, nil, &interval)
+            if result < 0 {
+                if errno == EINTR {
+                    continue
+                }
+                throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO)
+            }
+            if result == 0 {
+                continue
+            }
+
+            var buffer = [UInt8](repeating: 0, count: 256)
+            let bytesRead = Darwin.read(descriptor, &buffer, buffer.count)
+            if bytesRead > 0 {
+                collected.append(buffer, count: bytesRead)
+                if String(data: collected, encoding: .utf8)?.contains(expected) == true {
+                    return true
+                }
+            }
+        }
+
+        return false
+    }
+
+    func fdZero(_ set: inout fd_set) {
+        set = fd_set()
+    }
+
+    func fdSet(_ descriptor: Int32, set: inout fd_set) {
+        let bitsPerMask = 32
+        let intOffset = Int(descriptor) / bitsPerMask
+        let bitOffset = Int(descriptor) % bitsPerMask
+        let mask = Int32(1 << bitOffset)
+        switch intOffset {
+        case 0:
+            set.fds_bits.0 |= mask
+        case 1:
+            set.fds_bits.1 |= mask
+        case 2:
+            set.fds_bits.2 |= mask
+        case 3:
+            set.fds_bits.3 |= mask
+        case 4:
+            set.fds_bits.4 |= mask
+        case 5:
+            set.fds_bits.5 |= mask
+        case 6:
+            set.fds_bits.6 |= mask
+        case 7:
+            set.fds_bits.7 |= mask
+        case 8:
+            set.fds_bits.8 |= mask
+        case 9:
+            set.fds_bits.9 |= mask
+        case 10:
+            set.fds_bits.10 |= mask
+        case 11:
+            set.fds_bits.11 |= mask
+        case 12:
+            set.fds_bits.12 |= mask
+        case 13:
+            set.fds_bits.13 |= mask
+        case 14:
+            set.fds_bits.14 |= mask
+        case 15:
+            set.fds_bits.15 |= mask
+        case 16:
+            set.fds_bits.16 |= mask
+        case 17:
+            set.fds_bits.17 |= mask
+        case 18:
+            set.fds_bits.18 |= mask
+        case 19:
+            set.fds_bits.19 |= mask
+        case 20:
+            set.fds_bits.20 |= mask
+        case 21:
+            set.fds_bits.21 |= mask
+        case 22:
+            set.fds_bits.22 |= mask
+        case 23:
+            set.fds_bits.23 |= mask
+        case 24:
+            set.fds_bits.24 |= mask
+        case 25:
+            set.fds_bits.25 |= mask
+        case 26:
+            set.fds_bits.26 |= mask
+        case 27:
+            set.fds_bits.27 |= mask
+        case 28:
+            set.fds_bits.28 |= mask
+        case 29:
+            set.fds_bits.29 |= mask
+        case 30:
+            set.fds_bits.30 |= mask
+        case 31:
+            set.fds_bits.31 |= mask
+        default:
+            XCTFail("Descriptor is outside fd_set test helper range")
+        }
     }
 }

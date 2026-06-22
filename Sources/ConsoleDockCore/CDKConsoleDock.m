@@ -1,10 +1,13 @@
 #import "ConsoleDockCore.h"
+#import "CDKStandardOutputCapture.h"
 
 NSErrorDomain const CDKConsoleDockErrorDomain = @"CDKConsoleDockErrorDomain";
 
 static BOOL CDKConsoleDockRunning = NO;
+static BOOL CDKConsoleDockStopping = NO;
 static CDKConfiguration *CDKConsoleDockConfiguration = nil;
 static NSMutableArray<CDKLogEntry *> *CDKConsoleDockEntries = nil;
+static CDKStandardOutputCapture *CDKConsoleDockCapture = nil;
 
 static NSString *CDKStringByReplacingMatches(NSString *message, NSString *pattern, NSString *replacement)
 {
@@ -74,7 +77,7 @@ static CDKLogLevel CDKDefaultLevelForSource(CDKLogSource source)
 {
 #if defined(DEBUG) || defined(CONSOLEDOCK_ENABLE_RELEASE)
     @synchronized(self) {
-        if (CDKConsoleDockRunning) {
+        if (CDKConsoleDockRunning || CDKConsoleDockStopping) {
             return CDKStartResultAlreadyRunning;
         }
 
@@ -98,6 +101,21 @@ static CDKLogLevel CDKDefaultLevelForSource(CDKLogSource source)
 
         CDKConsoleDockConfiguration = [effectiveConfiguration copy];
         CDKConsoleDockEntries = [NSMutableArray arrayWithCapacity:MIN(CDKConsoleDockConfiguration.maximumEntries, 64)];
+        CDKStandardOutputCapture *capture = [[CDKStandardOutputCapture alloc] initWithConfiguration:CDKConsoleDockConfiguration];
+        NSError *captureError = nil;
+        if (![capture startWithError:&captureError]) {
+            [capture stop];
+            CDKConsoleDockConfiguration = nil;
+            CDKConsoleDockEntries = nil;
+            if (error != nil) {
+                *error = captureError ?: [NSError errorWithDomain:CDKConsoleDockErrorDomain
+                                                             code:100
+                                                         userInfo:@{NSLocalizedDescriptionKey: @"Failed to start standard output capture."}];
+            }
+            return CDKStartResultFailed;
+        }
+
+        CDKConsoleDockCapture = capture;
         CDKConsoleDockRunning = YES;
         return CDKStartResultStarted;
     }
@@ -112,8 +130,21 @@ static CDKLogLevel CDKDefaultLevelForSource(CDKLogSource source)
 
 + (void)stop
 {
+    CDKStandardOutputCapture *capture = nil;
+    @synchronized(self) {
+        if ((!CDKConsoleDockRunning && CDKConsoleDockCapture == nil) || CDKConsoleDockStopping) {
+            return;
+        }
+        CDKConsoleDockStopping = YES;
+        capture = CDKConsoleDockCapture;
+        CDKConsoleDockCapture = nil;
+    }
+
+    [capture stop];
+
     @synchronized(self) {
         CDKConsoleDockRunning = NO;
+        CDKConsoleDockStopping = NO;
     }
 }
 
