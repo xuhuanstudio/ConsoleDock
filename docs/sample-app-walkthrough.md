@@ -8,6 +8,7 @@ Use the samples to verify:
 - Objective-C imports and `CDK` APIs;
 - stdout and stderr file-descriptor capture;
 - explicit native logging APIs;
+- runtime diagnostics for capture state and current store counts;
 - `NSLog` output that reaches process stderr;
 - redaction before storage;
 - UIKit floating button, search, source and level filtering, pause/resume live follow, selected-entry copy, panel refresh, share/export, clear, stop, and restart behavior.
@@ -33,17 +34,18 @@ Manual check:
 2. Tap `Show Console` or the floating `CD` button.
 3. Tap `ConsoleDock.info`, `ConsoleDock.error`, `ConsoleDock.fault`, `print stdout`, `printf stdout`, `fprintf stderr`, and `NSLog`.
 4. Confirm entries appear in the ConsoleDock panel.
-5. Confirm generated `token=...` values are stored as `token=<redacted>`.
-6. Search for `stderr` or `token` and confirm the visible list filters without changing stored entries.
-7. Change the source scope to `stdout` or `stderr` and confirm only matching entries remain visible.
-8. Change the level scope to `Info` or `Error` and confirm only matching entries remain visible.
-9. Tap the pause button, generate another message from the sample, and confirm the visible list does not auto-refresh.
-10. Tap the play/resume button and confirm the panel catches up to the latest stored entries.
-11. Tap a visible log row and confirm the selected redacted entry is copied to the clipboard.
-12. Tap the share button and confirm the system share sheet opens with a plain-text redacted log snapshot for the visible entries.
-13. Tap `Clear` in the panel and confirm the list refreshes.
-14. Tap `Stop ConsoleDock`, generate another message, and confirm it is not stored.
-15. Tap `Start ConsoleDock`, generate another message, and confirm entries resume.
+5. Confirm the diagnostics header reports running state, entry count, stdout/stderr state, limits, and redacted/truncated/partial counts.
+6. Confirm generated `token=...` values are stored as `token=<redacted>`.
+7. Search for `stderr` or `token` and confirm the visible list filters without changing stored entries.
+8. Change the source scope to `stdout` or `stderr` and confirm only matching entries remain visible.
+9. Change the level scope to `Info` or `Error` and confirm only matching entries remain visible.
+10. Tap the pause button, generate another message from the sample, and confirm the visible list does not auto-refresh.
+11. Tap the play/resume button and confirm the panel catches up to the latest stored entries.
+12. Tap a visible log row and confirm the selected redacted entry is copied to the clipboard.
+13. Tap the share button and confirm the system share sheet opens with a plain-text redacted log snapshot for the visible entries and diagnostics.
+14. Tap `Clear` in the panel and confirm the list and diagnostics header refresh.
+15. Tap `Stop ConsoleDock`, generate another message, and confirm it is not stored.
+16. Tap `Start ConsoleDock`, generate another message, and confirm entries resume.
 
 Expected sources:
 
@@ -71,17 +73,18 @@ Manual check:
 2. Tap `Show Console` or the floating `CD` button.
 3. Tap the native `CDKConsoleDock`, C stdio, direct descriptor write, and `NSLog` buttons.
 4. Confirm entries appear in the ConsoleDock panel.
-5. Confirm generated `token=...` values are stored as `token=<redacted>`.
-6. Search for `stderr` or `token` and confirm the visible list filters without changing stored entries.
-7. Change the source scope to `stdout` or `stderr` and confirm only matching entries remain visible.
-8. Change the level scope to `Info` or `Error` and confirm only matching entries remain visible.
-9. Tap the pause button, generate another message from the sample, and confirm the visible list does not auto-refresh.
-10. Tap the play/resume button and confirm the panel catches up to the latest stored entries.
-11. Tap a visible log row and confirm the selected redacted entry is copied to the clipboard.
-12. Tap the share button and confirm the system share sheet opens with a plain-text redacted log snapshot for the visible entries.
-13. Tap `Clear` in the panel and confirm the list refreshes.
-14. Tap `Stop ConsoleDock`, generate another message, and confirm it is not stored.
-15. Tap `Start ConsoleDock`, generate another message, and confirm entries resume.
+5. Confirm the diagnostics header reports running state, entry count, stdout/stderr state, limits, and redacted/truncated/partial counts.
+6. Confirm generated `token=...` values are stored as `token=<redacted>`.
+7. Search for `stderr` or `token` and confirm the visible list filters without changing stored entries.
+8. Change the source scope to `stdout` or `stderr` and confirm only matching entries remain visible.
+9. Change the level scope to `Info` or `Error` and confirm only matching entries remain visible.
+10. Tap the pause button, generate another message from the sample, and confirm the visible list does not auto-refresh.
+11. Tap the play/resume button and confirm the panel catches up to the latest stored entries.
+12. Tap a visible log row and confirm the selected redacted entry is copied to the clipboard.
+13. Tap the share button and confirm the system share sheet opens with a plain-text redacted log snapshot for the visible entries and diagnostics.
+14. Tap `Clear` in the panel and confirm the list and diagnostics header refresh.
+15. Tap `Stop ConsoleDock`, generate another message, and confirm it is not stored.
+16. Tap `Start ConsoleDock`, generate another message, and confirm entries resume.
 
 Expected sources:
 
@@ -104,3 +107,5 @@ Pause/resume only affects live UI follow. ConsoleDock continues capturing and st
 Tapping a row copies only that visible, already-redacted entry. It does not copy hidden filtered entries.
 
 The share sheet exports the current visible in-memory ConsoleDock entries only. ConsoleDock does not write an export file by default, does not persist logs by default, and does not upload logs.
+
+Diagnostics describe ConsoleDock's active configuration and currently retained store counts only. They do not validate complete Swift `Logger`, `os_log`, or Apple unified logging capture.

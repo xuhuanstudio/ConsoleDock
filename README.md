@@ -15,15 +15,16 @@ ConsoleDock is an early-stage iOS debug SDK that lets testers inspect app logs d
 
 ## Status
 
-ConsoleDock `v0.1.0` is published as a source-first Swift Package Manager preview release. The repository contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, bounded in-memory entries with stable session identifiers and partial/redacted/truncated flags, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, entry change notification, Release startup safety gates, a UIKit-only floating button/panel foundation, Swift and Objective-C sample apps, DocC documentation, release validation workflow, and focused tests.
+ConsoleDock `v0.1.0` is published as a source-first Swift Package Manager preview release. The current `main` branch contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, bounded in-memory entries with stable session identifiers and partial/redacted/truncated flags, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, runtime diagnostics, entry change notification, Release startup safety gates, a UIKit-only floating button/panel foundation, Swift and Objective-C sample apps, DocC documentation, release validation workflow, and focused tests.
 
-Current `v0.1.0` limitations:
+Current `main` limitations:
 
 - stdout/stderr capture exists in the core and is connected to line framing and in-memory storage.
 - Direct descriptor writes and flushed C stdio output can be captured; unflushed `printf` / `fprintf` output depends on standard stream buffering.
 - File-descriptor capture can include framework or runtime warnings written through the app process descriptors, not only application-authored messages.
+- Runtime diagnostics report current ConsoleDock state and bounded in-memory store counts; they are not evidence of complete Swift `Logger`, `os_log`, or Apple unified logging capture.
 - Entry change notification exists as the refresh foundation for UI; notification handlers should fetch a snapshot through `entries`.
-- The UIKit floating button and console panel foundation can show, search, source-filter, level-filter, pause/resume live follow, live refresh, selected-entry copy, clear, share/export, and close the current in-memory snapshot.
+- The UIKit floating button and console panel foundation can show, search, source-filter, level-filter, pause/resume live follow, live refresh, selected-entry copy, clear, share/export with diagnostics, and close the current in-memory snapshot.
 - Persistence and advanced query syntax are not implemented yet.
 - Third-party adapters, CocoaPods, and XCFramework distribution are not implemented yet.
 - Redaction is a local in-memory baseline, not a complete privacy guarantee.
@@ -81,6 +82,26 @@ print("Visible through stdout capture")
 ```
 
 `ConsoleDock.start()` enables stdout/stderr capture by default in Debug builds, installs the floating `CD` button, redacts obvious secrets, truncates long messages, and stores entries in local memory.
+
+### Check Runtime Diagnostics
+
+Runtime diagnostics are available on `main` after `v0.1.0` and will be included in the next release tag.
+
+Use diagnostics to confirm the active configuration and current bounded in-memory store counts during integration:
+
+```swift
+let diagnostics = ConsoleDock.diagnostics
+print("ConsoleDock running: \(diagnostics.isRunning)")
+print("Stored entries: \(diagnostics.entryCount)")
+```
+
+```objc
+CDKDiagnostics *diagnostics = [CDKConsoleDock diagnostics];
+NSLog(@"ConsoleDock running: %@", diagnostics.isRunning ? @"YES" : @"NO");
+NSLog(@"Stored entries: %lu", (unsigned long)diagnostics.entryCount);
+```
+
+Diagnostics are local state only. They do not imply that Swift `Logger`, `os_log`, Apple unified logging, other-process logs, or debugger-only output are captured.
 
 ### Start In Objective-C
 
@@ -221,6 +242,7 @@ ConsoleDock.start()
 ConsoleDock.info("Login succeeded")
 
 let entries = ConsoleDock.entries
+let diagnostics = ConsoleDock.diagnostics
 ConsoleDock.clear()
 ```
 
@@ -239,6 +261,7 @@ CDKStartResult result = [CDKConsoleDockUIKit startWithConfiguration:configuratio
 [CDKConsoleDock info:@"Login succeeded"];
 [CDKConsoleDock fault:@"Invariant failed"];
 NSArray<CDKLogEntry *> *entries = [CDKConsoleDock entries];
+CDKDiagnostics *diagnostics = [CDKConsoleDock diagnostics];
 [CDKConsoleDock clearEntries];
 [CDKConsoleDockUIKit showConsole];
 [CDKConsoleDockUIKit stop];
@@ -251,6 +274,7 @@ Use `ConsoleDockCore` directly when an Objective-C app only needs capture, stora
 - [Product brief](docs/product-brief.md)
 - [DocC catalog](Sources/ConsoleDock/Documentation.docc/ConsoleDock.md)
 - [GitHub repository setup](docs/github-repository-setup.md)
+- [Integration diagnostics specification](docs/specs/2026-06-22-v0.2-integration-diagnostics.md)
 - [Migrating existing loggers](docs/migration-existing-loggers.md)
 - [MVP architecture](docs/specs/2026-06-22-mvp-architecture.md)
 - [Open-source readiness](docs/open-source-readiness.md)

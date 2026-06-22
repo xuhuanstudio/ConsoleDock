@@ -8,13 +8,14 @@ ConsoleDock 是一个早期阶段的 iOS debug SDK，目标是让测试人员在
 
 ## 当前状态
 
-ConsoleDock `v0.1.0` 已作为 source-first Swift Package Manager 公开预览版本发布。仓库已经包含：
+ConsoleDock `v0.1.0` 已作为 source-first Swift Package Manager 公开预览版本发布。当前 `main` 分支已经包含：
 
 - Swift Package Manager package；
 - Objective-C/C 兼容的 `ConsoleDockCore`；
 - Swift facade `ConsoleDock`；
 - stdout/stderr 文件描述符捕获、透传和恢复；
 - 带 session 内稳定 ID 和 partial/redacted/truncated 标记的本地内存日志存储；
+- runtime diagnostics，用于查看运行状态、capture 配置和当前内存 store 计数；
 - 默认敏感字段脱敏；
 - UIKit 浮动按钮和日志面板；
 - Swift 和 Objective-C 示例 App；
@@ -61,6 +62,26 @@ print("Visible through stdout capture")
 ```
 
 Debug 构建下，默认配置会启用 stdout/stderr 捕获，安装浮动 `CD` 按钮，进行基础敏感字段脱敏，并把日志保存在本地内存中。
+
+## 运行诊断
+
+Runtime diagnostics 是 `v0.1.0` 之后在 `main` 上新增的能力，会进入下一个 release tag。
+
+接入时可以读取 diagnostics，确认 ConsoleDock 是否正在运行、stdout/stderr capture 是否启用、当前内存中有多少条日志，以及 redacted/truncated/partial 计数：
+
+```swift
+let diagnostics = ConsoleDock.diagnostics
+print(diagnostics.isRunning)
+print(diagnostics.entryCount)
+```
+
+```objc
+CDKDiagnostics *diagnostics = [CDKConsoleDock diagnostics];
+NSLog(@"ConsoleDock running: %@", diagnostics.isRunning ? @"YES" : @"NO");
+NSLog(@"Stored entries: %lu", (unsigned long)diagnostics.entryCount);
+```
+
+diagnostics 只反映 ConsoleDock 本地运行状态和当前有界内存 store，不代表已经完整捕获 Swift `Logger`、`os_log` 或 Apple unified logging。
 
 ## Objective-C 快速开始
 

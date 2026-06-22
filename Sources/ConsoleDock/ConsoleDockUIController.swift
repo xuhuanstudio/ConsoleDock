@@ -210,6 +210,7 @@
         private let levelSegmentedControl = UISegmentedControl(
             items: ConsoleDockEntryFilter.LevelScope.allCases.map(\.title)
         )
+        private let statusLabel = UILabel()
         private var liveUpdateBuffer = ConsoleDockLiveUpdateBuffer()
         private var visibleEntries: [ConsoleDock.LogEntry] = []
         private var searchQuery = ""
@@ -232,10 +233,16 @@
             configureNavigationItems()
             configureSearchController()
             configureLevelSegmentedControl()
+            configureStatusLabel()
             configureTableView()
             observer = ConsoleDockEntriesObserver(deliveryQueue: .main) { [weak self] snapshot in
                 self?.receive(snapshot: snapshot)
             }
+        }
+
+        override func viewWillAppear(_ animated: Bool) {
+            super.viewWillAppear(animated)
+            updateStatusHeader()
         }
 
         deinit {
@@ -291,6 +298,22 @@
             view.addSubview(levelSegmentedControl)
         }
 
+        private func configureStatusLabel() {
+            statusLabel.translatesAutoresizingMaskIntoConstraints = false
+            statusLabel.numberOfLines = 0
+            statusLabel.font = ConsoleDockFonts.monospace(size: 10, weight: .regular)
+            statusLabel.textColor = UIColor(white: 0.78, alpha: 1)
+            statusLabel.backgroundColor = UIColor(white: 0.08, alpha: 1)
+            statusLabel.layer.cornerRadius = 6
+            statusLabel.layer.masksToBounds = true
+            statusLabel.text = ConsoleDockDiagnosticsFormatter.statusText(
+                diagnostics: ConsoleDock.diagnostics,
+                visibleEntryCount: 0,
+                isPaused: false
+            )
+            view.addSubview(statusLabel)
+        }
+
         private func configureTableView() {
             tableView.translatesAutoresizingMaskIntoConstraints = false
             tableView.backgroundColor = UIColor(white: 0.06, alpha: 1)
@@ -306,9 +329,12 @@
                 levelSegmentedControl.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
                 levelSegmentedControl.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
                 levelSegmentedControl.heightAnchor.constraint(equalToConstant: 32),
+                statusLabel.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
+                statusLabel.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
+                statusLabel.topAnchor.constraint(equalTo: levelSegmentedControl.bottomAnchor, constant: 8),
                 tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
                 tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-                tableView.topAnchor.constraint(equalTo: levelSegmentedControl.bottomAnchor, constant: 8),
+                tableView.topAnchor.constraint(equalTo: statusLabel.bottomAnchor, constant: 8),
                 tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
             ])
         }
@@ -316,6 +342,8 @@
         private func receive(snapshot: [ConsoleDock.LogEntry]) {
             if liveUpdateBuffer.receive(snapshot: snapshot) {
                 reloadVisibleEntries(scrollToBottom: true)
+            } else {
+                updateStatusHeader()
             }
         }
 
@@ -327,6 +355,7 @@
                 levelScope: levelScope
             )
             shareButton?.isEnabled = !visibleEntries.isEmpty
+            updateStatusHeader()
             tableView.reloadData()
             guard scrollToBottom, !visibleEntries.isEmpty else { return }
             let indexPath = IndexPath(row: visibleEntries.count - 1, section: 0)
@@ -349,7 +378,11 @@
 
         @objc private func shareSnapshot() {
             guard !visibleEntries.isEmpty else { return }
-            let snapshot = ConsoleDockSnapshotFormatter.snapshotText(entries: visibleEntries)
+            let snapshot = ConsoleDockSnapshotFormatter.snapshotText(
+                entries: visibleEntries,
+                diagnostics: ConsoleDock.diagnostics,
+                visibleEntryCount: visibleEntries.count
+            )
             let activityController = UIActivityViewController(activityItems: [snapshot], applicationActivities: nil)
             activityController.popoverPresentationController?.barButtonItem = shareButton
             present(activityController, animated: true)
@@ -363,6 +396,7 @@
             } else {
                 liveUpdateBuffer.pause()
                 updatePauseButton()
+                updateStatusHeader()
             }
         }
 
@@ -395,6 +429,14 @@
         @objc private func levelScopeDidChange() {
             levelScope = ConsoleDockEntryFilter.LevelScope(rawValue: levelSegmentedControl.selectedSegmentIndex) ?? .all
             reloadVisibleEntries(scrollToBottom: false)
+        }
+
+        private func updateStatusHeader() {
+            statusLabel.text = ConsoleDockDiagnosticsFormatter.statusText(
+                diagnostics: ConsoleDock.diagnostics,
+                visibleEntryCount: visibleEntries.count,
+                isPaused: liveUpdateBuffer.isPaused
+            )
         }
 
         func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

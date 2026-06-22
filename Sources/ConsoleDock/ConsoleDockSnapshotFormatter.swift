@@ -3,14 +3,24 @@ import Foundation
 struct ConsoleDockSnapshotFormatter {
     static func snapshotText(
         entries: [ConsoleDock.LogEntry],
-        generatedAt: Date = Date()
+        generatedAt: Date = Date(),
+        diagnostics: ConsoleDock.Diagnostics? = nil,
+        visibleEntryCount: Int? = nil
     ) -> String {
         var lines = [
             "ConsoleDock Log Snapshot",
-            "Generated: \(timestampString(generatedAt))",
-            "Entries: \(entries.count)",
-            ""
+            "Generated: \(timestampString(generatedAt))"
         ]
+
+        if let diagnostics {
+            lines.append("Entries: \(diagnostics.entryCount)")
+            lines.append("Visible Entries: \(visibleEntryCount ?? entries.count)")
+            lines.append(contentsOf: ConsoleDockDiagnosticsFormatter.snapshotLines(diagnostics: diagnostics))
+            lines.append("")
+        } else {
+            lines.append("Entries: \(entries.count)")
+            lines.append("")
+        }
 
         if entries.isEmpty {
             lines.append("(no entries)")

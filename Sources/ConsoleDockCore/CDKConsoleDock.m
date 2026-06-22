@@ -193,6 +193,45 @@ static void CDKPostEntriesDidChangeNotification(void)
     }
 }
 
++ (CDKDiagnostics *)diagnostics
+{
+    @synchronized(self) {
+        BOOL hasStoredEntries = CDKConsoleDockEntries.count > 0;
+        BOOL shouldUseActiveConfiguration = CDKConsoleDockRunning || hasStoredEntries;
+        CDKConfiguration *configuration =
+            shouldUseActiveConfiguration && CDKConsoleDockConfiguration != nil
+                ? CDKConsoleDockConfiguration
+                : [CDKConfiguration defaultConfiguration];
+        NSUInteger redactedEntryCount = 0;
+        NSUInteger truncatedEntryCount = 0;
+        NSUInteger partialEntryCount = 0;
+
+        for (CDKLogEntry *entry in CDKConsoleDockEntries) {
+            if (entry.redacted) {
+                redactedEntryCount += 1;
+            }
+            if (entry.truncated) {
+                truncatedEntryCount += 1;
+            }
+            if (entry.isPartial) {
+                partialEntryCount += 1;
+            }
+        }
+
+        return [[CDKDiagnostics alloc] initWithRunning:CDKConsoleDockRunning
+                                captureStandardOutput:configuration.captureStandardOutput
+                                 captureStandardError:configuration.captureStandardError
+                                  showsFloatingButton:configuration.showsFloatingButton
+                                  allowsReleaseBuilds:configuration.allowsReleaseBuilds
+                                       maximumEntries:configuration.maximumEntries
+                                 maximumMessageLength:configuration.maximumMessageLength
+                                           entryCount:CDKConsoleDockEntries.count
+                                   redactedEntryCount:redactedEntryCount
+                                  truncatedEntryCount:truncatedEntryCount
+                                    partialEntryCount:partialEntryCount];
+    }
+}
+
 + (NSArray<CDKLogEntry *> *)entries
 {
     @synchronized(self) {

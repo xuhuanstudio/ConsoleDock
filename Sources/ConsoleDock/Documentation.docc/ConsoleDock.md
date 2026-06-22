@@ -17,6 +17,7 @@ ConsoleDock is not a full replacement for Xcode Console or Apple unified logging
 - <doc:GettingStarted>
 - <doc:LoggingBoundaries>
 - <doc:ExistingLoggerMigration>
+- <doc:IntegrationDiagnostics>
 - <doc:PrivacyAndReleaseSafety>
 - <doc:ObjectiveCIntegration>
 
@@ -26,6 +27,8 @@ ConsoleDock is not a full replacement for Xcode Console or Apple unified logging
 - ``ConsoleDock/start(configuration:)``
 - ``ConsoleDock/stop()``
 - ``ConsoleDock/isRunning``
+- ``ConsoleDock/diagnostics``
+- ``ConsoleDock/Diagnostics``
 - ``ConsoleDock/StartResult``
 - ``ConsoleDock/StartFailure``
 

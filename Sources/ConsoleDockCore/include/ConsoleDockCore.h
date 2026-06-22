@@ -99,6 +99,47 @@ FOUNDATION_EXPORT NSNotificationName const CDKConsoleDockEntriesDidChangeNotific
 
 @end
 
+@interface CDKDiagnostics : NSObject <NSCopying>
+
+/// Whether ConsoleDock is currently running and able to append new entries.
+@property (nonatomic, readonly, getter=isRunning) BOOL running;
+/// Whether stdout capture is enabled in the effective configuration.
+@property (nonatomic, readonly) BOOL captureStandardOutput;
+/// Whether stderr capture is enabled in the effective configuration.
+@property (nonatomic, readonly) BOOL captureStandardError;
+/// Whether the effective configuration requests the bundled UIKit floating button.
+@property (nonatomic, readonly) BOOL showsFloatingButton;
+/// Whether the effective runtime configuration allows Release startup when compiled with CONSOLEDOCK_ENABLE_RELEASE.
+@property (nonatomic, readonly) BOOL allowsReleaseBuilds;
+/// Maximum number of entries retained in memory before oldest entries are evicted.
+@property (nonatomic, readonly) NSUInteger maximumEntries;
+/// Maximum stored message length after redaction.
+@property (nonatomic, readonly) NSUInteger maximumMessageLength;
+/// Current number of entries in the bounded in-memory store.
+@property (nonatomic, readonly) NSUInteger entryCount;
+/// Number of currently stored entries marked redacted.
+@property (nonatomic, readonly) NSUInteger redactedEntryCount;
+/// Number of currently stored entries marked truncated.
+@property (nonatomic, readonly) NSUInteger truncatedEntryCount;
+/// Number of currently stored entries flushed from incomplete lines.
+@property (nonatomic, readonly) NSUInteger partialEntryCount;
+
+- (instancetype)init NS_UNAVAILABLE;
++ (instancetype)new NS_UNAVAILABLE;
+- (instancetype)initWithRunning:(BOOL)running
+          captureStandardOutput:(BOOL)captureStandardOutput
+           captureStandardError:(BOOL)captureStandardError
+            showsFloatingButton:(BOOL)showsFloatingButton
+            allowsReleaseBuilds:(BOOL)allowsReleaseBuilds
+                 maximumEntries:(NSUInteger)maximumEntries
+           maximumMessageLength:(NSUInteger)maximumMessageLength
+                     entryCount:(NSUInteger)entryCount
+             redactedEntryCount:(NSUInteger)redactedEntryCount
+            truncatedEntryCount:(NSUInteger)truncatedEntryCount
+              partialEntryCount:(NSUInteger)partialEntryCount NS_DESIGNATED_INITIALIZER;
+
+@end
+
 @interface CDKLineEvent : NSObject <NSCopying>
 
 /// The descriptor source that produced this framed line.
@@ -141,6 +182,8 @@ FOUNDATION_EXPORT NSNotificationName const CDKConsoleDockEntriesDidChangeNotific
 + (void)stop;
 /// Whether ConsoleDock is currently running.
 + (BOOL)isRunning;
+/// Returns a snapshot of runtime configuration and current in-memory store counts.
++ (CDKDiagnostics *)diagnostics;
 
 /// Returns a snapshot of current in-memory entries.
 + (NSArray<CDKLogEntry *> *)entries;

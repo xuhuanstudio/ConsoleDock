@@ -71,6 +71,37 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertFalse(configuration.allowsReleaseBuilds)
     }
 
+    func testSwiftDiagnosticsMapsCoreFields() {
+        let configuration = ConsoleDock.Configuration(
+            maximumEntries: 9,
+            maximumMessageLength: 12,
+            captureStandardOutput: false,
+            captureStandardError: false,
+            showsFloatingButton: false,
+            allowsReleaseBuilds: true,
+            redactor: { message in
+                message.replacingOccurrences(of: "secret", with: "public")
+            }
+        )
+        XCTAssertEqual(ConsoleDock.start(configuration: configuration), .started)
+
+        ConsoleDock.info("secret-token")
+        CDKConsoleDock.append(CDKLineEvent(source: .stderr, message: "partial", isPartial: true))
+
+        let diagnostics = ConsoleDock.diagnostics
+        XCTAssertTrue(diagnostics.isRunning)
+        XCTAssertFalse(diagnostics.capturesStandardOutput)
+        XCTAssertFalse(diagnostics.capturesStandardError)
+        XCTAssertFalse(diagnostics.showsFloatingButton)
+        XCTAssertTrue(diagnostics.allowsReleaseBuilds)
+        XCTAssertEqual(diagnostics.maximumEntries, 9)
+        XCTAssertEqual(diagnostics.maximumMessageLength, 12)
+        XCTAssertEqual(diagnostics.entryCount, 2)
+        XCTAssertEqual(diagnostics.redactedEntryCount, 1)
+        XCTAssertEqual(diagnostics.truncatedEntryCount, 0)
+        XCTAssertEqual(diagnostics.partialEntryCount, 1)
+    }
+
     func testEntriesDidChangeNotificationNameIsExposed() {
         XCTAssertEqual(ConsoleDock.entriesDidChangeNotification.rawValue, "CDKConsoleDockEntriesDidChangeNotification")
     }
@@ -229,6 +260,87 @@ final class ConsoleDockTests: XCTestCase {
             Entries: 0
 
             (no entries)
+            """
+        )
+    }
+
+    func testSnapshotFormatterIncludesDiagnosticsWhenProvided() {
+        let diagnostics = ConsoleDock.Diagnostics(
+            isRunning: true,
+            capturesStandardOutput: true,
+            capturesStandardError: false,
+            showsFloatingButton: true,
+            allowsReleaseBuilds: false,
+            maximumEntries: 2_000,
+            maximumMessageLength: 8_192,
+            entryCount: 3,
+            redactedEntryCount: 1,
+            truncatedEntryCount: 1,
+            partialEntryCount: 1
+        )
+        let entries = [
+            ConsoleDock.LogEntry(
+                timestamp: Date(timeIntervalSince1970: 1.25),
+                level: .info,
+                source: .native,
+                message: "visible"
+            )
+        ]
+
+        let snapshot = ConsoleDockSnapshotFormatter.snapshotText(
+            entries: entries,
+            generatedAt: Date(timeIntervalSince1970: 0),
+            diagnostics: diagnostics,
+            visibleEntryCount: entries.count
+        )
+
+        XCTAssertEqual(
+            snapshot,
+            """
+            ConsoleDock Log Snapshot
+            Generated: 1970-01-01T00:00:00.000Z
+            Entries: 3
+            Visible Entries: 1
+            Diagnostics:
+              Running: true
+              stdout: enabled
+              stderr: disabled
+              Floating Button: enabled
+              Release Builds: disabled by runtime config
+              Limits: entries=2000 messageLength=8192
+              Redacted: 1
+              Truncated: 1
+              Partial: 1
+
+            [1970-01-01T00:00:01.250Z] [native] [INFO] visible
+            """
+        )
+    }
+
+    func testDiagnosticsStatusTextIsCompactAndSafe() {
+        let diagnostics = ConsoleDock.Diagnostics(
+            isRunning: false,
+            capturesStandardOutput: true,
+            capturesStandardError: true,
+            showsFloatingButton: false,
+            allowsReleaseBuilds: false,
+            maximumEntries: 10,
+            maximumMessageLength: 256,
+            entryCount: 8,
+            redactedEntryCount: 2,
+            truncatedEntryCount: 1,
+            partialEntryCount: 3
+        )
+
+        XCTAssertEqual(
+            ConsoleDockDiagnosticsFormatter.statusText(
+                diagnostics: diagnostics,
+                visibleEntryCount: 5,
+                isPaused: true
+            ),
+            """
+            Running: off  Entries: 8 visible 5  stdout: on  stderr: on
+            Limits: entries=10 messageLength=256  redacted=2 truncated=1 partial=3  live: paused
             """
         )
     }

@@ -119,6 +119,58 @@ public enum ConsoleDock {
         }
     }
 
+    /// Snapshot of ConsoleDock runtime configuration and current in-memory store counts.
+    public struct Diagnostics: Equatable {
+        /// Whether ConsoleDock is currently running and able to append new entries.
+        public let isRunning: Bool
+        /// Whether stdout capture is enabled in the effective configuration.
+        public let capturesStandardOutput: Bool
+        /// Whether stderr capture is enabled in the effective configuration.
+        public let capturesStandardError: Bool
+        /// Whether the effective configuration requests the bundled UIKit floating button.
+        public let showsFloatingButton: Bool
+        /// Whether the effective runtime configuration allows Release startup when compiled with CONSOLEDOCK_ENABLE_RELEASE.
+        public let allowsReleaseBuilds: Bool
+        /// Maximum number of entries retained in memory before oldest entries are evicted.
+        public let maximumEntries: Int
+        /// Maximum stored message length after redaction.
+        public let maximumMessageLength: Int
+        /// Current number of entries in the bounded in-memory store.
+        public let entryCount: Int
+        /// Number of currently stored entries marked redacted.
+        public let redactedEntryCount: Int
+        /// Number of currently stored entries marked truncated.
+        public let truncatedEntryCount: Int
+        /// Number of currently stored entries flushed from incomplete lines.
+        public let partialEntryCount: Int
+
+        public init(
+            isRunning: Bool,
+            capturesStandardOutput: Bool,
+            capturesStandardError: Bool,
+            showsFloatingButton: Bool,
+            allowsReleaseBuilds: Bool,
+            maximumEntries: Int,
+            maximumMessageLength: Int,
+            entryCount: Int,
+            redactedEntryCount: Int,
+            truncatedEntryCount: Int,
+            partialEntryCount: Int
+        ) {
+            self.isRunning = isRunning
+            self.capturesStandardOutput = capturesStandardOutput
+            self.capturesStandardError = capturesStandardError
+            self.showsFloatingButton = showsFloatingButton
+            self.allowsReleaseBuilds = allowsReleaseBuilds
+            self.maximumEntries = maximumEntries
+            self.maximumMessageLength = maximumMessageLength
+            self.entryCount = entryCount
+            self.redactedEntryCount = redactedEntryCount
+            self.truncatedEntryCount = truncatedEntryCount
+            self.partialEntryCount = partialEntryCount
+        }
+    }
+
     /// Startup result returned by `start(configuration:)`.
     public enum StartResult: Equatable {
         case started
@@ -178,6 +230,11 @@ public enum ConsoleDock {
     /// Snapshot of the current in-memory entries.
     public static var entries: [LogEntry] {
         CDKConsoleDock.entries().map(LogEntry.init(coreEntry:))
+    }
+
+    /// Snapshot of runtime configuration and current in-memory store counts.
+    public static var diagnostics: Diagnostics {
+        Diagnostics(coreDiagnostics: CDKConsoleDock.diagnostics())
     }
 
     /// Notification posted after entries are appended, reset, or cleared.
@@ -267,6 +324,22 @@ extension ConsoleDock.LogEntry {
         partial = coreEntry.isPartial
         redacted = coreEntry.redacted
         truncated = coreEntry.truncated
+    }
+}
+
+extension ConsoleDock.Diagnostics {
+    fileprivate init(coreDiagnostics: CDKDiagnostics) {
+        isRunning = coreDiagnostics.isRunning
+        capturesStandardOutput = coreDiagnostics.captureStandardOutput
+        capturesStandardError = coreDiagnostics.captureStandardError
+        showsFloatingButton = coreDiagnostics.showsFloatingButton
+        allowsReleaseBuilds = coreDiagnostics.allowsReleaseBuilds
+        maximumEntries = Int(coreDiagnostics.maximumEntries)
+        maximumMessageLength = Int(coreDiagnostics.maximumMessageLength)
+        entryCount = Int(coreDiagnostics.entryCount)
+        redactedEntryCount = Int(coreDiagnostics.redactedEntryCount)
+        truncatedEntryCount = Int(coreDiagnostics.truncatedEntryCount)
+        partialEntryCount = Int(coreDiagnostics.partialEntryCount)
     }
 }
 

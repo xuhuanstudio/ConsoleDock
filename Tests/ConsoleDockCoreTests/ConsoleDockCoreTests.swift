@@ -22,6 +22,85 @@ final class ConsoleDockCoreTests: XCTestCase {
         XCTAssertFalse(configuration.allowsReleaseBuilds)
     }
 
+    func testDiagnosticsBeforeStartUsesDefaultConfigurationAndEmptyStore() {
+        let diagnostics = CDKConsoleDock.diagnostics()
+
+        XCTAssertFalse(diagnostics.isRunning)
+        XCTAssertTrue(diagnostics.captureStandardOutput)
+        XCTAssertTrue(diagnostics.captureStandardError)
+        XCTAssertTrue(diagnostics.showsFloatingButton)
+        XCTAssertFalse(diagnostics.allowsReleaseBuilds)
+        XCTAssertEqual(diagnostics.maximumEntries, 2_000)
+        XCTAssertEqual(diagnostics.maximumMessageLength, 8_192)
+        XCTAssertEqual(diagnostics.entryCount, 0)
+        XCTAssertEqual(diagnostics.redactedEntryCount, 0)
+        XCTAssertEqual(diagnostics.truncatedEntryCount, 0)
+        XCTAssertEqual(diagnostics.partialEntryCount, 0)
+    }
+
+    func testDiagnosticsReflectActiveConfiguration() {
+        let configuration = noCaptureConfiguration()
+        configuration.maximumEntries = 7
+        configuration.maximumMessageLength = 11
+        configuration.showsFloatingButton = false
+        configuration.allowsReleaseBuilds = true
+
+        XCTAssertEqual(CDKConsoleDock.start(with: configuration), .started)
+
+        let diagnostics = CDKConsoleDock.diagnostics()
+        XCTAssertTrue(diagnostics.isRunning)
+        XCTAssertFalse(diagnostics.captureStandardOutput)
+        XCTAssertFalse(diagnostics.captureStandardError)
+        XCTAssertFalse(diagnostics.showsFloatingButton)
+        XCTAssertTrue(diagnostics.allowsReleaseBuilds)
+        XCTAssertEqual(diagnostics.maximumEntries, 7)
+        XCTAssertEqual(diagnostics.maximumMessageLength, 11)
+    }
+
+    func testDiagnosticsCountsStoredEntryFlags() {
+        let configuration = noCaptureConfiguration()
+        configuration.maximumMessageLength = 18
+        XCTAssertEqual(CDKConsoleDock.start(with: configuration), .started)
+
+        CDKConsoleDock.info("password=hunter2 suffix")
+        CDKConsoleDock.append(CDKLineEvent(source: .stdout, message: "partial", isPartial: true))
+
+        let diagnostics = CDKConsoleDock.diagnostics()
+        XCTAssertEqual(diagnostics.entryCount, 2)
+        XCTAssertEqual(diagnostics.redactedEntryCount, 1)
+        XCTAssertEqual(diagnostics.truncatedEntryCount, 1)
+        XCTAssertEqual(diagnostics.partialEntryCount, 1)
+    }
+
+    func testDiagnosticsAfterClearReportsEmptyStore() {
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+        CDKConsoleDock.info("before clear")
+        XCTAssertEqual(CDKConsoleDock.diagnostics().entryCount, 1)
+
+        CDKConsoleDock.clearEntries()
+
+        let diagnostics = CDKConsoleDock.diagnostics()
+        XCTAssertTrue(diagnostics.isRunning)
+        XCTAssertEqual(diagnostics.entryCount, 0)
+        XCTAssertEqual(diagnostics.redactedEntryCount, 0)
+        XCTAssertEqual(diagnostics.truncatedEntryCount, 0)
+        XCTAssertEqual(diagnostics.partialEntryCount, 0)
+    }
+
+    func testDiagnosticsAfterStopPreservesStoreCountsAndMarksNotRunning() {
+        let configuration = noCaptureConfiguration()
+        configuration.maximumEntries = 4
+        XCTAssertEqual(CDKConsoleDock.start(with: configuration), .started)
+        CDKConsoleDock.warning("stored before stop")
+
+        CDKConsoleDock.stop()
+
+        let diagnostics = CDKConsoleDock.diagnostics()
+        XCTAssertFalse(diagnostics.isRunning)
+        XCTAssertEqual(diagnostics.maximumEntries, 4)
+        XCTAssertEqual(diagnostics.entryCount, 1)
+    }
+
     func testReleaseBuildDefaultStartGateIsDisabled() {
         let configuration = noCaptureConfiguration()
 

@@ -58,11 +58,14 @@ ConsoleDock.start(configuration: configuration)
 
 ## Read Or Clear Entries
 
-Use ``ConsoleDock/entries`` for a snapshot and ``ConsoleDock/clear()`` to clear the local in-memory store.
+Use ``ConsoleDock/entries`` for a snapshot, ``ConsoleDock/diagnostics`` for runtime state and store counts, and ``ConsoleDock/clear()`` to clear the local in-memory store.
 
 ```swift
 let snapshot = ConsoleDock.entries
+let diagnostics = ConsoleDock.diagnostics
 ConsoleDock.clear()
 ```
 
 Use ``ConsoleDock/entriesDidChangeNotification`` when building a custom debug surface. Notification handlers should dispatch to the main queue before touching UIKit.
+
+Diagnostics report ConsoleDock's local runtime state only. They do not imply complete capture of Swift `Logger`, `os_log`, Apple unified logging, other-process logs, or debugger-only output.
