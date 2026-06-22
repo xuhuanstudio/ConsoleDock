@@ -30,6 +30,7 @@ Initial public preview of ConsoleDock as a source-first Swift Package Manager iO
 - Added Swift and Objective-C UIKit sample apps that exercise package integration, native logs, stdout, stderr, `NSLog`, redaction, clear, stop, and restart behavior.
 - Added README quick start content, a real Simulator screenshot, sample app walkthrough, Release safety documentation, existing logger migration guide, and DocC documentation for public Swift usage.
 - Added open-source governance files, issue templates, pull request template, security policy, and contribution guidance.
+- Added governance metadata validation for required open-source files, workflows, issue templates, and pull request template safeguards.
 - Added CI coverage for SwiftPM manifest validation, build, tests, Release safety gates, documentation link validation, DocC conversion, iOS package build, and Swift/Objective-C sample app builds.
 - Added release process documentation, reusable DocC and documentation-link validation scripts, tag-triggered release validation, and source archive validation.
 - Added release content audit for generated paths, private key blocks, common token shapes, and local absolute paths before publishing.

@@ -106,6 +106,7 @@ Initial checks:
 - unit tests;
 - DocC conversion with warnings treated as errors;
 - package identity validation;
+- governance metadata validation;
 - tag-triggered release validation for `v*` tags;
 - documentation link validation;
 - release content audit for generated paths, key material, common token shapes, and local absolute paths;
