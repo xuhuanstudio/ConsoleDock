@@ -124,6 +124,72 @@ def package_version(tag: str) -> str:
     return match.group(1)
 
 
+def resolve_tag_commit_sha_from_ls_remote(output: str, tag: str) -> str | None:
+    direct_ref = f"refs/tags/{tag}"
+    peeled_ref = f"{direct_ref}^{{}}"
+    direct_sha: str | None = None
+    peeled_sha: str | None = None
+
+    for line in output.splitlines():
+        parts = line.split()
+        if len(parts) != 2:
+            continue
+
+        sha, ref = parts
+        if ref == peeled_ref:
+            peeled_sha = sha
+        elif ref == direct_ref:
+            direct_sha = sha
+
+    return peeled_sha or direct_sha
+
+
+def remote_tag_commit_sha(repository_url: str, tag: str) -> tuple[str | None, list[str]]:
+    tag_lookup = run_network(
+        [
+            "git",
+            "ls-remote",
+            "--exit-code",
+            "--tags",
+            repository_url,
+            tag,
+            f"{tag}^{{}}",
+        ]
+    )
+    if tag_lookup.returncode != 0:
+        return None, [f"remote tag {tag} was not found on {repository_url}"]
+
+    tag_commit_sha = resolve_tag_commit_sha_from_ls_remote(tag_lookup.stdout, tag)
+    if tag_commit_sha is None:
+        return None, [f"remote tag {tag} was found on {repository_url}, but its commit SHA could not be resolved"]
+
+    return tag_commit_sha, []
+
+
+def validate_workflow_matches_tag(
+    tag: str,
+    workflow: str,
+    workflow_head_sha: object,
+    tag_commit_sha: str | None,
+) -> list[str]:
+    if tag_commit_sha is None:
+        return []
+
+    if not isinstance(workflow_head_sha, str) or not workflow_head_sha:
+        return [
+            f"{workflow} workflow for {tag} did not report headSha; "
+            "cannot confirm it ran against the remote tag commit"
+        ]
+
+    if workflow_head_sha != tag_commit_sha:
+        return [
+            f"{workflow} workflow for {tag} ran at {workflow_head_sha}, "
+            f"but the remote tag resolves to {tag_commit_sha}"
+        ]
+
+    return []
+
+
 def release_validation_url_re(repository_slug: str) -> re.Pattern[str]:
     return re.compile(rf"https://github\.com/{re.escape(repository_slug)}/actions/runs/\d+", re.IGNORECASE)
 
@@ -153,6 +219,8 @@ def check_github_release(repository_slug: str, tag: str, workflow: str) -> list[
     errors: list[str] = []
     release_body: str | None = None
     expected_workflow_url: str | None = None
+    repository_url = f"https://github.com/{repository_slug}.git"
+    tag_commit_sha: str | None = None
 
     repo = run_network(
         [
@@ -189,9 +257,8 @@ def check_github_release(repository_slug: str, tag: str, workflow: str) -> list[
             errors.append(f"GitHub Release {tag} must not be a draft")
         release_body = release_payload.get("body") or ""
 
-    tag_lookup = run_network(["git", "ls-remote", "--exit-code", "--tags", f"https://github.com/{repository_slug}.git", tag])
-    if tag_lookup.returncode != 0:
-        errors.append(f"remote tag {tag} was not found on https://github.com/{repository_slug}.git")
+    tag_commit_sha, tag_errors = remote_tag_commit_sha(repository_url, tag)
+    errors.extend(tag_errors)
 
     workflow_fields = "conclusion,status,headBranch,headSha,url,workflowName,createdAt"
     workflow_command = [
@@ -230,6 +297,7 @@ def check_github_release(repository_slug: str, tag: str, workflow: str) -> list[
                     f"got status={latest.get('status')} conclusion={latest.get('conclusion')}"
                 )
             else:
+                errors.extend(validate_workflow_matches_tag(tag, workflow, latest.get("headSha"), tag_commit_sha))
                 expected_workflow_url = latest.get("url")
 
     if release_body is not None:
@@ -406,6 +474,8 @@ def self_test() -> list[str]:
         pass
 
     errors.extend(self_test_transient_process_detection())
+    errors.extend(self_test_tag_commit_resolution())
+    errors.extend(self_test_workflow_tag_commit_validation())
     errors.extend(self_test_release_body_validation())
     errors.extend(self_test_swiftpm_v_tag_resolution())
     return errors
@@ -442,6 +512,48 @@ def self_test_transient_process_detection() -> list[str]:
     forbidden = urllib.error.HTTPError("https://example.com", 403, "Forbidden", {}, None)
     if is_access_challenge(forbidden):
         errors.append("is_access_challenge should not treat every HTTP 403 as an access challenge")
+
+    return errors
+
+
+def self_test_tag_commit_resolution() -> list[str]:
+    errors: list[str] = []
+    tag_object_sha = "a" * 40
+    peeled_commit_sha = "b" * 40
+    lightweight_commit_sha = "c" * 40
+
+    annotated_output = (
+        f"{tag_object_sha}\trefs/tags/v0.1.0\n"
+        f"{peeled_commit_sha}\trefs/tags/v0.1.0^{{}}\n"
+    )
+    if resolve_tag_commit_sha_from_ls_remote(annotated_output, "v0.1.0") != peeled_commit_sha:
+        errors.append("resolve_tag_commit_sha_from_ls_remote should prefer the peeled commit SHA for annotated tags")
+
+    lightweight_output = f"{lightweight_commit_sha}\trefs/tags/v0.1.0\n"
+    if resolve_tag_commit_sha_from_ls_remote(lightweight_output, "v0.1.0") != lightweight_commit_sha:
+        errors.append("resolve_tag_commit_sha_from_ls_remote should use the direct SHA for lightweight tags")
+
+    if resolve_tag_commit_sha_from_ls_remote("not-a-git-ref\n", "v0.1.0") is not None:
+        errors.append("resolve_tag_commit_sha_from_ls_remote should ignore malformed ls-remote output")
+
+    return errors
+
+
+def self_test_workflow_tag_commit_validation() -> list[str]:
+    errors: list[str] = []
+    tag_commit_sha = "d" * 40
+
+    if validate_workflow_matches_tag("v0.1.0", DEFAULT_WORKFLOW, tag_commit_sha, tag_commit_sha):
+        errors.append("validate_workflow_matches_tag should accept matching workflow and tag SHAs")
+
+    if not validate_workflow_matches_tag("v0.1.0", DEFAULT_WORKFLOW, "e" * 40, tag_commit_sha):
+        errors.append("validate_workflow_matches_tag should reject a workflow SHA that does not match the tag")
+
+    if not validate_workflow_matches_tag("v0.1.0", DEFAULT_WORKFLOW, None, tag_commit_sha):
+        errors.append("validate_workflow_matches_tag should reject a successful workflow without headSha")
+
+    if validate_workflow_matches_tag("v0.1.0", DEFAULT_WORKFLOW, None, None):
+        errors.append("validate_workflow_matches_tag should not duplicate errors when the tag SHA is already unknown")
 
     return errors
 

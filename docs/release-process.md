@@ -103,7 +103,7 @@ Use the matching changelog section as the source of truth. Keep release notes fa
 python3 scripts/verify-public-release.py --repository <OWNER>/ConsoleDock --tag v0.1.0 --check-spi
 ```
 
-The verifier retries transient network failures such as GitHub API EOFs and connection timeouts, but it still treats persistent missing releases, missing workflow runs, missing tags, missing release-note boundaries, missing release validation links, release notes that link to the wrong repository or workflow run, and unavailable Swift Package Index pages as failures.
+The verifier retries transient network failures such as GitHub API EOFs and connection timeouts, but it still treats persistent missing releases, missing workflow runs, missing tags, tag/workflow commit mismatches, missing release-note boundaries, missing release validation links, release notes that link to the wrong repository or workflow run, and unavailable Swift Package Index pages as failures.
 If Swift Package Index returns a Cloudflare access challenge to automated HTTP checks, manually open both the package and DocC pages in a browser. After that manual confirmation, rerun the verifier with `--allow-spi-challenge` to keep the rest of the automated checks strict while recording the SPI challenge as a warning:
 
 ```sh

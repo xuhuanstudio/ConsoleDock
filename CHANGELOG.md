@@ -22,6 +22,7 @@ The project follows Semantic Versioning for public releases.
 - Added GitHub Release notes boundary and validation-link checks to the post-release verifier.
 - Added public release preflight self-tests and dry-run input validation for malformed release rehearsal tags.
 - Added post-release verification that GitHub Release notes link to the matching repository and tag validation workflow run.
+- Added post-release verification that the tag validation workflow ran against the current remote tag commit.
 - Added `.editorconfig` and `.gitattributes` to standardize editor behavior and line endings for global contributors.
 - Added `.gitignore` governance validation and expanded generated-artifact ignores for Xcode, SwiftPM, DocC, CocoaPods, and future binary distribution outputs.
 - Added the v0.2 integration diagnostics design specification for runtime state, UIKit status, snapshot export, tests, and documentation.
