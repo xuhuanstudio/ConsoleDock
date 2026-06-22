@@ -101,13 +101,21 @@ Use the `v0.1.0` changelog section as the release notes source. Keep the release
 
 After publishing the GitHub Release:
 
-1. Create a temporary iOS app or use a clean sample workspace.
-2. Add the public repository URL through Swift Package Manager at tag `v0.1.0`.
-3. Confirm both products resolve:
+1. Run the automated public release verifier:
+
+```sh
+python3 scripts/verify-public-release.py --repository <OWNER>/ConsoleDock --tag v0.1.0 --check-spi
+```
+
+The verifier checks the GitHub repository, remote tag, GitHub Release, `Release Validation` workflow, a clean external SwiftPM consumer build, and Swift Package Index package/DocC pages when `--check-spi` is supplied.
+
+2. Create a temporary iOS app or use a clean sample workspace when you need a manual Xcode UI check.
+3. Add the public repository URL through Swift Package Manager at tag `v0.1.0`.
+4. Confirm both products resolve:
    - `ConsoleDock`
    - `ConsoleDockCore`
-4. Build the package in an iOS Simulator target.
-5. Confirm the README, release notes, and `SECURITY.md` still describe the shipped behavior accurately.
-6. Submit or verify the package on Swift Package Index after the public repository URL and release tag are available.
-7. Confirm Swift Package Index builds the package and hosts DocC documentation for the `ConsoleDock` target.
-8. Leave the local working tree clean.
+5. Build the package in an iOS Simulator target.
+6. Confirm the README, release notes, and `SECURITY.md` still describe the shipped behavior accurately.
+7. Submit or verify the package on Swift Package Index after the public repository URL and release tag are available.
+8. Confirm Swift Package Index builds the package and hosts DocC documentation for the `ConsoleDock` target.
+9. Leave the local working tree clean.
