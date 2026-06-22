@@ -14,6 +14,21 @@ static void SampleAppLogInfo(NSString *message)
     [CDKConsoleDock info:formattedMessage];
 }
 
+static NSString *const SampleAccessibilityStatusIdentifier = @"objc-sample.status";
+
+static NSString *SampleAccessibilityButtonIdentifier(NSString *title)
+{
+    NSCharacterSet *separatorSet = [[NSCharacterSet alphanumericCharacterSet] invertedSet];
+    NSArray<NSString *> *rawComponents = [title.lowercaseString componentsSeparatedByCharactersInSet:separatorSet];
+    NSMutableArray<NSString *> *components = [NSMutableArray array];
+    for (NSString *component in rawComponents) {
+        if (component.length > 0) {
+            [components addObject:component];
+        }
+    }
+    return [@"objc-sample." stringByAppendingString:[components componentsJoinedByString:@"-"]];
+}
+
 @interface MainViewController ()
 
 @property (nonatomic, strong) UILabel *statusLabel;
@@ -50,6 +65,7 @@ static void SampleAppLogInfo(NSString *message)
     self.statusLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleFootnote];
     self.statusLabel.textColor = [UIColor colorWithWhite:0.28 alpha:1.0];
     self.statusLabel.numberOfLines = 0;
+    self.statusLabel.accessibilityIdentifier = SampleAccessibilityStatusIdentifier;
 
     UIStackView *stackView = [[UIStackView alloc] initWithArrangedSubviews:@[
         headingLabel,
@@ -100,6 +116,7 @@ static void SampleAppLogInfo(NSString *message)
 {
     UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
     [button setTitle:title forState:UIControlStateNormal];
+    button.accessibilityIdentifier = SampleAccessibilityButtonIdentifier(title);
     button.titleLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
     button.titleLabel.adjustsFontForContentSizeCategory = YES;
     button.backgroundColor = UIColor.whiteColor;

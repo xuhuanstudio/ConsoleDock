@@ -2,6 +2,19 @@
     import ConsoleDockCore
     import UIKit
 
+    private enum ConsoleDockAccessibilityIdentifiers {
+        static let dockButton = "consoledock.dock-button"
+        static let closeButton = "consoledock.close"
+        static let shareButton = "consoledock.share"
+        static let clearButton = "consoledock.clear"
+        static let pauseLiveButton = "consoledock.pause-live"
+        static let resumeLiveButton = "consoledock.resume-live"
+        static let searchBar = "consoledock.search"
+        static let levelFilter = "consoledock.level-filter"
+        static let status = "consoledock.status"
+        static let entriesTable = "consoledock.entries-table"
+    }
+
     final class ConsoleDockUIController {
         static let shared = ConsoleDockUIController()
 
@@ -130,6 +143,7 @@
             button.backgroundColor = UIColor(white: 0.08, alpha: 0.92)
             button.setTitle("CD", for: .normal)
             button.setTitleColor(.white, for: .normal)
+            button.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.dockButton
             button.titleLabel?.font = ConsoleDockFonts.monospace(size: 15, weight: .semibold)
             button.autoresizingMask = [.flexibleLeftMargin, .flexibleTopMargin]
             button.addTarget(self, action: #selector(toggleConsole), for: .touchUpInside)
@@ -262,16 +276,20 @@
         }
 
         private func configureNavigationItems() {
-            navigationItem.leftBarButtonItem = UIBarButtonItem(
+            let closeButton = UIBarButtonItem(
                 barButtonSystemItem: .done,
                 target: self,
                 action: #selector(close)
             )
+            closeButton.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.closeButton
+            navigationItem.leftBarButtonItem = closeButton
+
             let shareButton = UIBarButtonItem(
                 barButtonSystemItem: .action,
                 target: self,
                 action: #selector(shareSnapshot)
             )
+            shareButton.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.shareButton
             shareButton.isEnabled = false
             self.shareButton = shareButton
 
@@ -281,6 +299,7 @@
                 target: self,
                 action: #selector(clear)
             )
+            clearButton.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.clearButton
             self.clearButton = clearButton
 
             let pauseButton = makePauseButton()
@@ -294,6 +313,7 @@
             searchController.searchBar.placeholder = "Search logs"
             searchController.searchBar.scopeButtonTitles = ConsoleDockEntryFilter.SourceScope.allCases.map(\.title)
             searchController.searchBar.delegate = self
+            searchController.searchBar.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.searchBar
             navigationItem.searchController = searchController
             navigationItem.hidesSearchBarWhenScrolling = false
             definesPresentationContext = true
@@ -301,6 +321,7 @@
 
         private func configureLevelSegmentedControl() {
             levelSegmentedControl.translatesAutoresizingMaskIntoConstraints = false
+            levelSegmentedControl.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.levelFilter
             levelSegmentedControl.selectedSegmentIndex = ConsoleDockEntryFilter.LevelScope.all.rawValue
             levelSegmentedControl.backgroundColor = UIColor(white: 0.1, alpha: 1)
             levelSegmentedControl.setTitleTextAttributes([.foregroundColor: UIColor.white], for: .selected)
@@ -312,6 +333,7 @@
 
         private func configureStatusLabel() {
             statusLabel.translatesAutoresizingMaskIntoConstraints = false
+            statusLabel.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.status
             statusLabel.numberOfLines = 0
             statusLabel.font = ConsoleDockFonts.monospace(size: 10, weight: .regular)
             statusLabel.textColor = UIColor(white: 0.78, alpha: 1)
@@ -328,6 +350,7 @@
 
         private func configureTableView() {
             tableView.translatesAutoresizingMaskIntoConstraints = false
+            tableView.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.entriesTable
             tableView.backgroundColor = UIColor(white: 0.06, alpha: 1)
             tableView.separatorColor = UIColor(white: 0.18, alpha: 1)
             tableView.dataSource = self
@@ -419,6 +442,10 @@
                 action: #selector(toggleLiveUpdates)
             )
             item.accessibilityLabel = liveUpdateBuffer.isPaused ? "Resume Live Updates" : "Pause Live Updates"
+            item.accessibilityIdentifier =
+                liveUpdateBuffer.isPaused
+                ? ConsoleDockAccessibilityIdentifiers.resumeLiveButton
+                : ConsoleDockAccessibilityIdentifiers.pauseLiveButton
             return item
         }
 

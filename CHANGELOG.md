@@ -16,6 +16,7 @@ The project follows Semantic Versioning for public releases.
 - Added a compact UIKit diagnostics header and included diagnostics in share/export snapshots.
 - Added diagnostics controls and status output to the Swift and Objective-C sample apps.
 - Added app-specific logger sink forwarding controls to the Swift and Objective-C sample apps.
+- Added stable accessibility identifiers to bundled console and sample controls for future UI smoke automation.
 
 ### Changed
 

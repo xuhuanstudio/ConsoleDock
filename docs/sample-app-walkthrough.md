@@ -14,6 +14,8 @@ Use the samples to verify:
 - redaction before storage;
 - UIKit floating button, search, source and level filtering, pause/resume live follow, selected-entry copy, panel refresh, share/export, clear, stop, and restart behavior.
 
+The bundled console and sample controls expose stable accessibility identifiers so future UI smoke tests can target behavior without relying on localized text. Key bundled console identifiers include `consoledock.dock-button`, `consoledock.search`, `consoledock.level-filter`, `consoledock.status`, and `consoledock.entries-table`. Sample app button identifiers use `swift-sample.<button-slug>` and `objc-sample.<button-slug>`.
+
 ![ConsoleDock Swift sample console](assets/swift-sample-console.png)
 
 ## Swift Sample

@@ -9,6 +9,19 @@ private enum SampleAppLog {
     }
 }
 
+private enum SampleAccessibilityIdentifiers {
+    static let status = "swift-sample.status"
+
+    static func button(_ title: String) -> String {
+        let components =
+            title
+            .lowercased()
+            .components(separatedBy: CharacterSet.alphanumerics.inverted)
+            .filter { !$0.isEmpty }
+        return "swift-sample.\(components.joined(separator: "-"))"
+    }
+}
+
 final class MainViewController: UIViewController {
     private let statusLabel = UILabel()
     private var counter = 0
@@ -37,6 +50,7 @@ final class MainViewController: UIViewController {
         statusLabel.font = .preferredFont(forTextStyle: .footnote)
         statusLabel.textColor = UIColor(white: 0.28, alpha: 1)
         statusLabel.numberOfLines = 0
+        statusLabel.accessibilityIdentifier = SampleAccessibilityIdentifiers.status
 
         let stackView = UIStackView(arrangedSubviews: [
             headingLabel,
@@ -84,6 +98,7 @@ final class MainViewController: UIViewController {
     private func makeButton(title: String, action: Selector) -> UIButton {
         let button = UIButton(type: .system)
         button.setTitle(title, for: .normal)
+        button.accessibilityIdentifier = SampleAccessibilityIdentifiers.button(title)
         button.titleLabel?.font = .preferredFont(forTextStyle: .body)
         button.titleLabel?.adjustsFontForContentSizeCategory = true
         button.backgroundColor = UIColor(white: 1, alpha: 1)
