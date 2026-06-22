@@ -106,6 +106,69 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertEqual(entries[0].source, .native)
         XCTAssertEqual(entries[0].message, "public")
     }
+
+    func testEntriesObserverDeliversInitialSnapshot() {
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+        ConsoleDock.info("initial")
+
+        let expectation = expectation(description: "Initial snapshot delivered")
+        var snapshots: [[ConsoleDock.LogEntry]] = []
+        let observer = ConsoleDockEntriesObserver(deliveryQueue: .main) { snapshot in
+            snapshots.append(snapshot)
+            expectation.fulfill()
+        }
+        defer { observer.invalidate() }
+
+        wait(for: [expectation], timeout: 1.0)
+        XCTAssertEqual(snapshots.last?.map(\.message), ["initial"])
+    }
+
+    func testEntriesObserverRefreshesAfterAppend() {
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+
+        let initialExpectation = expectation(description: "Initial empty snapshot delivered")
+        let appendExpectation = expectation(description: "Append snapshot delivered")
+        var didSeeInitialSnapshot = false
+        var snapshots: [[ConsoleDock.LogEntry]] = []
+        let observer = ConsoleDockEntriesObserver(deliveryQueue: .main) { snapshot in
+            snapshots.append(snapshot)
+            if !didSeeInitialSnapshot {
+                didSeeInitialSnapshot = true
+                initialExpectation.fulfill()
+            } else if snapshot.map(\.message) == ["appended"] {
+                appendExpectation.fulfill()
+            }
+        }
+        defer { observer.invalidate() }
+
+        wait(for: [initialExpectation], timeout: 1.0)
+        ConsoleDock.info("appended")
+        wait(for: [appendExpectation], timeout: 1.0)
+
+        XCTAssertEqual(snapshots.last?.map(\.message), ["appended"])
+    }
+
+    func testEntriesObserverStopsAfterInvalidate() {
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+
+        let initialExpectation = expectation(description: "Initial snapshot delivered")
+        let unexpectedExpectation = expectation(description: "No snapshot after invalidate")
+        unexpectedExpectation.isInverted = true
+        var didSeeInitialSnapshot = false
+        let observer = ConsoleDockEntriesObserver(deliveryQueue: .main) { _ in
+            if !didSeeInitialSnapshot {
+                didSeeInitialSnapshot = true
+                initialExpectation.fulfill()
+            } else {
+                unexpectedExpectation.fulfill()
+            }
+        }
+
+        wait(for: [initialExpectation], timeout: 1.0)
+        observer.invalidate()
+        ConsoleDock.info("after invalidate")
+        wait(for: [unexpectedExpectation], timeout: 0.2)
+    }
 }
 
 private extension ConsoleDock.Configuration {

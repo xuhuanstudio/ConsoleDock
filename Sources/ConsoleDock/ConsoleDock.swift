@@ -114,11 +114,16 @@ public enum ConsoleDock {
     public static func start(configuration: Configuration = .default) -> StartResult {
         var error: NSError?
         let result = CDKConsoleDock.start(with: configuration.makeCoreConfiguration(), error: &error)
-        return StartResult(coreResult: result, error: error)
+        let startResult = StartResult(coreResult: result, error: error)
+        if case .started = startResult, configuration.showsFloatingButton {
+            installUIIfAvailable()
+        }
+        return startResult
     }
 
     public static func stop() {
         CDKConsoleDock.stop()
+        teardownUIIfAvailable()
     }
 
     public static var isRunning: Bool {
@@ -135,6 +140,15 @@ public enum ConsoleDock {
         CDKConsoleDock.clearEntries()
     }
 
+    public static func showConsole() {
+        guard isRunning else { return }
+        showConsoleIfAvailable()
+    }
+
+    public static func hideConsole() {
+        hideConsoleIfAvailable()
+    }
+
     public static func debug(_ message: String) {
         CDKConsoleDock.debug(message)
     }
@@ -149,6 +163,32 @@ public enum ConsoleDock {
 
     public static func error(_ message: String) {
         CDKConsoleDock.error(message)
+    }
+}
+
+private extension ConsoleDock {
+    static func installUIIfAvailable() {
+        #if canImport(UIKit)
+        ConsoleDockUIController.shared.install()
+        #endif
+    }
+
+    static func teardownUIIfAvailable() {
+        #if canImport(UIKit)
+        ConsoleDockUIController.shared.teardown()
+        #endif
+    }
+
+    static func showConsoleIfAvailable() {
+        #if canImport(UIKit)
+        ConsoleDockUIController.shared.showConsole()
+        #endif
+    }
+
+    static func hideConsoleIfAvailable() {
+        #if canImport(UIKit)
+        ConsoleDockUIController.shared.hideConsole()
+        #endif
     }
 }
 
