@@ -8,6 +8,7 @@ The project follows Semantic Versioning for public releases.
 
 ### Added
 
+- Added Release safety coverage for the Swift facade and Objective-C/UIKit facade entry points.
 - Added clear-button refresh assertions to the Swift sample UI smoke test.
 - Added Dependabot configuration for weekly GitHub Actions update checks.
 - Added a distribution strategy document and validation gate for SPM, future CocoaPods compatibility, and future XCFramework distribution claims.

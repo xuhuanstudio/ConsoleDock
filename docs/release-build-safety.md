@@ -54,8 +54,8 @@ Only use this for controlled internal Release-style test builds. Do not enable C
 CI runs focused Release safety tests in two modes:
 
 ```sh
-swift test -c release --filter ConsoleDockCoreTests/testReleaseBuild
-swift test -c release -Xcc -DCONSOLEDOCK_ENABLE_RELEASE -Xswiftc -DCONSOLEDOCK_ENABLE_RELEASE --filter ConsoleDockCoreTests/testReleaseBuild
+swift test -c release --filter testReleaseBuild
+swift test -c release -Xcc -DCONSOLEDOCK_ENABLE_RELEASE -Xswiftc -DCONSOLEDOCK_ENABLE_RELEASE --filter testReleaseBuild
 ```
 
-The first command proves Release defaults to disabled. The second proves the compile-time flag still requires runtime configuration before startup succeeds.
+The first command proves Release defaults to disabled across the core, Swift facade, and Objective-C/UIKit facade entry points. The second proves the compile-time flag still requires runtime configuration before startup succeeds.

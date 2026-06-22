@@ -52,10 +52,10 @@ section "Run Swift package tests"
 swift test
 
 section "Test Release safety defaults"
-swift test -c release --filter ConsoleDockCoreTests/testReleaseBuild
+swift test -c release --filter testReleaseBuild
 
 section "Test Release explicit opt-in gate"
-swift test -c release -Xcc -DCONSOLEDOCK_ENABLE_RELEASE -Xswiftc -DCONSOLEDOCK_ENABLE_RELEASE --filter ConsoleDockCoreTests/testReleaseBuild
+swift test -c release -Xcc -DCONSOLEDOCK_ENABLE_RELEASE -Xswiftc -DCONSOLEDOCK_ENABLE_RELEASE --filter testReleaseBuild
 
 section "Validate documentation links"
 python3 scripts/validate-doc-links.py

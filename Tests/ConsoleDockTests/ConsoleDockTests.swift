@@ -60,6 +60,78 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertFalse(ConsoleDockUIKit.isRunning())
     }
 
+    func testReleaseBuildSwiftFacadeDefaultStartGateIsDisabled() {
+        let configuration = ConsoleDock.Configuration(
+            captureStandardOutput: false,
+            captureStandardError: false,
+            showsFloatingButton: false
+        )
+
+        let result = ConsoleDock.start(configuration: configuration)
+
+        #if DEBUG
+            XCTAssertEqual(result, .started)
+            XCTAssertTrue(ConsoleDock.isRunning)
+        #else
+            XCTAssertEqual(result, .disabled)
+            XCTAssertFalse(ConsoleDock.isRunning)
+        #endif
+    }
+
+    func testReleaseBuildSwiftFacadeOptInRequiresCompileTimeFlagAndRuntimeConfiguration() {
+        let configuration = ConsoleDock.Configuration(
+            captureStandardOutput: false,
+            captureStandardError: false,
+            showsFloatingButton: false,
+            allowsReleaseBuilds: true
+        )
+
+        let result = ConsoleDock.start(configuration: configuration)
+
+        #if DEBUG || CONSOLEDOCK_ENABLE_RELEASE
+            XCTAssertEqual(result, .started)
+            XCTAssertTrue(ConsoleDock.isRunning)
+        #else
+            XCTAssertEqual(result, .disabled)
+            XCTAssertFalse(ConsoleDock.isRunning)
+        #endif
+    }
+
+    func testReleaseBuildObjectiveCUIKitFacadeDefaultStartGateIsDisabled() {
+        let configuration = CDKConfiguration()
+        configuration.captureStandardOutput = false
+        configuration.captureStandardError = false
+        configuration.showsFloatingButton = false
+
+        let result = ConsoleDockUIKit.start(configuration: configuration, error: nil)
+
+        #if DEBUG
+            XCTAssertEqual(result, .started)
+            XCTAssertTrue(ConsoleDockUIKit.isRunning())
+        #else
+            XCTAssertEqual(result, .disabled)
+            XCTAssertFalse(ConsoleDockUIKit.isRunning())
+        #endif
+    }
+
+    func testReleaseBuildObjectiveCUIKitFacadeOptInRequiresCompileTimeFlagAndRuntimeConfiguration() {
+        let configuration = CDKConfiguration()
+        configuration.captureStandardOutput = false
+        configuration.captureStandardError = false
+        configuration.showsFloatingButton = false
+        configuration.allowsReleaseBuilds = true
+
+        let result = ConsoleDockUIKit.start(configuration: configuration, error: nil)
+
+        #if DEBUG || CONSOLEDOCK_ENABLE_RELEASE
+            XCTAssertEqual(result, .started)
+            XCTAssertTrue(ConsoleDockUIKit.isRunning())
+        #else
+            XCTAssertEqual(result, .disabled)
+            XCTAssertFalse(ConsoleDockUIKit.isRunning())
+        #endif
+    }
+
     func testConfigurationDefaultsMatchCoreDefaults() {
         let configuration = ConsoleDock.Configuration.default
 
