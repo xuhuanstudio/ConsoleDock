@@ -6,7 +6,9 @@ The project follows Semantic Versioning after public releases begin.
 
 ## Unreleased
 
-No changes yet.
+### Added
+
+- Added a standalone privacy and redaction guide covering the core redaction order, default patterns, app-specific redactors, copy/share behavior, and Release-build privacy checklist.
 
 ## v0.1.0 - 2026-06-22
 

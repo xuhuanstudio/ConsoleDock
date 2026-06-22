@@ -28,6 +28,8 @@ ConsoleDock.start(configuration: configuration)
 
 Redaction is a safety baseline, not a complete privacy guarantee. Avoid logging secrets in the first place.
 
+For the full repository-level guidance, see [Privacy and redaction](../../../docs/privacy-and-redaction.md).
+
 ## Release Builds Are Disabled By Default
 
 In Release builds, ``ConsoleDock/start(configuration:)`` returns ``ConsoleDock/StartResult/disabled`` by default.

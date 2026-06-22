@@ -123,7 +123,7 @@ Minimum public docs:
 - README quick start;
 - architecture document;
 - logging boundary document;
-- privacy and redaction guide;
+- [privacy and redaction guide](privacy-and-redaction.md);
 - release-build safety guide;
 - [migration guide for existing loggers](migration-existing-loggers.md);
 - sample app walkthrough.

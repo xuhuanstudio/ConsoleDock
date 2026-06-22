@@ -251,6 +251,7 @@ Use `ConsoleDockCore` directly when an Objective-C app only needs capture, stora
 - [Migrating existing loggers](docs/migration-existing-loggers.md)
 - [MVP architecture](docs/specs/2026-06-22-mvp-architecture.md)
 - [Open-source readiness](docs/open-source-readiness.md)
+- [Privacy and redaction](docs/privacy-and-redaction.md)
 - [Release process](docs/release-process.md)
 - [Release build safety](docs/release-build-safety.md)
 - [Sample app walkthrough](docs/sample-app-walkthrough.md)
