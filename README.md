@@ -249,11 +249,10 @@ ConsoleDock.start()
 ConsoleDock.info("Login succeeded")
 
 let entries = ConsoleDock.entries
-let diagnostics = ConsoleDock.diagnostics
 ConsoleDock.clear()
 ```
 
-Future UI or custom debug surfaces can observe `ConsoleDock.entriesDidChangeNotification` and then read `ConsoleDock.entries`. Observe `ConsoleDock.diagnosticsDidChangeNotification` when the surface also needs to refresh running state, capture configuration, or store counts after start, stop, append, or clear operations. Notifications are posted on the thread that changed ConsoleDock state, so UI code should dispatch to the main queue before touching UIKit.
+Future UI or custom debug surfaces can observe `ConsoleDock.entriesDidChangeNotification` and then read `ConsoleDock.entries`. Notifications are posted on the thread that changed ConsoleDock state, so UI code should dispatch to the main queue before touching UIKit.
 
 ConsoleDock's on-device panel reads from ConsoleDock's own in-memory store. The current implementation does not write files, upload logs, write to Apple unified logging, or read unified logging entries. If an app also needs Apple unified logging output, keep that output in the app's existing logger and forward the same already-formatted message to ConsoleDock.
 
@@ -268,7 +267,6 @@ CDKStartResult result = [CDKConsoleDockUIKit startWithConfiguration:configuratio
 [CDKConsoleDock info:@"Login succeeded"];
 [CDKConsoleDock fault:@"Invariant failed"];
 NSArray<CDKLogEntry *> *entries = [CDKConsoleDock entries];
-CDKDiagnostics *diagnostics = [CDKConsoleDock diagnostics];
 [CDKConsoleDock clearEntries];
 [CDKConsoleDockUIKit showConsole];
 [CDKConsoleDockUIKit stop];

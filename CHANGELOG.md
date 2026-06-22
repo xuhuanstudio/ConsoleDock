@@ -37,7 +37,7 @@ The project follows Semantic Versioning for public releases.
 ### Changed
 
 - Tightened Apple unified logging wording so README and product docs describe only current explicit-forwarding behavior instead of speculative future logging outputs.
-- Clarified README diagnostics examples as `main`-only until the next tag and added a release gate for versioned public documentation.
+- Clarified README diagnostics examples as `main`-only until the next tag and tightened the release gate for versioned public documentation.
 - Enabled focused Swift and Objective-C sample UI smoke tests in GitHub CI and release-validation workflows.
 - Broadened default redaction for common mobile token names including ID, auth, session, CSRF, and `x-api-key` forms.
 - Redacted stdout/stderr partial-line continuations from the same source after a sensitive oversized fragment is detected.

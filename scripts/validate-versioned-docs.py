@@ -8,6 +8,12 @@ import pathlib
 import sys
 
 
+MAIN_ONLY_API_TOKENS = [
+    "ConsoleDock.diagnostics",
+    "CDKDiagnostics",
+    "diagnosticsDidChangeNotification",
+]
+
 REQUIRED_SNIPPETS = {
     "README.md": [
         "Runtime diagnostics are available on `main` after `v0.1.0` and will be included in the next release tag.",
@@ -18,6 +24,62 @@ REQUIRED_SNIPPETS = {
         "如果你的依赖固定在 `v0.1.0`，请先跳过本节，等下一个 tag 发布后再使用这些符号。",
     ],
 }
+
+MAIN_ONLY_API_SECTIONS = {
+    "README.md": ("### Check Runtime Diagnostics", "### Start In Objective-C"),
+    "README.zh-CN.md": ("## 运行诊断", "## Objective-C 快速开始"),
+}
+
+
+def line_number_for_offset(text: str, offset: int) -> int:
+    return text.count("\n", 0, offset) + 1
+
+
+def allowed_section_range(text: str, start_heading: str, end_heading: str) -> tuple[int, int] | None:
+    start = text.find(start_heading)
+    if start == -1:
+        return None
+
+    end = text.find(end_heading, start + len(start_heading))
+    if end == -1:
+        return None
+
+    return start, end
+
+
+def find_token_offsets(text: str, token: str) -> list[int]:
+    offsets: list[int] = []
+    start = 0
+    while True:
+        offset = text.find(token, start)
+        if offset == -1:
+            return offsets
+        offsets.append(offset)
+        start = offset + len(token)
+
+
+def validate_main_only_api_tokens(
+    relative_path: str,
+    text: str,
+    errors: list[str],
+) -> None:
+    section = MAIN_ONLY_API_SECTIONS.get(relative_path)
+    if section is None:
+        return
+
+    allowed_range = allowed_section_range(text, *section)
+    if allowed_range is None:
+        errors.append(f"{relative_path}: missing main-only API section bounded by {section[0]} and {section[1]}")
+        return
+
+    allowed_start, allowed_end = allowed_range
+    for token in MAIN_ONLY_API_TOKENS:
+        for offset in find_token_offsets(text, token):
+            if not (allowed_start <= offset < allowed_end):
+                line_number = line_number_for_offset(text, offset)
+                errors.append(
+                    f"{relative_path}:{line_number}: main-only API token `{token}` must stay inside the guarded diagnostics section"
+                )
 
 
 def validate(root: pathlib.Path) -> list[str]:
@@ -32,6 +94,8 @@ def validate(root: pathlib.Path) -> list[str]:
         for snippet in snippets:
             if snippet not in text:
                 errors.append(f"{relative_path}: missing required versioned-doc snippet: {snippet}")
+
+        validate_main_only_api_tokens(relative_path, text, errors)
 
     return errors
 
