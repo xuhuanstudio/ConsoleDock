@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import pathlib
 import sys
+import tempfile
 
 
 MAIN_ONLY_API_TOKENS = [
@@ -100,6 +101,90 @@ def validate(root: pathlib.Path) -> list[str]:
     return errors
 
 
+def write_valid_docs(root: pathlib.Path) -> None:
+    english = f"""# ConsoleDock
+
+{REQUIRED_SNIPPETS["README.md"][0]}
+{REQUIRED_SNIPPETS["README.md"][1]}
+
+### Check Runtime Diagnostics
+
+Use `ConsoleDock.diagnostics` and `diagnosticsDidChangeNotification` here.
+
+```objc
+CDKDiagnostics *diagnostics = [CDKConsoleDock diagnostics];
+```
+
+### Start In Objective-C
+
+Objective-C setup starts here.
+"""
+    chinese = f"""# ConsoleDock
+
+{REQUIRED_SNIPPETS["README.zh-CN.md"][0]}
+{REQUIRED_SNIPPETS["README.zh-CN.md"][1]}
+
+## 运行诊断
+
+这里可以使用 `ConsoleDock.diagnostics` 和 `ConsoleDock.diagnosticsDidChangeNotification`。
+
+```objc
+CDKDiagnostics *diagnostics = [CDKConsoleDock diagnostics];
+```
+
+## Objective-C 快速开始
+
+Objective-C 接入从这里开始。
+"""
+    (root / "README.md").write_text(english, encoding="utf-8")
+    (root / "README.zh-CN.md").write_text(chinese, encoding="utf-8")
+
+
+def self_test() -> list[str]:
+    errors: list[str] = []
+
+    with tempfile.TemporaryDirectory(prefix="consoledock-versioned-docs-self-test-") as raw_directory:
+        root = pathlib.Path(raw_directory)
+        write_valid_docs(root)
+        if validate(root):
+            errors.append("validate should accept docs with main-only APIs inside guarded diagnostics sections")
+
+        missing_snippet_root = root / "missing-snippet"
+        missing_snippet_root.mkdir()
+        write_valid_docs(missing_snippet_root)
+        readme = missing_snippet_root / "README.md"
+        readme.write_text(
+            readme.read_text(encoding="utf-8").replace(REQUIRED_SNIPPETS["README.md"][1], ""),
+            encoding="utf-8",
+        )
+        if not validate(missing_snippet_root):
+            errors.append("validate should reject docs without the released-tag warning snippets")
+
+        leaked_token_root = root / "leaked-token"
+        leaked_token_root.mkdir()
+        write_valid_docs(leaked_token_root)
+        readme = leaked_token_root / "README.md"
+        readme.write_text(
+            readme.read_text(encoding="utf-8") + "\nUse ConsoleDock.diagnostics in the quick start.\n",
+            encoding="utf-8",
+        )
+        if not validate(leaked_token_root):
+            errors.append("validate should reject main-only API tokens outside the guarded diagnostics section")
+
+        missing_section_root = root / "missing-section"
+        missing_section_root.mkdir()
+        write_valid_docs(missing_section_root)
+        readme = missing_section_root / "README.md"
+        readme.write_text(
+            readme.read_text(encoding="utf-8").replace("### Start In Objective-C", "### Objective-C Setup"),
+            encoding="utf-8",
+        )
+        if not validate(missing_section_root):
+            errors.append("validate should reject docs without the expected diagnostics section bounds")
+
+    return errors
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -109,7 +194,19 @@ def main() -> int:
         type=pathlib.Path,
         help="Repository root. Defaults to the parent of the scripts directory.",
     )
+    parser.add_argument("--self-test", action="store_true", help="Run local validator self-tests.")
     args = parser.parse_args()
+
+    if args.self_test:
+        errors = self_test()
+        if errors:
+            print("Versioned documentation validator self-test failed:", file=sys.stderr)
+            for error in errors:
+                print(f"- {error}", file=sys.stderr)
+            return 1
+
+        print("Versioned documentation validator self-test passed.")
+        return 0
 
     errors = validate(args.root.resolve())
     if errors:

@@ -66,6 +66,7 @@ section "Validate documentation links"
 python3 scripts/validate-doc-links.py
 
 section "Validate versioned public documentation"
+python3 scripts/validate-versioned-docs.py --self-test
 python3 scripts/validate-versioned-docs.py
 
 section "Validate logging boundary documentation"
@@ -76,6 +77,7 @@ section "Validate governance metadata"
 python3 scripts/validate-governance-metadata.py
 
 section "Validate distribution documentation and artifacts"
+python3 scripts/validate-distribution-docs.py --self-test
 python3 scripts/validate-distribution-docs.py
 
 section "Validate release helper scripts"

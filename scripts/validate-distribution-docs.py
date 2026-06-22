@@ -8,6 +8,7 @@ import pathlib
 import re
 import subprocess
 import sys
+import tempfile
 
 
 REQUIRED_SNIPPETS = {
@@ -132,6 +133,64 @@ def validate(root: pathlib.Path) -> list[str]:
     return errors
 
 
+def run_git(root: pathlib.Path, *args: str) -> None:
+    subprocess.run(["git", *args], cwd=root, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def write_valid_distribution_docs(root: pathlib.Path) -> None:
+    for relative_path, snippets in REQUIRED_SNIPPETS.items():
+        path = root / relative_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("\n".join(snippets) + "\n", encoding="utf-8")
+
+
+def write_tracked_fixture(root: pathlib.Path) -> None:
+    root.mkdir(parents=True, exist_ok=True)
+    run_git(root, "init")
+    write_valid_distribution_docs(root)
+    run_git(root, "add", ".")
+
+
+def self_test() -> list[str]:
+    errors: list[str] = []
+
+    with tempfile.TemporaryDirectory(prefix="consoledock-distribution-docs-self-test-") as raw_directory:
+        root = pathlib.Path(raw_directory)
+        write_tracked_fixture(root)
+        if validate(root):
+            errors.append("validate should accept the current SPM-only distribution documentation policy")
+
+        missing_snippet_root = root / "missing-snippet"
+        write_tracked_fixture(missing_snippet_root)
+        strategy = missing_snippet_root / "docs/distribution-strategy.md"
+        strategy.write_text(
+            strategy.read_text(encoding="utf-8").replace(REQUIRED_SNIPPETS["docs/distribution-strategy.md"][0], ""),
+            encoding="utf-8",
+        )
+        if not validate(missing_snippet_root):
+            errors.append("validate should reject missing required distribution policy snippets")
+
+        premature_claim_root = root / "premature-claim"
+        write_tracked_fixture(premature_claim_root)
+        readme = premature_claim_root / "README.md"
+        readme.write_text(
+            readme.read_text(encoding="utf-8") + "\npod 'ConsoleDock'\nCocoaPods supported\n",
+            encoding="utf-8",
+        )
+        if not validate(premature_claim_root):
+            errors.append("validate should reject premature CocoaPods support claims")
+
+        tracked_artifact_root = root / "tracked-artifact"
+        write_tracked_fixture(tracked_artifact_root)
+        podspec = tracked_artifact_root / "ConsoleDock.podspec"
+        podspec.write_text("Pod::Spec.new do |spec|\nend\n", encoding="utf-8")
+        run_git(tracked_artifact_root, "add", "ConsoleDock.podspec")
+        if not validate(tracked_artifact_root):
+            errors.append("validate should reject tracked future distribution artifacts")
+
+    return errors
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -141,7 +200,19 @@ def main() -> int:
         type=pathlib.Path,
         help="Repository root. Defaults to the parent of the scripts directory.",
     )
+    parser.add_argument("--self-test", action="store_true", help="Run local validator self-tests.")
     args = parser.parse_args()
+
+    if args.self_test:
+        errors = self_test()
+        if errors:
+            print("Distribution validator self-test failed:", file=sys.stderr)
+            for error in errors:
+                print(f"- {error}", file=sys.stderr)
+            return 1
+
+        print("Distribution validator self-test passed.")
+        return 0
 
     root = args.root.resolve()
     errors = validate(root)

@@ -16,6 +16,7 @@ The project follows Semantic Versioning for public releases.
 - Added a logging boundary validation gate to keep Swift Logger, os_log, Apple unified logging, Xcode Console, and other-process log claims honest.
 - Added a Swift API surface validation gate to protect app-facing facade and UIKit bridge integration points.
 - Added Swift and Objective-C API surface validator self-tests for missing APIs, public symbol leaks, and package header-path regressions.
+- Added versioned documentation and distribution policy validator self-tests for main-only API leaks, premature channel claims, and tracked future artifacts.
 - Added bounded retry handling to post-release verification for transient GitHub, SwiftPM, and Swift Package Index network failures.
 - Added explicit post-release verifier handling for Swift Package Index access challenges that require manual browser confirmation.
 - Added search-control rendering and level-filtering assertions to the Swift and Objective-C sample UI smoke tests.
