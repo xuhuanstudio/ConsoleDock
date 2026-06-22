@@ -45,7 +45,7 @@ From the package root:
 scripts/validate-objc-sample-ui-smoke.sh
 ```
 
-The script chooses an available iPhone simulator unless `CONSOLEDOCK_UI_SMOKE_DESTINATION` is set. It launches the app with `--consoledock-ui-smoke` so the test focuses on a native `CDKConsoleDock` entry, redaction, the bundled panel, pause/resume, clear refresh, and close behavior without stdout/stderr capture descriptor noise.
+The script chooses an available iPhone simulator unless `CONSOLEDOCK_UI_SMOKE_DESTINATION` is set. It launches the app with `--consoledock-ui-smoke` so the test focuses on a native `CDKConsoleDock` entry, redaction, the bundled panel, selected-row tap, pause/resume, clear refresh, and close behavior without stdout/stderr capture descriptor noise.
 
 ## Manual Check
 

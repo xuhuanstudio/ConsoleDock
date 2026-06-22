@@ -29,6 +29,9 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
         XCTAssertTrue(waitForTableEntry(in: entriesTable, timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "token=<redacted>", in: entriesTable, timeout: 5))
         XCTAssertFalse(tableEntry(containing: "sample-secret", existsIn: entriesTable))
+        let redactedEntry = tableStaticText(containing: "token=<redacted>", in: entriesTable)
+        redactedEntry.tap()
+        XCTAssertTrue(redactedEntry.exists)
 
         let pauseButton = app.buttons["consoledock.pause-live"]
         XCTAssertTrue(pauseButton.waitForExistence(timeout: 5))
@@ -85,11 +88,14 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
     }
 
     private func tableEntry(containing text: String, existsIn table: XCUIElement) -> Bool {
+        tableStaticText(containing: text, in: table).exists
+    }
+
+    private func tableStaticText(containing text: String, in table: XCUIElement) -> XCUIElement {
         table
             .descendants(matching: .staticText)
             .matching(NSPredicate(format: "label CONTAINS %@", text))
             .firstMatch
-            .exists
     }
 
     private func waitForLabel(containing text: String, in element: XCUIElement, timeout: TimeInterval) -> Bool {

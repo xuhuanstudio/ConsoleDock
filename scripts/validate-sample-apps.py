@@ -29,16 +29,19 @@ REQUIRED_SNIPPETS = {
         "scripts/validate-swift-sample-ui-smoke.sh",
         "`--consoledock-ui-smoke`",
         "CONSOLEDOCK_UI_SMOKE_DESTINATION",
+        "selected-row tap",
     ],
     "Examples/ObjCSampleApp/README.md": [
         "scripts/validate-objc-sample-ui-smoke.sh",
         "`--consoledock-ui-smoke`",
         "CONSOLEDOCK_UI_SMOKE_DESTINATION",
+        "selected-row tap",
     ],
     "docs/sample-app-walkthrough.md": [
         "scripts/validate-swift-sample-ui-smoke.sh",
         "scripts/validate-objc-sample-ui-smoke.sh",
         "native-log-only UI automation mode",
+        "selected-row tap",
     ],
     "scripts/validate-release.sh": [
         "scripts/validate-swift-sample-ui-smoke.sh",
