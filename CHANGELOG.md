@@ -23,3 +23,4 @@ The project follows Semantic Versioning after public releases begin.
 - Added Release safety gates so Release startup requires both `CONSOLEDOCK_ENABLE_RELEASE` and `allowsReleaseBuilds`, plus focused CI coverage and documentation.
 - Updated contribution and GitHub templates to match the current capture, UIKit, privacy, and Release safety scope.
 - Added README quick start content, a real Simulator screenshot, and a shared Swift/Objective-C sample app walkthrough.
+- Added a UIKit share action for user-initiated plain-text export of the current redacted in-memory log snapshot.

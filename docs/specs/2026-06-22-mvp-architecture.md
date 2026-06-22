@@ -370,7 +370,7 @@ The capture core must be idempotent:
 | Capture | `NSLog` | Captured only on supported runtime paths that write through process stderr; documentation avoids complete-coverage claims. |
 | Restoration | start then stop | stdout and stderr are restored and later writes bypass ConsoleDock. |
 | Lifecycle | repeated start/stop | No stacked redirects, crashes, or leaked descriptors. |
-| UI | floating button and console panel | UI appears in Debug, opens, live-updates, clears, closes, and displays redacted entries. Search, pause, copy, and export are later developer-experience work. |
+| UI | floating button and console panel | UI appears in Debug, opens, live-updates, clears, closes, displays redacted entries, and can share/export the current redacted snapshot. Search, pause/resume, and selected-entry copy are later developer-experience work. |
 | Build policy | Release/default disabled | `start()` returns disabled, no UI appears, and descriptors are not redirected. |
 | Build policy | explicit enabled Release | Capture only starts when the explicit enable flag and configuration are present. |
 

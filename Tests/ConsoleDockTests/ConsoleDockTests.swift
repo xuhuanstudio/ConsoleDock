@@ -101,6 +101,56 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertTrue(ConsoleDock.entries.isEmpty)
     }
 
+    func testSnapshotFormatterExportsStablePlainText() {
+        let generatedAt = Date(timeIntervalSince1970: 0)
+        let entries = [
+            ConsoleDock.LogEntry(
+                timestamp: Date(timeIntervalSince1970: 1.25),
+                level: .info,
+                source: .native,
+                message: "native token=<redacted>"
+            ),
+            ConsoleDock.LogEntry(
+                timestamp: Date(timeIntervalSince1970: 2.5),
+                level: .error,
+                source: .stderr,
+                message: "line one\nline two"
+            )
+        ]
+
+        let snapshot = ConsoleDockSnapshotFormatter.snapshotText(entries: entries, generatedAt: generatedAt)
+
+        XCTAssertEqual(
+            snapshot,
+            """
+            ConsoleDock Log Snapshot
+            Generated: 1970-01-01T00:00:00.000Z
+            Entries: 2
+
+            [1970-01-01T00:00:01.250Z] [native] [INFO] native token=<redacted>
+            [1970-01-01T00:00:02.500Z] [stderr] [ERROR] line one\\nline two
+            """
+        )
+    }
+
+    func testSnapshotFormatterHandlesEmptyEntries() {
+        let snapshot = ConsoleDockSnapshotFormatter.snapshotText(
+            entries: [],
+            generatedAt: Date(timeIntervalSince1970: 0)
+        )
+
+        XCTAssertEqual(
+            snapshot,
+            """
+            ConsoleDock Log Snapshot
+            Generated: 1970-01-01T00:00:00.000Z
+            Entries: 0
+
+            (no entries)
+            """
+        )
+    }
+
     func testSwiftConfigurationBridgesStoreLimitsAndRedactor() {
         let configuration = ConsoleDock.Configuration(
             maximumEntries: 1,

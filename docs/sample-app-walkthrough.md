@@ -10,7 +10,7 @@ Use the samples to verify:
 - explicit native logging APIs;
 - `NSLog` output that reaches process stderr;
 - redaction before storage;
-- UIKit floating button, panel refresh, clear, stop, and restart behavior.
+- UIKit floating button, panel refresh, share/export, clear, stop, and restart behavior.
 
 ![ConsoleDock Swift sample console](assets/swift-sample-console.png)
 
@@ -34,9 +34,10 @@ Manual check:
 3. Tap `ConsoleDock.info`, `ConsoleDock.error`, `print stdout`, `printf stdout`, `fprintf stderr`, and `NSLog`.
 4. Confirm entries appear in the ConsoleDock panel.
 5. Confirm generated `token=...` values are stored as `token=<redacted>`.
-6. Tap `Clear` in the panel and confirm the list refreshes.
-7. Tap `Stop ConsoleDock`, generate another message, and confirm it is not stored.
-8. Tap `Start ConsoleDock`, generate another message, and confirm entries resume.
+6. Tap the share button and confirm the system share sheet opens with a plain-text redacted log snapshot.
+7. Tap `Clear` in the panel and confirm the list refreshes.
+8. Tap `Stop ConsoleDock`, generate another message, and confirm it is not stored.
+9. Tap `Start ConsoleDock`, generate another message, and confirm entries resume.
 
 Expected sources:
 
@@ -65,9 +66,10 @@ Manual check:
 3. Tap the native `CDKConsoleDock`, C stdio, direct descriptor write, and `NSLog` buttons.
 4. Confirm entries appear in the ConsoleDock panel.
 5. Confirm generated `token=...` values are stored as `token=<redacted>`.
-6. Tap `Clear` in the panel and confirm the list refreshes.
-7. Tap `Stop ConsoleDock`, generate another message, and confirm it is not stored.
-8. Tap `Start ConsoleDock`, generate another message, and confirm entries resume.
+6. Tap the share button and confirm the system share sheet opens with a plain-text redacted log snapshot.
+7. Tap `Clear` in the panel and confirm the list refreshes.
+8. Tap `Stop ConsoleDock`, generate another message, and confirm it is not stored.
+9. Tap `Start ConsoleDock`, generate another message, and confirm entries resume.
 
 Expected sources:
 
@@ -82,3 +84,5 @@ Do not use `simctl launch --stdout` or `simctl launch --stderr` as the primary v
 Run from Xcode or launch normally through Simulator when checking integration behavior.
 
 Swift `Logger`, `os_log`, and Apple unified logging are not validated by these samples because ConsoleDock does not promise complete zero-intrusion capture of those systems.
+
+The share sheet exports the current in-memory ConsoleDock entries only. ConsoleDock does not write an export file by default, does not persist logs by default, and does not upload logs.

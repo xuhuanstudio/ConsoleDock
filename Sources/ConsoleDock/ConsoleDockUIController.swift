@@ -206,6 +206,7 @@ private final class ConsoleDockPanelViewController: UIViewController, UITableVie
     private let tableView = UITableView(frame: .zero, style: .plain)
     private var entries: [ConsoleDock.LogEntry] = []
     private var observer: ConsoleDockEntriesObserver?
+    private var shareButton: UIBarButtonItem?
     private let formatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm:ss.SSS"
@@ -233,12 +234,21 @@ private final class ConsoleDockPanelViewController: UIViewController, UITableVie
             target: self,
             action: #selector(close)
         )
-        navigationItem.rightBarButtonItem = UIBarButtonItem(
+        let shareButton = UIBarButtonItem(
+            barButtonSystemItem: .action,
+            target: self,
+            action: #selector(shareSnapshot)
+        )
+        shareButton.isEnabled = false
+        self.shareButton = shareButton
+
+        let clearButton = UIBarButtonItem(
             title: "Clear",
             style: .plain,
             target: self,
             action: #selector(clear)
         )
+        navigationItem.rightBarButtonItems = [clearButton, shareButton]
     }
 
     private func configureTableView() {
@@ -260,6 +270,7 @@ private final class ConsoleDockPanelViewController: UIViewController, UITableVie
 
     private func apply(snapshot: [ConsoleDock.LogEntry]) {
         entries = snapshot
+        shareButton?.isEnabled = !entries.isEmpty
         tableView.reloadData()
         guard !entries.isEmpty else { return }
         let indexPath = IndexPath(row: entries.count - 1, section: 0)
@@ -277,6 +288,14 @@ private final class ConsoleDockPanelViewController: UIViewController, UITableVie
         dismiss(animated: true) { [weak self] in
             self?.onClose?()
         }
+    }
+
+    @objc private func shareSnapshot() {
+        guard !entries.isEmpty else { return }
+        let snapshot = ConsoleDockSnapshotFormatter.snapshotText(entries: entries)
+        let activityController = UIActivityViewController(activityItems: [snapshot], applicationActivities: nil)
+        activityController.popoverPresentationController?.barButtonItem = shareButton
+        present(activityController, animated: true)
     }
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
