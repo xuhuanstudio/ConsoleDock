@@ -31,7 +31,24 @@ body:
     id: environment
     attributes:
       label: Xcode, Swift, and platform
-      placeholder: "Xcode 16.x, Swift 6.x, iOS Simulator"
+      placeholder: "Xcode 16.x, Swift 6.x, iOS Simulator or device"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Core capture
+        - Swift API
+        - Objective-C API
+        - UIKit console
+        - Redaction and privacy
+        - Release safety
+        - Sample app
+        - Documentation
+        - Packaging
+        - Other
     validations:
       required: true
   - type: textarea
@@ -44,5 +61,12 @@ body:
     id: actual
     attributes:
       label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: privacy
+    attributes:
+      label: Privacy and Release-build check
+      description: Does this involve sensitive log content, redaction, export/share behavior, or Release-build activation?
     validations:
       required: true

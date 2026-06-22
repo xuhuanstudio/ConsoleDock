@@ -39,3 +39,10 @@ body:
       description: Does this rely on full zero-intrusion Swift Logger/os_log capture, system logs, or other-process logs?
     validations:
       required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Safety and distribution impact
+      description: Would this affect local-only behavior, in-memory storage, redaction, Release safety, SPM, CocoaPods, or XCFramework distribution?
+    validations:
+      required: true
