@@ -13,3 +13,4 @@ The project follows Semantic Versioning after public releases begin.
 - Added open-source governance files.
 - Refined Swift start failure handling to preserve core error details.
 - Added core log entry model, bounded in-memory Native API storage, basic redaction, message truncation, and read/clear APIs.
+- Added isolated core line framing for byte chunks, partial flushes, CRLF normalization, invalid UTF-8 replacement, and stdout/stderr line event storage normalization.

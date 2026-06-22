@@ -57,6 +57,31 @@ FOUNDATION_EXPORT NSErrorDomain const CDKConsoleDockErrorDomain;
 
 @end
 
+@interface CDKLineEvent : NSObject <NSCopying>
+
+@property (nonatomic, readonly) CDKLogSource source;
+@property (nonatomic, copy, readonly) NSString *message;
+@property (nonatomic, readonly, getter=isPartial) BOOL partial;
+
+- (instancetype)init NS_UNAVAILABLE;
++ (instancetype)new NS_UNAVAILABLE;
+- (instancetype)initWithSource:(CDKLogSource)source
+                       message:(NSString *)message
+                     isPartial:(BOOL)isPartial NS_DESIGNATED_INITIALIZER;
+
+@end
+
+@interface CDKLineFramer : NSObject
+
+@property (nonatomic, readonly) NSUInteger maximumPartialBytes;
+
+- (instancetype)init;
+- (instancetype)initWithMaximumPartialBytes:(NSUInteger)maximumPartialBytes NS_DESIGNATED_INITIALIZER;
+- (NSArray<CDKLineEvent *> *)appendData:(NSData *)data source:(CDKLogSource)source;
+- (NSArray<CDKLineEvent *> *)flushSource:(CDKLogSource)source;
+
+@end
+
 @interface CDKConsoleDock : NSObject
 
 + (CDKStartResult)startWithConfiguration:(nullable CDKConfiguration *)configuration;
@@ -67,6 +92,7 @@ FOUNDATION_EXPORT NSErrorDomain const CDKConsoleDockErrorDomain;
 
 + (NSArray<CDKLogEntry *> *)entries;
 + (void)clearEntries;
++ (void)appendLineEvent:(CDKLineEvent *)event;
 
 + (void)logWithLevel:(CDKLogLevel)level message:(NSString *)message;
 + (void)debug:(NSString *)message;

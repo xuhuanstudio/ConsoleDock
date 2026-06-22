@@ -50,6 +50,18 @@ static NSString *CDKPreparedMessage(NSString *message, CDKConfiguration *configu
     return prepared;
 }
 
+static CDKLogLevel CDKDefaultLevelForSource(CDKLogSource source)
+{
+    switch (source) {
+        case CDKLogSourceStderr:
+            return CDKLogLevelError;
+        case CDKLogSourceStdout:
+        case CDKLogSourceNative:
+        default:
+            return CDKLogLevelInfo;
+    }
+}
+
 @implementation CDKConsoleDock
 
 + (CDKStartResult)startWithConfiguration:(CDKConfiguration *)configuration
@@ -126,7 +138,7 @@ static NSString *CDKPreparedMessage(NSString *message, CDKConfiguration *configu
     }
 }
 
-+ (void)logWithLevel:(CDKLogLevel)level message:(NSString *)message
++ (void)appendEntryWithLevel:(CDKLogLevel)level source:(CDKLogSource)source message:(NSString *)message
 {
     @synchronized(self) {
         if (!CDKConsoleDockRunning || CDKConsoleDockConfiguration == nil) {
@@ -136,7 +148,7 @@ static NSString *CDKPreparedMessage(NSString *message, CDKConfiguration *configu
         NSString *preparedMessage = CDKPreparedMessage(message, CDKConsoleDockConfiguration);
         CDKLogEntry *entry = [[CDKLogEntry alloc] initWithTimestamp:[NSDate date]
                                                               level:level
-                                                             source:CDKLogSourceNative
+                                                             source:source
                                                             message:preparedMessage];
         if (CDKConsoleDockEntries == nil) {
             CDKConsoleDockEntries = [NSMutableArray array];
@@ -147,6 +159,18 @@ static NSString *CDKPreparedMessage(NSString *message, CDKConfiguration *configu
             [CDKConsoleDockEntries removeObjectAtIndex:0];
         }
     }
+}
+
++ (void)appendLineEvent:(CDKLineEvent *)event
+{
+    [self appendEntryWithLevel:CDKDefaultLevelForSource(event.source)
+                        source:event.source
+                       message:event.message];
+}
+
++ (void)logWithLevel:(CDKLogLevel)level message:(NSString *)message
+{
+    [self appendEntryWithLevel:level source:CDKLogSourceNative message:message];
 }
 
 + (void)debug:(NSString *)message

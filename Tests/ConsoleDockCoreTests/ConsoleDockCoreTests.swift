@@ -171,4 +171,128 @@ final class ConsoleDockCoreTests: XCTestCase {
 
         XCTAssertTrue(CDKConsoleDock.entries().isEmpty)
     }
+
+    func testLineFramerEmitsSingleLine() {
+        let framer = CDKLineFramer()
+
+        let events = framer.append(Data("hello\n".utf8), source: .stdout)
+
+        XCTAssertEqual(events.count, 1)
+        XCTAssertEqual(events[0].source, .stdout)
+        XCTAssertEqual(events[0].message, "hello")
+        XCTAssertFalse(events[0].isPartial)
+    }
+
+    func testLineFramerEmitsMultipleLinesFromOneChunk() {
+        let framer = CDKLineFramer()
+
+        let events = framer.append(Data("first\nsecond\n".utf8), source: .stdout)
+
+        XCTAssertEqual(events.map(\.message), ["first", "second"])
+        XCTAssertEqual(events.map(\.source), [.stdout, .stdout])
+        XCTAssertEqual(events.map(\.isPartial), [false, false])
+    }
+
+    func testLineFramerMergesPartialAcrossChunks() {
+        let framer = CDKLineFramer()
+
+        XCTAssertTrue(framer.append(Data("hel".utf8), source: .stdout).isEmpty)
+        let events = framer.append(Data("lo\n".utf8), source: .stdout)
+
+        XCTAssertEqual(events.map(\.message), ["hello"])
+        XCTAssertFalse(events[0].isPartial)
+    }
+
+    func testLineFramerFlushesPartial() {
+        let framer = CDKLineFramer()
+
+        XCTAssertTrue(framer.append(Data("partial".utf8), source: .stdout).isEmpty)
+        let events = framer.flushSource(.stdout)
+
+        XCTAssertEqual(events.count, 1)
+        XCTAssertEqual(events[0].message, "partial")
+        XCTAssertTrue(events[0].isPartial)
+        XCTAssertTrue(framer.flushSource(.stdout).isEmpty)
+    }
+
+    func testLineFramerFlushEmptyIsNoOp() {
+        let framer = CDKLineFramer()
+
+        XCTAssertTrue(framer.flushSource(.stdout).isEmpty)
+    }
+
+    func testLineFramerPreservesEmptyLines() {
+        let framer = CDKLineFramer()
+
+        let events = framer.append(Data("a\n\n".utf8), source: .stdout)
+
+        XCTAssertEqual(events.map(\.message), ["a", ""])
+        XCTAssertEqual(events.map(\.isPartial), [false, false])
+    }
+
+    func testLineFramerNormalizesCRLF() {
+        let framer = CDKLineFramer()
+
+        let events = framer.append(Data("a\r\n".utf8), source: .stdout)
+
+        XCTAssertEqual(events.map(\.message), ["a"])
+    }
+
+    func testLineFramerKeepsSourceBuffersIndependent() {
+        let framer = CDKLineFramer()
+
+        XCTAssertTrue(framer.append(Data("out".utf8), source: .stdout).isEmpty)
+        let stderrEvents = framer.append(Data("err\n".utf8), source: .stderr)
+        let stdoutEvents = framer.append(Data("\n".utf8), source: .stdout)
+
+        XCTAssertEqual(stderrEvents.map(\.source), [.stderr])
+        XCTAssertEqual(stderrEvents.map(\.message), ["err"])
+        XCTAssertEqual(stdoutEvents.map(\.source), [.stdout])
+        XCTAssertEqual(stdoutEvents.map(\.message), ["out"])
+    }
+
+    func testLineFramerReplacesInvalidUTF8() {
+        let framer = CDKLineFramer()
+
+        let events = framer.append(Data([0x61, 0xFF, 0x62, 0x0A]), source: .stdout)
+
+        XCTAssertEqual(events.count, 1)
+        XCTAssertEqual(events[0].message, "a\u{FFFD}b")
+    }
+
+    func testLineFramerBoundsVeryLongPartial() {
+        let framer = CDKLineFramer(maximumPartialBytes: 4)
+
+        let immediateEvents = framer.append(Data("12345".utf8), source: .stdout)
+        let flushedEvents = framer.flushSource(.stdout)
+
+        XCTAssertEqual(immediateEvents.count, 1)
+        XCTAssertEqual(immediateEvents[0].message, "1234")
+        XCTAssertTrue(immediateEvents[0].isPartial)
+        XCTAssertEqual(flushedEvents.count, 1)
+        XCTAssertEqual(flushedEvents[0].message, "5")
+        XCTAssertTrue(flushedEvents[0].isPartial)
+    }
+
+    func testAppendLineEventStoresStdoutAndStderrEntries() {
+        XCTAssertEqual(CDKConsoleDock.start(with: .default()), .started)
+
+        CDKConsoleDock.append(CDKLineEvent(source: .stdout, message: "out", isPartial: false))
+        CDKConsoleDock.append(CDKLineEvent(source: .stderr, message: "err", isPartial: false))
+
+        let entries = CDKConsoleDock.entries()
+        XCTAssertEqual(entries.map(\.source), [.stdout, .stderr])
+        XCTAssertEqual(entries.map(\.level), [.info, .error])
+        XCTAssertEqual(entries.map(\.message), ["out", "err"])
+    }
+
+    func testAppendLineEventUsesRedactionAndTruncation() {
+        let configuration = CDKConfiguration.default()
+        configuration.maximumMessageLength = 18
+        XCTAssertEqual(CDKConsoleDock.start(with: configuration), .started)
+
+        CDKConsoleDock.append(CDKLineEvent(source: .stdout, message: "password=hunter2 suffix", isPartial: false))
+
+        XCTAssertEqual(CDKConsoleDock.entries().first?.message, "password=<redacted")
+    }
 }
