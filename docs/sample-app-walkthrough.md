@@ -31,6 +31,14 @@ xcodebuild -project Examples/SwiftSampleApp/SwiftSampleApp.xcodeproj \
 
 Run `SwiftSampleApp` in Xcode or install the built app on Simulator.
 
+For a focused simulator UI smoke run of the Swift sample:
+
+```sh
+scripts/validate-swift-sample-ui-smoke.sh
+```
+
+The smoke test launches the sample app in a native-log-only UI automation mode, writes a `ConsoleDock.info` entry, opens the bundled console, and verifies the diagnostics header, entries table, pause/resume, and close controls through stable accessibility identifiers.
+
 Manual check:
 
 1. Launch the app.

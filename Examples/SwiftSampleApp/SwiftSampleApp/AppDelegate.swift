@@ -9,10 +9,13 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
-        ConsoleDock.start(configuration: .sample)
+        let isUISmokeRun = ProcessInfo.processInfo.arguments.contains("--consoledock-ui-smoke")
+        ConsoleDock.start(configuration: isUISmokeRun ? .uiSmoke : .sample)
         ConsoleDock.info("SwiftSampleApp launched")
-        print("ConsoleDock sample launch print token=launch-secret")
-        fflush(stdout)
+        if !isUISmokeRun {
+            print("ConsoleDock sample launch print token=launch-secret")
+            fflush(stdout)
+        }
 
         if #available(iOS 13.0, *) {
             return true
@@ -46,6 +49,15 @@ extension ConsoleDock.Configuration {
         maximumMessageLength: 4_096,
         captureStandardOutput: true,
         captureStandardError: true,
+        showsFloatingButton: true,
+        allowsReleaseBuilds: false
+    )
+
+    static let uiSmoke = ConsoleDock.Configuration(
+        maximumEntries: 100,
+        maximumMessageLength: 4_096,
+        captureStandardOutput: false,
+        captureStandardError: false,
         showsFloatingButton: true,
         allowsReleaseBuilds: false
     )

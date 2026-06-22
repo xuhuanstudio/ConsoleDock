@@ -123,7 +123,7 @@ Initial checks:
 
 Future checks:
 
-- UI test smoke run on iOS simulator;
+- UI test smoke run on iOS simulator. An opt-in Swift sample smoke script exists and can be enabled in release validation with `CONSOLEDOCK_RUN_UI_SMOKE=1`;
 - XCFramework packaging validation;
 - CocoaPods lint.
 

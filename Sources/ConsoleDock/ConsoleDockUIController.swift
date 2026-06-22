@@ -334,16 +334,19 @@
         private func configureStatusLabel() {
             statusLabel.translatesAutoresizingMaskIntoConstraints = false
             statusLabel.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.status
+            statusLabel.isAccessibilityElement = true
             statusLabel.numberOfLines = 0
             statusLabel.font = ConsoleDockFonts.monospace(size: 10, weight: .regular)
             statusLabel.textColor = UIColor(white: 0.78, alpha: 1)
             statusLabel.backgroundColor = UIColor(white: 0.08, alpha: 1)
             statusLabel.layer.cornerRadius = 6
             statusLabel.layer.masksToBounds = true
-            statusLabel.text = ConsoleDockDiagnosticsFormatter.statusText(
-                diagnostics: ConsoleDock.diagnostics,
-                visibleEntryCount: 0,
-                isPaused: false
+            updateStatusLabelText(
+                ConsoleDockDiagnosticsFormatter.statusText(
+                    diagnostics: ConsoleDock.diagnostics,
+                    visibleEntryCount: 0,
+                    isPaused: false
+                )
             )
             view.addSubview(statusLabel)
         }
@@ -471,11 +474,18 @@
         }
 
         private func updateStatusHeader() {
-            statusLabel.text = ConsoleDockDiagnosticsFormatter.statusText(
-                diagnostics: ConsoleDock.diagnostics,
-                visibleEntryCount: visibleEntries.count,
-                isPaused: liveUpdateBuffer.isPaused
+            updateStatusLabelText(
+                ConsoleDockDiagnosticsFormatter.statusText(
+                    diagnostics: ConsoleDock.diagnostics,
+                    visibleEntryCount: visibleEntries.count,
+                    isPaused: liveUpdateBuffer.isPaused
+                )
             )
+        }
+
+        private func updateStatusLabelText(_ text: String) {
+            statusLabel.text = text
+            statusLabel.accessibilityLabel = text
         }
 
         func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

@@ -17,10 +17,12 @@ The project follows Semantic Versioning for public releases.
 - Added diagnostics controls and status output to the Swift and Objective-C sample apps.
 - Added app-specific logger sink forwarding controls to the Swift and Objective-C sample apps.
 - Added stable accessibility identifiers to bundled console and sample controls for future UI smoke automation.
+- Added an opt-in Swift sample UI smoke test and validation script for Simulator-based release checks.
 
 ### Changed
 
 - Updated README status and installation guidance now that `v0.1.0` is publicly released.
+- Updated Swift Package Index status guidance after the PackageList entry was merged.
 - Added public README badges for CI, release validation, latest release, and license status.
 - Updated GitHub Actions checkout usage to the Node 24-compatible `actions/checkout@v6` runtime.
 - Aligned contribution and security policy status wording with the public `v0.x` preview stage.

@@ -105,9 +105,10 @@ python3 scripts/verify-public-release.py --repository <OWNER>/ConsoleDock --tag 
 2. Verify Xcode can add the repository URL as a Swift Package dependency at the tag.
 3. Verify the `ConsoleDock` and `ConsoleDockCore` products resolve.
 4. Open the generated DocC archive locally if documentation changed materially.
-5. Submit or verify the package on Swift Package Index after the public repository URL and release tag are available.
-6. Confirm Swift Package Index hosts DocC documentation for the `ConsoleDock` target declared in `.spi.yml`.
-7. Leave the working tree clean.
+5. Run `CONSOLEDOCK_RUN_UI_SMOKE=1 scripts/validate-release.sh` or `scripts/validate-swift-sample-ui-smoke.sh` when validating a minor release on a machine with an available iOS Simulator.
+6. Submit or verify the package on Swift Package Index after the public repository URL and release tag are available. Use Swift Package Index's current package request issue flow instead of opening a direct PackageList pull request.
+7. Confirm Swift Package Index hosts DocC documentation for the `ConsoleDock` target declared in `.spi.yml`.
+8. Leave the working tree clean.
 
 ## Patch Or Rollback
 

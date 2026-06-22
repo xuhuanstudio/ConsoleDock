@@ -68,7 +68,7 @@ Use the `v0.1.0` tag for the first public preview. Then depend on:
 - `ConsoleDock` for Swift API plus the bundled UIKit console.
 - `ConsoleDockCore` for Objective-C/C-compatible core APIs.
 
-The repository includes Swift Package Index metadata for hosted DocC documentation. SPI listing is pending in [SwiftPackageIndex/PackageList#14091](https://github.com/SwiftPackageIndex/PackageList/pull/14091).
+The repository includes Swift Package Index metadata for hosted DocC documentation. The PackageList entry was merged in [SwiftPackageIndex/PackageList#14098](https://github.com/SwiftPackageIndex/PackageList/pull/14098); the hosted package and DocC pages may appear after Swift Package Index finishes indexing the release.
 
 ### Start In Swift
 
@@ -147,7 +147,7 @@ Local DocC validation:
 scripts/validate-docc.sh
 ```
 
-GitHub Actions runs the shared release validation script for pull requests, pushes to `main`, and `v*` tag validation. The script validates the working tree is clean, then validates the SwiftPM manifest, package identity, Swift Package Index metadata, Objective-C API surface, Swift formatting, SwiftPM build/test, Release safety gates, documentation links, governance metadata, release content audit, DocC documentation, the package iOS Simulator build, both sample app builds, source archive creation, source archive contents, and source archive build/test before a GitHub Release is published.
+GitHub Actions runs the shared release validation script for pull requests, pushes to `main`, and `v*` tag validation. The script validates the working tree is clean, then validates the SwiftPM manifest, package identity, Swift Package Index metadata, Objective-C API surface, UI accessibility identifiers, Swift formatting, SwiftPM build/test, Release safety gates, documentation links, governance metadata, release content audit, DocC documentation, the package iOS Simulator build, both sample app builds, source archive creation, source archive contents, and source archive build/test before a GitHub Release is published. Set `CONSOLEDOCK_RUN_UI_SMOKE=1` to include the opt-in Swift sample simulator UI smoke test.
 
 ## Examples And Walkthrough
 
