@@ -33,7 +33,7 @@ let package = Package(
         ),
         .testTarget(
             name: "ConsoleDockTests",
-            dependencies: ["ConsoleDock"]
+            dependencies: ["ConsoleDock", "ConsoleDockCore"]
         )
     ]
 )

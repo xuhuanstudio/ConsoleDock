@@ -6,7 +6,7 @@ ConsoleDock is a planned iOS debug SDK that lets testers inspect app logs direct
 
 ## Status
 
-ConsoleDock is currently in the UIKit console foundation phase. The repository contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, bounded in-memory entries, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, entry change notification, a UIKit-only floating button/panel foundation, and focused tests.
+ConsoleDock is currently in the UIKit console foundation phase. The repository contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, bounded in-memory entries, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, entry change notification, a UIKit-only floating button/panel foundation, Swift and Objective-C sample apps, and focused tests.
 
 Current limitations:
 
@@ -45,7 +45,7 @@ Reliable complete logging should go through ConsoleDock's explicit API or an ada
 
 Current package products:
 
-- `ConsoleDock`: Swift facade for app-facing API.
+- `ConsoleDock`: Swift facade for app-facing API plus an Objective-C-callable UIKit facade.
 - `ConsoleDockCore`: Objective-C/C-compatible core with `CDK`-prefixed symbols.
 
 The package includes macOS as a development/test platform so `swift build` and `swift test` can run on local development machines and CI. ConsoleDock's product goal remains an iOS debug SDK.
@@ -60,15 +60,25 @@ swift test
 
 ## Examples
 
-The repository includes a minimal UIKit sample app:
+The repository includes minimal UIKit sample apps:
 
 - [SwiftSampleApp](Examples/SwiftSampleApp/README.md): Swift UIKit app that imports the local package, starts ConsoleDock at launch, shows the floating console button, and generates Native API, Swift `print`, C `printf`, C `fprintf(stderr)`, and `NSLog` messages.
+- [ObjCSampleApp](Examples/ObjCSampleApp/README.md): Objective-C UIKit app that imports the local package, starts ConsoleDock through `CDKConsoleDockUIKit`, shows the floating console button, and generates Native API, C stdio, direct descriptor writes, and `NSLog` messages.
 
-Build it from the package root:
+Build the Swift sample from the package root:
 
 ```sh
 xcodebuild -project Examples/SwiftSampleApp/SwiftSampleApp.xcodeproj \
   -scheme SwiftSampleApp \
+  -destination 'generic/platform=iOS Simulator' \
+  build
+```
+
+Build the Objective-C sample from the package root:
+
+```sh
+xcodebuild -project Examples/ObjCSampleApp/ObjCSampleApp.xcodeproj \
+  -scheme ObjCSampleApp \
   -destination 'generic/platform=iOS Simulator' \
   build
 ```
@@ -143,18 +153,22 @@ Future UI or custom debug surfaces can observe `ConsoleDock.entriesDidChangeNoti
 
 The future implementation may write to both ConsoleDock's internal store and Apple unified logging where appropriate, but ConsoleDock's on-device panel must read from its own store. ConsoleDock does not write files, upload logs, or read unified logging entries in the current implementation.
 
-### Objective-C Core
+### Objective-C Core and UIKit
 
 ```objc
-#import <ConsoleDockCore/ConsoleDockCore.h>
+@import ConsoleDock;
+@import ConsoleDockCore;
 
 CDKConfiguration *configuration = [CDKConfiguration defaultConfiguration];
-CDKStartResult result = [CDKConsoleDock startWithConfiguration:configuration];
+CDKStartResult result = [CDKConsoleDockUIKit startWithConfiguration:configuration error:nil];
 [CDKConsoleDock info:@"Login succeeded"];
 NSArray<CDKLogEntry *> *entries = [CDKConsoleDock entries];
 [CDKConsoleDock clearEntries];
-[CDKConsoleDock stop];
+[CDKConsoleDockUIKit showConsole];
+[CDKConsoleDockUIKit stop];
 ```
+
+Use `ConsoleDockCore` directly when an Objective-C app only needs capture, storage, and explicit logging APIs. Use `ConsoleDock` as well when the app should show the bundled UIKit floating button and console panel.
 
 ## Design Documents
 

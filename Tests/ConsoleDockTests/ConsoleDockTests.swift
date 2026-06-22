@@ -1,4 +1,5 @@
 @testable import ConsoleDock
+import ConsoleDockCore
 import XCTest
 
 final class ConsoleDockTests: XCTestCase {
@@ -25,6 +26,21 @@ final class ConsoleDockTests: XCTestCase {
         ConsoleDock.stop()
 
         XCTAssertFalse(ConsoleDock.isRunning)
+    }
+
+    func testObjectiveCUIKitFacadeStartStopLifecycle() {
+        let configuration = CDKConfiguration()
+        configuration.captureStandardOutput = false
+        configuration.captureStandardError = false
+
+        XCTAssertEqual(ConsoleDockUIKit.start(configuration: configuration, error: nil), .started)
+        XCTAssertTrue(ConsoleDockUIKit.isRunning())
+
+        ConsoleDockUIKit.showConsole()
+        ConsoleDockUIKit.hideConsole()
+        ConsoleDockUIKit.stop()
+
+        XCTAssertFalse(ConsoleDockUIKit.isRunning())
     }
 
     func testConfigurationDefaultsMatchCoreDefaults() {
