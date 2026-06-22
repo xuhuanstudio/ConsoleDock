@@ -79,6 +79,14 @@ def validate(
     remote_branch = run(["git", "ls-remote", "--exit-code", "--heads", remote, branch], root)
     if remote_branch.returncode != 0:
         errors.append(f"remote {remote} does not expose branch {branch}; push and validate CI before tagging")
+    else:
+        remote_branch_sha = remote_branch.stdout.split()[0]
+        local_head_sha = output(["git", "rev-parse", "HEAD"], root)
+        if remote_branch_sha != local_head_sha:
+            errors.append(
+                f"remote {remote}/{branch} is {remote_branch_sha}, "
+                f"but local HEAD is {local_head_sha}; push the current commit and wait for CI before tagging"
+            )
 
     remote_tag = run(["git", "ls-remote", "--exit-code", "--tags", remote, tag], root)
     if remote_tag.returncode == 0:

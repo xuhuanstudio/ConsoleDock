@@ -80,7 +80,7 @@ If branch protection is enabled, require the `CI` workflow after it has run succ
 
 ## First Tag And Release
 
-Only after the first `main` workflow passes:
+Only after the current local `HEAD` has been pushed to `origin/main` and that exact commit's `main` workflow has passed:
 
 ```sh
 python3 scripts/validate-public-release-preflight.py --tag v0.1.0
@@ -89,7 +89,6 @@ python3 scripts/audit-release-content.py
 scripts/validate-release.sh
 python3 scripts/audit-source-archive.py .build/ConsoleDock-source.zip
 git status --short
-git push origin main
 git tag -a v0.1.0 -m "ConsoleDock v0.1.0"
 git push origin v0.1.0
 ```

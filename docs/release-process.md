@@ -48,11 +48,12 @@ Run at least one iOS Simulator smoke check before the first public release in a 
 
 ## Tag And Validate
 
-Create an annotated tag only after local validation passes:
+Create an annotated tag only after local validation passes and `origin/main` points at the same commit as local `HEAD`:
 
 ```sh
+python3 scripts/validate-public-release-preflight.py --tag v0.1.0
+scripts/validate-release.sh
 git tag -a v0.1.0 -m "ConsoleDock v0.1.0"
-git push origin main
 git push origin v0.1.0
 ```
 
