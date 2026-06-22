@@ -10,9 +10,9 @@ ConsoleDock is an early-stage iOS debug SDK that lets testers inspect app logs d
 
 ## Status
 
-ConsoleDock is currently in the pre-release MVP hardening phase. The repository contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, bounded in-memory entries with stable session identifiers and partial/redacted/truncated flags, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, entry change notification, Release startup safety gates, a UIKit-only floating button/panel foundation, Swift and Objective-C sample apps, DocC documentation, release validation workflow, and focused tests.
+ConsoleDock `v0.1.0` is published as a source-first Swift Package Manager preview release. The repository contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, bounded in-memory entries with stable session identifiers and partial/redacted/truncated flags, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, entry change notification, Release startup safety gates, a UIKit-only floating button/panel foundation, Swift and Objective-C sample apps, DocC documentation, release validation workflow, and focused tests.
 
-Current limitations:
+Current `v0.1.0` limitations:
 
 - stdout/stderr capture exists in the core and is connected to line framing and in-memory storage.
 - Direct descriptor writes and flushed C stdio output can be captured; unflushed `printf` / `fprintf` output depends on standard stream buffering.
@@ -51,18 +51,18 @@ Reliable complete logging should go through ConsoleDock's explicit API or an ada
 
 ConsoleDock is SPM-first.
 
-For local evaluation, add this repository folder as a local Swift Package dependency in Xcode:
+Add the public repository URL through Xcode's package dependency UI:
 
 ```text
-/path/to/ConsoleDock
+https://github.com/xuhuanstudio/ConsoleDock.git
 ```
 
-After the repository is published and tagged, add the repository URL through Xcode's package dependency UI or `Package.swift`, then depend on:
+Use the `v0.1.0` tag for the first public preview. Then depend on:
 
 - `ConsoleDock` for Swift API plus the bundled UIKit console.
 - `ConsoleDockCore` for Objective-C/C-compatible core APIs.
 
-The repository includes Swift Package Index metadata for hosted DocC documentation once the package is public and tagged.
+The repository includes Swift Package Index metadata for hosted DocC documentation. SPI listing is pending in [SwiftPackageIndex/PackageList#14091](https://github.com/SwiftPackageIndex/PackageList/pull/14091).
 
 ### Start In Swift
 

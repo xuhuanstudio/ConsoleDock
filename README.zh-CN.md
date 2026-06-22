@@ -8,7 +8,7 @@ ConsoleDock 是一个早期阶段的 iOS debug SDK，目标是让测试人员在
 
 ## 当前状态
 
-ConsoleDock 目前处于 `v0.1.0` 公开预览前的 MVP hardening 阶段。仓库已经包含：
+ConsoleDock `v0.1.0` 已作为 source-first Swift Package Manager 公开预览版本发布。仓库已经包含：
 
 - Swift Package Manager package；
 - Objective-C/C 兼容的 `ConsoleDockCore`；
@@ -44,6 +44,12 @@ ConsoleDock 不承诺完整、稳定、零侵入捕获：
 如果需要可靠完整的 App 内日志展示，推荐使用 ConsoleDock 的显式 API，或者在已有 logger 中增加 sink/appender 转发。
 
 ## Swift 快速开始
+
+通过 Swift Package Manager 添加公开仓库地址，并选择 `v0.1.0` tag：
+
+```text
+https://github.com/xuhuanstudio/ConsoleDock.git
+```
 
 ```swift
 import ConsoleDock
@@ -105,6 +111,6 @@ scripts/validate-release.sh
 2. CocoaPods，等 SPM package 稳定后再考虑；
 3. XCFramework，等公开 API 稳定后再考虑。
 
-仓库包含 Swift Package Index 元数据，公开并打 tag 后可用于托管 DocC 文档。
+仓库包含 Swift Package Index 元数据。SPI 收录正在通过 [SwiftPackageIndex/PackageList#14091](https://github.com/SwiftPackageIndex/PackageList/pull/14091) 处理。
 
 ConsoleDock 当前不包含 CocoaPods、XCFramework、网络面板、崩溃采集、默认持久化、远程上传或第三方 logger 适配器。

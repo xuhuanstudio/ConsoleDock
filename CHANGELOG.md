@@ -6,7 +6,9 @@ The project follows Semantic Versioning after public releases begin.
 
 ## Unreleased
 
-No changes yet.
+### Changed
+
+- Updated README status and installation guidance now that `v0.1.0` is publicly released.
 
 ## v0.1.0 - 2026-06-22
 
