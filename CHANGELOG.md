@@ -9,6 +9,7 @@ The project follows Semantic Versioning after public releases begin.
 ### Changed
 
 - Updated README status and installation guidance now that `v0.1.0` is publicly released.
+- Added public README badges for CI, release validation, latest release, and license status.
 
 ## v0.1.0 - 2026-06-22
 
