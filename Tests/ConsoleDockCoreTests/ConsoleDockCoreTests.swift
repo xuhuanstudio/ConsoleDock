@@ -22,6 +22,35 @@ final class ConsoleDockCoreTests: XCTestCase {
         XCTAssertFalse(configuration.allowsReleaseBuilds)
     }
 
+    func testReleaseBuildDefaultStartGateIsDisabled() {
+        let configuration = noCaptureConfiguration()
+
+        let result = CDKConsoleDock.start(with: configuration)
+
+        #if DEBUG
+        XCTAssertEqual(result, .started)
+        XCTAssertTrue(CDKConsoleDock.isRunning())
+        #else
+        XCTAssertEqual(result, .disabled)
+        XCTAssertFalse(CDKConsoleDock.isRunning())
+        #endif
+    }
+
+    func testReleaseBuildOptInRequiresCompileTimeFlagAndRuntimeConfiguration() {
+        let configuration = noCaptureConfiguration()
+        configuration.allowsReleaseBuilds = true
+
+        let result = CDKConsoleDock.start(with: configuration)
+
+        #if DEBUG || CONSOLEDOCK_ENABLE_RELEASE
+        XCTAssertEqual(result, .started)
+        XCTAssertTrue(CDKConsoleDock.isRunning())
+        #else
+        XCTAssertEqual(result, .disabled)
+        XCTAssertFalse(CDKConsoleDock.isRunning())
+        #endif
+    }
+
     func testStartStopLifecycle() {
         let result = CDKConsoleDock.start(with: noCaptureConfiguration())
 

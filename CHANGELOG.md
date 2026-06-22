@@ -20,3 +20,4 @@ The project follows Semantic Versioning after public releases begin.
 - Added a Swift UIKit sample app that imports the local package and validates Native API, stdout, stderr, `NSLog`, redaction, clear, stop, and restart behavior on Simulator.
 - Added `CDKConsoleDockUIKit` for Objective-C access to the bundled UIKit console and an Objective-C UIKit sample app that validates Native API, stdout, stderr, direct descriptor writes, `NSLog`, redaction, clear, stop, and restart behavior on Simulator.
 - Expanded CI to build the package for iOS Simulator and build both Swift and Objective-C sample apps.
+- Added Release safety gates so Release startup requires both `CONSOLEDOCK_ENABLE_RELEASE` and `allowsReleaseBuilds`, plus focused CI coverage and documentation.

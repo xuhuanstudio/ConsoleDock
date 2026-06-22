@@ -8,6 +8,7 @@ public enum ConsoleDock {
         public var captureStandardOutput: Bool
         public var captureStandardError: Bool
         public var showsFloatingButton: Bool
+        /// Allows ConsoleDock to start in Release builds only when the app also defines CONSOLEDOCK_ENABLE_RELEASE.
         public var allowsReleaseBuilds: Bool
         public var redactor: ((String) -> String)?
 

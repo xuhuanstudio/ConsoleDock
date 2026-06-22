@@ -6,7 +6,7 @@ ConsoleDock is a planned iOS debug SDK that lets testers inspect app logs direct
 
 ## Status
 
-ConsoleDock is currently in the UIKit console foundation phase. The repository contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, bounded in-memory entries, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, entry change notification, a UIKit-only floating button/panel foundation, Swift and Objective-C sample apps, and focused tests.
+ConsoleDock is currently in the UIKit console foundation phase. The repository contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, bounded in-memory entries, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, entry change notification, Release startup safety gates, a UIKit-only floating button/panel foundation, Swift and Objective-C sample apps, and focused tests.
 
 Current limitations:
 
@@ -56,10 +56,12 @@ Local validation:
 swift package dump-package
 swift build
 swift test
+swift test -c release --filter ConsoleDockCoreTests/testReleaseBuild
+swift test -c release -Xcc -DCONSOLEDOCK_ENABLE_RELEASE -Xswiftc -DCONSOLEDOCK_ENABLE_RELEASE --filter ConsoleDockCoreTests/testReleaseBuild
 xcodebuild -scheme ConsoleDock-Package -destination 'generic/platform=iOS Simulator' build
 ```
 
-GitHub Actions currently validates the SwiftPM manifest, SwiftPM build/test, the package iOS Simulator build, and both sample app builds.
+GitHub Actions currently validates the SwiftPM manifest, SwiftPM build/test, Release safety gates, the package iOS Simulator build, and both sample app builds.
 
 ## Examples
 
@@ -178,6 +180,7 @@ Use `ConsoleDockCore` directly when an Objective-C app only needs capture, stora
 - [Product brief](docs/product-brief.md)
 - [MVP architecture](docs/specs/2026-06-22-mvp-architecture.md)
 - [Open-source readiness](docs/open-source-readiness.md)
+- [Release build safety](docs/release-build-safety.md)
 - [Roadmap](docs/roadmap.md)
 
 ## Workspace Layout
@@ -191,6 +194,6 @@ Use `ConsoleDockCore` directly when an Objective-C app only needs capture, stora
 
 - Be honest about iOS logging boundaries.
 - Keep the default runtime behavior safe for debug builds.
-- Do not enable release-build debug UI by default.
+- Do not enable release-build debug UI by default; Release startup requires both a compile-time flag and runtime opt-in.
 - Treat privacy redaction as a core data path, not a later add-on.
 - Prefer standards-based packaging, versioning, documentation, and CI.

@@ -35,6 +35,8 @@ FOUNDATION_EXPORT NSNotificationName const CDKConsoleDockEntriesDidChangeNotific
 @property (nonatomic) BOOL captureStandardOutput;
 @property (nonatomic) BOOL captureStandardError;
 @property (nonatomic) BOOL showsFloatingButton;
+
+/// Allows ConsoleDock to start in Release builds only when the app also defines CONSOLEDOCK_ENABLE_RELEASE.
 @property (nonatomic) BOOL allowsReleaseBuilds;
 @property (nonatomic, copy, nullable) CDKRedactionBlock redactionBlock;
 

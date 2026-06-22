@@ -90,6 +90,11 @@ static void CDKPostEntriesDidChangeNotification(void)
         }
 
         CDKConfiguration *effectiveConfiguration = configuration ?: [CDKConfiguration defaultConfiguration];
+#if !defined(DEBUG) && defined(CONSOLEDOCK_ENABLE_RELEASE)
+        if (!effectiveConfiguration.allowsReleaseBuilds) {
+            return CDKStartResultDisabled;
+        }
+#endif
         if (effectiveConfiguration.maximumEntries == 0) {
             if (error != nil) {
                 *error = [NSError errorWithDomain:CDKConsoleDockErrorDomain
