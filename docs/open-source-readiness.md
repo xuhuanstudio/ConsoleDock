@@ -103,13 +103,13 @@ Initial checks:
 - unit tests;
 - DocC conversion with warnings treated as errors;
 - tag-triggered release validation for `v*` tags;
-- documentation link check where practical;
+- documentation link validation;
+- Objective-C sample app build;
+- Swift sample app build;
 - formatting or lint check once a formatter is selected.
 
 Future checks:
 
-- Objective-C sample app build;
-- Swift sample app build;
 - UI test smoke run on iOS simulator;
 - XCFramework packaging validation;
 - CocoaPods lint.
@@ -179,8 +179,9 @@ Before `v0.1.0`:
 - MIT license is present;
 - security policy is present;
 - `Logger` / `os_log` boundary is documented;
-- release notes are written.
-- DocC documentation builds without warnings.
+- release notes are written;
+- documentation links are validated;
+- DocC documentation builds without warnings;
 - release process is documented and the tag validation workflow passes.
 
 Before `v1.0.0`:

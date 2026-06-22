@@ -46,6 +46,8 @@ jobs:
         run: swift test -c release --filter ConsoleDockCoreTests/testReleaseBuild
       - name: Test Release explicit opt-in gate
         run: swift test -c release -Xcc -DCONSOLEDOCK_ENABLE_RELEASE -Xswiftc -DCONSOLEDOCK_ENABLE_RELEASE --filter ConsoleDockCoreTests/testReleaseBuild
+      - name: Validate documentation links
+        run: python3 scripts/validate-doc-links.py
       - name: Build DocC documentation
         run: scripts/validate-docc.sh
       - name: Build package for iOS Simulator

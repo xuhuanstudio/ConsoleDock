@@ -28,6 +28,7 @@ swift build
 swift test
 swift test -c release --filter ConsoleDockCoreTests/testReleaseBuild
 swift test -c release -Xcc -DCONSOLEDOCK_ENABLE_RELEASE -Xswiftc -DCONSOLEDOCK_ENABLE_RELEASE --filter ConsoleDockCoreTests/testReleaseBuild
+python3 scripts/validate-doc-links.py
 scripts/validate-docc.sh
 xcodebuild -scheme ConsoleDock-Package -destination 'generic/platform=iOS Simulator' build
 xcodebuild -project Examples/SwiftSampleApp/SwiftSampleApp.xcodeproj -scheme SwiftSampleApp -destination 'generic/platform=iOS Simulator' build
@@ -63,6 +64,7 @@ The `Release Validation` GitHub Actions workflow runs on `v*` tags. It verifies:
 - matching `CHANGELOG.md` release heading;
 - SwiftPM manifest, build, and tests;
 - Release safety gates;
+- documentation link validation;
 - DocC conversion with warnings treated as errors;
 - iOS package build;
 - Swift and Objective-C sample app builds;
