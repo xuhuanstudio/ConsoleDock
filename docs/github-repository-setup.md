@@ -27,6 +27,8 @@ Recommended topics:
 
 Topics make the repository easier to discover by subject area.
 
+Swift Package Index should use the checked-in `.spi.yml` file to build hosted DocC documentation with `ConsoleDock` as the landing target after the public repository and first tag are available.
+
 ## Repository Features
 
 Enable:
@@ -105,4 +107,6 @@ After publishing the GitHub Release:
    - `ConsoleDockCore`
 4. Build the package in an iOS Simulator target.
 5. Confirm the README, release notes, and `SECURITY.md` still describe the shipped behavior accurately.
-6. Leave the local working tree clean.
+6. Submit or verify the package on Swift Package Index after the public repository URL and release tag are available.
+7. Confirm Swift Package Index builds the package and hosts DocC documentation for the `ConsoleDock` target.
+8. Leave the local working tree clean.

@@ -90,7 +90,9 @@ Use the matching changelog section as the source of truth. Keep release notes fa
 1. Verify Xcode can add the repository URL as a Swift Package dependency at the tag.
 2. Verify the `ConsoleDock` and `ConsoleDockCore` products resolve.
 3. Open the generated DocC archive locally if documentation changed materially.
-4. Leave the working tree clean.
+4. Submit or verify the package on Swift Package Index after the public repository URL and release tag are available.
+5. Confirm Swift Package Index hosts DocC documentation for the `ConsoleDock` target declared in `.spi.yml`.
+6. Leave the working tree clean.
 
 ## Patch Or Rollback
 

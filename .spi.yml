@@ -1,0 +1,6 @@
+# Swift Package Index uses this manifest to build and host DocC documentation.
+# ConsoleDock is the public Swift facade and documentation landing target.
+version: 1
+builder:
+  configs:
+    - documentation_targets: [ConsoleDock]

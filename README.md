@@ -62,6 +62,8 @@ After the repository is published and tagged, add the repository URL through Xco
 - `ConsoleDock` for Swift API plus the bundled UIKit console.
 - `ConsoleDockCore` for Objective-C/C-compatible core APIs.
 
+The repository includes Swift Package Index metadata for hosted DocC documentation once the package is public and tagged.
+
 ### Start In Swift
 
 ```swift

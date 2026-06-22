@@ -71,6 +71,7 @@ Requirements:
 - `Package.swift` with explicit platform support;
 - stable target names;
 - library products for Swift and Objective-C-compatible integration;
+- Swift Package Index metadata for hosted DocC documentation;
 - tagged releases.
 
 ### CocoaPods

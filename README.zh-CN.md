@@ -105,4 +105,6 @@ scripts/validate-release.sh
 2. CocoaPods，等 SPM package 稳定后再考虑；
 3. XCFramework，等公开 API 稳定后再考虑。
 
+仓库包含 Swift Package Index 元数据，公开并打 tag 后可用于托管 DocC 文档。
+
 ConsoleDock 当前不包含 CocoaPods、XCFramework、网络面板、崩溃采集、默认持久化、远程上传或第三方 logger 适配器。
