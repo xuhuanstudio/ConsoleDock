@@ -42,7 +42,6 @@ REQUIRED_RELEASE_BODY_SNIPPETS = (
     "### Validation",
     "Release Validation workflow passed:",
 )
-RELEASE_VALIDATION_URL_RE = re.compile(r"https://github\.com/[^/\s]+/[^/\s]+/actions/runs/\d+")
 
 
 class URLCheckResult(NamedTuple):
@@ -125,20 +124,35 @@ def package_version(tag: str) -> str:
     return match.group(1)
 
 
-def validate_release_body(body: str) -> list[str]:
+def release_validation_url_re(repository_slug: str) -> re.Pattern[str]:
+    return re.compile(rf"https://github\.com/{re.escape(repository_slug)}/actions/runs/\d+", re.IGNORECASE)
+
+
+def validate_release_body(body: str, repository_slug: str, expected_workflow_url: str | None = None) -> list[str]:
     errors: list[str] = []
     for snippet in REQUIRED_RELEASE_BODY_SNIPPETS:
         if snippet not in body:
             errors.append(f"GitHub Release notes must contain: {snippet}")
 
-    if RELEASE_VALIDATION_URL_RE.search(body) is None:
-        errors.append("GitHub Release notes must link to the passing Release Validation workflow run")
+    workflow_urls = release_validation_url_re(repository_slug).findall(body)
+    if not workflow_urls:
+        errors.append(
+            "GitHub Release notes must link to the passing Release Validation workflow run "
+            f"for {repository_slug}"
+        )
+    elif expected_workflow_url is not None and expected_workflow_url not in workflow_urls:
+        errors.append(
+            "GitHub Release notes must link to the passing Release Validation workflow run for the verified tag: "
+            f"{expected_workflow_url}"
+        )
 
     return errors
 
 
 def check_github_release(repository_slug: str, tag: str, workflow: str) -> list[str]:
     errors: list[str] = []
+    release_body: str | None = None
+    expected_workflow_url: str | None = None
 
     repo = run_network(
         [
@@ -173,7 +187,7 @@ def check_github_release(repository_slug: str, tag: str, workflow: str) -> list[
             errors.append(f"GitHub Release tagName must be {tag}, got {release_payload.get('tagName')}")
         if release_payload.get("isDraft"):
             errors.append(f"GitHub Release {tag} must not be a draft")
-        errors.extend(validate_release_body(release_payload.get("body") or ""))
+        release_body = release_payload.get("body") or ""
 
     tag_lookup = run_network(["git", "ls-remote", "--exit-code", "--tags", f"https://github.com/{repository_slug}.git", tag])
     if tag_lookup.returncode != 0:
@@ -215,6 +229,11 @@ def check_github_release(repository_slug: str, tag: str, workflow: str) -> list[
                     f"{workflow} workflow for {tag} must be completed/success, "
                     f"got status={latest.get('status')} conclusion={latest.get('conclusion')}"
                 )
+            else:
+                expected_workflow_url = latest.get("url")
+
+    if release_body is not None:
+        errors.extend(validate_release_body(release_body, repository_slug, expected_workflow_url))
 
     return errors
 
@@ -448,19 +467,37 @@ def self_test_release_body_validation() -> list[str]:
         - Release Validation workflow passed: https://github.com/xuhuanstudio/ConsoleDock/actions/runs/27929173406
         """
     )
-    if validate_release_body(valid_body):
+    if validate_release_body(valid_body, "xuhuanstudio/ConsoleDock", "https://github.com/xuhuanstudio/ConsoleDock/actions/runs/27929173406"):
         errors.append("validate_release_body should accept the documented release-notes shape")
 
     missing_boundaries = valid_body.replace("### Boundaries\n", "")
-    if not validate_release_body(missing_boundaries):
+    if not validate_release_body(missing_boundaries, "xuhuanstudio/ConsoleDock"):
         errors.append("validate_release_body should reject release notes without the Boundaries section")
 
     missing_validation_url = valid_body.replace(
         "https://github.com/xuhuanstudio/ConsoleDock/actions/runs/27929173406",
         "Release Validation workflow",
     )
-    if not validate_release_body(missing_validation_url):
+    if not validate_release_body(missing_validation_url, "xuhuanstudio/ConsoleDock"):
         errors.append("validate_release_body should reject release notes without a workflow run URL")
+
+    wrong_repository_url = valid_body.replace(
+        "https://github.com/xuhuanstudio/ConsoleDock/actions/runs/27929173406",
+        "https://github.com/other/ConsoleDock/actions/runs/27929173406",
+    )
+    if not validate_release_body(wrong_repository_url, "xuhuanstudio/ConsoleDock"):
+        errors.append("validate_release_body should reject workflow run URLs from another repository")
+
+    wrong_workflow_url = valid_body.replace(
+        "https://github.com/xuhuanstudio/ConsoleDock/actions/runs/27929173406",
+        "https://github.com/xuhuanstudio/ConsoleDock/actions/runs/27929173407",
+    )
+    if not validate_release_body(
+        wrong_workflow_url,
+        "xuhuanstudio/ConsoleDock",
+        "https://github.com/xuhuanstudio/ConsoleDock/actions/runs/27929173406",
+    ):
+        errors.append("validate_release_body should reject a non-matching workflow run URL when the tag run is known")
 
     return errors
 
