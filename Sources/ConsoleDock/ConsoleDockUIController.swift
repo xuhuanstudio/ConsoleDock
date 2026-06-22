@@ -200,11 +200,15 @@ private final class ConsoleDockPassthroughWindow: UIWindow {
     }
 }
 
-private final class ConsoleDockPanelViewController: UIViewController, UITableViewDataSource {
+private final class ConsoleDockPanelViewController: UIViewController, UITableViewDataSource, UISearchResultsUpdating, UISearchBarDelegate {
     var onClose: (() -> Void)?
 
     private let tableView = UITableView(frame: .zero, style: .plain)
+    private let searchController = UISearchController(searchResultsController: nil)
     private var entries: [ConsoleDock.LogEntry] = []
+    private var visibleEntries: [ConsoleDock.LogEntry] = []
+    private var searchQuery = ""
+    private var sourceScope = ConsoleDockEntryFilter.SourceScope.all
     private var observer: ConsoleDockEntriesObserver?
     private var shareButton: UIBarButtonItem?
     private let formatter: DateFormatter = {
@@ -218,6 +222,7 @@ private final class ConsoleDockPanelViewController: UIViewController, UITableVie
         title = "ConsoleDock"
         view.backgroundColor = UIColor(white: 0.06, alpha: 1)
         configureNavigationItems()
+        configureSearchController()
         configureTableView()
         observer = ConsoleDockEntriesObserver(deliveryQueue: .main) { [weak self] snapshot in
             self?.apply(snapshot: snapshot)
@@ -251,6 +256,17 @@ private final class ConsoleDockPanelViewController: UIViewController, UITableVie
         navigationItem.rightBarButtonItems = [clearButton, shareButton]
     }
 
+    private func configureSearchController() {
+        searchController.searchResultsUpdater = self
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchBar.placeholder = "Search logs"
+        searchController.searchBar.scopeButtonTitles = ConsoleDockEntryFilter.SourceScope.allCases.map(\.title)
+        searchController.searchBar.delegate = self
+        navigationItem.searchController = searchController
+        navigationItem.hidesSearchBarWhenScrolling = false
+        definesPresentationContext = true
+    }
+
     private func configureTableView() {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.backgroundColor = UIColor(white: 0.06, alpha: 1)
@@ -270,10 +286,19 @@ private final class ConsoleDockPanelViewController: UIViewController, UITableVie
 
     private func apply(snapshot: [ConsoleDock.LogEntry]) {
         entries = snapshot
-        shareButton?.isEnabled = !entries.isEmpty
+        reloadVisibleEntries(scrollToBottom: true)
+    }
+
+    private func reloadVisibleEntries(scrollToBottom: Bool) {
+        visibleEntries = ConsoleDockEntryFilter.filteredEntries(
+            entries,
+            query: searchQuery,
+            sourceScope: sourceScope
+        )
+        shareButton?.isEnabled = !visibleEntries.isEmpty
         tableView.reloadData()
-        guard !entries.isEmpty else { return }
-        let indexPath = IndexPath(row: entries.count - 1, section: 0)
+        guard scrollToBottom, !visibleEntries.isEmpty else { return }
+        let indexPath = IndexPath(row: visibleEntries.count - 1, section: 0)
         tableView.scrollToRow(at: indexPath, at: .bottom, animated: false)
     }
 
@@ -291,22 +316,32 @@ private final class ConsoleDockPanelViewController: UIViewController, UITableVie
     }
 
     @objc private func shareSnapshot() {
-        guard !entries.isEmpty else { return }
-        let snapshot = ConsoleDockSnapshotFormatter.snapshotText(entries: entries)
+        guard !visibleEntries.isEmpty else { return }
+        let snapshot = ConsoleDockSnapshotFormatter.snapshotText(entries: visibleEntries)
         let activityController = UIActivityViewController(activityItems: [snapshot], applicationActivities: nil)
         activityController.popoverPresentationController?.barButtonItem = shareButton
         present(activityController, animated: true)
     }
 
+    func updateSearchResults(for searchController: UISearchController) {
+        searchQuery = searchController.searchBar.text ?? ""
+        reloadVisibleEntries(scrollToBottom: false)
+    }
+
+    func searchBar(_ searchBar: UISearchBar, selectedScopeButtonIndexDidChange selectedScope: Int) {
+        sourceScope = ConsoleDockEntryFilter.SourceScope(rawValue: selectedScope) ?? .all
+        reloadVisibleEntries(scrollToBottom: false)
+    }
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        entries.count
+        visibleEntries.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let reuseIdentifier = "ConsoleDockEntryCell"
         let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier)
             ?? UITableViewCell(style: .subtitle, reuseIdentifier: reuseIdentifier)
-        let entry = entries[indexPath.row]
+        let entry = visibleEntries[indexPath.row]
         cell.backgroundColor = UIColor(white: 0.06, alpha: 1)
         cell.textLabel?.numberOfLines = 0
         cell.textLabel?.font = ConsoleDockFonts.monospace(size: 12, weight: .regular)

@@ -24,3 +24,4 @@ The project follows Semantic Versioning after public releases begin.
 - Updated contribution and GitHub templates to match the current capture, UIKit, privacy, and Release safety scope.
 - Added README quick start content, a real Simulator screenshot, and a shared Swift/Objective-C sample app walkthrough.
 - Added a UIKit share action for user-initiated plain-text export of the current redacted in-memory log snapshot.
+- Added UIKit console text search and source filtering for the visible in-memory log list.

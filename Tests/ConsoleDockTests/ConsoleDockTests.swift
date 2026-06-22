@@ -151,6 +151,44 @@ final class ConsoleDockTests: XCTestCase {
         )
     }
 
+    func testEntryFilterReturnsAllEntriesForEmptyQueryAndAllSources() {
+        let entries = filterFixtureEntries()
+
+        let filtered = ConsoleDockEntryFilter.filteredEntries(entries, query: "  ")
+
+        XCTAssertEqual(filtered.map(\.message), ["Native login succeeded", "stdout response", "stderr network failure"])
+    }
+
+    func testEntryFilterMatchesMessageLevelAndSourceCaseInsensitively() {
+        let entries = filterFixtureEntries()
+
+        XCTAssertEqual(
+            ConsoleDockEntryFilter.filteredEntries(entries, query: "LOGIN").map(\.message),
+            ["Native login succeeded"]
+        )
+        XCTAssertEqual(
+            ConsoleDockEntryFilter.filteredEntries(entries, query: "error").map(\.message),
+            ["stderr network failure"]
+        )
+        XCTAssertEqual(
+            ConsoleDockEntryFilter.filteredEntries(entries, query: "STDOUT").map(\.message),
+            ["stdout response"]
+        )
+    }
+
+    func testEntryFilterRestrictsSourceScope() {
+        let entries = filterFixtureEntries()
+
+        XCTAssertEqual(
+            ConsoleDockEntryFilter.filteredEntries(entries, query: "", sourceScope: .stderr).map(\.message),
+            ["stderr network failure"]
+        )
+        XCTAssertEqual(
+            ConsoleDockEntryFilter.filteredEntries(entries, query: "response", sourceScope: .native).map(\.message),
+            []
+        )
+    }
+
     func testSwiftConfigurationBridgesStoreLimitsAndRedactor() {
         let configuration = ConsoleDock.Configuration(
             maximumEntries: 1,
@@ -242,4 +280,29 @@ private extension ConsoleDock.Configuration {
         captureStandardOutput: false,
         captureStandardError: false
     )
+}
+
+private extension ConsoleDockTests {
+    func filterFixtureEntries() -> [ConsoleDock.LogEntry] {
+        [
+            ConsoleDock.LogEntry(
+                timestamp: Date(timeIntervalSince1970: 1),
+                level: .info,
+                source: .native,
+                message: "Native login succeeded"
+            ),
+            ConsoleDock.LogEntry(
+                timestamp: Date(timeIntervalSince1970: 2),
+                level: .debug,
+                source: .stdout,
+                message: "stdout response"
+            ),
+            ConsoleDock.LogEntry(
+                timestamp: Date(timeIntervalSince1970: 3),
+                level: .error,
+                source: .stderr,
+                message: "stderr network failure"
+            )
+        ]
+    }
 }
