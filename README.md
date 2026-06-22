@@ -113,26 +113,17 @@ swift build
 swift test
 swift test -c release --filter ConsoleDockCoreTests/testReleaseBuild
 swift test -c release -Xcc -DCONSOLEDOCK_ENABLE_RELEASE -Xswiftc -DCONSOLEDOCK_ENABLE_RELEASE --filter ConsoleDockCoreTests/testReleaseBuild
+scripts/validate-docc.sh
 xcodebuild -scheme ConsoleDock-Package -destination 'generic/platform=iOS Simulator' build
 ```
 
 Local DocC validation:
 
 ```sh
-swift package dump-symbol-graph --minimum-access-level public --skip-synthesized-members
-SYMBOL_GRAPH_DIR="$(find .build -type d -name symbolgraph | head -n 1)"
-test -n "$SYMBOL_GRAPH_DIR"
-xcrun docc convert Sources/ConsoleDock/Documentation.docc \
-  --additional-symbol-graph-dir "$SYMBOL_GRAPH_DIR" \
-  --output-dir .build/ConsoleDock.doccarchive \
-  --fallback-display-name ConsoleDock \
-  --fallback-bundle-identifier io.github.consoledock.ConsoleDock \
-  --fallback-default-module-kind framework \
-  --default-code-listing-language swift \
-  --warnings-as-errors
+scripts/validate-docc.sh
 ```
 
-GitHub Actions currently validates the SwiftPM manifest, SwiftPM build/test, Release safety gates, DocC documentation, the package iOS Simulator build, and both sample app builds.
+GitHub Actions currently validates the SwiftPM manifest, SwiftPM build/test, Release safety gates, DocC documentation, the package iOS Simulator build, and both sample app builds. The release validation workflow repeats those checks for `v*` tags and verifies source archive creation before a GitHub Release is published.
 
 ## Examples And Walkthrough
 
@@ -256,6 +247,7 @@ Use `ConsoleDockCore` directly when an Objective-C app only needs capture, stora
 - [DocC catalog](Sources/ConsoleDock/Documentation.docc/ConsoleDock.md)
 - [MVP architecture](docs/specs/2026-06-22-mvp-architecture.md)
 - [Open-source readiness](docs/open-source-readiness.md)
+- [Release process](docs/release-process.md)
 - [Release build safety](docs/release-build-safety.md)
 - [Sample app walkthrough](docs/sample-app-walkthrough.md)
 - [Roadmap](docs/roadmap.md)

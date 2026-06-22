@@ -1,18 +1,41 @@
-name: CI
+name: Release Validation
 
 on:
-  pull_request:
   push:
-    branches:
-      - main
+    tags:
+      - "v*"
+  workflow_dispatch:
 
 jobs:
-  swift-package:
+  validate-release:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
       - name: Show Swift version
         run: swift --version
+      - name: Validate release tag and changelog
+        run: |
+          python3 - <<'PY'
+          import os
+          import pathlib
+          import re
+          import sys
+
+          if os.environ.get("GITHUB_REF_TYPE") != "tag":
+              print("Manual release validation run; skipping tag-specific checks.")
+              sys.exit(0)
+
+          tag = os.environ["GITHUB_REF_NAME"]
+          if not re.fullmatch(r"v\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?", tag):
+              print(f"error: release tag must use semantic version form like v0.1.0, got {tag}", file=sys.stderr)
+              sys.exit(1)
+
+          changelog = pathlib.Path("CHANGELOG.md").read_text(encoding="utf-8")
+          heading = re.compile(rf"^## \[?{re.escape(tag)}\]?(?:\s|-|$)", re.MULTILINE)
+          if heading.search(changelog) is None:
+              print(f"error: CHANGELOG.md must contain a release heading for {tag}", file=sys.stderr)
+              sys.exit(1)
+          PY
       - name: Validate package manifest
         run: swift package dump-package
       - name: Build
@@ -39,3 +62,7 @@ jobs:
             -scheme ObjCSampleApp \
             -destination 'generic/platform=iOS Simulator' \
             build
+      - name: Validate source archive
+        run: |
+          swift package archive-source --output .build/ConsoleDock-source.zip
+          test -s .build/ConsoleDock-source.zip

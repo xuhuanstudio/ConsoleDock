@@ -102,6 +102,7 @@ Initial checks:
 - xcodebuild build for iOS simulator;
 - unit tests;
 - DocC conversion with warnings treated as errors;
+- tag-triggered release validation for `v*` tags;
 - documentation link check where practical;
 - formatting or lint check once a formatter is selected.
 
@@ -180,6 +181,7 @@ Before `v0.1.0`:
 - `Logger` / `os_log` boundary is documented;
 - release notes are written.
 - DocC documentation builds without warnings.
+- release process is documented and the tag validation workflow passes.
 
 Before `v1.0.0`:
 
