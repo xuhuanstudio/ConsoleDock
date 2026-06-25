@@ -8,6 +8,13 @@ The project follows Semantic Versioning for public releases.
 
 No changes yet.
 
+## v0.3.2 - 2026-06-26
+
+### Changed
+
+- Stabilized sample UI smoke level-filter selection on slow CI by retrying segmented-control selection and matching visible-entry counts with whitespace-tolerant status parsing.
+- Updated public installation guidance so the latest release tag points to `v0.3.2` after the failed `v0.3.1` release-validation candidate.
+
 ## v0.3.1 - 2026-06-26
 
 ### Changed

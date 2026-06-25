@@ -8,7 +8,7 @@ ConsoleDock 是一个早期阶段的 iOS debug SDK，目标是让测试人员在
 
 ## 当前状态
 
-ConsoleDock `v0.3.1` 是当前 source-first Swift Package Manager 公开预览版本，包含：
+ConsoleDock `v0.3.2` 是当前 source-first Swift Package Manager 公开预览版本，包含：
 
 - Swift Package Manager package；
 - Objective-C/C 兼容的 `ConsoleDockCore`；
@@ -48,7 +48,7 @@ ConsoleDock 不能承诺完整、稳定、实时、零侵入捕获：
 
 ## Swift 快速开始
 
-通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.3.1` 已包含 Debug Actions、日志详情、visible/all 分享、runtime diagnostics 和当前 release validation 加固：
+通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.3.2` 已包含 Debug Actions、日志详情、visible/all 分享、runtime diagnostics 和当前 release validation 加固：
 
 ```text
 https://github.com/xuhuanstudio/ConsoleDock.git

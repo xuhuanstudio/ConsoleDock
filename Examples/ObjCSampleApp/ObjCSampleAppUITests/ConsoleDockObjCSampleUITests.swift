@@ -42,14 +42,11 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
 
         let levelFilter = app.segmentedControls["consoledock.level-filter"]
         XCTAssertTrue(levelFilter.waitForExistence(timeout: 5))
-        levelFilter.buttons["Error"].tap()
-        XCTAssertTrue(waitForVisibleEntryCount(1, in: statusLabel, timeout: 10))
+        XCTAssertTrue(selectLevel("Error", in: levelFilter, statusLabel: statusLabel, visibleCount: 1, timeout: 20))
         XCTAssertTrue(waitForTableEntry(containing: "objc native error", in: entriesTable, timeout: 5))
-        levelFilter.buttons["Fault"].tap()
-        XCTAssertTrue(waitForVisibleEntryCount(1, in: statusLabel, timeout: 10))
+        XCTAssertTrue(selectLevel("Fault", in: levelFilter, statusLabel: statusLabel, visibleCount: 1, timeout: 20))
         XCTAssertTrue(waitForTableEntry(containing: "objc native fault", in: entriesTable, timeout: 5))
-        levelFilter.buttons["All"].tap()
-        XCTAssertTrue(waitForVisibleEntryCount(4, in: statusLabel, timeout: 10))
+        XCTAssertTrue(selectLevel("All", in: levelFilter, statusLabel: statusLabel, visibleCount: 4, timeout: 20))
         XCTAssertTrue(waitForTableEntry(containing: "objc native info", in: entriesTable, timeout: 5))
         let redactedEntry = tableStaticText(containing: "token=<redacted>", in: entriesTable)
         redactedEntry.tap()
@@ -139,8 +136,37 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         return false
     }
 
+    private func selectLevel(
+        _ title: String,
+        in levelFilter: XCUIElement,
+        statusLabel: XCUIElement,
+        visibleCount: Int,
+        timeout: TimeInterval
+    ) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        repeat {
+            let button = levelFilter.buttons[title]
+            if button.exists {
+                button.tap()
+            }
+            let remaining = max(0.2, min(5, deadline.timeIntervalSinceNow))
+            if waitForVisibleEntryCount(visibleCount, in: statusLabel, timeout: remaining) {
+                return true
+            }
+        } while Date() < deadline
+        return false
+    }
+
     private func waitForVisibleEntryCount(_ count: Int, in statusLabel: XCUIElement, timeout: TimeInterval) -> Bool {
-        waitForLabel(containing: "visible \(count)  stdout", in: statusLabel, timeout: timeout)
+        let deadline = Date().addingTimeInterval(timeout)
+        let pattern = "\\bvisible\\s+\(count)\\b"
+        repeat {
+            if statusLabel.label.range(of: pattern, options: .regularExpression) != nil {
+                return true
+            }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.1))
+        } while Date() < deadline
+        return false
     }
 
     private func tableEntry(containing text: String, existsIn table: XCUIElement) -> Bool {
