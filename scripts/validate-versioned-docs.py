@@ -11,14 +11,14 @@ import tempfile
 
 REQUIRED_SNIPPETS = {
     "README.md": [
-        "ConsoleDock `v0.3.0` is the current source-first Swift Package Manager preview release.",
-        "Use the latest release tag from GitHub Releases. `v0.3.0` includes Debug Actions, log detail, explicit visible/all sharing, runtime diagnostics, and release-validation hardening.",
+        "ConsoleDock `v0.3.1` is the current source-first Swift Package Manager preview release.",
+        "Use the latest release tag from GitHub Releases. `v0.3.1` includes Debug Actions, log detail, explicit visible/all sharing, runtime diagnostics, and release-validation hardening.",
         "Runtime diagnostics are available in `v0.2.0` and later.",
         "Debug Actions are available in `v0.3.0` and later.",
     ],
     "README.zh-CN.md": [
-        "ConsoleDock `v0.3.0` 是当前 source-first Swift Package Manager 公开预览版本",
-        "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.3.0` 已包含 Debug Actions、日志详情、visible/all 分享、runtime diagnostics 和当前 release validation 加固：",
+        "ConsoleDock `v0.3.1` 是当前 source-first Swift Package Manager 公开预览版本",
+        "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.3.1` 已包含 Debug Actions、日志详情、visible/all 分享、runtime diagnostics 和当前 release validation 加固：",
         "Runtime diagnostics 从 `v0.2.0` 开始属于已发布能力。",
         "Debug Actions 从 `v0.3.0` 开始属于已发布能力。",
     ],
@@ -106,7 +106,7 @@ def self_test() -> list[str]:
         root = pathlib.Path(raw_directory)
         write_valid_docs(root)
         if validate(root):
-            errors.append("validate should accept docs with released v0.3.0 guidance")
+            errors.append("validate should accept docs with released v0.3.1 guidance")
 
         missing_snippet_root = root / "missing-snippet"
         missing_snippet_root.mkdir()

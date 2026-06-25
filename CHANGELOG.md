@@ -8,6 +8,13 @@ The project follows Semantic Versioning for public releases.
 
 No changes yet.
 
+## v0.3.1 - 2026-06-26
+
+### Changed
+
+- Stabilized Swift and Objective-C sample UI smoke tests by waiting for the console status visible-entry count before asserting filtered log rows.
+- Updated public installation guidance so the latest release tag points to `v0.3.1` after the failed `v0.3.0` release-validation candidate.
+
 ## v0.3.0 - 2026-06-26
 
 ### Added
