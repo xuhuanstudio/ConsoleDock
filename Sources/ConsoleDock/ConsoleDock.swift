@@ -15,6 +15,8 @@ public enum ConsoleDock {
         public var captureStandardError: Bool
         /// Installs the bundled UIKit floating button when UIKit is available.
         public var showsFloatingButton: Bool
+        /// Initial corner for the bundled UIKit floating button.
+        public var floatingButtonPosition: FloatingButtonPosition
         /// Allows ConsoleDock to start in Release builds only when the app also defines CONSOLEDOCK_ENABLE_RELEASE.
         public var allowsReleaseBuilds: Bool
         /// Optional app-specific redaction hook. The default redactor runs before this closure.
@@ -26,6 +28,7 @@ public enum ConsoleDock {
             captureStandardOutput: Bool = true,
             captureStandardError: Bool = true,
             showsFloatingButton: Bool = true,
+            floatingButtonPosition: FloatingButtonPosition = .bottomTrailing,
             allowsReleaseBuilds: Bool = false,
             redactor: ((String) -> String)? = nil
         ) {
@@ -34,6 +37,7 @@ public enum ConsoleDock {
             self.captureStandardOutput = captureStandardOutput
             self.captureStandardError = captureStandardError
             self.showsFloatingButton = showsFloatingButton
+            self.floatingButtonPosition = floatingButtonPosition
             self.allowsReleaseBuilds = allowsReleaseBuilds
             self.redactor = redactor
         }
@@ -46,6 +50,7 @@ public enum ConsoleDock {
                 && lhs.captureStandardOutput == rhs.captureStandardOutput
                 && lhs.captureStandardError == rhs.captureStandardError
                 && lhs.showsFloatingButton == rhs.showsFloatingButton
+                && lhs.floatingButtonPosition == rhs.floatingButtonPosition
                 && lhs.allowsReleaseBuilds == rhs.allowsReleaseBuilds
                 && (lhs.redactor == nil) == (rhs.redactor == nil)
         }
@@ -57,6 +62,7 @@ public enum ConsoleDock {
             configuration.captureStandardOutput = captureStandardOutput
             configuration.captureStandardError = captureStandardError
             configuration.showsFloatingButton = showsFloatingButton
+            configuration.floatingButtonPosition = floatingButtonPosition.corePosition
             configuration.allowsReleaseBuilds = allowsReleaseBuilds
             if let redactor {
                 configuration.redactionBlock = { message in
@@ -80,6 +86,14 @@ public enum ConsoleDock {
     public enum DebugActionStyle: Equatable {
         case normal
         case destructive
+    }
+
+    /// Initial corner for the bundled UIKit floating button.
+    public enum FloatingButtonPosition: Equatable {
+        case topLeading
+        case topTrailing
+        case bottomLeading
+        case bottomTrailing
     }
 
     /// Where a ConsoleDock entry came from.
@@ -329,8 +343,8 @@ public enum ConsoleDock {
         var error: NSError?
         let result = CDKConsoleDock.start(with: configuration.makeCoreConfiguration(), error: &error)
         let startResult = StartResult(coreResult: result, error: error)
-        if shouldInstallUI(startResult: startResult, configuration: configuration) {
-            installUIIfAvailable()
+        if shouldConfigureUI(startResult: startResult) {
+            configureUIIfAvailable(configuration: configuration)
         }
         return startResult
     }
@@ -389,6 +403,17 @@ public enum ConsoleDock {
     /// Hides the bundled UIKit console when UIKit is available.
     public static func hideConsole() {
         hideConsoleIfAvailable()
+    }
+
+    /// Shows the bundled UIKit floating trigger when ConsoleDock is running and UIKit is available.
+    public static func showFloatingButton() {
+        guard isRunning else { return }
+        showFloatingButtonIfAvailable()
+    }
+
+    /// Hides the bundled UIKit floating trigger without stopping ConsoleDock.
+    public static func hideFloatingButton() {
+        hideFloatingButtonIfAvailable()
     }
 
     /// Registers a local debug action shown by the bundled UIKit console.
@@ -461,15 +486,18 @@ public enum ConsoleDock {
 }
 
 extension ConsoleDock {
-    static func shouldInstallUI(startResult: StartResult, configuration: Configuration) -> Bool {
-        configuration.showsFloatingButton && (startResult == .started || startResult == .alreadyRunning)
+    static func shouldConfigureUI(startResult: StartResult) -> Bool {
+        startResult == .started || startResult == .alreadyRunning
     }
 }
 
 extension ConsoleDock {
-    fileprivate static func installUIIfAvailable() {
+    fileprivate static func configureUIIfAvailable(configuration: Configuration) {
         #if canImport(UIKit)
-            ConsoleDockUIController.shared.install()
+            ConsoleDockUIController.shared.configure(
+                floatingButtonPosition: configuration.floatingButtonPosition,
+                showsFloatingButton: configuration.showsFloatingButton
+            )
         #endif
     }
 
@@ -488,6 +516,18 @@ extension ConsoleDock {
     fileprivate static func hideConsoleIfAvailable() {
         #if canImport(UIKit)
             ConsoleDockUIController.shared.hideConsole()
+        #endif
+    }
+
+    fileprivate static func showFloatingButtonIfAvailable() {
+        #if canImport(UIKit)
+            ConsoleDockUIController.shared.showFloatingButton()
+        #endif
+    }
+
+    fileprivate static func hideFloatingButtonIfAvailable() {
+        #if canImport(UIKit)
+            ConsoleDockUIController.shared.hideFloatingButton()
         #endif
     }
 }
@@ -586,6 +626,36 @@ extension ConsoleDock.LogLevel {
             self = .fault
         @unknown default:
             self = .debug
+        }
+    }
+}
+
+extension ConsoleDock.FloatingButtonPosition {
+    fileprivate var corePosition: CDKFloatingButtonPosition {
+        switch self {
+        case .topLeading:
+            return .topLeading
+        case .topTrailing:
+            return .topTrailing
+        case .bottomLeading:
+            return .bottomLeading
+        case .bottomTrailing:
+            return .bottomTrailing
+        }
+    }
+
+    init(corePosition: CDKFloatingButtonPosition) {
+        switch corePosition {
+        case .topLeading:
+            self = .topLeading
+        case .topTrailing:
+            self = .topTrailing
+        case .bottomLeading:
+            self = .bottomLeading
+        case .bottomTrailing:
+            self = .bottomTrailing
+        @unknown default:
+            self = .bottomTrailing
         }
     }
 }

@@ -48,6 +48,19 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         XCTAssertTrue(waitForTableEntry(containing: "objc native fault", in: entriesTable, timeout: 5))
         XCTAssertTrue(selectLevel("All", in: levelFilter, statusLabel: statusLabel, visibleCount: 4, timeout: 20))
         XCTAssertTrue(waitForTableEntry(containing: "objc native info", in: entriesTable, timeout: 5))
+
+        let jumpButton = app.buttons["consoledock.jump"]
+        XCTAssertTrue(jumpButton.waitForExistence(timeout: 5))
+        jumpButton.tap()
+        XCTAssertTrue(app.buttons["consoledock.jump-latest-log"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["consoledock.jump-first-error"].waitForExistence(timeout: 5))
+        app.buttons["consoledock.jump-first-error"].tap()
+        XCTAssertTrue(entriesTable.waitForExistence(timeout: 5))
+        jumpButton.tap()
+        XCTAssertTrue(app.buttons["consoledock.jump-latest-log"].waitForExistence(timeout: 5))
+        app.buttons["consoledock.jump-latest-log"].tap()
+        XCTAssertTrue(entriesTable.waitForExistence(timeout: 5))
+
         let redactedEntry = tableStaticText(containing: "token=<redacted>", in: entriesTable)
         redactedEntry.tap()
         XCTAssertTrue(app.textViews["consoledock.entry-detail.message"].waitForExistence(timeout: 5))
@@ -94,6 +107,12 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         XCTAssertTrue(waitForTableEntry(containing: "Generate Smoke Logs", in: actionsTable, timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "Disabled Placeholder", in: actionsTable, timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "Disabled", in: actionsTable, timeout: 5))
+        let actionsSearch = app.searchFields["consoledock.actions-search"]
+        XCTAssertTrue(actionsSearch.waitForExistence(timeout: 5))
+        actionsSearch.tap()
+        actionsSearch.typeText("Smoke")
+        XCTAssertTrue(waitForTableEntry(containing: "Generate Smoke Logs", in: actionsTable, timeout: 5))
+        XCTAssertFalse(tableEntry(containing: "Clear Entries", existsIn: actionsTable))
         tableStaticText(containing: "Generate Smoke Logs", in: actionsTable).tap()
 
         modeControl.buttons["Logs"].tap()

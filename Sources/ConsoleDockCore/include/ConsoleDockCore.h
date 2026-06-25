@@ -23,6 +23,13 @@ typedef NS_ENUM(NSInteger, CDKStartResult) {
     CDKStartResultFailed
 };
 
+typedef NS_ENUM(NSInteger, CDKFloatingButtonPosition) {
+    CDKFloatingButtonPositionTopLeading = 0,
+    CDKFloatingButtonPositionTopTrailing,
+    CDKFloatingButtonPositionBottomLeading,
+    CDKFloatingButtonPositionBottomTrailing
+};
+
 typedef NSString * _Nonnull (^CDKRedactionBlock)(NSString *message);
 
 FOUNDATION_EXPORT NSErrorDomain const CDKConsoleDockErrorDomain;
@@ -41,6 +48,8 @@ FOUNDATION_EXPORT NSNotificationName const CDKConsoleDockDiagnosticsDidChangeNot
 @property (nonatomic) BOOL captureStandardError;
 /// Installs the bundled UIKit floating button when used through the UIKit facade.
 @property (nonatomic) BOOL showsFloatingButton;
+/// Initial corner for the bundled UIKit floating button.
+@property (nonatomic) CDKFloatingButtonPosition floatingButtonPosition;
 
 /// Allows ConsoleDock to start in Release builds only when the app also defines CONSOLEDOCK_ENABLE_RELEASE.
 @property (nonatomic) BOOL allowsReleaseBuilds;

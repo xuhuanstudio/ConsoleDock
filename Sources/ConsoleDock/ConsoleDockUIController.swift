@@ -9,14 +9,21 @@
         private var dockButton: UIButton?
         private var panelController: ConsoleDockPanelViewController?
         private var lifecycleObservers: [NSObjectProtocol] = []
+        private var floatingButtonPosition: ConsoleDock.FloatingButtonPosition = .bottomTrailing
+        private var showsFloatingButton = true
+        private var dockButtonWasDragged = false
 
         private init() {}
 
-        func install() {
+        func configure(floatingButtonPosition: ConsoleDock.FloatingButtonPosition, showsFloatingButton: Bool) {
             performOnMain { [weak self] in
                 guard let self else { return }
+                self.floatingButtonPosition = floatingButtonPosition
+                self.showsFloatingButton = showsFloatingButton
                 self.installLifecycleObserversIfNeeded()
-                self.ensureOverlayWindow()
+                if showsFloatingButton || self.overlayWindow != nil {
+                    self.ensureOverlayWindow()
+                }
             }
         }
 
@@ -29,6 +36,9 @@
                 self.dockButton = nil
                 self.lifecycleObservers.forEach(NotificationCenter.default.removeObserver)
                 self.lifecycleObservers.removeAll()
+                self.floatingButtonPosition = .bottomTrailing
+                self.showsFloatingButton = true
+                self.dockButtonWasDragged = false
             }
         }
 
@@ -41,6 +51,22 @@
         func hideConsole() {
             performOnMain { [weak self] in
                 self?.hideConsoleOnMain()
+            }
+        }
+
+        func showFloatingButton() {
+            performOnMain { [weak self] in
+                guard let self else { return }
+                self.showsFloatingButton = true
+                self.ensureOverlayWindow()
+            }
+        }
+
+        func hideFloatingButton() {
+            performOnMain { [weak self] in
+                guard let self else { return }
+                self.showsFloatingButton = false
+                self.removeDockButton()
             }
         }
 
@@ -61,7 +87,7 @@
                     object: nil,
                     queue: .main
                 ) { [weak self] _ in
-                    self?.ensureOverlayWindow()
+                    self?.refreshOverlayWindowForLifecycle()
                 }
             )
             if #available(iOS 13.0, *) {
@@ -71,15 +97,22 @@
                         object: nil,
                         queue: .main
                     ) { [weak self] _ in
-                        self?.ensureOverlayWindow()
+                        self?.refreshOverlayWindowForLifecycle()
                     }
                 )
+            }
+        }
+
+        private func refreshOverlayWindowForLifecycle() {
+            if showsFloatingButton || overlayWindow != nil {
+                ensureOverlayWindow()
             }
         }
 
         private func ensureOverlayWindow() {
             if let overlayWindow {
                 overlayWindow.isHidden = false
+                syncDockButtonVisibility()
                 return
             }
 
@@ -94,12 +127,8 @@
             window.backgroundColor = .clear
             window.isHidden = false
 
-            let button = makeDockButton()
-            rootViewController.view.addSubview(button)
-            positionDockButton(button, in: rootViewController.view.bounds)
-
             overlayWindow = window
-            dockButton = button
+            syncDockButtonVisibility()
         }
 
         private func makeOverlayWindow() -> ConsoleDockPassthroughWindow? {
@@ -138,13 +167,49 @@
             return button
         }
 
-        private func positionDockButton(_ button: UIButton, in bounds: CGRect) {
+        private func syncDockButtonVisibility() {
+            guard let rootView = overlayWindow?.rootViewController?.view else { return }
+            if showsFloatingButton {
+                let button = dockButton ?? makeDockButton()
+                if button.superview == nil {
+                    rootView.addSubview(button)
+                }
+                if dockButton == nil || !dockButtonWasDragged {
+                    positionDockButton(button, in: rootView)
+                }
+                dockButton = button
+            } else {
+                removeDockButton()
+            }
+        }
+
+        private func removeDockButton() {
+            dockButton?.removeFromSuperview()
+            dockButton = nil
+            dockButtonWasDragged = false
+        }
+
+        private func positionDockButton(_ button: UIButton, in container: UIView) {
             let margin: CGFloat = 18
-            let safeBounds = bounds == .zero ? UIScreen.main.bounds : bounds
-            button.center = CGPoint(
-                x: safeBounds.maxX - margin - button.bounds.width / 2,
-                y: safeBounds.maxY - margin - button.bounds.height / 2
-            )
+            let bounds = container.bounds == .zero ? UIScreen.main.bounds : container.bounds
+            let insets = container.safeAreaInsets
+            let halfWidth = button.bounds.width / 2
+            let halfHeight = button.bounds.height / 2
+            let leadingX = bounds.minX + insets.left + margin + halfWidth
+            let trailingX = bounds.maxX - insets.right - margin - halfWidth
+            let topY = bounds.minY + insets.top + margin + halfHeight
+            let bottomY = bounds.maxY - insets.bottom - margin - halfHeight
+
+            switch floatingButtonPosition {
+            case .topLeading:
+                button.center = CGPoint(x: leadingX, y: topY)
+            case .topTrailing:
+                button.center = CGPoint(x: trailingX, y: topY)
+            case .bottomLeading:
+                button.center = CGPoint(x: leadingX, y: bottomY)
+            case .bottomTrailing:
+                button.center = CGPoint(x: trailingX, y: bottomY)
+            }
         }
 
         @objc private func toggleConsole() {
@@ -159,6 +224,9 @@
             guard let button = dockButton, let container = button.superview else { return }
             let translation = recognizer.translation(in: container)
             recognizer.setTranslation(.zero, in: container)
+            if translation != .zero {
+                dockButtonWasDragged = true
+            }
 
             let halfWidth = button.bounds.width / 2
             let halfHeight = button.bounds.height / 2
@@ -252,6 +320,7 @@
         private func showLogs() {
             modeControl.selectedSegmentIndex = 0
             switchTo(logsViewController)
+            actionsViewController.deactivateSearch()
             logsViewController.activateSearch(in: navigationItem)
         }
 
@@ -259,7 +328,7 @@
             modeControl.selectedSegmentIndex = 1
             switchTo(actionsViewController)
             logsViewController.deactivateSearch()
-            navigationItem.searchController = nil
+            actionsViewController.activateSearch(in: navigationItem)
             navigationItem.rightBarButtonItems = []
         }
 

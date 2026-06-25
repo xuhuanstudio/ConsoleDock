@@ -32,10 +32,13 @@ REQUIRED_SNIPPETS = {
         "ConsoleDock.LogForwarder",
         "search control rendering",
         "level filtering",
+        "Logs jump controls",
         "log detail",
         "markers",
         "issue report sharing",
         "Debug Actions",
+        "Actions search",
+        "Floating trigger controls",
     ],
     "Examples/ObjCSampleApp/README.md": [
         "scripts/validate-objc-sample-ui-smoke.sh",
@@ -44,10 +47,13 @@ REQUIRED_SNIPPETS = {
         "CDKLogForwarder",
         "search control rendering",
         "level filtering",
+        "Logs jump controls",
         "log detail",
         "markers",
         "issue report sharing",
         "Debug Actions",
+        "Actions search",
+        "Floating trigger controls",
     ],
     "docs/sample-app-walkthrough.md": [
         "scripts/validate-swift-sample-ui-smoke.sh",
@@ -55,11 +61,13 @@ REQUIRED_SNIPPETS = {
         "native-log-only UI automation mode",
         "search control rendering",
         "level filtering",
+        "Logs jump controls",
         "log detail",
         "marker creation",
         "issue-report share action availability",
         "issue-report copy action availability",
         "Debug Actions",
+        "Actions search",
         "logger forwarder sink",
     ],
     "Examples/SwiftSampleApp/SwiftSampleApp/MainViewController.swift": [
@@ -68,6 +76,7 @@ REQUIRED_SNIPPETS = {
     "Examples/SwiftSampleApp/SwiftSampleApp/AppDelegate.swift": [
         "style: .destructive",
         "isEnabled: false",
+        "floatingButtonPosition: .bottomLeading",
     ],
     "Examples/ObjCSampleApp/ObjCSampleApp/MainViewController.m": [
         "CDKLogForwarder *SampleAppLogForwarder",
@@ -75,6 +84,7 @@ REQUIRED_SNIPPETS = {
     "Examples/ObjCSampleApp/ObjCSampleApp/AppDelegate.m": [
         "CDKDebugActionStyleDestructive",
         "isEnabled:NO",
+        "CDKFloatingButtonPositionBottomLeading",
     ],
     "scripts/validate-release.sh": [
         "scripts/validate-swift-sample-ui-smoke.sh",

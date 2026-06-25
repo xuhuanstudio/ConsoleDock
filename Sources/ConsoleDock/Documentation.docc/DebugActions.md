@@ -25,6 +25,8 @@ ConsoleDock.registerAction(
 
 Use non-empty stable `id` and `title` values. ConsoleDock trims required action metadata and uses the normalized `id` when replacing a repeated startup registration.
 
+The bundled Actions view can search by action id, title, group, or detail. Search is local UI filtering only; it does not execute actions, persist queries, or change registration.
+
 ## Disable Or Style An Action
 
 Use `isEnabled: false` when an action is relevant to the app but temporarily unavailable. Disabled actions remain visible in the panel and are skipped by the registry if triggered programmatically.

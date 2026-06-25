@@ -17,6 +17,7 @@ Use `ConsoleDockCore` directly when the app only needs capture, storage, notific
 
 ```objc
 CDKConfiguration *configuration = [CDKConfiguration defaultConfiguration];
+configuration.floatingButtonPosition = CDKFloatingButtonPositionBottomLeading;
 CDKStartResult result = [CDKConsoleDockUIKit startWithConfiguration:configuration error:nil];
 
 if (result == CDKStartResultStarted || result == CDKStartResultAlreadyRunning) {
@@ -27,6 +28,13 @@ if (result == CDKStartResultStarted || result == CDKStartResultAlreadyRunning) {
 ```
 
 `CDKConsoleDockUIKit` installs the floating console when configured. The core `CDKConsoleDock` APIs remain available for reading, clearing, and writing native entries.
+
+Use the UIKit facade to hide or show the bundled trigger at runtime without stopping ConsoleDock:
+
+```objc
+[CDKConsoleDockUIKit hideFloatingButton];
+[CDKConsoleDockUIKit showFloatingButton];
+```
 
 ## Keep Existing Logger Call Sites
 

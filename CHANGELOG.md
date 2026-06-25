@@ -8,6 +8,16 @@ The project follows Semantic Versioning for public releases.
 
 No changes yet.
 
+## v0.6.0 - 2026-06-26
+
+### Added
+
+- Added configurable UIKit floating button positions through `ConsoleDock.Configuration.floatingButtonPosition` and `CDKConfiguration.floatingButtonPosition`.
+- Added `ConsoleDock.showFloatingButton()`, `ConsoleDock.hideFloatingButton()`, `[CDKConsoleDockUIKit showFloatingButton]`, and `[CDKConsoleDockUIKit hideFloatingButton]` for runtime trigger visibility control.
+- Added a Logs `Jump` menu for latest visible logs and first visible error/fault entries.
+- Added local Debug Actions search by id, title, group, and detail.
+- Added Swift and Objective-C sample controls/actions, UI smoke coverage, API validators, DocC, README, and roadmap updates for daily debug usability.
+
 ## v0.5.0 - 2026-06-26
 
 ### Added

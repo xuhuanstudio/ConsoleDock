@@ -74,6 +74,24 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         }
 
         ConsoleDock.registerAction(
+            id: "swift.sample.hide-floating-button",
+            title: "Hide Floating Button",
+            group: "Navigation",
+            detail: "Hides the bundled ConsoleDock trigger without stopping logging."
+        ) {
+            ConsoleDock.hideFloatingButton()
+        }
+
+        ConsoleDock.registerAction(
+            id: "swift.sample.show-floating-button",
+            title: "Show Floating Button",
+            group: "Navigation",
+            detail: "Shows the bundled ConsoleDock trigger again."
+        ) {
+            ConsoleDock.showFloatingButton()
+        }
+
+        ConsoleDock.registerAction(
             id: "swift.sample.clear",
             title: "Clear Entries",
             group: "Maintenance",
@@ -124,6 +142,7 @@ extension ConsoleDock.Configuration {
         captureStandardOutput: true,
         captureStandardError: true,
         showsFloatingButton: true,
+        floatingButtonPosition: .bottomLeading,
         allowsReleaseBuilds: false
     )
 
@@ -133,6 +152,7 @@ extension ConsoleDock.Configuration {
         captureStandardOutput: false,
         captureStandardError: false,
         showsFloatingButton: true,
+        floatingButtonPosition: .bottomLeading,
         allowsReleaseBuilds: false
     )
 }

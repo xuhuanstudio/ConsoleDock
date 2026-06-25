@@ -58,6 +58,7 @@ configurationForConnectingSceneSession:(UISceneSession *)connectingSceneSession
     configuration.captureStandardOutput = !isUISmokeRun;
     configuration.captureStandardError = !isUISmokeRun;
     configuration.showsFloatingButton = YES;
+    configuration.floatingButtonPosition = CDKFloatingButtonPositionBottomLeading;
     configuration.allowsReleaseBuilds = NO;
 
     NSError *error = nil;
@@ -96,6 +97,24 @@ configurationForConnectingSceneSession:(UISceneSession *)connectingSceneSession
                                  requiresConfirmation:NO
                                               handler:^{
                                                   [CDKConsoleDockUIKit showConsole];
+                                              }];
+
+    [CDKConsoleDockUIKit registerActionWithIdentifier:@"objc.sample.hide-floating-button"
+                                                title:@"Hide Floating Button"
+                                                group:@"Navigation"
+                                               detail:@"Hides the bundled ConsoleDock trigger without stopping logging."
+                                 requiresConfirmation:NO
+                                              handler:^{
+                                                  [CDKConsoleDockUIKit hideFloatingButton];
+                                              }];
+
+    [CDKConsoleDockUIKit registerActionWithIdentifier:@"objc.sample.show-floating-button"
+                                                title:@"Show Floating Button"
+                                                group:@"Navigation"
+                                               detail:@"Shows the bundled ConsoleDock trigger again."
+                                 requiresConfirmation:NO
+                                              handler:^{
+                                                  [CDKConsoleDockUIKit showFloatingButton];
                                               }];
 
     [CDKConsoleDockUIKit registerActionWithIdentifier:@"objc.sample.clear"

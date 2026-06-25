@@ -82,6 +82,8 @@ static NSString *SampleAccessibilityButtonIdentifier(NSString *title)
         headingLabel,
         bodyLabel,
         [self makeButtonWithTitle:@"Show Console" action:@selector(showConsole)],
+        [self makeButtonWithTitle:@"Hide Floating Button" action:@selector(hideFloatingButton)],
+        [self makeButtonWithTitle:@"Show Floating Button" action:@selector(showFloatingButton)],
         [self makeButtonWithTitle:@"Log diagnostics" action:@selector(logDiagnostics)],
         [self makeButtonWithTitle:@"App logger sink" action:@selector(logAppLoggerSink)],
         [self makeButtonWithTitle:@"CDKConsoleDock info" action:@selector(logNativeInfo)],
@@ -171,6 +173,18 @@ static NSString *SampleAccessibilityButtonIdentifier(NSString *title)
 {
     [CDKConsoleDockUIKit showConsole];
     [self updateStatus:@"Requested ConsoleDock panel."];
+}
+
+- (void)hideFloatingButton
+{
+    [CDKConsoleDockUIKit hideFloatingButton];
+    [self updateStatus:@"Hid ConsoleDock floating button."];
+}
+
+- (void)showFloatingButton
+{
+    [CDKConsoleDockUIKit showFloatingButton];
+    [self updateStatus:@"Showed ConsoleDock floating button."];
 }
 
 - (void)logDiagnostics
@@ -277,6 +291,7 @@ static NSString *SampleAccessibilityButtonIdentifier(NSString *title)
     configuration.captureStandardOutput = YES;
     configuration.captureStandardError = YES;
     configuration.showsFloatingButton = YES;
+    configuration.floatingButtonPosition = CDKFloatingButtonPositionBottomLeading;
     configuration.allowsReleaseBuilds = NO;
 
     NSError *error = nil;

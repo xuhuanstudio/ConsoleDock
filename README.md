@@ -15,7 +15,7 @@ ConsoleDock is an early-stage iOS debug SDK that lets testers inspect app logs d
 
 ## Status
 
-ConsoleDock `v0.5.0` is the current source-first Swift Package Manager preview release. It contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, logger forwarders for existing logger sinks, session metadata, manual markers, bounded in-memory entries with stable session identifiers and partial/redacted/truncated flags, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, runtime diagnostics, entry change notification, Debug Actions with enabled/destructive metadata, log detail, explicit visible/all/issue-report sharing and issue-report copying, Release startup safety gates, a UIKit-only floating button/panel foundation, Swift and Objective-C sample apps, DocC documentation, release validation workflow, and focused tests.
+ConsoleDock `v0.6.0` is the current source-first Swift Package Manager preview release. It contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, logger forwarders for existing logger sinks, session metadata, manual markers, bounded in-memory entries with stable session identifiers and partial/redacted/truncated flags, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, runtime diagnostics, entry change notification, Debug Actions with enabled/destructive metadata and local search, log detail, Logs jump actions, explicit visible/all/issue-report sharing and issue-report copying, Release startup safety gates, a configurable UIKit-only floating button/panel foundation, Swift and Objective-C sample apps, DocC documentation, release validation workflow, and focused tests.
 
 Current limitations:
 
@@ -24,7 +24,7 @@ Current limitations:
 - File-descriptor capture can include framework or runtime warnings written through the app process descriptors, not only application-authored messages.
 - Runtime diagnostics report current ConsoleDock state and bounded in-memory store counts; they are not evidence of complete Swift `Logger`, `os_log`, or Apple unified logging capture.
 - Entry change notification exists as the refresh foundation for UI; notification handlers should fetch a snapshot through `entries`.
-- The UIKit floating button and console panel foundation can show, search, source-filter, level-filter, pause/resume live follow, live refresh, log detail, copy, clear, add manual markers, visible/all/issue-report share/export with diagnostics, copy issue reports, Debug Actions, and close the current in-memory snapshot.
+- The UIKit floating button and console panel foundation can show, search, source-filter, level-filter, jump to latest/first visible error, pause/resume live follow, live refresh, log detail, copy, clear, add manual markers, visible/all/issue-report share/export with diagnostics, copy issue reports, search and run Debug Actions, and close the current in-memory snapshot.
 - Persistence and advanced query syntax are not implemented yet.
 - Third-party adapters, CocoaPods, and XCFramework distribution are not implemented yet.
 - Redaction is a local in-memory baseline, not a complete privacy guarantee.
@@ -63,7 +63,7 @@ Add the public repository URL through Xcode's package dependency UI:
 https://github.com/xuhuanstudio/ConsoleDock.git
 ```
 
-Use the latest release tag from GitHub Releases. `v0.5.0` includes logger forwarders for existing logger sinks, Test Session Reports, manual markers, Debug Actions, log detail, explicit visible/all/issue-report sharing and copying, runtime diagnostics, and release-validation hardening. Then depend on:
+Use the latest release tag from GitHub Releases. `v0.6.0` includes configurable floating trigger controls, Logs jump actions, Actions search, logger forwarders for existing logger sinks, Test Session Reports, manual markers, Debug Actions, log detail, explicit visible/all/issue-report sharing and copying, runtime diagnostics, and release-validation hardening. Then depend on:
 
 - `ConsoleDock` for Swift API plus the bundled UIKit console.
 - `ConsoleDockCore` for Objective-C/C-compatible core APIs.
@@ -82,6 +82,31 @@ print("Visible through stdout capture")
 ```
 
 `ConsoleDock.start()` enables stdout/stderr capture by default in Debug builds, installs the floating `CD` button, redacts obvious secrets, truncates long messages, and stores entries in local memory.
+
+### Configure The Floating Trigger
+
+Floating trigger configuration is available in `v0.6.0` and later. Apps can choose the starting corner and can hide or show the bundled trigger without stopping ConsoleDock.
+
+```swift
+let configuration = ConsoleDock.Configuration(
+    floatingButtonPosition: .bottomLeading
+)
+
+ConsoleDock.start(configuration: configuration)
+ConsoleDock.hideFloatingButton()
+ConsoleDock.showFloatingButton()
+```
+
+```objc
+CDKConfiguration *configuration = [CDKConfiguration defaultConfiguration];
+configuration.floatingButtonPosition = CDKFloatingButtonPositionBottomLeading;
+
+[CDKConsoleDockUIKit startWithConfiguration:configuration error:nil];
+[CDKConsoleDockUIKit hideFloatingButton];
+[CDKConsoleDockUIKit showFloatingButton];
+```
+
+`ConsoleDock.showConsole()` can still open the panel when `showsFloatingButton` is false, so apps can provide their own debug entry point.
 
 ### Check Runtime Diagnostics
 
@@ -160,6 +185,8 @@ ConsoleDock.registerAction(
 Use non-empty stable `id` and `title` values. ConsoleDock trims required action metadata and replaces an existing action when the normalized `id` is registered again. `isEnabled` is useful for showing temporarily unavailable actions without running them, and `.destructive` is UI metadata for actions such as clearing local debug data.
 
 ConsoleDock only stores, displays, and triggers actions registered by the host app. It does not discover screens, take over routing, bypass app permissions, receive remote commands, or act as an automation test framework.
+
+The bundled Actions page can search registered actions by `id`, title, group, or detail. Search is local UI filtering only; it does not execute actions or persist query state.
 
 ### Mark Test Sessions And Share Issue Reports
 

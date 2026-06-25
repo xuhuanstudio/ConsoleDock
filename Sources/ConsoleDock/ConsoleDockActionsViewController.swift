@@ -1,20 +1,26 @@
 #if canImport(UIKit)
     import UIKit
 
-    final class ConsoleDockActionsViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+    final class ConsoleDockActionsViewController: UIViewController, UITableViewDataSource, UITableViewDelegate,
+        UISearchResultsUpdating
+    {
         private struct Section {
             let title: String
             let actions: [ConsoleDockDebugAction]
         }
 
         private let tableView = UITableView(frame: .zero, style: .grouped)
+        private let searchController = UISearchController(searchResultsController: nil)
         private let emptyStateLabel = UILabel()
         private var sections: [Section] = []
+        private var allActions: [ConsoleDockDebugAction] = []
+        private var searchQuery = ""
         private var actionsObserver: NSObjectProtocol?
 
         override func viewDidLoad() {
             super.viewDidLoad()
             view.backgroundColor = ConsoleDockUIColors.background
+            configureSearchController()
             configureTableView()
             configureEmptyStateLabel()
             reloadActions()
@@ -36,6 +42,26 @@
             if let actionsObserver {
                 NotificationCenter.default.removeObserver(actionsObserver)
             }
+        }
+
+        func activateSearch(in navigationItem: UINavigationItem) {
+            navigationItem.searchController = searchController
+            navigationItem.hidesSearchBarWhenScrolling = false
+        }
+
+        func deactivateSearch() {
+            searchController.isActive = false
+            searchController.searchBar.text = nil
+            searchQuery = ""
+            reloadActions()
+        }
+
+        private func configureSearchController() {
+            searchController.searchResultsUpdater = self
+            searchController.obscuresBackgroundDuringPresentation = false
+            searchController.searchBar.placeholder = "Search actions"
+            searchController.searchBar.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.actionsSearchBar
+            definesPresentationContext = true
         }
 
         private func configureTableView() {
@@ -75,9 +101,25 @@
         }
 
         private func reloadActions() {
-            sections = groupedSections(from: ConsoleDock.debugActions)
-            emptyStateLabel.isHidden = !sections.isEmpty
+            allActions = ConsoleDock.debugActions
+            let filteredActions = ConsoleDockDebugActionFilter.filteredActions(allActions, query: searchQuery)
+            sections = groupedSections(from: filteredActions)
+            updateEmptyState()
             tableView.reloadData()
+        }
+
+        private func updateEmptyState() {
+            let message: String?
+            if allActions.isEmpty {
+                message = "No debug actions registered."
+            } else if sections.isEmpty {
+                message = "No debug actions match the current search."
+            } else {
+                message = nil
+            }
+            emptyStateLabel.text = message
+            emptyStateLabel.accessibilityLabel = message
+            emptyStateLabel.isHidden = message == nil
         }
 
         private func groupedSections(from actions: [ConsoleDockDebugAction]) -> [Section] {
@@ -93,6 +135,11 @@
                 }
             }
             return sections
+        }
+
+        func updateSearchResults(for searchController: UISearchController) {
+            searchQuery = searchController.searchBar.text ?? ""
+            reloadActions()
         }
 
         func numberOfSections(in tableView: UITableView) -> Int {

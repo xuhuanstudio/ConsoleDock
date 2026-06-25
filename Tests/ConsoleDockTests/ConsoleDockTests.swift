@@ -36,14 +36,20 @@ final class ConsoleDockTests: XCTestCase {
         let result = ConsoleDock.start(configuration: .default)
 
         XCTAssertEqual(result, .alreadyRunning)
-        XCTAssertTrue(ConsoleDock.shouldInstallUI(startResult: result, configuration: .default))
+        XCTAssertTrue(ConsoleDock.shouldConfigureUI(startResult: result))
     }
 
-    func testSwiftFacadeDoesNotAttachUIWhenDisabledByConfiguration() {
-        let configuration = ConsoleDock.Configuration(showsFloatingButton: false)
-
-        XCTAssertFalse(ConsoleDock.shouldInstallUI(startResult: .started, configuration: configuration))
-        XCTAssertFalse(ConsoleDock.shouldInstallUI(startResult: .alreadyRunning, configuration: configuration))
+    func testSwiftFacadeConfiguresUIForSuccessfulStartResultsOnly() {
+        XCTAssertTrue(ConsoleDock.shouldConfigureUI(startResult: .started))
+        XCTAssertTrue(ConsoleDock.shouldConfigureUI(startResult: .alreadyRunning))
+        XCTAssertFalse(ConsoleDock.shouldConfigureUI(startResult: .disabled))
+        XCTAssertFalse(
+            ConsoleDock.shouldConfigureUI(
+                startResult: .failed(
+                    ConsoleDock.StartFailure(domain: "test", code: 1, message: "failed")
+                )
+            )
+        )
     }
 
     func testObjectiveCUIKitFacadeStartStopLifecycle() {
@@ -56,7 +62,16 @@ final class ConsoleDockTests: XCTestCase {
 
         ConsoleDockUIKit.showConsole()
         ConsoleDockUIKit.hideConsole()
+        ConsoleDockUIKit.hideFloatingButton()
+        ConsoleDockUIKit.showFloatingButton()
         ConsoleDockUIKit.stop()
+
+        XCTAssertFalse(ConsoleDockUIKit.isRunning())
+    }
+
+    func testObjectiveCUIKitFacadeFloatingButtonControlsAreSafeBeforeStart() {
+        ConsoleDockUIKit.hideFloatingButton()
+        ConsoleDockUIKit.showFloatingButton()
 
         XCTAssertFalse(ConsoleDockUIKit.isRunning())
     }
@@ -141,7 +156,18 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertTrue(configuration.captureStandardOutput)
         XCTAssertTrue(configuration.captureStandardError)
         XCTAssertTrue(configuration.showsFloatingButton)
+        XCTAssertEqual(configuration.floatingButtonPosition, .bottomTrailing)
         XCTAssertFalse(configuration.allowsReleaseBuilds)
+    }
+
+    func testSwiftConfigurationMapsFloatingButtonPositionToCoreConfiguration() {
+        let configuration = ConsoleDock.Configuration(
+            captureStandardOutput: false,
+            captureStandardError: false,
+            floatingButtonPosition: .topLeading
+        )
+
+        XCTAssertEqual(configuration.makeCoreConfiguration().floatingButtonPosition, .topLeading)
     }
 
     func testSwiftDiagnosticsMapsCoreFields() {
@@ -1006,6 +1032,44 @@ final class ConsoleDockTests: XCTestCase {
         ConsoleDock.removeAllActions()
 
         XCTAssertTrue(ConsoleDock.debugActions.isEmpty)
+    }
+
+    func testDebugActionFilterMatchesIDTitleGroupAndDetail() {
+        let actions = [
+            ConsoleDockDebugAction(
+                id: "open.checkout",
+                title: "Open Checkout",
+                group: "Navigation",
+                detail: "Jump to payment"
+            ),
+            ConsoleDockDebugAction(
+                id: "seed.user",
+                title: "Seed User",
+                group: "Data",
+                detail: "Create local account"
+            ),
+            ConsoleDockDebugAction(
+                id: "diagnostics",
+                title: "Log Diagnostics",
+                group: nil,
+                detail: nil
+            )
+        ]
+
+        XCTAssertEqual(
+            ConsoleDockDebugActionFilter.filteredActions(actions, query: "checkout").map(\.id),
+            ["open.checkout"]
+        )
+        XCTAssertEqual(
+            ConsoleDockDebugActionFilter.filteredActions(actions, query: "seed.user").map(\.id),
+            ["seed.user"]
+        )
+        XCTAssertEqual(ConsoleDockDebugActionFilter.filteredActions(actions, query: "data").map(\.id), ["seed.user"])
+        XCTAssertEqual(
+            ConsoleDockDebugActionFilter.filteredActions(actions, query: "PAYMENT").map(\.id),
+            ["open.checkout"]
+        )
+        XCTAssertEqual(ConsoleDockDebugActionFilter.filteredActions(actions, query: " ").map(\.id), actions.map(\.id))
     }
 
     func testDebugActionPerformsOnMainThreadAndLogsStartAndCompletion() {

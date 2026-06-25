@@ -58,6 +58,8 @@ final class MainViewController: UIViewController {
             headingLabel,
             bodyLabel,
             makeButton(title: "Show Console", action: #selector(showConsole)),
+            makeButton(title: "Hide Floating Button", action: #selector(hideFloatingButton)),
+            makeButton(title: "Show Floating Button", action: #selector(showFloatingButton)),
             makeButton(title: "Log diagnostics", action: #selector(logDiagnostics)),
             makeButton(title: "App logger sink", action: #selector(logAppLoggerSink)),
             makeButton(title: "ConsoleDock.info", action: #selector(logNativeInfo)),
@@ -137,6 +139,16 @@ final class MainViewController: UIViewController {
     @objc private func showConsole() {
         ConsoleDock.showConsole()
         updateStatus("Requested ConsoleDock panel.")
+    }
+
+    @objc private func hideFloatingButton() {
+        ConsoleDock.hideFloatingButton()
+        updateStatus("Hid ConsoleDock floating button.")
+    }
+
+    @objc private func showFloatingButton() {
+        ConsoleDock.showFloatingButton()
+        updateStatus("Showed ConsoleDock floating button.")
     }
 
     @objc private func logDiagnostics() {

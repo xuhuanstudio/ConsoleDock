@@ -27,8 +27,8 @@ public final class ConsoleDockUIKit: NSObject {
     @objc(startWithConfiguration:error:)
     public static func start(configuration: CDKConfiguration?, error: NSErrorPointer) -> CDKStartResult {
         let result = CDKConsoleDock.start(with: configuration, error: error)
-        if shouldInstallUI(configuration: configuration, result: result) {
-            installUIIfAvailable()
+        if shouldConfigureUI(result: result) {
+            configureUIIfAvailable(configuration: configuration ?? CDKConfiguration())
         }
         return result
     }
@@ -57,6 +57,19 @@ public final class ConsoleDockUIKit: NSObject {
     @objc(hideConsole)
     public static func hideConsole() {
         hideConsoleIfAvailable()
+    }
+
+    /// Shows the bundled UIKit floating trigger when ConsoleDock is running.
+    @objc(showFloatingButton)
+    public static func showFloatingButton() {
+        guard CDKConsoleDock.isRunning() else { return }
+        showFloatingButtonIfAvailable()
+    }
+
+    /// Hides the bundled UIKit floating trigger without stopping ConsoleDock.
+    @objc(hideFloatingButton)
+    public static func hideFloatingButton() {
+        hideFloatingButtonIfAvailable()
     }
 
     /// Builds a local issue report with session metadata, diagnostics, markers, and all retained entries.
@@ -125,14 +138,18 @@ public final class ConsoleDockUIKit: NSObject {
         ConsoleDock.removeAllActions()
     }
 
-    private static func shouldInstallUI(configuration: CDKConfiguration?, result: CDKStartResult) -> Bool {
-        let showsFloatingButton = configuration?.showsFloatingButton ?? CDKConfiguration().showsFloatingButton
-        return showsFloatingButton && (result == .started || result == .alreadyRunning)
+    private static func shouldConfigureUI(result: CDKStartResult) -> Bool {
+        result == .started || result == .alreadyRunning
     }
 
-    private static func installUIIfAvailable() {
+    private static func configureUIIfAvailable(configuration: CDKConfiguration) {
         #if canImport(UIKit)
-            ConsoleDockUIController.shared.install()
+            ConsoleDockUIController.shared.configure(
+                floatingButtonPosition: ConsoleDock.FloatingButtonPosition(
+                    corePosition: configuration.floatingButtonPosition
+                ),
+                showsFloatingButton: configuration.showsFloatingButton
+            )
         #endif
     }
 
@@ -151,6 +168,18 @@ public final class ConsoleDockUIKit: NSObject {
     private static func hideConsoleIfAvailable() {
         #if canImport(UIKit)
             ConsoleDockUIController.shared.hideConsole()
+        #endif
+    }
+
+    private static func showFloatingButtonIfAvailable() {
+        #if canImport(UIKit)
+            ConsoleDockUIController.shared.showFloatingButton()
+        #endif
+    }
+
+    private static func hideFloatingButtonIfAvailable() {
+        #if canImport(UIKit)
+            ConsoleDockUIController.shared.hideFloatingButton()
         #endif
     }
 }

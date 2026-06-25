@@ -28,6 +28,7 @@ REQUIRED_SNIPPETS = {
         "public var captureStandardOutput: Bool",
         "public var captureStandardError: Bool",
         "public var showsFloatingButton: Bool",
+        "public var floatingButtonPosition: FloatingButtonPosition",
         "public var allowsReleaseBuilds: Bool",
         "public var redactor: ((String) -> String)?",
         "maximumEntries: Int = 2_000",
@@ -35,6 +36,7 @@ REQUIRED_SNIPPETS = {
         "captureStandardOutput: Bool = true",
         "captureStandardError: Bool = true",
         "showsFloatingButton: Bool = true",
+        "floatingButtonPosition: FloatingButtonPosition = .bottomTrailing",
         "allowsReleaseBuilds: Bool = false",
         "redactor: ((String) -> String)? = nil",
         """
@@ -44,6 +46,7 @@ REQUIRED_SNIPPETS = {
             captureStandardOutput: Bool = true,
             captureStandardError: Bool = true,
             showsFloatingButton: Bool = true,
+            floatingButtonPosition: FloatingButtonPosition = .bottomTrailing,
             allowsReleaseBuilds: Bool = false,
             redactor: ((String) -> String)? = nil
         )
@@ -58,6 +61,11 @@ REQUIRED_SNIPPETS = {
         "public enum DebugActionStyle: Equatable",
         "case normal",
         "case destructive",
+        "public enum FloatingButtonPosition: Equatable",
+        "case topLeading",
+        "case topTrailing",
+        "case bottomLeading",
+        "case bottomTrailing",
         "public enum LogSource: Equatable",
         "case native",
         "case stdout",
@@ -177,6 +185,8 @@ REQUIRED_SNIPPETS = {
         "public static func issueReportText() -> String",
         "public static func showConsole()",
         "public static func hideConsole()",
+        "public static func showFloatingButton()",
+        "public static func hideFloatingButton()",
         """
         public static func registerAction(
             id: String,
@@ -216,6 +226,10 @@ REQUIRED_SNIPPETS = {
         "public static func showConsole()",
         "@objc(hideConsole)",
         "public static func hideConsole()",
+        "@objc(showFloatingButton)",
+        "public static func showFloatingButton()",
+        "@objc(hideFloatingButton)",
+        "public static func hideFloatingButton()",
         "@objc(issueReportText)",
         "public static func issueReportText() -> String",
         "@objc(registerActionWithIdentifier:title:group:detail:requiresConfirmation:handler:)",

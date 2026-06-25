@@ -11,6 +11,7 @@
         _captureStandardOutput = YES;
         _captureStandardError = YES;
         _showsFloatingButton = YES;
+        _floatingButtonPosition = CDKFloatingButtonPositionBottomTrailing;
         _allowsReleaseBuilds = NO;
     }
     return self;
@@ -29,6 +30,7 @@
     copy.captureStandardOutput = self.captureStandardOutput;
     copy.captureStandardError = self.captureStandardError;
     copy.showsFloatingButton = self.showsFloatingButton;
+    copy.floatingButtonPosition = self.floatingButtonPosition;
     copy.allowsReleaseBuilds = self.allowsReleaseBuilds;
     copy.redactionBlock = self.redactionBlock;
     return copy;

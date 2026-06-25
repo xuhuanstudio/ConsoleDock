@@ -126,7 +126,33 @@ Not included:
 - network inspector.
 - crash reporting.
 
-## Post-v0.5 - Demand-Driven Compatibility Candidates
+## v0.6 - Daily Debug Usability
+
+Goal: make repeated local test sessions faster without expanding ConsoleDock into a remote automation platform.
+
+Deliverables:
+
+- configurable UIKit floating button start position.
+- runtime show/hide controls for the bundled floating trigger.
+- manual console presentation that still works when the bundled floating trigger is disabled.
+- Logs jump menu for latest visible entries and first visible error/fault entries.
+- local Debug Actions search by id, title, group, and detail.
+- Swift and Objective-C samples updated to demonstrate trigger controls.
+- focused UI smoke coverage for Logs jump and Actions search.
+- tests, validators, README, DocC, and sample walkthrough updates for daily usability.
+
+Not included:
+
+- shake-to-open as a public promise.
+- default persistence of button position, filters, or action search.
+- parameterized Debug Actions.
+- remote commands.
+- automatic route discovery.
+- network inspector.
+- crash reporting.
+- CocoaPods or XCFramework distribution.
+
+## Post-v0.6 - Demand-Driven Compatibility Candidates
 
 Goal: improve adoption in existing apps only when real integration feedback shows SPM and the current explicit API are not enough.
 

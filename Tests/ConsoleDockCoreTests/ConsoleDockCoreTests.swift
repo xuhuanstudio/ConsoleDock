@@ -19,7 +19,17 @@ final class ConsoleDockCoreTests: XCTestCase {
         XCTAssertTrue(configuration.captureStandardOutput)
         XCTAssertTrue(configuration.captureStandardError)
         XCTAssertTrue(configuration.showsFloatingButton)
+        XCTAssertEqual(configuration.floatingButtonPosition, .bottomTrailing)
         XCTAssertFalse(configuration.allowsReleaseBuilds)
+    }
+
+    func testConfigurationCopyPreservesFloatingButtonPosition() throws {
+        let configuration = CDKConfiguration.default()
+        configuration.floatingButtonPosition = .topLeading
+
+        let copy = try XCTUnwrap(configuration.copy() as? CDKConfiguration)
+
+        XCTAssertEqual(copy.floatingButtonPosition, .topLeading)
     }
 
     func testDiagnosticsBeforeStartUsesDefaultConfigurationAndEmptyStore() {

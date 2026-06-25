@@ -25,6 +25,7 @@
         private var pauseButton: UIBarButtonItem?
         private var shareButton: UIBarButtonItem?
         private var clearButton: UIBarButtonItem?
+        private var jumpButton: UIBarButtonItem?
         private let formatter: DateFormatter = {
             let formatter = DateFormatter()
             formatter.dateFormat = "HH:mm:ss.SSS"
@@ -95,13 +96,23 @@
             clearButton.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.clearButton
             self.clearButton = clearButton
 
+            let jumpButton = UIBarButtonItem(
+                title: "Jump",
+                style: .plain,
+                target: self,
+                action: #selector(showJumpOptions)
+            )
+            jumpButton.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.jumpButton
+            jumpButton.isEnabled = false
+            self.jumpButton = jumpButton
+
             let pauseButton = makePauseButton()
             self.pauseButton = pauseButton
             publishNavigationItems()
         }
 
         private func publishNavigationItems() {
-            navigationItemsDidChange?([clearButton, shareButton, pauseButton].compactMap { $0 })
+            navigationItemsDidChange?([clearButton, shareButton, jumpButton, pauseButton].compactMap { $0 })
         }
 
         private func configureSearchController() {
@@ -223,6 +234,7 @@
                 levelScope: levelScope
             )
             shareButton?.isEnabled = !visibleEntries.isEmpty || !ConsoleDock.entries.isEmpty
+            jumpButton?.isEnabled = !visibleEntries.isEmpty
             updateStatusHeader()
             updateEmptyState()
             tableView.reloadData()
@@ -287,6 +299,50 @@
             let activityController = UIActivityViewController(activityItems: [report], applicationActivities: nil)
             activityController.popoverPresentationController?.barButtonItem = shareButton
             present(activityController, animated: true)
+        }
+
+        @objc private func showJumpOptions() {
+            let alert = UIAlertController(title: "Jump", message: nil, preferredStyle: .actionSheet)
+            let latestAction = UIAlertAction(title: "Latest Visible Log", style: .default) { [weak self] _ in
+                self?.scrollToLatestVisibleEntry()
+            }
+            latestAction.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.jumpLatestLog
+            latestAction.isEnabled = !visibleEntries.isEmpty
+            alert.addAction(latestAction)
+
+            let firstErrorAction = UIAlertAction(title: "First Visible Error", style: .default) { [weak self] _ in
+                self?.scrollToFirstVisibleError()
+            }
+            firstErrorAction.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.jumpFirstError
+            firstErrorAction.isEnabled = firstVisibleErrorIndex() != nil
+            alert.addAction(firstErrorAction)
+            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+            alert.popoverPresentationController?.barButtonItem = jumpButton
+            present(alert, animated: true)
+        }
+
+        private func scrollToLatestVisibleEntry() {
+            guard !visibleEntries.isEmpty else { return }
+            scrollToVisibleEntry(at: visibleEntries.count - 1)
+        }
+
+        private func scrollToFirstVisibleError() {
+            guard let index = firstVisibleErrorIndex() else { return }
+            scrollToVisibleEntry(at: index)
+        }
+
+        private func firstVisibleErrorIndex() -> Int? {
+            visibleEntries.firstIndex { entry in
+                entry.level == .error || entry.level == .fault
+            }
+        }
+
+        private func scrollToVisibleEntry(at index: Int) {
+            guard visibleEntries.indices.contains(index) else { return }
+            let indexPath = IndexPath(row: index, section: 0)
+            tableView.scrollToRow(at: indexPath, at: .middle, animated: true)
+            tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
+            tableView.deselectRow(at: indexPath, animated: true)
         }
 
         @objc private func showMarkerPrompt() {

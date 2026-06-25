@@ -11,17 +11,19 @@ import tempfile
 
 REQUIRED_SNIPPETS = {
     "README.md": [
-        "ConsoleDock `v0.5.0` is the current source-first Swift Package Manager preview release.",
-        "Use the latest release tag from GitHub Releases. `v0.5.0` includes logger forwarders for existing logger sinks, Test Session Reports, manual markers, Debug Actions, log detail, explicit visible/all/issue-report sharing and copying, runtime diagnostics, and release-validation hardening.",
+        "ConsoleDock `v0.6.0` is the current source-first Swift Package Manager preview release.",
+        "Use the latest release tag from GitHub Releases. `v0.6.0` includes configurable floating trigger controls, Logs jump actions, Actions search, logger forwarders for existing logger sinks, Test Session Reports, manual markers, Debug Actions, log detail, explicit visible/all/issue-report sharing and copying, runtime diagnostics, and release-validation hardening.",
+        "Floating trigger configuration is available in `v0.6.0` and later.",
         "Logger forwarders are available in `v0.5.0` and later.",
         "Runtime diagnostics are available in `v0.2.0` and later.",
         "Debug Actions are available in `v0.3.0` and later.",
         "Test Session Reports are available in `v0.4.0` and later.",
     ],
     "README.zh-CN.md": [
-        "ConsoleDock `v0.5.0` 是当前 source-first Swift Package Manager 公开预览版本",
-        "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.5.0` 已包含 logger forwarders、Test Session Reports、manual markers、Debug Actions、日志详情、visible/all/issue-report 分享和复制、runtime diagnostics 和当前 release validation 加固：",
-        "`v0.5.0` 提供的 `ConsoleDock.LogForwarder` / `CDKLogForwarder` 就是为这个迁移路径准备的轻量工具。",
+        "ConsoleDock `v0.6.0` 是当前 source-first Swift Package Manager 公开预览版本",
+        "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.6.0` 已包含可配置 floating trigger、Logs Jump、Actions 搜索、logger forwarders、Test Session Reports、manual markers、Debug Actions、日志详情、visible/all/issue-report 分享和复制、runtime diagnostics 和当前 release validation 加固：",
+        "Floating trigger 配置从 `v0.6.0` 开始属于已发布能力。",
+        "`v0.5.0` 开始提供的 `ConsoleDock.LogForwarder` / `CDKLogForwarder` 就是为这个迁移路径准备的轻量工具。",
         "Runtime diagnostics 从 `v0.2.0` 开始属于已发布能力。",
         "Debug Actions 从 `v0.3.0` 开始属于已发布能力。",
         "Test Session Reports 从 `v0.4.0` 开始属于已发布能力。",
@@ -110,7 +112,7 @@ def self_test() -> list[str]:
         root = pathlib.Path(raw_directory)
         write_valid_docs(root)
         if validate(root):
-            errors.append("validate should accept docs with released v0.5.0 guidance")
+            errors.append("validate should accept docs with released v0.6.0 guidance")
 
         missing_snippet_root = root / "missing-snippet"
         missing_snippet_root.mkdir()

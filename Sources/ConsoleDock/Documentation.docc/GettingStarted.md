@@ -25,6 +25,7 @@ The default configuration:
 
 - captures supported stdout and stderr writes from the current app process;
 - installs the floating UIKit `CD` button when UIKit is available;
+- starts the floating button at bottom trailing unless configured otherwise;
 - redacts obvious secrets before storage;
 - truncates very long messages;
 - stores entries in local memory only;
@@ -72,6 +73,27 @@ let configuration = ConsoleDock.Configuration(redactor: { message in
 
 ConsoleDock.start(configuration: configuration)
 ```
+
+## Configure The Floating Trigger
+
+When the default button position covers app controls, choose another starting corner.
+
+```swift
+let configuration = ConsoleDock.Configuration(
+    floatingButtonPosition: .bottomLeading
+)
+
+ConsoleDock.start(configuration: configuration)
+```
+
+Apps can also hide or show the bundled trigger at runtime without stopping logging.
+
+```swift
+ConsoleDock.hideFloatingButton()
+ConsoleDock.showFloatingButton()
+```
+
+Use ``ConsoleDock/showConsole()`` when the app provides its own debug entry point. See <doc:DailyDebugUsability>.
 
 ## Read Or Clear Entries
 
