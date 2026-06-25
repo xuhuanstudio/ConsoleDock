@@ -99,7 +99,34 @@ Not included:
 - crash reporting.
 - network inspector.
 
-## Post-v0.4 - Demand-Driven Compatibility Candidates
+## v0.5 - Integration Upgrade
+
+Goal: make ConsoleDock easier to adopt in existing Swift, Objective-C, and mixed UIKit projects without expanding distribution channels.
+
+Deliverables:
+
+- `ConsoleDock.LogForwarder` for existing Swift logger sinks/appender paths.
+- `CDKLogForwarder` for Objective-C logger functions, macros, and wrappers.
+- public issue report text APIs for Swift and Objective-C/UIKit integrations.
+- `Copy Issue Report` in the bundled UIKit share menu.
+- Debug Actions enabled-state metadata so unavailable local shortcuts can be shown without running.
+- Debug Actions destructive-style metadata for actions such as clearing local debug data.
+- Swift and Objective-C sample apps updated to demonstrate logger forwarders and disabled/destructive actions.
+- tests, UI smoke coverage, validators, README, DocC, migration guide, and sample walkthrough updates for the new integration path.
+
+Not included:
+
+- CocoaPods.
+- XCFramework.
+- packaged third-party logger adapters.
+- default persistent logging.
+- automatic upload.
+- remote commands.
+- automatic route discovery.
+- network inspector.
+- crash reporting.
+
+## Post-v0.5 - Demand-Driven Compatibility Candidates
 
 Goal: improve adoption in existing apps only when real integration feedback shows SPM and the current explicit API are not enough.
 
@@ -108,9 +135,8 @@ Candidate work, not committed deliverables:
 - CocoaLumberjack adapter if real users need it.
 - XCGLogger or SwiftyBeaver adapter, selected by real adoption demand.
 - CocoaPods compatibility evaluation only if real older Objective-C or mixed projects cannot adopt the Swift Package.
-- packaged adapter examples based on the existing logger migration guide.
-- improved Objective-C documentation.
 - optional disk export file generation, still local-only and user-initiated.
+- richer issue report formatting only if real tester workflows need it.
 
 Not included:
 

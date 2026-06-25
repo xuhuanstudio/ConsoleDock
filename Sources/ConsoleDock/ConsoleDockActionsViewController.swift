@@ -114,25 +114,26 @@
                 ?? UITableViewCell(style: .subtitle, reuseIdentifier: reuseIdentifier)
             let action = sections[indexPath.section].actions[indexPath.row]
             cell.backgroundColor = UIColor(white: 0.1, alpha: 1)
-            cell.textLabel?.textColor = ConsoleDockUIColors.primaryText
+            cell.textLabel?.textColor =
+                action.style == .destructive ? ConsoleDockUIColors.level(.error) : ConsoleDockUIColors.primaryText
             cell.textLabel?.font = .preferredFont(forTextStyle: .body)
             cell.textLabel?.text = action.title
             cell.detailTextLabel?.textColor = ConsoleDockUIColors.secondaryText
             cell.detailTextLabel?.font = .preferredFont(forTextStyle: .footnote)
             cell.detailTextLabel?.numberOfLines = 0
             cell.detailTextLabel?.text = detailText(for: action)
-            cell.selectionStyle = .default
+            cell.contentView.alpha = action.isEnabled ? 1 : 0.5
+            cell.selectionStyle = action.isEnabled ? .default : .none
             cell.accessoryType = .none
             cell.accessibilityHint =
-                action.requiresConfirmation
-                ? "Requires confirmation before running."
-                : "Runs this debug action."
+                accessibilityHint(for: action)
             return cell
         }
 
         func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
             guard let action = action(at: indexPath) else { return }
             tableView.deselectRow(at: indexPath, animated: true)
+            guard action.isEnabled else { return }
             if action.requiresConfirmation {
                 confirm(action)
             } else {
@@ -154,10 +155,26 @@
             if let detail = action.detail {
                 parts.append(detail)
             }
+            if !action.isEnabled {
+                parts.append("Disabled")
+            }
+            if action.style == .destructive {
+                parts.append("Destructive")
+            }
             if action.requiresConfirmation {
                 parts.append("Requires confirmation")
             }
             return parts.joined(separator: "\n")
+        }
+
+        private func accessibilityHint(for action: ConsoleDockDebugAction) -> String {
+            guard action.isEnabled else {
+                return "This debug action is disabled."
+            }
+            if action.requiresConfirmation {
+                return "Requires confirmation before running."
+            }
+            return "Runs this debug action."
         }
 
         private func confirm(_ action: ConsoleDockDebugAction) {
@@ -169,7 +186,8 @@
             let cancel = UIAlertAction(title: "Cancel", style: .cancel)
             cancel.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.cancelActionButton
             alert.addAction(cancel)
-            let confirm = UIAlertAction(title: "Run Action", style: .destructive) { _ in
+            let confirmStyle: UIAlertAction.Style = action.style == .destructive ? .destructive : .default
+            let confirm = UIAlertAction(title: "Run Action", style: confirmStyle) { _ in
                 ConsoleDock.performDebugAction(id: action.id)
             }
             confirm.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.confirmActionButton

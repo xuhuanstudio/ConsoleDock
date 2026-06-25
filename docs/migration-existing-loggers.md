@@ -5,7 +5,7 @@ Use ConsoleDock without rewriting every old log call site.
 ConsoleDock has three practical integration paths for existing iOS apps:
 
 1. Start ConsoleDock and rely on supported stdout/stderr capture for baseline visibility.
-2. Add one sink, appender, transport, or forwarding call inside the app's existing logger.
+2. Add one ConsoleDock forwarder, sink, appender, transport, or forwarding call inside the app's existing logger.
 3. Use ConsoleDock's explicit API for new logs that must always appear in the in-app panel.
 
 The second path is the recommended migration strategy for older projects. Keep the current logger as the source of truth, and add ConsoleDock as another destination.
@@ -17,9 +17,9 @@ The second path is the recommended migration strategy for older projects. Keep t
 | Swift `print` | Start ConsoleDock with stdout capture enabled. | Useful baseline coverage, but not structured. |
 | C `printf` / `fprintf` | Start ConsoleDock with stdout/stderr capture enabled. | C stdio buffering still applies; flush when testing. |
 | `NSLog` | Start ConsoleDock with stderr capture enabled, then validate on the target OS. | Many outputs are visible, but this is not a complete guarantee. |
-| App-specific Swift logger | Add one ConsoleDock sink in the central logger. | Best migration path for Swift projects. |
-| App-specific Objective-C logger or macro | Add one forward call in the existing macro/function. | Best migration path for older Objective-C projects. |
-| CocoaLumberjack, XCGLogger, SwiftyBeaver | Add an appender/destination if the framework exposes one. | Packaged adapters are not included yet. |
+| App-specific Swift logger | Add `ConsoleDock.LogForwarder` in the central logger. | Best migration path for Swift projects. |
+| App-specific Objective-C logger or macro | Add `CDKLogForwarder` in the existing macro/function. | Best migration path for older Objective-C projects. |
+| CocoaLumberjack, XCGLogger, SwiftyBeaver | Add an appender/destination if the framework exposes one. | Packaged adapters are not included yet; forward through `ConsoleDock.LogForwarder` or `CDKLogForwarder`. |
 | Swift `Logger` / `os_log` | Forward explicitly from your wrapper or adapter. | Do not rely on reading unified logging back from inside the app. |
 
 ## Start With Baseline Capture
@@ -60,22 +60,24 @@ After:
 import ConsoleDock
 
 enum AppLog {
+    private static let consoleDock = ConsoleDock.LogForwarder(category: "AppLog")
+
     static func info(_ message: String) {
         print("[info] \(message)")
-        ConsoleDock.log(level: .info, message: message)
+        consoleDock.info(message)
     }
 
     static func error(_ message: String) {
         print("[error] \(message)")
-        ConsoleDock.log(level: .error, message: message)
+        consoleDock.error(message)
     }
 }
 ```
 
 Existing call sites keep using `AppLog.info(...)` and `AppLog.error(...)`. ConsoleDock becomes one additional destination.
-Use `ConsoleDock.log(level:message:)` when the existing logger already carries a severity value. Convenience methods such as `ConsoleDock.info(_:)` remain useful for simple direct calls.
+Use `ConsoleDock.LogForwarder.log(level:message:)` when the existing logger already carries a severity value. Convenience methods such as `ConsoleDock.info(_:)` remain useful for simple direct calls that are not part of an existing logger.
 
-The Swift sample app includes an `App logger sink` button that follows this pattern: it writes through the app's logger wrapper and forwards the already-formatted message to ConsoleDock.
+The Swift sample app includes an `App logger sink` button that follows this pattern: it writes through the app's logger wrapper and forwards the message through `ConsoleDock.LogForwarder`.
 
 If the existing logger writes to Swift `Logger`, keep that output and also forward to ConsoleDock:
 
@@ -85,10 +87,11 @@ import OSLog
 
 enum AppLog {
     private static let logger = Logger(subsystem: "com.example.app", category: "app")
+    private static let consoleDock = ConsoleDock.LogForwarder(category: "AppLog")
 
     static func info(_ message: String) {
         logger.info("\(message, privacy: .public)")
-        ConsoleDock.log(level: .info, message: message)
+        consoleDock.info(message)
     }
 }
 ```
@@ -105,19 +108,34 @@ For Objective-C projects, the best migration point is usually the existing macro
 #define AppLogInfo(format, ...) do { \
     NSString *message = [NSString stringWithFormat:(format), ##__VA_ARGS__]; \
     NSLog(@"%@", message); \
-    [CDKConsoleDock info:message]; \
+    [AppLogConsoleDockForwarder() info:message]; \
 } while (0)
 
 #define AppLogError(format, ...) do { \
     NSString *message = [NSString stringWithFormat:(format), ##__VA_ARGS__]; \
     NSLog(@"%@", message); \
-    [CDKConsoleDock error:message]; \
+    [AppLogConsoleDockForwarder() error:message]; \
 } while (0)
+```
+
+Create the forwarder once and reuse it:
+
+```objc
+static CDKLogForwarder *AppLogConsoleDockForwarder(void)
+{
+    static CDKLogForwarder *forwarder;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        forwarder = [[CDKLogForwarder alloc] initWithCategory:@"AppLog"
+                                                 minimumLevel:CDKLogLevelDebug];
+    });
+    return forwarder;
+}
 ```
 
 Existing call sites keep using `AppLogInfo(...)` and `AppLogError(...)`. The original output remains, and ConsoleDock receives the same formatted message through the native storage path.
 
-The Objective-C sample app includes an `App logger sink` button that follows this pattern with an `NSLog`-style central forwarding function.
+The Objective-C sample app includes an `App logger sink` button that follows this pattern with an `NSLog`-style central forwarding function and `CDKLogForwarder`.
 
 Use `@import ConsoleDock;` and `CDKConsoleDockUIKit` when the Objective-C app also wants the bundled floating button and panel.
 
@@ -127,9 +145,9 @@ ConsoleDock does not currently ship packaged CocoaLumberjack, XCGLogger, or Swif
 
 Until those adapters exist, use the framework's extension point if it has one:
 
-- CocoaLumberjack: add a logger that forwards formatted messages and mapped severity to `CDKConsoleDock` or `ConsoleDock.log(level:message:)`.
-- XCGLogger: add a destination that forwards level and message to `ConsoleDock.log(level:message:)`.
-- SwiftyBeaver: add a destination that forwards level and message to `ConsoleDock.log(level:message:)`.
+- CocoaLumberjack: add a logger that forwards formatted messages and mapped severity through `CDKLogForwarder` or `ConsoleDock.LogForwarder`.
+- XCGLogger: add a destination that forwards level and message through `ConsoleDock.LogForwarder`.
+- SwiftyBeaver: add a destination that forwards level and message through `ConsoleDock.LogForwarder`.
 
 Keep the existing framework's file, console, or remote outputs unchanged unless the app has a separate reason to remove them.
 

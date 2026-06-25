@@ -41,6 +41,23 @@ ConsoleDock.error("Request failed")
 ConsoleDock.fault("Invariant failed")
 ```
 
+## Forward An Existing Logger
+
+When an app already has a central logger, add ConsoleDock as one destination inside that logger instead of changing every call site.
+
+```swift
+enum AppLog {
+    private static let consoleDock = ConsoleDock.LogForwarder(category: "AppLog")
+
+    static func info(_ message: String) {
+        print("[info] \(message)")
+        consoleDock.info(message)
+    }
+}
+```
+
+This is an explicit app-owned forward. It does not make ConsoleDock read Swift `Logger`, `os_log`, or Apple unified logging back from the system.
+
 ## Customize Redaction
 
 ConsoleDock runs its default redactor first. Add a custom redactor for app-specific fields.
@@ -79,7 +96,9 @@ ConsoleDock.registerAction(
     id: "debug.simulate-payment-error",
     title: "Simulate Payment Error",
     group: "Scenario",
-    detail: "Writes a payment error entry for testing."
+    detail: "Writes a payment error entry for testing.",
+    isEnabled: true,
+    style: .normal
 ) {
     ConsoleDock.error("Simulated payment failure")
 }
@@ -95,4 +114,4 @@ Use ``ConsoleDock/mark(_:)`` to add a reproduction timeline entry from app code 
 ConsoleDock.mark("Opened checkout")
 ```
 
-The bundled UIKit console also exposes a `Mark` action and a `Share Issue Report` option. Issue reports are local, user-initiated plain-text exports containing session metadata, diagnostics, markers, and currently retained redacted logs. ConsoleDock does not upload them or create remote issues automatically. See <doc:TestSessionReports>.
+The bundled UIKit console also exposes a `Mark` action plus `Share Issue Report` and `Copy Issue Report` options. Issue reports are local, user-initiated plain-text exports containing session metadata, diagnostics, markers, and currently retained redacted logs. ConsoleDock does not upload them or create remote issues automatically. See <doc:TestSessionReports>.

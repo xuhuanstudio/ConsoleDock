@@ -2,10 +2,12 @@ import ConsoleDock
 import UIKit
 
 private enum SampleAppLog {
+    private static let consoleDockForwarder = ConsoleDock.LogForwarder(category: "sample app logger")
+
     static func info(_ message: String) {
         let formattedMessage = "[sample app logger] \(message)"
         print(formattedMessage)
-        ConsoleDock.info(formattedMessage)
+        consoleDockForwarder.info(message)
     }
 }
 

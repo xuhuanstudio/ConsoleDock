@@ -260,6 +260,11 @@
             }
             reportAction.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.shareIssueReport
             alert.addAction(reportAction)
+            let copyReportAction = UIAlertAction(title: "Copy Issue Report", style: .default) { _ in
+                UIPasteboard.general.string = ConsoleDock.issueReportText()
+            }
+            copyReportAction.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.copyIssueReport
+            alert.addAction(copyReportAction)
             alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
             alert.popoverPresentationController?.barButtonItem = shareButton
             present(alert, animated: true)
@@ -278,11 +283,7 @@
         }
 
         private func shareIssueReport() {
-            let report = ConsoleDockIssueReportFormatter.reportText(
-                entries: ConsoleDock.entries,
-                metadata: ConsoleDock.sessionMetadata,
-                diagnostics: ConsoleDock.diagnostics
-            )
+            let report = ConsoleDock.issueReportText()
             let activityController = UIActivityViewController(activityItems: [report], applicationActivities: nil)
             activityController.popoverPresentationController?.barButtonItem = shareButton
             present(activityController, animated: true)

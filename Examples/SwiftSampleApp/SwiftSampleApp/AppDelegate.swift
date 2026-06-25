@@ -78,9 +78,20 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             title: "Clear Entries",
             group: "Maintenance",
             detail: "Clears the in-memory ConsoleDock log entries.",
-            requiresConfirmation: true
+            requiresConfirmation: true,
+            style: .destructive
         ) {
             ConsoleDock.clear()
+        }
+
+        ConsoleDock.registerAction(
+            id: "swift.sample.disabled",
+            title: "Disabled Placeholder",
+            group: "Maintenance",
+            detail: "Shows how unavailable debug actions appear in the panel.",
+            isEnabled: false
+        ) {
+            ConsoleDock.info("disabled sample action should not run")
         }
 
         ConsoleDock.registerAction(

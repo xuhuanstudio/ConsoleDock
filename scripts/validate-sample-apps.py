@@ -29,6 +29,7 @@ REQUIRED_SNIPPETS = {
         "scripts/validate-swift-sample-ui-smoke.sh",
         "`--consoledock-ui-smoke`",
         "CONSOLEDOCK_UI_SMOKE_DESTINATION",
+        "ConsoleDock.LogForwarder",
         "search control rendering",
         "level filtering",
         "log detail",
@@ -40,6 +41,7 @@ REQUIRED_SNIPPETS = {
         "scripts/validate-objc-sample-ui-smoke.sh",
         "`--consoledock-ui-smoke`",
         "CONSOLEDOCK_UI_SMOKE_DESTINATION",
+        "CDKLogForwarder",
         "search control rendering",
         "level filtering",
         "log detail",
@@ -56,7 +58,23 @@ REQUIRED_SNIPPETS = {
         "log detail",
         "marker creation",
         "issue-report share action availability",
+        "issue-report copy action availability",
         "Debug Actions",
+        "logger forwarder sink",
+    ],
+    "Examples/SwiftSampleApp/SwiftSampleApp/MainViewController.swift": [
+        "ConsoleDock.LogForwarder(category:",
+    ],
+    "Examples/SwiftSampleApp/SwiftSampleApp/AppDelegate.swift": [
+        "style: .destructive",
+        "isEnabled: false",
+    ],
+    "Examples/ObjCSampleApp/ObjCSampleApp/MainViewController.m": [
+        "CDKLogForwarder *SampleAppLogForwarder",
+    ],
+    "Examples/ObjCSampleApp/ObjCSampleApp/AppDelegate.m": [
+        "CDKDebugActionStyleDestructive",
+        "isEnabled:NO",
     ],
     "scripts/validate-release.sh": [
         "scripts/validate-swift-sample-ui-smoke.sh",

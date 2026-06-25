@@ -8,6 +8,8 @@ ConsoleDock is a debug and test SDK for iOS apps. It stores redacted log entries
 
 Use ConsoleDock when testers need to inspect useful app logs on a device or Simulator without a live Xcode session. It can capture supported stdout and stderr writes from the app process, and its explicit native logging API is the most reliable way to send messages into the in-app console.
 
+For existing app loggers, add ``ConsoleDock/LogForwarder`` in the logger's sink or appender so old call sites keep their current `AppLog` API while ConsoleDock receives the same app-authored messages.
+
 ConsoleDock is not a full replacement for Xcode Console or Apple unified logging. It does not promise complete zero-intrusion capture of Swift `Logger`, `os_log`, system logs, other-process logs, debugger output, LLDB expressions, or sanitizer diagnostics.
 
 ## Topics
@@ -43,12 +45,14 @@ ConsoleDock is not a full replacement for Xcode Console or Apple unified logging
 - ``ConsoleDock/error(_:)``
 - ``ConsoleDock/fault(_:)``
 - ``ConsoleDock/LogLevel``
+- ``ConsoleDock/LogForwarder``
 
 ### Reading Entries
 
 - ``ConsoleDock/entries``
 - ``ConsoleDock/entriesDidChangeNotification``
 - ``ConsoleDock/clear()``
+- ``ConsoleDock/issueReportText()``
 - ``ConsoleDock/LogEntry``
 - ``ConsoleDock/LogSource``
 
@@ -65,6 +69,7 @@ ConsoleDock is not a full replacement for Xcode Console or Apple unified logging
 
 ### Registering Debug Actions
 
-- ``ConsoleDock/registerAction(id:title:group:detail:requiresConfirmation:handler:)``
+- ``ConsoleDock/registerAction(id:title:group:detail:requiresConfirmation:isEnabled:style:handler:)``
 - ``ConsoleDock/unregisterAction(id:)``
 - ``ConsoleDock/removeAllActions()``
+- ``ConsoleDock/DebugActionStyle``

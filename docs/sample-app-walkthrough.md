@@ -11,12 +11,12 @@ Use the samples to verify:
 - app-specific logger sink forwarding without rewriting every call site;
 - runtime diagnostics for capture state and current store counts;
 - Debug Actions for app-registered local test shortcuts;
-- manual markers and local issue report sharing;
+- manual markers and local issue report sharing/copying;
 - `NSLog` output that reaches process stderr;
 - redaction before storage;
 - UIKit floating button, search, source and level filtering, pause/resume live follow, log detail, copy, panel refresh, share/export, actions, clear, stop, and restart behavior.
 
-The bundled console and sample controls expose stable accessibility identifiers so future UI smoke tests can target behavior without relying on localized text. Key bundled console identifiers include `consoledock.dock-button`, `consoledock.mode-control`, `consoledock.search`, `consoledock.level-filter`, `consoledock.status`, `consoledock.entries-table`, `consoledock.actions-table`, `consoledock.mark`, `consoledock.marker-text`, `consoledock.add-marker`, and `consoledock.share-issue-report`. Sample app button identifiers use `swift-sample.<button-slug>` and `objc-sample.<button-slug>`.
+The bundled console and sample controls expose stable accessibility identifiers so future UI smoke tests can target behavior without relying on localized text. Key bundled console identifiers include `consoledock.dock-button`, `consoledock.mode-control`, `consoledock.search`, `consoledock.level-filter`, `consoledock.status`, `consoledock.entries-table`, `consoledock.actions-table`, `consoledock.mark`, `consoledock.marker-text`, `consoledock.add-marker`, `consoledock.share-issue-report`, and `consoledock.copy-issue-report`. Sample app button identifiers use `swift-sample.<button-slug>` and `objc-sample.<button-slug>`.
 
 ![ConsoleDock Swift sample console](assets/swift-sample-console.png)
 
@@ -45,7 +45,7 @@ For a focused simulator UI smoke run of the Objective-C sample:
 scripts/validate-objc-sample-ui-smoke.sh
 ```
 
-The smoke tests launch each sample app in a native-log-only UI automation mode, write native ConsoleDock entries containing sample tokens, open the bundled console, and verify the diagnostics header, entries table, visible redaction, search control rendering, level filtering, log detail, copy controls, marker creation, issue-report share action availability, pause/resume, clear refresh, Debug Actions, confirmation prompts, and close controls through stable accessibility identifiers.
+The smoke tests launch each sample app in a native-log-only UI automation mode, write native ConsoleDock entries containing sample tokens, open the bundled console, and verify the diagnostics header, entries table, visible redaction, search control rendering, level filtering, log detail, copy controls, marker creation, issue-report share action availability, issue-report copy action availability, pause/resume, clear refresh, Debug Actions, disabled/destructive action metadata, confirmation prompts, and close controls through stable accessibility identifiers.
 
 Manual check:
 
@@ -53,22 +53,24 @@ Manual check:
 2. Tap `Show Console` or the floating `CD` button.
 3. Tap `Log diagnostics`, `App logger sink`, `ConsoleDock.info`, `ConsoleDock.error`, `ConsoleDock.fault`, `print stdout`, `printf stdout`, `fprintf stderr`, and `NSLog`.
 4. Confirm entries appear in the ConsoleDock panel.
-5. Confirm the diagnostics header reports running state, entry count, stdout/stderr state, limits, and redacted/truncated/partial counts.
-6. Confirm generated `token=...` values are stored as `token=<redacted>`.
-7. Search for `stderr` or `token` and confirm the visible list filters without changing stored entries.
-8. Change the source scope to `stdout` or `stderr` and confirm only matching entries remain visible.
-9. Change the level scope to `Info` or `Error` and confirm only matching entries remain visible.
-10. Tap the pause button, generate another message from the sample, and confirm the visible list does not auto-refresh.
-11. Tap the play/resume button and confirm the panel catches up to the latest stored entries.
-12. Tap a visible log row and confirm the detail screen shows the full redacted message, metadata flags, and copy buttons.
-13. Tap `Mark`, enter a short reproduction note, and confirm a `[marker]` entry appears under `Logs`.
-14. Tap the share button and choose visible logs, all logs, or issue report; confirm the system share sheet opens with a plain-text redacted snapshot and diagnostics.
-15. Switch to `Actions`, run `Generate Smoke Logs`, and confirm new action start/completion plus sample error entries appear under `Logs`.
-16. Run the `Add Marker` action and confirm a sample marker entry appears under `Logs`.
-17. Run the `Clear Entries` action and confirm it asks before executing.
-18. Tap `Clear` in the panel and confirm the list and diagnostics header refresh.
-19. Tap `Stop ConsoleDock`, generate another message, and confirm it is not stored.
-20. Tap `Start ConsoleDock`, generate another message, and confirm entries resume.
+5. Confirm `App logger sink` writes through the app's logger forwarder sink, preserving the original app logger output while adding a native ConsoleDock entry.
+6. Confirm the diagnostics header reports running state, entry count, stdout/stderr state, limits, and redacted/truncated/partial counts.
+7. Confirm generated `token=...` values are stored as `token=<redacted>`.
+8. Search for `stderr` or `token` and confirm the visible list filters without changing stored entries.
+9. Change the source scope to `stdout` or `stderr` and confirm only matching entries remain visible.
+10. Change the level scope to `Info` or `Error` and confirm only matching entries remain visible.
+11. Tap the pause button, generate another message from the sample, and confirm the visible list does not auto-refresh.
+12. Tap the play/resume button and confirm the panel catches up to the latest stored entries.
+13. Tap a visible log row and confirm the detail screen shows the full redacted message, metadata flags, and copy buttons.
+14. Tap `Mark`, enter a short reproduction note, and confirm a `[marker]` entry appears under `Logs`.
+15. Tap the share button and choose visible logs, all logs, issue report, or copy issue report; confirm share actions open the system share sheet and the copy action is available for the same local report text.
+16. Switch to `Actions`, run `Generate Smoke Logs`, and confirm new action start/completion plus sample error entries appear under `Logs`.
+17. Confirm `Disabled Placeholder` appears disabled and does not need to be triggered for the smoke path.
+18. Run the `Add Marker` action and confirm a sample marker entry appears under `Logs`.
+19. Run the `Clear Entries` action and confirm it is marked destructive and asks before executing.
+20. Tap `Clear` in the panel and confirm the list and diagnostics header refresh.
+21. Tap `Stop ConsoleDock`, generate another message, and confirm it is not stored.
+22. Tap `Start ConsoleDock`, generate another message, and confirm entries resume.
 
 Expected sources:
 
@@ -107,13 +109,14 @@ Manual check:
 11. Tap the play/resume button and confirm the panel catches up to the latest stored entries.
 12. Tap a visible log row and confirm the detail screen shows the full redacted message, metadata flags, and copy buttons.
 13. Tap `Mark`, enter a short reproduction note, and confirm a `[marker]` entry appears under `Logs`.
-14. Tap the share button and choose visible logs, all logs, or issue report; confirm the system share sheet opens with a plain-text redacted snapshot and diagnostics.
+14. Tap the share button and choose visible logs, all logs, issue report, or copy issue report; confirm share actions open the system share sheet and the copy action is available for the same local report text.
 15. Switch to `Actions`, run `Generate Smoke Logs`, and confirm new action start/completion plus sample error entries appear under `Logs`.
-16. Run the `Add Marker` action and confirm a sample marker entry appears under `Logs`.
-17. Run the `Clear Entries` action and confirm it asks before executing.
-18. Tap `Clear` in the panel and confirm the list and diagnostics header refresh.
-19. Tap `Stop ConsoleDock`, generate another message, and confirm it is not stored.
-20. Tap `Start ConsoleDock`, generate another message, and confirm entries resume.
+16. Confirm `Disabled Placeholder` appears disabled and does not need to be triggered for the smoke path.
+17. Run the `Add Marker` action and confirm a sample marker entry appears under `Logs`.
+18. Run the `Clear Entries` action and confirm it is marked destructive and asks before executing.
+19. Tap `Clear` in the panel and confirm the list and diagnostics header refresh.
+20. Tap `Stop ConsoleDock`, generate another message, and confirm it is not stored.
+21. Tap `Start ConsoleDock`, generate another message, and confirm entries resume.
 
 Expected sources:
 
@@ -137,7 +140,7 @@ Pause/resume only affects live UI follow. ConsoleDock continues capturing and st
 
 Tapping a row opens the log detail screen. Copy actions on that screen copy only that visible, already-redacted message or the selected entry with its metadata. They do not copy hidden filtered entries.
 
-The share sheet can export the current visible in-memory ConsoleDock entries, all currently retained entries, or a local issue report with session metadata, diagnostics, markers, and all currently retained redacted logs. ConsoleDock does not write an export file by default, does not persist logs by default, and does not upload logs.
+The share sheet can export the current visible in-memory ConsoleDock entries, all currently retained entries, or a local issue report with session metadata, diagnostics, markers, and all currently retained redacted logs. `Copy Issue Report` copies the same local report text to the pasteboard. ConsoleDock does not write an export file by default, does not persist logs by default, and does not upload logs.
 
 Markers are normal native info entries with a stable `[marker]` prefix. They are useful as a reproduction timeline, but they are not a separate persistent note system.
 

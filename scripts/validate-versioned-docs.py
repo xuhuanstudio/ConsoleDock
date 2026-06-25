@@ -11,15 +11,17 @@ import tempfile
 
 REQUIRED_SNIPPETS = {
     "README.md": [
-        "ConsoleDock `v0.4.0` is the current source-first Swift Package Manager preview release.",
-        "Use the latest release tag from GitHub Releases. `v0.4.0` includes Test Session Reports, manual markers, Debug Actions, log detail, explicit visible/all/issue-report sharing, runtime diagnostics, and release-validation hardening.",
+        "ConsoleDock `v0.5.0` is the current source-first Swift Package Manager preview release.",
+        "Use the latest release tag from GitHub Releases. `v0.5.0` includes logger forwarders for existing logger sinks, Test Session Reports, manual markers, Debug Actions, log detail, explicit visible/all/issue-report sharing and copying, runtime diagnostics, and release-validation hardening.",
+        "Logger forwarders are available in `v0.5.0` and later.",
         "Runtime diagnostics are available in `v0.2.0` and later.",
         "Debug Actions are available in `v0.3.0` and later.",
         "Test Session Reports are available in `v0.4.0` and later.",
     ],
     "README.zh-CN.md": [
-        "ConsoleDock `v0.4.0` 是当前 source-first Swift Package Manager 公开预览版本",
-        "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.4.0` 已包含 Test Session Reports、manual markers、Debug Actions、日志详情、visible/all/issue-report 分享、runtime diagnostics 和当前 release validation 加固：",
+        "ConsoleDock `v0.5.0` 是当前 source-first Swift Package Manager 公开预览版本",
+        "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.5.0` 已包含 logger forwarders、Test Session Reports、manual markers、Debug Actions、日志详情、visible/all/issue-report 分享和复制、runtime diagnostics 和当前 release validation 加固：",
+        "`v0.5.0` 提供的 `ConsoleDock.LogForwarder` / `CDKLogForwarder` 就是为这个迁移路径准备的轻量工具。",
         "Runtime diagnostics 从 `v0.2.0` 开始属于已发布能力。",
         "Debug Actions 从 `v0.3.0` 开始属于已发布能力。",
         "Test Session Reports 从 `v0.4.0` 开始属于已发布能力。",
@@ -108,7 +110,7 @@ def self_test() -> list[str]:
         root = pathlib.Path(raw_directory)
         write_valid_docs(root)
         if validate(root):
-            errors.append("validate should accept docs with released v0.4.0 guidance")
+            errors.append("validate should accept docs with released v0.5.0 guidance")
 
         missing_snippet_root = root / "missing-snippet"
         missing_snippet_root.mkdir()

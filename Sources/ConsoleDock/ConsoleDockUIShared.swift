@@ -8,6 +8,7 @@
         static let shareVisibleLogs = "consoledock.share-visible-logs"
         static let shareAllLogs = "consoledock.share-all-logs"
         static let shareIssueReport = "consoledock.share-issue-report"
+        static let copyIssueReport = "consoledock.copy-issue-report"
         static let markButton = "consoledock.mark"
         static let markerTextField = "consoledock.marker-text"
         static let addMarkerButton = "consoledock.add-marker"

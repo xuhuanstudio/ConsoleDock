@@ -1,6 +1,24 @@
 import ConsoleDockCore
 import Foundation
 
+/// Objective-C-visible style for a local debug action.
+@objc(CDKDebugActionStyle)
+public enum ConsoleDockDebugActionStyle: Int {
+    case normal = 0
+    case destructive = 1
+
+    var swiftStyle: ConsoleDock.DebugActionStyle {
+        switch self {
+        case .normal:
+            return .normal
+        case .destructive:
+            return .destructive
+        @unknown default:
+            return .normal
+        }
+    }
+}
+
 /// Objective-C-callable facade for using ConsoleDock with the bundled UIKit console.
 @objc(CDKConsoleDockUIKit)
 public final class ConsoleDockUIKit: NSObject {
@@ -41,6 +59,12 @@ public final class ConsoleDockUIKit: NSObject {
         hideConsoleIfAvailable()
     }
 
+    /// Builds a local issue report with session metadata, diagnostics, markers, and all retained entries.
+    @objc(issueReportText)
+    public static func issueReportText() -> String {
+        ConsoleDock.issueReportText()
+    }
+
     /// Registers a local debug action shown by the bundled UIKit console.
     @objc(registerActionWithIdentifier:title:group:detail:requiresConfirmation:handler:)
     public static func registerAction(
@@ -56,7 +80,34 @@ public final class ConsoleDockUIKit: NSObject {
             title: title,
             group: group,
             detail: detail,
-            requiresConfirmation: requiresConfirmation
+            requiresConfirmation: requiresConfirmation,
+            isEnabled: true,
+            style: .normal
+        ) {
+            handler()
+        }
+    }
+
+    /// Registers a local debug action with explicit enabled state and UI style.
+    @objc(registerActionWithIdentifier:title:group:detail:requiresConfirmation:isEnabled:style:handler:)
+    public static func registerAction(
+        identifier: String,
+        title: String,
+        group: String?,
+        detail: String?,
+        requiresConfirmation: Bool,
+        isEnabled: Bool,
+        style: ConsoleDockDebugActionStyle,
+        handler: @escaping () -> Void
+    ) {
+        ConsoleDock.registerAction(
+            id: identifier,
+            title: title,
+            group: group,
+            detail: detail,
+            requiresConfirmation: requiresConfirmation,
+            isEnabled: isEnabled,
+            style: style.swiftStyle
         ) {
             handler()
         }

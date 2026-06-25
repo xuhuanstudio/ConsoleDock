@@ -8,7 +8,7 @@ The sample starts ConsoleDock on launch, enables stdout/stderr capture, shows th
 - Runtime diagnostics through `ConsoleDock.diagnostics`
 - Debug Actions registered through `ConsoleDock.registerAction`
 - Manual markers through `ConsoleDock.mark`
-- App-specific logger sink forwarding
+- App-specific logger sink forwarding through `ConsoleDock.LogForwarder`
 - Swift `print` stdout
 - C `printf` stdout
 - C `fprintf(stderr)` stderr
@@ -41,7 +41,7 @@ From the package root:
 scripts/validate-swift-sample-ui-smoke.sh
 ```
 
-The script chooses an available iPhone simulator unless `CONSOLEDOCK_UI_SMOKE_DESTINATION` is set. It launches the app with `--consoledock-ui-smoke` so the test focuses on native ConsoleDock entries, redaction, the bundled panel, search control rendering, level filtering, log detail, markers, issue report sharing, Debug Actions, pause/resume, clear refresh, and close behavior without stdout/stderr capture descriptor noise.
+The script chooses an available iPhone simulator unless `CONSOLEDOCK_UI_SMOKE_DESTINATION` is set. It launches the app with `--consoledock-ui-smoke` so the test focuses on native ConsoleDock entries, redaction, the bundled panel, search control rendering, level filtering, log detail, markers, issue report sharing, Debug Actions, disabled/destructive action metadata, pause/resume, clear refresh, and close behavior without stdout/stderr capture descriptor noise.
 
 ## Manual Check
 
@@ -52,7 +52,8 @@ For the full shared checklist, see [Sample app walkthrough](../../docs/sample-ap
 3. Tap each logging button, including `Log diagnostics` and `App logger sink`.
 4. Confirm entries appear in the console, diagnostics are readable, and `token=...` values are displayed as `<redacted>`.
 5. Add a marker from the console and confirm the `[marker]` entry appears.
-6. Open the share menu and confirm `Share Issue Report` is available.
-7. Tap `Clear` in the console or `Clear ConsoleDock Entries` in the sample to verify live refresh.
+6. Open the share menu and confirm `Share Issue Report` and `Copy Issue Report` are available.
+7. Switch to `Actions` and confirm the disabled placeholder and destructive clear action metadata are visible.
+8. Tap `Clear` in the console or `Clear ConsoleDock Entries` in the sample to verify live refresh.
 
 When testing ConsoleDock's own stdout/stderr capture, avoid using `simctl launch --stdout` or `simctl launch --stderr` as the primary validation path because those flags also modify the app process descriptors. Running from Xcode or launching normally through Simulator gives a closer app-integration signal.

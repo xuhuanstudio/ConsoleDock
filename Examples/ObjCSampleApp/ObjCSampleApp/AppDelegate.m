@@ -103,8 +103,21 @@ configurationForConnectingSceneSession:(UISceneSession *)connectingSceneSession
                                                 group:@"Maintenance"
                                                detail:@"Clears the in-memory ConsoleDock log entries."
                                  requiresConfirmation:YES
+                                            isEnabled:YES
+                                                style:CDKDebugActionStyleDestructive
                                               handler:^{
                                                   [CDKConsoleDock clearEntries];
+                                              }];
+
+    [CDKConsoleDockUIKit registerActionWithIdentifier:@"objc.sample.disabled"
+                                                title:@"Disabled Placeholder"
+                                                group:@"Maintenance"
+                                               detail:@"Shows how unavailable debug actions appear in the panel."
+                                 requiresConfirmation:NO
+                                            isEnabled:NO
+                                                style:CDKDebugActionStyleNormal
+                                              handler:^{
+                                                  [CDKConsoleDock info:@"disabled objc sample action should not run"];
                                               }];
 
     [CDKConsoleDockUIKit registerActionWithIdentifier:@"objc.sample.simulate-error"

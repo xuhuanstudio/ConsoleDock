@@ -55,6 +55,9 @@ REQUIRED_SNIPPETS = {
         "case warning",
         "case error",
         "case fault",
+        "public enum DebugActionStyle: Equatable",
+        "case normal",
+        "case destructive",
         "public enum LogSource: Equatable",
         "case native",
         "case stdout",
@@ -88,6 +91,16 @@ REQUIRED_SNIPPETS = {
             truncated: Bool = false
         )
         """,
+        "public struct LogForwarder",
+        "public let category: String?",
+        "public let minimumLevel: LogLevel",
+        "public init(category: String? = nil, minimumLevel: LogLevel = .debug)",
+        "public func log(level: LogLevel, message: String)",
+        "public func debug(_ message: String)",
+        "public func info(_ message: String)",
+        "public func warning(_ message: String)",
+        "public func error(_ message: String)",
+        "public func fault(_ message: String)",
         "public struct Diagnostics: Equatable",
         "public let isRunning: Bool",
         "public let capturesStandardOutput: Bool",
@@ -161,6 +174,7 @@ REQUIRED_SNIPPETS = {
         "public static let entriesDidChangeNotification",
         "public static let diagnosticsDidChangeNotification",
         "public static func clear()",
+        "public static func issueReportText() -> String",
         "public static func showConsole()",
         "public static func hideConsole()",
         """
@@ -170,6 +184,8 @@ REQUIRED_SNIPPETS = {
             group: String? = nil,
             detail: String? = nil,
             requiresConfirmation: Bool = false,
+            isEnabled: Bool = true,
+            style: DebugActionStyle = .normal,
             handler: @escaping () throws -> Void
         )
         """,
@@ -184,6 +200,10 @@ REQUIRED_SNIPPETS = {
         "public static func fault(_ message: String)",
     ],
     UIKIT_FACADE: [
+        "@objc(CDKDebugActionStyle)",
+        "public enum ConsoleDockDebugActionStyle: Int",
+        "case normal = 0",
+        "case destructive = 1",
         "@objc(CDKConsoleDockUIKit)",
         "public final class ConsoleDockUIKit: NSObject",
         "@objc(startWithConfiguration:error:)",
@@ -196,6 +216,8 @@ REQUIRED_SNIPPETS = {
         "public static func showConsole()",
         "@objc(hideConsole)",
         "public static func hideConsole()",
+        "@objc(issueReportText)",
+        "public static func issueReportText() -> String",
         "@objc(registerActionWithIdentifier:title:group:detail:requiresConfirmation:handler:)",
         """
         public static func registerAction(
@@ -204,6 +226,19 @@ REQUIRED_SNIPPETS = {
             group: String?,
             detail: String?,
             requiresConfirmation: Bool,
+            handler: @escaping () -> Void
+        )
+        """,
+        "@objc(registerActionWithIdentifier:title:group:detail:requiresConfirmation:isEnabled:style:handler:)",
+        """
+        public static func registerAction(
+            identifier: String,
+            title: String,
+            group: String?,
+            detail: String?,
+            requiresConfirmation: Bool,
+            isEnabled: Bool,
+            style: ConsoleDockDebugActionStyle,
             handler: @escaping () -> Void
         )
         """,
@@ -216,7 +251,7 @@ REQUIRED_SNIPPETS = {
 
 REQUIRED_SNIPPET_COUNTS = {
     SWIFT_FACADE: {
-        "public init(": 5,
+        "public init(": 6,
         "public let message: String": 2,
     },
 }

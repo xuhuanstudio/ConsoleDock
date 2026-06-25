@@ -8,6 +8,17 @@ The project follows Semantic Versioning for public releases.
 
 No changes yet.
 
+## v0.5.0 - 2026-06-26
+
+### Added
+
+- Added `ConsoleDock.LogForwarder` and `CDKLogForwarder` for forwarding existing app logger sink/appender output into ConsoleDock without rewriting old call sites.
+- Added public issue report text APIs through `ConsoleDock.issueReportText()` and `CDKConsoleDockUIKit.issueReportText`.
+- Added `Copy Issue Report` to the bundled UIKit share menu alongside visible/all/issue-report sharing.
+- Added Debug Actions enabled-state and destructive-style metadata for Swift and Objective-C/UIKit integrations.
+- Added sample app usage of Swift and Objective-C logger forwarders plus disabled/destructive Debug Action examples.
+- Added unit, UI smoke, API surface, accessibility identifier, sample documentation, README, DocC, and roadmap coverage for the v0.5 integration upgrade.
+
 ## v0.4.0 - 2026-06-26
 
 ### Added

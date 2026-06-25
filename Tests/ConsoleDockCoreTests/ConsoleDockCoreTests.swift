@@ -345,6 +345,50 @@ final class ConsoleDockCoreTests: XCTestCase {
         XCTAssertEqual(entries[0].message, "Disk corruption detected")
     }
 
+    func testLogForwarderPrefixesCategoryAndFiltersMinimumLevel() {
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+        let forwarder = CDKLogForwarder(category: " App\nLog ", minimumLevel: .warning)
+
+        forwarder.debug("ignored debug")
+        forwarder.info("ignored info")
+        forwarder.warning("cache warming")
+        forwarder.error("request failed")
+
+        let entries = CDKConsoleDock.entries()
+        XCTAssertEqual(entries.map(\.level), [.warning, .error])
+        XCTAssertEqual(entries.map(\.message), ["[App Log] cache warming", "[App Log] request failed"])
+        XCTAssertEqual(forwarder.category, "App Log")
+        XCTAssertEqual(forwarder.minimumLevel, .warning)
+    }
+
+    func testLogForwarderConvenienceMethodsForwardNativeEntries() {
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+        let forwarder = CDKLogForwarder()
+
+        forwarder.debug("debug")
+        forwarder.info("info")
+        forwarder.warning("warning")
+        forwarder.error("error")
+        forwarder.fault("fault")
+
+        XCTAssertEqual(CDKConsoleDock.entries().map(\.level), [.debug, .info, .warning, .error, .fault])
+        XCTAssertEqual(CDKConsoleDock.entries().map(\.message), ["debug", "info", "warning", "error", "fault"])
+    }
+
+    func testLogForwarderUsesConsoleDockRedactionAndTruncationPath() {
+        let configuration = noCaptureConfiguration()
+        configuration.maximumMessageLength = 24
+        XCTAssertEqual(CDKConsoleDock.start(with: configuration), .started)
+        let forwarder = CDKLogForwarder(category: "Network", minimumLevel: .debug)
+
+        forwarder.info("token=secret-value suffix")
+
+        let entry = CDKConsoleDock.entries().first
+        XCTAssertEqual(entry?.message, "[Network] token=<redacte")
+        XCTAssertTrue(entry?.redacted == true)
+        XCTAssertTrue(entry?.truncated == true)
+    }
+
     func testRingBufferEvictsOldestEntries() {
         let configuration = noCaptureConfiguration()
         configuration.maximumEntries = 2

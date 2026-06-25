@@ -6,6 +6,26 @@ struct ConsoleDockDebugAction: Equatable, Identifiable {
     let group: String?
     let detail: String?
     let requiresConfirmation: Bool
+    let isEnabled: Bool
+    let style: ConsoleDock.DebugActionStyle
+
+    init(
+        id: String,
+        title: String,
+        group: String? = nil,
+        detail: String? = nil,
+        requiresConfirmation: Bool = false,
+        isEnabled: Bool = true,
+        style: ConsoleDock.DebugActionStyle = .normal
+    ) {
+        self.id = id
+        self.title = title
+        self.group = group
+        self.detail = detail
+        self.requiresConfirmation = requiresConfirmation
+        self.isEnabled = isEnabled
+        self.style = style
+    }
 }
 
 extension Notification.Name {
@@ -36,6 +56,8 @@ final class ConsoleDockDebugActionRegistry {
         group: String?,
         detail: String?,
         requiresConfirmation: Bool,
+        isEnabled: Bool,
+        style: ConsoleDock.DebugActionStyle,
         handler: @escaping Handler
     ) {
         guard let normalizedID = normalizedRequired(id),
@@ -49,7 +71,9 @@ final class ConsoleDockDebugActionRegistry {
             title: normalizedTitle,
             group: normalizedSingleLineOptional(group),
             detail: normalizedOptional(detail),
-            requiresConfirmation: requiresConfirmation
+            requiresConfirmation: requiresConfirmation,
+            isEnabled: isEnabled,
+            style: style
         )
         let record = Record(action: action, handler: handler)
 
@@ -101,6 +125,11 @@ final class ConsoleDockDebugActionRegistry {
             let record = record(for: normalizedID)
         else {
             ConsoleDock.error("Debug action failed: missing action id=\(singleLine(id))")
+            return
+        }
+
+        guard record.action.isEnabled else {
+            ConsoleDock.info("Debug action skipped: \(record.action.title) [\(record.action.id)] disabled")
             return
         }
 

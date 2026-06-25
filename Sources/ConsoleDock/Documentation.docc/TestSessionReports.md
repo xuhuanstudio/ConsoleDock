@@ -10,9 +10,9 @@ ConsoleDock does this with three local pieces:
 
 - ``ConsoleDock/sessionMetadata`` returns app, process, OS, device, locale, time zone, session, and generation context.
 - ``ConsoleDock/mark(_:)`` writes a native info entry with a stable `[marker]` prefix.
-- The bundled UIKit console offers `Mark` and `Share Issue Report` actions.
+- The bundled UIKit console offers `Mark`, `Share Issue Report`, and `Copy Issue Report` actions.
 
-Issue reports are generated locally through the system share sheet. They include session metadata, diagnostics, a marker index, and all currently retained redacted logs. ConsoleDock does not persist reports by default, upload them, or create remote issues automatically.
+Issue reports are generated locally through the system share sheet, copied locally through the pasteboard action, or read as text through ``ConsoleDock/issueReportText()``. They include session metadata, diagnostics, a marker index, and all currently retained redacted logs. ConsoleDock does not persist reports by default, upload them, or create remote issues automatically.
 
 ## Add Markers
 
@@ -39,6 +39,6 @@ The metadata snapshot is local process context. It is not a persistent user iden
 
 ## Share From The Bundled Console
 
-Open the ConsoleDock panel, tap the share button, and choose `Share Issue Report`.
+Open the ConsoleDock panel, tap the share button, and choose `Share Issue Report` or `Copy Issue Report`.
 
 The report shares all currently retained entries, not only the visible filtered list, so a tester does not accidentally omit surrounding context. `Share Visible Logs` and `Share All Logs` remain available for smaller snapshots.

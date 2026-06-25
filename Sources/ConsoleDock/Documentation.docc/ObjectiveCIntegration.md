@@ -30,7 +30,25 @@ if (result == CDKStartResultStarted || result == CDKStartResultAlreadyRunning) {
 
 ## Keep Existing Logger Call Sites
 
-For older Objective-C projects, prefer adding a sink or appender to the existing logger instead of rewriting every call site. The appender can forward formatted messages to `CDKConsoleDock` while the original logger keeps its current outputs.
+For older Objective-C projects, prefer adding a sink or appender to the existing logger instead of rewriting every call site. The appender can forward formatted messages through `CDKLogForwarder` while the original logger keeps its current outputs.
+
+```objc
+static CDKLogForwarder *AppLogConsoleDockForwarder(void)
+{
+    static CDKLogForwarder *forwarder;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        forwarder = [[CDKLogForwarder alloc] initWithCategory:@"AppLog"
+                                                 minimumLevel:CDKLogLevelInfo];
+    });
+    return forwarder;
+}
+
+void AppLogInfo(NSString *message) {
+    NSLog(@"%@", message);
+    [AppLogConsoleDockForwarder() info:message];
+}
+```
 
 ConsoleDock cannot fully capture Swift `Logger`, `os_log`, or Apple unified logging from inside the app, so adapters should forward to ConsoleDock explicitly when reliable in-app visibility is required.
 
@@ -47,4 +65,8 @@ CDKSessionMetadata *metadata = [CDKConsoleDock sessionMetadata];
 NSLog(@"ConsoleDock session: %@", metadata.sessionIdentifier);
 ```
 
-Markers are native info entries with a stable `[marker]` prefix. The bundled UIKit console can also create markers and share a local issue report with session metadata, diagnostics, markers, and currently retained redacted logs.
+Markers are native info entries with a stable `[marker]` prefix. The bundled UIKit console can also create markers, share a local issue report, or copy the report text with session metadata, diagnostics, markers, and currently retained redacted logs.
+
+```objc
+NSString *report = [CDKConsoleDockUIKit issueReportText];
+```

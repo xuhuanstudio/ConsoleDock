@@ -91,6 +91,8 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
         let actionsTable = app.tables["consoledock.actions-table"]
         XCTAssertTrue(actionsTable.waitForExistence(timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "Generate Smoke Logs", in: actionsTable, timeout: 5))
+        XCTAssertTrue(waitForTableEntry(containing: "Disabled Placeholder", in: actionsTable, timeout: 5))
+        XCTAssertTrue(waitForTableEntry(containing: "Disabled", in: actionsTable, timeout: 5))
         tableStaticText(containing: "Generate Smoke Logs", in: actionsTable).tap()
 
         modeControl.buttons["Logs"].tap()
@@ -98,6 +100,7 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
 
         modeControl.buttons["Actions"].tap()
         XCTAssertTrue(waitForTableEntry(containing: "Clear Entries", in: actionsTable, timeout: 5))
+        XCTAssertTrue(waitForTableEntry(containing: "Destructive", in: actionsTable, timeout: 5))
         tableStaticText(containing: "Clear Entries", in: actionsTable).tap()
         XCTAssertTrue(app.alerts.firstMatch.waitForExistence(timeout: 5))
         app.alerts.firstMatch.buttons["consoledock.cancel-action"].firstMatch.tap()
@@ -121,6 +124,7 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
         XCTAssertTrue(shareButton.waitForExistence(timeout: 5))
         shareButton.tap()
         XCTAssertTrue(app.buttons["consoledock.share-issue-report"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["consoledock.copy-issue-report"].waitForExistence(timeout: 5))
     }
 
     private func waitForTableEntry(in table: XCUIElement, timeout: TimeInterval) -> Bool {

@@ -182,6 +182,32 @@ FOUNDATION_EXPORT NSNotificationName const CDKConsoleDockDiagnosticsDidChangeNot
 
 @end
 
+@interface CDKLogForwarder : NSObject
+
+/// Optional single-line category prefix added to forwarded messages.
+@property (nonatomic, copy, readonly, nullable) NSString *category;
+/// Lowest severity forwarded into ConsoleDock.
+@property (nonatomic, readonly) CDKLogLevel minimumLevel;
+
+- (instancetype)init;
+- (instancetype)initWithCategory:(nullable NSString *)category
+                    minimumLevel:(CDKLogLevel)minimumLevel NS_DESIGNATED_INITIALIZER;
+
+/// Forwards a message to ConsoleDock when the level is at or above minimumLevel.
+- (void)logWithLevel:(CDKLogLevel)level message:(NSString *)message;
+/// Forwards a debug message when enabled by minimumLevel.
+- (void)debug:(NSString *)message;
+/// Forwards an info message when enabled by minimumLevel.
+- (void)info:(NSString *)message;
+/// Forwards a warning message when enabled by minimumLevel.
+- (void)warning:(NSString *)message;
+/// Forwards an error message when enabled by minimumLevel.
+- (void)error:(NSString *)message;
+/// Forwards a fault message when enabled by minimumLevel.
+- (void)fault:(NSString *)message;
+
+@end
+
 @interface CDKLineEvent : NSObject <NSCopying>
 
 /// The descriptor source that produced this framed line.

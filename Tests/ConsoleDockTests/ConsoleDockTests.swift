@@ -873,6 +873,59 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertEqual(entry?.truncated, true)
     }
 
+    func testSwiftLogForwarderPrefixesCategoryAndFiltersMinimumLevel() {
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+        let forwarder = ConsoleDock.LogForwarder(category: " App\nLog ", minimumLevel: .warning)
+
+        forwarder.debug("ignored debug")
+        forwarder.info("ignored info")
+        forwarder.warning("cache warming")
+        forwarder.error("request failed")
+
+        XCTAssertEqual(ConsoleDock.entries.map(\.level), [.warning, .error])
+        XCTAssertEqual(ConsoleDock.entries.map(\.message), ["[App Log] cache warming", "[App Log] request failed"])
+        XCTAssertEqual(forwarder.category, "App Log")
+        XCTAssertEqual(forwarder.minimumLevel, .warning)
+    }
+
+    func testSwiftLogForwarderConvenienceMethodsForwardNativeEntries() {
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+        let forwarder = ConsoleDock.LogForwarder()
+
+        forwarder.debug("debug")
+        forwarder.info("info")
+        forwarder.warning("warning")
+        forwarder.error("error")
+        forwarder.fault("fault")
+
+        XCTAssertEqual(ConsoleDock.entries.map(\.level), [.debug, .info, .warning, .error, .fault])
+        XCTAssertEqual(ConsoleDock.entries.map(\.message), ["debug", "info", "warning", "error", "fault"])
+    }
+
+    func testIssueReportTextIncludesCurrentSessionAndEntries() {
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+        ConsoleDock.mark("Open checkout")
+        ConsoleDock.error("Checkout failed")
+
+        let report = ConsoleDock.issueReportText()
+
+        XCTAssertTrue(report.contains("ConsoleDock Issue Report"))
+        XCTAssertTrue(report.contains("Session ID:"))
+        XCTAssertTrue(report.contains("Markers:"))
+        XCTAssertTrue(report.contains("[marker] Open checkout"))
+        XCTAssertTrue(report.contains("Checkout failed"))
+    }
+
+    func testObjectiveCUIKitFacadeIssueReportTextUsesSharedReportFormatter() {
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+        ConsoleDock.info("ObjC facade report")
+
+        let report = ConsoleDockUIKit.issueReportText()
+
+        XCTAssertTrue(report.contains("ConsoleDock Issue Report"))
+        XCTAssertTrue(report.contains("ObjC facade report"))
+    }
+
     func testDebugActionRegistrationStoresMetadata() {
         ConsoleDock.registerAction(
             id: "open.checkout",
@@ -1003,6 +1056,44 @@ final class ConsoleDockTests: XCTestCase {
 
         XCTAssertEqual(ConsoleDock.debugActions.first?.requiresConfirmation, true)
         ConsoleDock.performDebugAction(id: "danger")
+
+        XCTAssertTrue(didRun)
+    }
+
+    func testDisabledDebugActionDoesNotRunAndLogsSkipped() {
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+        var didRun = false
+        ConsoleDock.registerAction(
+            id: "disabled",
+            title: "Disabled Action",
+            isEnabled: false
+        ) {
+            didRun = true
+        }
+
+        XCTAssertEqual(ConsoleDock.debugActions.first?.isEnabled, false)
+        ConsoleDock.performDebugAction(id: "disabled")
+
+        XCTAssertFalse(didRun)
+        XCTAssertEqual(
+            ConsoleDock.entries.map(\.message),
+            ["Debug action skipped: Disabled Action [disabled] disabled"]
+        )
+    }
+
+    func testDestructiveDebugActionStyleIsMetadataOnlyForRegistryExecution() {
+        var didRun = false
+        ConsoleDock.registerAction(
+            id: "clear",
+            title: "Clear Entries",
+            style: .destructive
+        ) {
+            didRun = true
+        }
+
+        XCTAssertEqual(ConsoleDock.debugActions.first?.style, .destructive)
+        XCTAssertEqual(ConsoleDock.debugActions.first?.requiresConfirmation, false)
+        ConsoleDock.performDebugAction(id: "clear")
 
         XCTAssertTrue(didRun)
     }

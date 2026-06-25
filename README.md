@@ -15,7 +15,7 @@ ConsoleDock is an early-stage iOS debug SDK that lets testers inspect app logs d
 
 ## Status
 
-ConsoleDock `v0.4.0` is the current source-first Swift Package Manager preview release. It contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, session metadata, manual markers, bounded in-memory entries with stable session identifiers and partial/redacted/truncated flags, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, runtime diagnostics, entry change notification, Debug Actions, log detail, explicit visible/all/issue-report sharing, Release startup safety gates, a UIKit-only floating button/panel foundation, Swift and Objective-C sample apps, DocC documentation, release validation workflow, and focused tests.
+ConsoleDock `v0.5.0` is the current source-first Swift Package Manager preview release. It contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, logger forwarders for existing logger sinks, session metadata, manual markers, bounded in-memory entries with stable session identifiers and partial/redacted/truncated flags, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, runtime diagnostics, entry change notification, Debug Actions with enabled/destructive metadata, log detail, explicit visible/all/issue-report sharing and issue-report copying, Release startup safety gates, a UIKit-only floating button/panel foundation, Swift and Objective-C sample apps, DocC documentation, release validation workflow, and focused tests.
 
 Current limitations:
 
@@ -24,7 +24,7 @@ Current limitations:
 - File-descriptor capture can include framework or runtime warnings written through the app process descriptors, not only application-authored messages.
 - Runtime diagnostics report current ConsoleDock state and bounded in-memory store counts; they are not evidence of complete Swift `Logger`, `os_log`, or Apple unified logging capture.
 - Entry change notification exists as the refresh foundation for UI; notification handlers should fetch a snapshot through `entries`.
-- The UIKit floating button and console panel foundation can show, search, source-filter, level-filter, pause/resume live follow, live refresh, log detail, copy, clear, add manual markers, visible/all/issue-report share/export with diagnostics, Debug Actions, and close the current in-memory snapshot.
+- The UIKit floating button and console panel foundation can show, search, source-filter, level-filter, pause/resume live follow, live refresh, log detail, copy, clear, add manual markers, visible/all/issue-report share/export with diagnostics, copy issue reports, Debug Actions, and close the current in-memory snapshot.
 - Persistence and advanced query syntax are not implemented yet.
 - Third-party adapters, CocoaPods, and XCFramework distribution are not implemented yet.
 - Redaction is a local in-memory baseline, not a complete privacy guarantee.
@@ -63,7 +63,7 @@ Add the public repository URL through Xcode's package dependency UI:
 https://github.com/xuhuanstudio/ConsoleDock.git
 ```
 
-Use the latest release tag from GitHub Releases. `v0.4.0` includes Test Session Reports, manual markers, Debug Actions, log detail, explicit visible/all/issue-report sharing, runtime diagnostics, and release-validation hardening. Then depend on:
+Use the latest release tag from GitHub Releases. `v0.5.0` includes logger forwarders for existing logger sinks, Test Session Reports, manual markers, Debug Actions, log detail, explicit visible/all/issue-report sharing and copying, runtime diagnostics, and release-validation hardening. Then depend on:
 
 - `ConsoleDock` for Swift API plus the bundled UIKit console.
 - `ConsoleDockCore` for Objective-C/C-compatible core APIs.
@@ -103,6 +103,43 @@ NSLog(@"Stored entries: %lu", (unsigned long)diagnostics.entryCount);
 
 Diagnostics are local state only. They do not imply that Swift `Logger`, `os_log`, Apple unified logging, other-process logs, or debugger-only output are captured.
 
+### Forward Existing Logger Output
+
+Logger forwarders are available in `v0.5.0` and later. Add them inside an existing logger sink/appender so old call sites keep using the app's logger.
+
+```swift
+import ConsoleDock
+
+enum AppLog {
+    private static let consoleDock = ConsoleDock.LogForwarder(category: "AppLog", minimumLevel: .info)
+
+    static func info(_ message: String) {
+        print("[info] \(message)")
+        consoleDock.info(message)
+    }
+}
+```
+
+```objc
+@import ConsoleDockCore;
+
+static CDKLogForwarder *AppLogConsoleDockForwarder(void) {
+    static CDKLogForwarder *forwarder;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        forwarder = [[CDKLogForwarder alloc] initWithCategory:@"AppLog" minimumLevel:CDKLogLevelInfo];
+    });
+    return forwarder;
+}
+
+void AppLogInfo(NSString *message) {
+    NSLog(@"%@", message);
+    [AppLogConsoleDockForwarder() info:message];
+}
+```
+
+This does not make ConsoleDock capture Swift `Logger` or Apple unified logging. It gives the app one reliable local destination for messages that the app already decides to log.
+
 ### Register Debug Actions
 
 Debug Actions are available in `v0.3.0` and later. They let an app expose explicit local test shortcuts in the bundled ConsoleDock panel.
@@ -112,13 +149,15 @@ ConsoleDock.registerAction(
     id: "open.checkout",
     title: "Open Checkout",
     group: "Navigation",
-    detail: "Jump to checkout test entry"
+    detail: "Jump to checkout test entry",
+    isEnabled: true,
+    style: .normal
 ) {
     AppRouter.shared.openCheckout()
 }
 ```
 
-Use non-empty stable `id` and `title` values. ConsoleDock trims required action metadata and replaces an existing action when the normalized `id` is registered again.
+Use non-empty stable `id` and `title` values. ConsoleDock trims required action metadata and replaces an existing action when the normalized `id` is registered again. `isEnabled` is useful for showing temporarily unavailable actions without running them, and `.destructive` is UI metadata for actions such as clearing local debug data.
 
 ConsoleDock only stores, displays, and triggers actions registered by the host app. It does not discover screens, take over routing, bypass app permissions, receive remote commands, or act as an automation test framework.
 
@@ -140,7 +179,7 @@ CDKSessionMetadata *metadata = [CDKConsoleDock sessionMetadata];
 NSLog(@"ConsoleDock session: %@", metadata.sessionIdentifier);
 ```
 
-The bundled UIKit console includes `Mark` and `Share Issue Report` actions. The issue report is generated locally through the system share sheet and includes session metadata, diagnostics, a marker index, and all currently retained redacted logs.
+The bundled UIKit console includes `Mark`, `Share Issue Report`, and `Copy Issue Report` actions. The same local report text is available through `ConsoleDock.issueReportText()` and `CDKConsoleDockUIKit.issueReportText`. The issue report includes session metadata, diagnostics, a marker index, and all currently retained redacted logs.
 
 Markers are normal native info entries with a stable `[marker]` prefix, so existing redaction, truncation, detail, search, copy, and share behavior still applies. ConsoleDock does not persist issue reports by default, upload them, or send them anywhere automatically.
 
@@ -261,7 +300,8 @@ ConsoleDock.stop()
 Integrate with existing logging systems by adding a sink/appender/logger target.
 
 ```swift
-ConsoleDock.log(level: .warning, message: "Retrying checkout")
+let consoleDock = ConsoleDock.LogForwarder(category: "AppLog")
+consoleDock.warning("Retrying checkout")
 ```
 
 Examples:
@@ -306,6 +346,9 @@ CDKConfiguration *configuration = [CDKConfiguration defaultConfiguration];
 CDKStartResult result = [CDKConsoleDockUIKit startWithConfiguration:configuration error:nil];
 [CDKConsoleDock info:@"Login succeeded"];
 [CDKConsoleDock fault:@"Invariant failed"];
+CDKLogForwarder *forwarder = [[CDKLogForwarder alloc] initWithCategory:@"AppLog"
+                                                           minimumLevel:CDKLogLevelInfo];
+[forwarder info:@"Forwarded from the app logger"];
 NSArray<CDKLogEntry *> *entries = [CDKConsoleDock entries];
 [CDKConsoleDock clearEntries];
 [CDKConsoleDockUIKit showConsole];

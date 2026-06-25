@@ -76,6 +76,12 @@ public enum ConsoleDock {
         case fault
     }
 
+    /// Visual and semantic treatment for a local debug action.
+    public enum DebugActionStyle: Equatable {
+        case normal
+        case destructive
+    }
+
     /// Where a ConsoleDock entry came from.
     public enum LogSource: Equatable {
         case native
@@ -116,6 +122,67 @@ public enum ConsoleDock {
             self.partial = partial
             self.redacted = redacted
             self.truncated = truncated
+        }
+    }
+
+    /// Lightweight sink for forwarding existing app logger output into ConsoleDock.
+    public struct LogForwarder {
+        /// Optional single-line category prefix added to forwarded messages.
+        public let category: String?
+        /// Lowest severity forwarded into ConsoleDock.
+        public let minimumLevel: LogLevel
+
+        public init(category: String? = nil, minimumLevel: LogLevel = .debug) {
+            self.category = Self.normalizedCategory(category)
+            self.minimumLevel = minimumLevel
+        }
+
+        /// Forwards a message to ConsoleDock when the level is at or above minimumLevel.
+        public func log(level: LogLevel, message: String) {
+            guard level.isAtLeast(minimumLevel) else { return }
+            ConsoleDock.log(level: level, message: formattedMessage(message))
+        }
+
+        /// Forwards a debug message when enabled by minimumLevel.
+        public func debug(_ message: String) {
+            log(level: .debug, message: message)
+        }
+
+        /// Forwards an info message when enabled by minimumLevel.
+        public func info(_ message: String) {
+            log(level: .info, message: message)
+        }
+
+        /// Forwards a warning message when enabled by minimumLevel.
+        public func warning(_ message: String) {
+            log(level: .warning, message: message)
+        }
+
+        /// Forwards an error message when enabled by minimumLevel.
+        public func error(_ message: String) {
+            log(level: .error, message: message)
+        }
+
+        /// Forwards a fault message when enabled by minimumLevel.
+        public func fault(_ message: String) {
+            log(level: .fault, message: message)
+        }
+
+        private func formattedMessage(_ message: String) -> String {
+            guard let category else { return message }
+            return "[\(category)] \(message)"
+        }
+
+        private static func normalizedCategory(_ value: String?) -> String? {
+            guard let value else {
+                return nil
+            }
+
+            let withoutCRLF = value.replacingOccurrences(of: "\r\n", with: " ")
+            let withoutLF = withoutCRLF.replacingOccurrences(of: "\n", with: " ")
+            let withoutCR = withoutLF.replacingOccurrences(of: "\r", with: " ")
+            let trimmed = withoutCR.trimmingCharacters(in: .whitespacesAndNewlines)
+            return trimmed.isEmpty ? nil : trimmed
         }
     }
 
@@ -304,6 +371,15 @@ public enum ConsoleDock {
         CDKConsoleDock.clearEntries()
     }
 
+    /// Builds a local issue report with session metadata, diagnostics, markers, and all retained entries.
+    public static func issueReportText() -> String {
+        ConsoleDockIssueReportFormatter.reportText(
+            entries: entries,
+            metadata: sessionMetadata,
+            diagnostics: diagnostics
+        )
+    }
+
     /// Shows the bundled UIKit console when ConsoleDock is running and UIKit is available.
     public static func showConsole() {
         guard isRunning else { return }
@@ -322,6 +398,8 @@ public enum ConsoleDock {
         group: String? = nil,
         detail: String? = nil,
         requiresConfirmation: Bool = false,
+        isEnabled: Bool = true,
+        style: DebugActionStyle = .normal,
         handler: @escaping () throws -> Void
     ) {
         ConsoleDockDebugActionRegistry.shared.register(
@@ -330,6 +408,8 @@ public enum ConsoleDock {
             group: group,
             detail: detail,
             requiresConfirmation: requiresConfirmation,
+            isEnabled: isEnabled,
+            style: style,
             handler: handler
         )
     }
@@ -458,6 +538,25 @@ extension ConsoleDock.SessionMetadata {
 }
 
 extension ConsoleDock.LogLevel {
+    fileprivate var rank: Int {
+        switch self {
+        case .debug:
+            return 0
+        case .info:
+            return 1
+        case .warning:
+            return 2
+        case .error:
+            return 3
+        case .fault:
+            return 4
+        }
+    }
+
+    fileprivate func isAtLeast(_ minimumLevel: ConsoleDock.LogLevel) -> Bool {
+        rank >= minimumLevel.rank
+    }
+
     fileprivate var coreLevel: CDKLogLevel {
         switch self {
         case .debug:

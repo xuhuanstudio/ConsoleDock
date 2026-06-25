@@ -7,11 +7,22 @@
 @import ConsoleDock;
 @import ConsoleDockCore;
 
+static CDKLogForwarder *SampleAppLogForwarder(void)
+{
+    static CDKLogForwarder *forwarder;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        forwarder = [[CDKLogForwarder alloc] initWithCategory:@"sample app logger"
+                                                 minimumLevel:CDKLogLevelDebug];
+    });
+    return forwarder;
+}
+
 static void SampleAppLogInfo(NSString *message)
 {
     NSString *formattedMessage = [NSString stringWithFormat:@"[sample app logger] %@", message];
     NSLog(@"%@", formattedMessage);
-    [CDKConsoleDock info:formattedMessage];
+    [SampleAppLogForwarder() info:message];
 }
 
 static NSString *const SampleAccessibilityStatusIdentifier = @"objc-sample.status";

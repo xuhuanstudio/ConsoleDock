@@ -17,6 +17,7 @@ REQUIRED_IDENTIFIERS = {
         "consoledock.share-visible-logs",
         "consoledock.share-all-logs",
         "consoledock.share-issue-report",
+        "consoledock.copy-issue-report",
         "consoledock.mark",
         "consoledock.marker-text",
         "consoledock.add-marker",
