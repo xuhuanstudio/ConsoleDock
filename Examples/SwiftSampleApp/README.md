@@ -6,6 +6,7 @@ The sample starts ConsoleDock on launch, enables stdout/stderr capture, shows th
 
 - Native ConsoleDock info/error/fault entries
 - Runtime diagnostics through `ConsoleDock.diagnostics`
+- Debug Actions registered through `ConsoleDock.registerAction`
 - App-specific logger sink forwarding
 - Swift `print` stdout
 - C `printf` stdout
@@ -39,7 +40,7 @@ From the package root:
 scripts/validate-swift-sample-ui-smoke.sh
 ```
 
-The script chooses an available iPhone simulator unless `CONSOLEDOCK_UI_SMOKE_DESTINATION` is set. It launches the app with `--consoledock-ui-smoke` so the test focuses on native ConsoleDock entries, redaction, the bundled panel, search control rendering, level filtering, selected-row tap, pause/resume, clear refresh, and close behavior without stdout/stderr capture descriptor noise.
+The script chooses an available iPhone simulator unless `CONSOLEDOCK_UI_SMOKE_DESTINATION` is set. It launches the app with `--consoledock-ui-smoke` so the test focuses on native ConsoleDock entries, redaction, the bundled panel, search control rendering, level filtering, log detail, Debug Actions, pause/resume, clear refresh, and close behavior without stdout/stderr capture descriptor noise.
 
 ## Manual Check
 

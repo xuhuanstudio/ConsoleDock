@@ -41,6 +41,39 @@ public final class ConsoleDockUIKit: NSObject {
         hideConsoleIfAvailable()
     }
 
+    /// Registers a local debug action shown by the bundled UIKit console.
+    @objc(registerActionWithIdentifier:title:group:detail:requiresConfirmation:handler:)
+    public static func registerAction(
+        identifier: String,
+        title: String,
+        group: String?,
+        detail: String?,
+        requiresConfirmation: Bool,
+        handler: @escaping () -> Void
+    ) {
+        ConsoleDock.registerAction(
+            id: identifier,
+            title: title,
+            group: group,
+            detail: detail,
+            requiresConfirmation: requiresConfirmation
+        ) {
+            handler()
+        }
+    }
+
+    /// Removes a previously registered local debug action.
+    @objc(unregisterActionWithIdentifier:)
+    public static func unregisterAction(identifier: String) {
+        ConsoleDock.unregisterAction(id: identifier)
+    }
+
+    /// Removes all registered local debug actions.
+    @objc(removeAllActions)
+    public static func removeAllActions() {
+        ConsoleDock.removeAllActions()
+    }
+
     private static func shouldInstallUI(configuration: CDKConfiguration?, result: CDKStartResult) -> Bool {
         let showsFloatingButton = configuration?.showsFloatingButton ?? CDKConfiguration().showsFloatingButton
         return showsFloatingButton && (result == .started || result == .alreadyRunning)

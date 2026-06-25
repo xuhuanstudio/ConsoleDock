@@ -258,6 +258,35 @@ public enum ConsoleDock {
         hideConsoleIfAvailable()
     }
 
+    /// Registers a local debug action shown by the bundled UIKit console.
+    public static func registerAction(
+        id: String,
+        title: String,
+        group: String? = nil,
+        detail: String? = nil,
+        requiresConfirmation: Bool = false,
+        handler: @escaping () throws -> Void
+    ) {
+        ConsoleDockDebugActionRegistry.shared.register(
+            id: id,
+            title: title,
+            group: group,
+            detail: detail,
+            requiresConfirmation: requiresConfirmation,
+            handler: handler
+        )
+    }
+
+    /// Removes a previously registered local debug action.
+    public static func unregisterAction(id: String) {
+        ConsoleDockDebugActionRegistry.shared.unregister(id: id)
+    }
+
+    /// Removes all registered local debug actions.
+    public static func removeAllActions() {
+        ConsoleDockDebugActionRegistry.shared.removeAll()
+    }
+
     /// Appends a native debug entry.
     public static func debug(_ message: String) {
         CDKConsoleDock.debug(message)

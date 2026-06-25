@@ -2,19 +2,6 @@
     import ConsoleDockCore
     import UIKit
 
-    private enum ConsoleDockAccessibilityIdentifiers {
-        static let dockButton = "consoledock.dock-button"
-        static let closeButton = "consoledock.close"
-        static let shareButton = "consoledock.share"
-        static let clearButton = "consoledock.clear"
-        static let pauseLiveButton = "consoledock.pause-live"
-        static let resumeLiveButton = "consoledock.resume-live"
-        static let searchBar = "consoledock.search"
-        static let levelFilter = "consoledock.level-filter"
-        static let status = "consoledock.status"
-        static let entriesTable = "consoledock.entries-table"
-    }
-
     final class ConsoleDockUIController {
         static let shared = ConsoleDockUIController()
 
@@ -215,64 +202,21 @@
         }
     }
 
-    private final class ConsoleDockPanelViewController: UIViewController, UITableViewDataSource, UITableViewDelegate,
-        UISearchResultsUpdating, UISearchBarDelegate
-    {
+    private final class ConsoleDockPanelViewController: UIViewController {
         var onClose: (() -> Void)?
 
-        private let tableView = UITableView(frame: .zero, style: .plain)
-        private let searchController = UISearchController(searchResultsController: nil)
-        private let levelSegmentedControl = UISegmentedControl(
-            items: ConsoleDockEntryFilter.LevelScope.allCases.map(\.title)
-        )
-        private let statusLabel = UILabel()
-        private var liveUpdateBuffer = ConsoleDockLiveUpdateBuffer()
-        private var visibleEntries: [ConsoleDock.LogEntry] = []
-        private var searchQuery = ""
-        private var sourceScope = ConsoleDockEntryFilter.SourceScope.all
-        private var levelScope = ConsoleDockEntryFilter.LevelScope.all
-        private var observer: ConsoleDockEntriesObserver?
-        private var diagnosticsObserver: NSObjectProtocol?
-        private var pauseButton: UIBarButtonItem?
-        private var shareButton: UIBarButtonItem?
-        private var clearButton: UIBarButtonItem?
-        private let formatter: DateFormatter = {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "HH:mm:ss.SSS"
-            return formatter
-        }()
+        private let modeControl = UISegmentedControl(items: ["Logs", "Actions"])
+        private let logsViewController = ConsoleDockLogsViewController()
+        private let actionsViewController = ConsoleDockActionsViewController()
+        private var currentViewController: UIViewController?
 
         override func viewDidLoad() {
             super.viewDidLoad()
             title = "ConsoleDock"
-            view.backgroundColor = UIColor(white: 0.06, alpha: 1)
+            view.backgroundColor = ConsoleDockUIColors.background
             configureNavigationItems()
-            configureSearchController()
-            configureLevelSegmentedControl()
-            configureStatusLabel()
-            configureTableView()
-            observer = ConsoleDockEntriesObserver(deliveryQueue: .main) { [weak self] snapshot in
-                self?.receive(snapshot: snapshot)
-            }
-            diagnosticsObserver = NotificationCenter.default.addObserver(
-                forName: ConsoleDock.diagnosticsDidChangeNotification,
-                object: CDKConsoleDock.self,
-                queue: .main
-            ) { [weak self] _ in
-                self?.updateStatusHeader()
-            }
-        }
-
-        override func viewWillAppear(_ animated: Bool) {
-            super.viewWillAppear(animated)
-            updateStatusHeader()
-        }
-
-        deinit {
-            observer?.invalidate()
-            if let diagnosticsObserver {
-                NotificationCenter.default.removeObserver(diagnosticsObserver)
-            }
+            configureModeControl()
+            showLogs()
         }
 
         private func configureNavigationItems() {
@@ -284,289 +228,65 @@
             closeButton.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.closeButton
             navigationItem.leftBarButtonItem = closeButton
 
-            let shareButton = UIBarButtonItem(
-                barButtonSystemItem: .action,
-                target: self,
-                action: #selector(shareSnapshot)
-            )
-            shareButton.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.shareButton
-            shareButton.isEnabled = false
-            self.shareButton = shareButton
-
-            let clearButton = UIBarButtonItem(
-                title: "Clear",
-                style: .plain,
-                target: self,
-                action: #selector(clear)
-            )
-            clearButton.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.clearButton
-            self.clearButton = clearButton
-
-            let pauseButton = makePauseButton()
-            self.pauseButton = pauseButton
-            navigationItem.rightBarButtonItems = [clearButton, shareButton, pauseButton]
+            logsViewController.navigationItemsDidChange = { [weak self] items in
+                guard self?.modeControl.selectedSegmentIndex == 0 else { return }
+                self?.navigationItem.rightBarButtonItems = items
+            }
         }
 
-        private func configureSearchController() {
-            searchController.searchResultsUpdater = self
-            searchController.obscuresBackgroundDuringPresentation = false
-            searchController.searchBar.placeholder = "Search logs"
-            searchController.searchBar.scopeButtonTitles = ConsoleDockEntryFilter.SourceScope.allCases.map(\.title)
-            searchController.searchBar.delegate = self
-            searchController.searchBar.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.searchBar
-            navigationItem.searchController = searchController
-            navigationItem.hidesSearchBarWhenScrolling = false
-            definesPresentationContext = true
+        private func configureModeControl() {
+            modeControl.selectedSegmentIndex = 0
+            modeControl.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.modeControl
+            modeControl.addTarget(self, action: #selector(modeDidChange), for: .valueChanged)
+            navigationItem.titleView = modeControl
         }
 
-        private func configureLevelSegmentedControl() {
-            levelSegmentedControl.translatesAutoresizingMaskIntoConstraints = false
-            levelSegmentedControl.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.levelFilter
-            levelSegmentedControl.selectedSegmentIndex = ConsoleDockEntryFilter.LevelScope.all.rawValue
-            levelSegmentedControl.backgroundColor = UIColor(white: 0.1, alpha: 1)
-            levelSegmentedControl.setTitleTextAttributes([.foregroundColor: UIColor.white], for: .selected)
-            levelSegmentedControl.setTitleTextAttributes(
-                [.foregroundColor: UIColor(white: 0.82, alpha: 1)], for: .normal)
-            levelSegmentedControl.addTarget(self, action: #selector(levelScopeDidChange), for: .valueChanged)
-            view.addSubview(levelSegmentedControl)
-        }
-
-        private func configureStatusLabel() {
-            statusLabel.translatesAutoresizingMaskIntoConstraints = false
-            statusLabel.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.status
-            statusLabel.isAccessibilityElement = true
-            statusLabel.numberOfLines = 0
-            statusLabel.font = ConsoleDockFonts.monospace(size: 10, weight: .regular)
-            statusLabel.textColor = UIColor(white: 0.78, alpha: 1)
-            statusLabel.backgroundColor = UIColor(white: 0.08, alpha: 1)
-            statusLabel.layer.cornerRadius = 6
-            statusLabel.layer.masksToBounds = true
-            updateStatusLabelText(
-                ConsoleDockDiagnosticsFormatter.statusText(
-                    diagnostics: ConsoleDock.diagnostics,
-                    visibleEntryCount: 0,
-                    isPaused: false
-                )
-            )
-            view.addSubview(statusLabel)
-        }
-
-        private func configureTableView() {
-            tableView.translatesAutoresizingMaskIntoConstraints = false
-            tableView.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.entriesTable
-            tableView.backgroundColor = UIColor(white: 0.06, alpha: 1)
-            tableView.separatorColor = UIColor(white: 0.18, alpha: 1)
-            tableView.dataSource = self
-            tableView.delegate = self
-            tableView.rowHeight = UITableView.automaticDimension
-            tableView.estimatedRowHeight = 54
-            view.addSubview(tableView)
-
-            NSLayoutConstraint.activate([
-                levelSegmentedControl.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
-                levelSegmentedControl.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
-                levelSegmentedControl.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
-                levelSegmentedControl.heightAnchor.constraint(equalToConstant: 32),
-                statusLabel.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
-                statusLabel.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
-                statusLabel.topAnchor.constraint(equalTo: levelSegmentedControl.bottomAnchor, constant: 8),
-                tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-                tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-                tableView.topAnchor.constraint(equalTo: statusLabel.bottomAnchor, constant: 8),
-                tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-            ])
-        }
-
-        private func receive(snapshot: [ConsoleDock.LogEntry]) {
-            if liveUpdateBuffer.receive(snapshot: snapshot) {
-                reloadVisibleEntries(scrollToBottom: true)
+        @objc private func modeDidChange() {
+            if modeControl.selectedSegmentIndex == 0 {
+                showLogs()
             } else {
-                updateStatusHeader()
+                showActions()
             }
         }
 
-        private func reloadVisibleEntries(scrollToBottom: Bool) {
-            visibleEntries = ConsoleDockEntryFilter.filteredEntries(
-                liveUpdateBuffer.displayedEntries,
-                query: searchQuery,
-                sourceScope: sourceScope,
-                levelScope: levelScope
-            )
-            shareButton?.isEnabled = !visibleEntries.isEmpty
-            updateStatusHeader()
-            tableView.reloadData()
-            guard scrollToBottom, !visibleEntries.isEmpty else { return }
-            let indexPath = IndexPath(row: visibleEntries.count - 1, section: 0)
-            tableView.scrollToRow(at: indexPath, at: .bottom, animated: false)
+        private func showLogs() {
+            modeControl.selectedSegmentIndex = 0
+            switchTo(logsViewController)
+            logsViewController.activateSearch(in: navigationItem)
         }
 
-        @objc private func clear() {
-            ConsoleDock.clear()
-            if ConsoleDock.entries.isEmpty {
-                liveUpdateBuffer.replaceDisplayedEntries([])
-                reloadVisibleEntries(scrollToBottom: false)
+        private func showActions() {
+            modeControl.selectedSegmentIndex = 1
+            switchTo(actionsViewController)
+            logsViewController.deactivateSearch()
+            navigationItem.searchController = nil
+            navigationItem.rightBarButtonItems = []
+        }
+
+        private func switchTo(_ nextViewController: UIViewController) {
+            guard currentViewController !== nextViewController else { return }
+            if let currentViewController {
+                currentViewController.willMove(toParent: nil)
+                currentViewController.view.removeFromSuperview()
+                currentViewController.removeFromParent()
             }
+
+            addChild(nextViewController)
+            nextViewController.view.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview(nextViewController.view)
+            NSLayoutConstraint.activate([
+                nextViewController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                nextViewController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                nextViewController.view.topAnchor.constraint(equalTo: view.topAnchor),
+                nextViewController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            ])
+            nextViewController.didMove(toParent: self)
+            currentViewController = nextViewController
         }
 
         @objc private func close() {
             dismiss(animated: true) { [weak self] in
                 self?.onClose?()
-            }
-        }
-
-        @objc private func shareSnapshot() {
-            guard !visibleEntries.isEmpty else { return }
-            let snapshot = ConsoleDockSnapshotFormatter.snapshotText(
-                entries: visibleEntries,
-                diagnostics: ConsoleDock.diagnostics,
-                visibleEntryCount: visibleEntries.count
-            )
-            let activityController = UIActivityViewController(activityItems: [snapshot], applicationActivities: nil)
-            activityController.popoverPresentationController?.barButtonItem = shareButton
-            present(activityController, animated: true)
-        }
-
-        @objc private func toggleLiveUpdates() {
-            if liveUpdateBuffer.isPaused {
-                liveUpdateBuffer.resume(latestEntries: ConsoleDock.entries)
-                updatePauseButton()
-                reloadVisibleEntries(scrollToBottom: true)
-            } else {
-                liveUpdateBuffer.pause()
-                updatePauseButton()
-                updateStatusHeader()
-            }
-        }
-
-        private func makePauseButton() -> UIBarButtonItem {
-            let item = UIBarButtonItem(
-                barButtonSystemItem: liveUpdateBuffer.isPaused ? .play : .pause,
-                target: self,
-                action: #selector(toggleLiveUpdates)
-            )
-            item.accessibilityLabel = liveUpdateBuffer.isPaused ? "Resume Live Updates" : "Pause Live Updates"
-            item.accessibilityIdentifier =
-                liveUpdateBuffer.isPaused
-                ? ConsoleDockAccessibilityIdentifiers.resumeLiveButton
-                : ConsoleDockAccessibilityIdentifiers.pauseLiveButton
-            return item
-        }
-
-        private func updatePauseButton() {
-            let pauseButton = makePauseButton()
-            self.pauseButton = pauseButton
-            navigationItem.rightBarButtonItems = [clearButton, shareButton, pauseButton].compactMap { $0 }
-        }
-
-        func updateSearchResults(for searchController: UISearchController) {
-            searchQuery = searchController.searchBar.text ?? ""
-            reloadVisibleEntries(scrollToBottom: false)
-        }
-
-        func searchBar(_ searchBar: UISearchBar, selectedScopeButtonIndexDidChange selectedScope: Int) {
-            sourceScope = ConsoleDockEntryFilter.SourceScope(rawValue: selectedScope) ?? .all
-            reloadVisibleEntries(scrollToBottom: false)
-        }
-
-        @objc private func levelScopeDidChange() {
-            levelScope = ConsoleDockEntryFilter.LevelScope(rawValue: levelSegmentedControl.selectedSegmentIndex) ?? .all
-            reloadVisibleEntries(scrollToBottom: false)
-        }
-
-        private func updateStatusHeader() {
-            updateStatusLabelText(
-                ConsoleDockDiagnosticsFormatter.statusText(
-                    diagnostics: ConsoleDock.diagnostics,
-                    visibleEntryCount: visibleEntries.count,
-                    isPaused: liveUpdateBuffer.isPaused
-                )
-            )
-        }
-
-        private func updateStatusLabelText(_ text: String) {
-            statusLabel.text = text
-            statusLabel.accessibilityLabel = text
-        }
-
-        func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-            visibleEntries.count
-        }
-
-        func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-            let reuseIdentifier = "ConsoleDockEntryCell"
-            let cell =
-                tableView.dequeueReusableCell(withIdentifier: reuseIdentifier)
-                ?? UITableViewCell(style: .subtitle, reuseIdentifier: reuseIdentifier)
-            let entry = visibleEntries[indexPath.row]
-            cell.backgroundColor = UIColor(white: 0.06, alpha: 1)
-            cell.textLabel?.numberOfLines = 0
-            cell.textLabel?.font = ConsoleDockFonts.monospace(size: 12, weight: .regular)
-            cell.textLabel?.textColor = .white
-            cell.textLabel?.text = entry.message
-            cell.selectionStyle = .default
-            cell.detailTextLabel?.font = ConsoleDockFonts.monospace(size: 10, weight: .regular)
-            cell.detailTextLabel?.textColor = color(for: entry.level)
-            cell.detailTextLabel?.text =
-                "\(formatter.string(from: entry.timestamp))  \(entry.source.label)  \(entry.level.label)"
-            return cell
-        }
-
-        func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-            guard visibleEntries.indices.contains(indexPath.row) else { return }
-            UIPasteboard.general.string = ConsoleDockSnapshotFormatter.entryText(visibleEntries[indexPath.row])
-            UIAccessibility.post(notification: .announcement, argument: "Copied log entry")
-            tableView.deselectRow(at: indexPath, animated: true)
-        }
-
-        private func color(for level: ConsoleDock.LogLevel) -> UIColor {
-            switch level {
-            case .debug:
-                return UIColor(white: 0.65, alpha: 1)
-            case .info:
-                return UIColor(red: 0.42, green: 0.76, blue: 1.0, alpha: 1)
-            case .warning:
-                return UIColor(red: 1.0, green: 0.75, blue: 0.25, alpha: 1)
-            case .error, .fault:
-                return UIColor(red: 1.0, green: 0.36, blue: 0.32, alpha: 1)
-            }
-        }
-    }
-
-    private enum ConsoleDockFonts {
-        static func monospace(size: CGFloat, weight: UIFont.Weight) -> UIFont {
-            if #available(iOS 13.0, *) {
-                return .monospacedSystemFont(ofSize: size, weight: weight)
-            }
-            return UIFont(name: "Menlo", size: size) ?? .systemFont(ofSize: size, weight: weight)
-        }
-    }
-
-    extension ConsoleDock.LogLevel {
-        fileprivate var label: String {
-            switch self {
-            case .debug:
-                return "DEBUG"
-            case .info:
-                return "INFO"
-            case .warning:
-                return "WARN"
-            case .error:
-                return "ERROR"
-            case .fault:
-                return "FAULT"
-            }
-        }
-    }
-
-    extension ConsoleDock.LogSource {
-        fileprivate var label: String {
-            switch self {
-            case .native:
-                return "native"
-            case .stdout:
-                return "stdout"
-            case .stderr:
-                return "stderr"
             }
         }
     }

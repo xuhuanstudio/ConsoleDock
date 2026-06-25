@@ -14,7 +14,9 @@ struct ConsoleDockSnapshotFormatter {
 
         if let diagnostics {
             lines.append("Entries: \(diagnostics.entryCount)")
-            lines.append("Visible Entries: \(visibleEntryCount ?? entries.count)")
+            if let visibleEntryCount {
+                lines.append("Visible Entries: \(visibleEntryCount)")
+            }
             lines.append(contentsOf: ConsoleDockDiagnosticsFormatter.snapshotLines(diagnostics: diagnostics))
             lines.append("")
         } else {
@@ -32,11 +34,26 @@ struct ConsoleDockSnapshotFormatter {
     }
 
     static func entryText(_ entry: ConsoleDock.LogEntry) -> String {
-        "[\(timestampString(entry.timestamp))] [\(sourceLabel(entry.source))] [\(levelLabel(entry.level))] \(singleLine(entry.message))"
+        let metadata = entryFlagText(entry).map { " [\($0)]" } ?? ""
+        let prefix =
+            "[\(timestampText(entry.timestamp))] [\(sourceLabel(entry.source))] [\(levelLabel(entry.level))]"
+        return "\(prefix)\(metadata) \(singleLine(entry.message))"
+    }
+
+    static func entryDetailText(_ entry: ConsoleDock.LogEntry) -> String {
+        metadataLines(entry).joined(separator: "\n") + "\n\n" + entry.message
+    }
+
+    static func metadataText(_ entry: ConsoleDock.LogEntry) -> String {
+        metadataLines(entry).joined(separator: "\n")
+    }
+
+    static func timestampText(_ date: Date) -> String {
+        timestampFormatter.string(from: date)
     }
 
     private static func timestampString(_ date: Date) -> String {
-        timestampFormatter.string(from: date)
+        timestampText(date)
     }
 
     private static let timestampFormatter: ISO8601DateFormatter = {
@@ -51,6 +68,31 @@ struct ConsoleDockSnapshotFormatter {
             .replacingOccurrences(of: "\r\n", with: "\\n")
             .replacingOccurrences(of: "\n", with: "\\n")
             .replacingOccurrences(of: "\r", with: "\\n")
+    }
+
+    private static func metadataLines(_ entry: ConsoleDock.LogEntry) -> [String] {
+        [
+            "Time: \(timestampText(entry.timestamp))",
+            "Source: \(sourceLabel(entry.source))",
+            "Level: \(levelLabel(entry.level))",
+            "Partial: \(entry.partial)",
+            "Redacted: \(entry.redacted)",
+            "Truncated: \(entry.truncated)"
+        ]
+    }
+
+    private static func entryFlagText(_ entry: ConsoleDock.LogEntry) -> String? {
+        var flags: [String] = []
+        if entry.partial {
+            flags.append("partial")
+        }
+        if entry.redacted {
+            flags.append("redacted")
+        }
+        if entry.truncated {
+            flags.append("truncated")
+        }
+        return flags.isEmpty ? nil : flags.joined(separator: " ")
     }
 
     private static func levelLabel(_ level: ConsoleDock.LogLevel) -> String {

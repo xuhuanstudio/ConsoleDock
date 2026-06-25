@@ -22,7 +22,7 @@ Reasoning:
 
 - familiar to iOS open-source users;
 - permissive for commercial app adoption;
-- compatible with SDK distribution through SPM, CocoaPods, and XCFramework;
+- compatible with the current SPM-first distribution model, while leaving CocoaPods and XCFramework as demand-driven evaluations only;
 - low friction for global contributors.
 
 Before public release, add:

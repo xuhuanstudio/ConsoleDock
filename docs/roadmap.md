@@ -53,7 +53,31 @@ Not included:
 - large third-party adapter suite.
 - network request inspection.
 
-## Post-v0.2 - Demand-Driven Compatibility Candidates
+## v0.3 - Functional Console Upgrade
+
+Goal: make the bundled console useful as a local test and debugging surface, not only a log list.
+
+Deliverables:
+
+- log detail screen for full-message viewing and copy actions.
+- explicit share choices for visible logs and all logs.
+- grouped Debug Actions registered by the host app.
+- Swift and Objective-C/UIKit Debug Actions registration APIs.
+- confirmation prompts for dangerous actions.
+- action start/completion/failure entries written back into ConsoleDock logs.
+- Swift and Objective-C sample actions for smoke logs, diagnostics, simulated errors, and clearing entries.
+- focused UI smoke coverage for Logs and Actions flows.
+
+Not included:
+
+- automatic route discovery.
+- remote command delivery.
+- parameterized command forms.
+- network inspector.
+- crash reporting.
+- CocoaPods or XCFramework distribution.
+
+## Post-v0.3 - Demand-Driven Compatibility Candidates
 
 Goal: improve adoption in existing apps only when real integration feedback shows SPM and the current explicit API are not enough.
 

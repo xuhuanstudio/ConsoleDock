@@ -53,7 +53,12 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         XCTAssertTrue(waitForTableEntry(containing: "objc native info", in: entriesTable, timeout: 5))
         let redactedEntry = tableStaticText(containing: "token=<redacted>", in: entriesTable)
         redactedEntry.tap()
-        XCTAssertTrue(redactedEntry.exists)
+        XCTAssertTrue(app.textViews["consoledock.entry-detail.message"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["consoledock.copy-message"].waitForExistence(timeout: 5))
+        app.buttons["consoledock.copy-message"].tap()
+        XCTAssertTrue(app.buttons["consoledock.copy-entry"].waitForExistence(timeout: 5))
+        tapBackButton(in: app)
+        XCTAssertTrue(entriesTable.waitForExistence(timeout: 5))
 
         let pauseButton = app.buttons["consoledock.pause-live"]
         XCTAssertTrue(pauseButton.waitForExistence(timeout: 5))
@@ -69,6 +74,30 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         clearButton.tap()
         XCTAssertTrue(waitForNoTableEntries(in: entriesTable, timeout: 5))
         XCTAssertTrue(waitForLabel(containing: "Entries: 0 visible 0", in: statusLabel, timeout: 5))
+
+        let modeControl = app.segmentedControls["consoledock.mode-control"]
+        XCTAssertTrue(modeControl.waitForExistence(timeout: 5))
+        modeControl.buttons["Actions"].tap()
+
+        let actionsTable = app.tables["consoledock.actions-table"]
+        XCTAssertTrue(actionsTable.waitForExistence(timeout: 5))
+        XCTAssertTrue(waitForTableEntry(containing: "Generate Smoke Logs", in: actionsTable, timeout: 5))
+        tableStaticText(containing: "Generate Smoke Logs", in: actionsTable).tap()
+
+        modeControl.buttons["Logs"].tap()
+        XCTAssertTrue(waitForTableEntry(containing: "objc debug action smoke error", in: entriesTable, timeout: 5))
+
+        modeControl.buttons["Actions"].tap()
+        XCTAssertTrue(waitForTableEntry(containing: "Clear Entries", in: actionsTable, timeout: 5))
+        tableStaticText(containing: "Clear Entries", in: actionsTable).tap()
+        XCTAssertTrue(app.alerts.firstMatch.waitForExistence(timeout: 5))
+        app.alerts.firstMatch.buttons["consoledock.cancel-action"].firstMatch.tap()
+        XCTAssertFalse(app.alerts.firstMatch.waitForExistence(timeout: 2))
+        tableStaticText(containing: "Clear Entries", in: actionsTable).tap()
+        XCTAssertTrue(app.alerts.firstMatch.waitForExistence(timeout: 5))
+        app.alerts.firstMatch.buttons["consoledock.confirm-action"].firstMatch.tap()
+        modeControl.buttons["Logs"].tap()
+        XCTAssertTrue(waitForTableEntry(containing: "Debug action completed: Clear Entries", in: entriesTable, timeout: 5))
 
         let closeButton = app.buttons["consoledock.close"]
         XCTAssertTrue(closeButton.waitForExistence(timeout: 5))
@@ -140,5 +169,13 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
             RunLoop.current.run(until: Date().addingTimeInterval(0.1))
         } while Date() < deadline
         return false
+    }
+
+    private func tapBackButton(in app: XCUIApplication) {
+        if app.navigationBars.buttons["ConsoleDock"].exists {
+            app.navigationBars.buttons["ConsoleDock"].tap()
+        } else {
+            app.navigationBars.buttons.element(boundBy: 0).tap()
+        }
     }
 }

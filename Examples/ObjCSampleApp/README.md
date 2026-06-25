@@ -11,6 +11,7 @@ The app starts ConsoleDock on launch, enables stdout/stderr capture, shows the f
 
 - Native `CDKConsoleDock` info/error/fault entries
 - Runtime diagnostics through `CDKDiagnostics`
+- Debug Actions registered through `CDKConsoleDockUIKit`
 - App-specific logger sink forwarding
 - C `printf` stdout
 - C `fprintf(stderr)` stderr
@@ -45,7 +46,7 @@ From the package root:
 scripts/validate-objc-sample-ui-smoke.sh
 ```
 
-The script chooses an available iPhone simulator unless `CONSOLEDOCK_UI_SMOKE_DESTINATION` is set. It launches the app with `--consoledock-ui-smoke` so the test focuses on native `CDKConsoleDock` entries, redaction, the bundled panel, search control rendering, level filtering, selected-row tap, pause/resume, clear refresh, and close behavior without stdout/stderr capture descriptor noise.
+The script chooses an available iPhone simulator unless `CONSOLEDOCK_UI_SMOKE_DESTINATION` is set. It launches the app with `--consoledock-ui-smoke` so the test focuses on native `CDKConsoleDock` entries, redaction, the bundled panel, search control rendering, level filtering, log detail, Debug Actions, pause/resume, clear refresh, and close behavior without stdout/stderr capture descriptor noise.
 
 ## Manual Check
 

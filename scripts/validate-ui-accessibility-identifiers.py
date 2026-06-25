@@ -10,10 +10,12 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 REQUIRED_IDENTIFIERS = {
-    pathlib.Path("Sources/ConsoleDock/ConsoleDockUIController.swift"): [
+    pathlib.Path("Sources/ConsoleDock/ConsoleDockUIShared.swift"): [
         "consoledock.dock-button",
         "consoledock.close",
         "consoledock.share",
+        "consoledock.share-visible-logs",
+        "consoledock.share-all-logs",
         "consoledock.clear",
         "consoledock.pause-live",
         "consoledock.resume-live",
@@ -21,6 +23,14 @@ REQUIRED_IDENTIFIERS = {
         "consoledock.level-filter",
         "consoledock.status",
         "consoledock.entries-table",
+        "consoledock.empty-state",
+        "consoledock.mode-control",
+        "consoledock.actions-table",
+        "consoledock.entry-detail.message",
+        "consoledock.copy-message",
+        "consoledock.copy-entry",
+        "consoledock.confirm-action",
+        "consoledock.cancel-action",
     ],
     pathlib.Path("Examples/SwiftSampleApp/SwiftSampleApp/MainViewController.swift"): [
         "swift-sample.",

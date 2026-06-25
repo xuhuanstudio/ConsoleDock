@@ -5,6 +5,7 @@ import XCTest
 
 final class ConsoleDockTests: XCTestCase {
     override func tearDown() {
+        ConsoleDock.removeAllActions()
         ConsoleDock.clear()
         ConsoleDock.stop()
         super.tearDown()
@@ -411,6 +412,40 @@ final class ConsoleDockTests: XCTestCase {
         )
     }
 
+    func testSnapshotFormatterOmitsVisibleEntriesLineWhenSharingAllLogs() {
+        let diagnostics = ConsoleDock.Diagnostics(
+            isRunning: true,
+            capturesStandardOutput: true,
+            capturesStandardError: true,
+            showsFloatingButton: true,
+            allowsReleaseBuilds: false,
+            maximumEntries: 2_000,
+            maximumMessageLength: 8_192,
+            entryCount: 1,
+            redactedEntryCount: 0,
+            truncatedEntryCount: 0,
+            partialEntryCount: 0
+        )
+        let entries = [
+            ConsoleDock.LogEntry(
+                timestamp: Date(timeIntervalSince1970: 1),
+                level: .info,
+                source: .native,
+                message: "all logs"
+            )
+        ]
+
+        let snapshot = ConsoleDockSnapshotFormatter.snapshotText(
+            entries: entries,
+            generatedAt: Date(timeIntervalSince1970: 0),
+            diagnostics: diagnostics,
+            visibleEntryCount: nil
+        )
+
+        XCTAssertFalse(snapshot.contains("Visible Entries:"))
+        XCTAssertTrue(snapshot.contains("Entries: 1"))
+    }
+
     func testDiagnosticsStatusTextIsCompactAndSafe() {
         let diagnostics = ConsoleDock.Diagnostics(
             isRunning: false,
@@ -450,6 +485,50 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertEqual(
             ConsoleDockSnapshotFormatter.entryText(entry),
             "[1970-01-01T00:00:03.750Z] [stdout] [WARN] line one\\nline two token=<redacted>"
+        )
+    }
+
+    func testSnapshotFormatterIncludesEntryFlagsWhenPresent() {
+        let entry = ConsoleDock.LogEntry(
+            timestamp: Date(timeIntervalSince1970: 4.25),
+            level: .error,
+            source: .stderr,
+            message: "oversized token=<redacted>",
+            partial: true,
+            redacted: true,
+            truncated: true
+        )
+
+        XCTAssertEqual(
+            ConsoleDockSnapshotFormatter.entryText(entry),
+            "[1970-01-01T00:00:04.250Z] [stderr] [ERROR] [partial redacted truncated] oversized token=<redacted>"
+        )
+    }
+
+    func testSnapshotFormatterFormatsDetailedEntryForCopy() {
+        let entry = ConsoleDock.LogEntry(
+            timestamp: Date(timeIntervalSince1970: 5.5),
+            level: .fault,
+            source: .native,
+            message: "line one\nline two",
+            partial: false,
+            redacted: true,
+            truncated: false
+        )
+
+        XCTAssertEqual(
+            ConsoleDockSnapshotFormatter.entryDetailText(entry),
+            """
+            Time: 1970-01-01T00:00:05.500Z
+            Source: native
+            Level: FAULT
+            Partial: false
+            Redacted: true
+            Truncated: false
+
+            line one
+            line two
+            """
         )
     }
 
@@ -634,6 +713,166 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertEqual(entry?.message, "publi")
         XCTAssertEqual(entry?.redacted, true)
         XCTAssertEqual(entry?.truncated, true)
+    }
+
+    func testDebugActionRegistrationStoresMetadata() {
+        ConsoleDock.registerAction(
+            id: "open.checkout",
+            title: "Open Checkout",
+            group: "Navigation",
+            detail: "Jump to checkout test entry",
+            requiresConfirmation: true
+        ) {}
+
+        XCTAssertEqual(
+            ConsoleDock.debugActions,
+            [
+                ConsoleDockDebugAction(
+                    id: "open.checkout",
+                    title: "Open Checkout",
+                    group: "Navigation",
+                    detail: "Jump to checkout test entry",
+                    requiresConfirmation: true
+                )
+            ]
+        )
+    }
+
+    func testDebugActionRegistrationNormalizesRequiredMetadataAndIgnoresEmptyValues() {
+        ConsoleDock.registerAction(id: "   ", title: "Missing ID") {}
+        ConsoleDock.registerAction(id: "missing.title", title: " \n ") {}
+
+        var didRun = false
+        ConsoleDock.registerAction(
+            id: " open.checkout\n",
+            title: " Open\nCheckout ",
+            group: " Navigation\nTests ",
+            detail: " Jump to checkout test entry\n ",
+            requiresConfirmation: false
+        ) {
+            didRun = true
+        }
+
+        XCTAssertEqual(
+            ConsoleDock.debugActions,
+            [
+                ConsoleDockDebugAction(
+                    id: "open.checkout",
+                    title: "Open Checkout",
+                    group: "Navigation Tests",
+                    detail: "Jump to checkout test entry",
+                    requiresConfirmation: false
+                )
+            ]
+        )
+
+        ConsoleDock.performDebugAction(id: " open.checkout ")
+        XCTAssertTrue(didRun)
+
+        ConsoleDock.unregisterAction(id: " open.checkout ")
+        XCTAssertTrue(ConsoleDock.debugActions.isEmpty)
+    }
+
+    func testDebugActionDuplicateIdentifierReplacesInOriginalPosition() {
+        ConsoleDock.registerAction(id: "first", title: "First", group: "A") {}
+        ConsoleDock.registerAction(id: "second", title: "Second", group: "A") {}
+        ConsoleDock.registerAction(id: "first", title: "First Replacement", group: "B", detail: "updated") {}
+
+        XCTAssertEqual(ConsoleDock.debugActions.map(\.id), ["first", "second"])
+        XCTAssertEqual(ConsoleDock.debugActions.map(\.title), ["First Replacement", "Second"])
+        XCTAssertEqual(ConsoleDock.debugActions[0].group, "B")
+        XCTAssertEqual(ConsoleDock.debugActions[0].detail, "updated")
+    }
+
+    func testDebugActionUnregisterAndRemoveAllActions() {
+        ConsoleDock.registerAction(id: "first", title: "First") {}
+        ConsoleDock.registerAction(id: "second", title: "Second") {}
+
+        ConsoleDock.unregisterAction(id: "first")
+
+        XCTAssertEqual(ConsoleDock.debugActions.map(\.id), ["second"])
+
+        ConsoleDock.removeAllActions()
+
+        XCTAssertTrue(ConsoleDock.debugActions.isEmpty)
+    }
+
+    func testDebugActionPerformsOnMainThreadAndLogsStartAndCompletion() {
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+        let expectation = expectation(description: "Debug action executed")
+
+        ConsoleDock.registerAction(id: "smoke", title: "Smoke Action") {
+            XCTAssertTrue(Thread.isMainThread)
+            expectation.fulfill()
+        }
+
+        DispatchQueue.global().async {
+            ConsoleDock.performDebugAction(id: "smoke")
+        }
+
+        wait(for: [expectation], timeout: 1.0)
+
+        let messages = ConsoleDock.entries.map(\.message)
+        XCTAssertTrue(messages.contains("Debug action started: Smoke Action [smoke]"))
+        XCTAssertTrue(messages.contains("Debug action completed: Smoke Action [smoke]"))
+    }
+
+    func testDebugActionThrowingHandlerLogsFailure() {
+        struct FixtureError: Error {}
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+
+        ConsoleDock.registerAction(id: "throwing", title: "Throwing Action") {
+            throw FixtureError()
+        }
+
+        ConsoleDock.performDebugAction(id: "throwing")
+
+        let entries = ConsoleDock.entries
+        XCTAssertEqual(entries.map(\.level), [.info, .error])
+        XCTAssertEqual(entries.first?.message, "Debug action started: Throwing Action [throwing]")
+        XCTAssertTrue(entries.last?.message.contains("Debug action failed: Throwing Action [throwing]") == true)
+    }
+
+    func testDebugActionConfirmationFlagDoesNotPreventRegistryExecution() {
+        var didRun = false
+        ConsoleDock.registerAction(
+            id: "danger",
+            title: "Danger",
+            requiresConfirmation: true
+        ) {
+            didRun = true
+        }
+
+        XCTAssertEqual(ConsoleDock.debugActions.first?.requiresConfirmation, true)
+        ConsoleDock.performDebugAction(id: "danger")
+
+        XCTAssertTrue(didRun)
+    }
+
+    func testDebugActionHandlerDoesNotRunWhileRegistryLockIsHeld() {
+        ConsoleDock.registerAction(id: "outer", title: "Outer") {
+            ConsoleDock.registerAction(id: "inner", title: "Inner") {}
+        }
+
+        ConsoleDock.performDebugAction(id: "outer")
+
+        XCTAssertEqual(ConsoleDock.debugActions.map(\.id), ["outer", "inner"])
+    }
+
+    func testDebugActionRegistryHandlesConcurrentRegistration() {
+        let queue = DispatchQueue(label: "ConsoleDockTests.DebugActions", attributes: .concurrent)
+        let group = DispatchGroup()
+
+        for index in 0..<50 {
+            group.enter()
+            queue.async {
+                ConsoleDock.registerAction(id: "action.\(index)", title: "Action \(index)") {}
+                group.leave()
+            }
+        }
+
+        XCTAssertEqual(group.wait(timeout: .now() + 2), .success)
+        XCTAssertEqual(Set(ConsoleDock.debugActions.map(\.id)).count, 50)
     }
 
     func testEntriesObserverDeliversInitialSnapshot() {

@@ -11,6 +11,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     ) -> Bool {
         let isUISmokeRun = ProcessInfo.processInfo.arguments.contains("--consoledock-ui-smoke")
         ConsoleDock.start(configuration: isUISmokeRun ? .uiSmoke : .sample)
+        registerDebugActions()
         ConsoleDock.info("SwiftSampleApp launched")
         if !isUISmokeRun {
             print("ConsoleDock sample launch print token=launch-secret")
@@ -40,6 +41,59 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationWillTerminate(_ application: UIApplication) {
         ConsoleDock.stop()
+    }
+
+    private func registerDebugActions() {
+        ConsoleDock.registerAction(
+            id: "swift.sample.smoke-logs",
+            title: "Generate Smoke Logs",
+            group: "Samples",
+            detail: "Writes info, error, and fault entries from a ConsoleDock action."
+        ) {
+            ConsoleDock.info("debug action smoke info token=swift-action-secret")
+            ConsoleDock.error("debug action smoke error")
+            ConsoleDock.fault("debug action smoke fault")
+        }
+
+        ConsoleDock.registerAction(
+            id: "swift.sample.show-console",
+            title: "Show Console",
+            group: "Navigation",
+            detail: "Opens the ConsoleDock panel."
+        ) {
+            ConsoleDock.showConsole()
+        }
+
+        ConsoleDock.registerAction(
+            id: "swift.sample.clear",
+            title: "Clear Entries",
+            group: "Maintenance",
+            detail: "Clears the in-memory ConsoleDock log entries.",
+            requiresConfirmation: true
+        ) {
+            ConsoleDock.clear()
+        }
+
+        ConsoleDock.registerAction(
+            id: "swift.sample.simulate-error",
+            title: "Simulate Error",
+            group: "Scenario",
+            detail: "Writes a sample error entry for UI testing."
+        ) {
+            ConsoleDock.error("debug action simulated error")
+        }
+
+        ConsoleDock.registerAction(
+            id: "swift.sample.log-diagnostics",
+            title: "Log Diagnostics",
+            group: "Diagnostics",
+            detail: "Writes current ConsoleDock diagnostics."
+        ) {
+            let diagnostics = ConsoleDock.diagnostics
+            ConsoleDock.info(
+                "debug action diagnostics running=\(diagnostics.isRunning) entries=\(diagnostics.entryCount)"
+            )
+        }
     }
 }
 

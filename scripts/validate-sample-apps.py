@@ -31,7 +31,8 @@ REQUIRED_SNIPPETS = {
         "CONSOLEDOCK_UI_SMOKE_DESTINATION",
         "search control rendering",
         "level filtering",
-        "selected-row tap",
+        "log detail",
+        "Debug Actions",
     ],
     "Examples/ObjCSampleApp/README.md": [
         "scripts/validate-objc-sample-ui-smoke.sh",
@@ -39,7 +40,8 @@ REQUIRED_SNIPPETS = {
         "CONSOLEDOCK_UI_SMOKE_DESTINATION",
         "search control rendering",
         "level filtering",
-        "selected-row tap",
+        "log detail",
+        "Debug Actions",
     ],
     "docs/sample-app-walkthrough.md": [
         "scripts/validate-swift-sample-ui-smoke.sh",
@@ -47,7 +49,8 @@ REQUIRED_SNIPPETS = {
         "native-log-only UI automation mode",
         "search control rendering",
         "level filtering",
-        "selected-row tap",
+        "log detail",
+        "Debug Actions",
     ],
     "scripts/validate-release.sh": [
         "scripts/validate-swift-sample-ui-smoke.sh",

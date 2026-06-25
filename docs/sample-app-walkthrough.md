@@ -10,11 +10,12 @@ Use the samples to verify:
 - explicit native logging APIs;
 - app-specific logger sink forwarding without rewriting every call site;
 - runtime diagnostics for capture state and current store counts;
+- Debug Actions for app-registered local test shortcuts;
 - `NSLog` output that reaches process stderr;
 - redaction before storage;
-- UIKit floating button, search, source and level filtering, pause/resume live follow, selected-entry copy, panel refresh, share/export, clear, stop, and restart behavior.
+- UIKit floating button, search, source and level filtering, pause/resume live follow, log detail, copy, panel refresh, share/export, actions, clear, stop, and restart behavior.
 
-The bundled console and sample controls expose stable accessibility identifiers so future UI smoke tests can target behavior without relying on localized text. Key bundled console identifiers include `consoledock.dock-button`, `consoledock.search`, `consoledock.level-filter`, `consoledock.status`, and `consoledock.entries-table`. Sample app button identifiers use `swift-sample.<button-slug>` and `objc-sample.<button-slug>`.
+The bundled console and sample controls expose stable accessibility identifiers so future UI smoke tests can target behavior without relying on localized text. Key bundled console identifiers include `consoledock.dock-button`, `consoledock.mode-control`, `consoledock.search`, `consoledock.level-filter`, `consoledock.status`, `consoledock.entries-table`, and `consoledock.actions-table`. Sample app button identifiers use `swift-sample.<button-slug>` and `objc-sample.<button-slug>`.
 
 ![ConsoleDock Swift sample console](assets/swift-sample-console.png)
 
@@ -43,7 +44,7 @@ For a focused simulator UI smoke run of the Objective-C sample:
 scripts/validate-objc-sample-ui-smoke.sh
 ```
 
-The smoke tests launch each sample app in a native-log-only UI automation mode, write native ConsoleDock entries containing sample tokens, open the bundled console, and verify the diagnostics header, entries table, visible redaction, search control rendering, level filtering, selected-row tap, pause/resume, clear refresh, and close controls through stable accessibility identifiers.
+The smoke tests launch each sample app in a native-log-only UI automation mode, write native ConsoleDock entries containing sample tokens, open the bundled console, and verify the diagnostics header, entries table, visible redaction, search control rendering, level filtering, log detail, copy controls, pause/resume, clear refresh, Debug Actions, confirmation prompts, and close controls through stable accessibility identifiers.
 
 Manual check:
 
@@ -58,11 +59,13 @@ Manual check:
 9. Change the level scope to `Info` or `Error` and confirm only matching entries remain visible.
 10. Tap the pause button, generate another message from the sample, and confirm the visible list does not auto-refresh.
 11. Tap the play/resume button and confirm the panel catches up to the latest stored entries.
-12. Tap a visible log row and confirm the selected redacted entry is copied to the clipboard.
-13. Tap the share button and confirm the system share sheet opens with a plain-text redacted log snapshot for the visible entries and diagnostics.
-14. Tap `Clear` in the panel and confirm the list and diagnostics header refresh.
-15. Tap `Stop ConsoleDock`, generate another message, and confirm it is not stored.
-16. Tap `Start ConsoleDock`, generate another message, and confirm entries resume.
+12. Tap a visible log row and confirm the detail screen shows the full redacted message, metadata flags, and copy buttons.
+13. Tap the share button and choose either visible logs or all logs; confirm the system share sheet opens with a plain-text redacted snapshot and diagnostics.
+14. Switch to `Actions`, run `Generate Smoke Logs`, and confirm new action start/completion plus sample error entries appear under `Logs`.
+15. Run the `Clear Entries` action and confirm it asks before executing.
+16. Tap `Clear` in the panel and confirm the list and diagnostics header refresh.
+17. Tap `Stop ConsoleDock`, generate another message, and confirm it is not stored.
+18. Tap `Start ConsoleDock`, generate another message, and confirm entries resume.
 
 Expected sources:
 
@@ -99,11 +102,13 @@ Manual check:
 9. Change the level scope to `Info` or `Error` and confirm only matching entries remain visible.
 10. Tap the pause button, generate another message from the sample, and confirm the visible list does not auto-refresh.
 11. Tap the play/resume button and confirm the panel catches up to the latest stored entries.
-12. Tap a visible log row and confirm the selected redacted entry is copied to the clipboard.
-13. Tap the share button and confirm the system share sheet opens with a plain-text redacted log snapshot for the visible entries and diagnostics.
-14. Tap `Clear` in the panel and confirm the list and diagnostics header refresh.
-15. Tap `Stop ConsoleDock`, generate another message, and confirm it is not stored.
-16. Tap `Start ConsoleDock`, generate another message, and confirm entries resume.
+12. Tap a visible log row and confirm the detail screen shows the full redacted message, metadata flags, and copy buttons.
+13. Tap the share button and choose either visible logs or all logs; confirm the system share sheet opens with a plain-text redacted snapshot and diagnostics.
+14. Switch to `Actions`, run `Generate Smoke Logs`, and confirm new action start/completion plus sample error entries appear under `Logs`.
+15. Run the `Clear Entries` action and confirm it asks before executing.
+16. Tap `Clear` in the panel and confirm the list and diagnostics header refresh.
+17. Tap `Stop ConsoleDock`, generate another message, and confirm it is not stored.
+18. Tap `Start ConsoleDock`, generate another message, and confirm entries resume.
 
 Expected sources:
 
@@ -125,8 +130,10 @@ Search, source filtering, and level filtering only affect the visible list and t
 
 Pause/resume only affects live UI follow. ConsoleDock continues capturing and storing entries while the panel is paused.
 
-Tapping a row copies only that visible, already-redacted entry. It does not copy hidden filtered entries.
+Tapping a row opens the log detail screen. Copy actions on that screen copy only that visible, already-redacted message or the selected entry with its metadata. They do not copy hidden filtered entries.
 
-The share sheet exports the current visible in-memory ConsoleDock entries only. ConsoleDock does not write an export file by default, does not persist logs by default, and does not upload logs.
+The share sheet can export the current visible in-memory ConsoleDock entries or all currently retained entries. ConsoleDock does not write an export file by default, does not persist logs by default, and does not upload logs.
+
+Debug Actions are local, app-registered shortcuts. ConsoleDock does not discover pages, control routing, bypass app permissions, or receive remote commands.
 
 Diagnostics describe ConsoleDock's active configuration and currently retained store counts only. They do not validate complete Swift `Logger`, `os_log`, or Apple unified logging capture.

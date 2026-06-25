@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate public logging-boundary documentation stays accurate."""
+"""Validate public technical-boundary documentation stays accurate."""
 
 from __future__ import annotations
 
@@ -16,11 +16,13 @@ REQUIRED_SNIPPETS = {
         "ConsoleDock cannot promise complete, reliable, live, zero-intrusion capture of:",
         "Reliable complete logging should go through ConsoleDock's explicit API or an adapter for an existing logging framework.",
         "ConsoleDock's on-device panel reads from ConsoleDock's own in-memory store.",
+        "ConsoleDock only stores, displays, and triggers actions registered by the host app. It does not discover screens, take over routing, bypass app permissions, receive remote commands, or act as an automation test framework.",
     ],
     "README.zh-CN.md": [
         "ConsoleDock 不能被描述成 Xcode Console 或 Apple unified logging 的完整替代品。",
         "ConsoleDock 不能承诺完整、稳定、实时、零侵入捕获：",
         "如果需要可靠完整的 App 内日志展示，推荐使用 ConsoleDock 的显式 API，或者在已有 logger 中增加 sink/appender 转发。",
+        "ConsoleDock 只展示和触发 App 注册的动作；它不会自动发现页面、接管路由、绕过业务权限、远程下发命令，也不是自动化测试平台。",
     ],
     "docs/migration-existing-loggers.md": [
         "Do not depend on ConsoleDock reading Swift `Logger` or `os_log` entries back from Apple unified logging.",
@@ -30,6 +32,11 @@ REQUIRED_SNIPPETS = {
     "docs/sample-app-walkthrough.md": [
         "Swift `Logger`, `os_log`, and Apple unified logging are not validated by these samples",
         "ConsoleDock does not promise complete zero-intrusion capture of those systems.",
+        "Debug Actions are local, app-registered shortcuts. ConsoleDock does not discover pages, control routing, bypass app permissions, or receive remote commands.",
+    ],
+    "docs/product-brief.md": [
+        "ConsoleDock only displays and triggers actions that the app registers. It should not discover routes, control app navigation automatically, bypass business permissions, or accept remote commands.",
+        "Do not turn Debug Actions into a remote command system or automatic route discovery layer.",
     ],
     "docs/release-process.md": [
         "Do not describe ConsoleDock as a full Xcode Console, Swift `Logger`, `os_log`, or Apple unified logging replacement.",
@@ -48,6 +55,9 @@ REQUIRED_SNIPPETS = {
     ],
     "Sources/ConsoleDock/Documentation.docc/IntegrationDiagnostics.md": [
         "Diagnostics do not prove complete zero-intrusion capture of Swift `Logger`, `os_log`, Apple unified logging, other-process logs, sanitizer diagnostics, LLDB expressions, or Xcode-only output.",
+    ],
+    "Sources/ConsoleDock/Documentation.docc/DebugActions.md": [
+        "ConsoleDock does not discover screens, take over routing, bypass business permissions, receive remote commands, or act as an automation test framework.",
     ],
 }
 
@@ -86,6 +96,14 @@ FORBIDDEN_PATTERNS = [
     (
         re.compile(r"\bfull\s+`?Logger`?\s*/\s*`?os_log`?\s+ingestion\b", re.IGNORECASE),
         "ConsoleDock roadmap language must not imply full Logger/os_log ingestion",
+    ),
+    (
+        re.compile(r"\bDebug Actions?\s+(?:can\s+|will\s+)?(?:discover|auto-discover|automatically discover)\s+(?:screens|pages|routes)\b", re.IGNORECASE),
+        "Debug Actions must not claim automatic screen or route discovery",
+    ),
+    (
+        re.compile(r"\bDebug Actions?\s+(?:can\s+|will\s+)?(?:receive|accept|run)\s+remote\s+commands\b", re.IGNORECASE),
+        "Debug Actions must not claim remote command support",
     ),
 ]
 
@@ -167,6 +185,8 @@ def self_test() -> list[str]:
             "ConsoleDock reads logs from other apps.",
             "future adapter may also write to Apple unified logging.",
             "- full `Logger` / `os_log` ingestion.",
+            "Debug Actions can discover routes.",
+            "Debug Actions can receive remote commands.",
         ]
     ):
         if not forbidden_claim_errors(f"bad-{index}.md", bad_text):

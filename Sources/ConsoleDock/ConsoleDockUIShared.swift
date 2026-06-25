@@ -1,0 +1,86 @@
+#if canImport(UIKit)
+    import UIKit
+
+    enum ConsoleDockAccessibilityIdentifiers {
+        static let dockButton = "consoledock.dock-button"
+        static let closeButton = "consoledock.close"
+        static let shareButton = "consoledock.share"
+        static let shareVisibleLogs = "consoledock.share-visible-logs"
+        static let shareAllLogs = "consoledock.share-all-logs"
+        static let clearButton = "consoledock.clear"
+        static let pauseLiveButton = "consoledock.pause-live"
+        static let resumeLiveButton = "consoledock.resume-live"
+        static let searchBar = "consoledock.search"
+        static let levelFilter = "consoledock.level-filter"
+        static let status = "consoledock.status"
+        static let entriesTable = "consoledock.entries-table"
+        static let emptyState = "consoledock.empty-state"
+        static let modeControl = "consoledock.mode-control"
+        static let actionsTable = "consoledock.actions-table"
+        static let entryDetailMessage = "consoledock.entry-detail.message"
+        static let copyMessageButton = "consoledock.copy-message"
+        static let copyEntryButton = "consoledock.copy-entry"
+        static let confirmActionButton = "consoledock.confirm-action"
+        static let cancelActionButton = "consoledock.cancel-action"
+    }
+
+    enum ConsoleDockFonts {
+        static func monospace(size: CGFloat, weight: UIFont.Weight) -> UIFont {
+            if #available(iOS 13.0, *) {
+                return .monospacedSystemFont(ofSize: size, weight: weight)
+            }
+            return UIFont(name: "Menlo", size: size) ?? .systemFont(ofSize: size, weight: weight)
+        }
+    }
+
+    enum ConsoleDockUIColors {
+        static let background = UIColor(white: 0.06, alpha: 1)
+        static let panel = UIColor(white: 0.08, alpha: 1)
+        static let separator = UIColor(white: 0.18, alpha: 1)
+        static let primaryText = UIColor.white
+        static let secondaryText = UIColor(white: 0.78, alpha: 1)
+
+        static func level(_ level: ConsoleDock.LogLevel) -> UIColor {
+            switch level {
+            case .debug:
+                return UIColor(white: 0.65, alpha: 1)
+            case .info:
+                return UIColor(red: 0.42, green: 0.76, blue: 1.0, alpha: 1)
+            case .warning:
+                return UIColor(red: 1.0, green: 0.75, blue: 0.25, alpha: 1)
+            case .error, .fault:
+                return UIColor(red: 1.0, green: 0.36, blue: 0.32, alpha: 1)
+            }
+        }
+    }
+
+    extension ConsoleDock.LogLevel {
+        var consoleDockLabel: String {
+            switch self {
+            case .debug:
+                return "DEBUG"
+            case .info:
+                return "INFO"
+            case .warning:
+                return "WARN"
+            case .error:
+                return "ERROR"
+            case .fault:
+                return "FAULT"
+            }
+        }
+    }
+
+    extension ConsoleDock.LogSource {
+        var consoleDockLabel: String {
+            switch self {
+            case .native:
+                return "native"
+            case .stdout:
+                return "stdout"
+            case .stderr:
+                return "stderr"
+            }
+        }
+    }
+#endif

@@ -8,6 +8,7 @@
 @interface AppDelegate ()
 
 - (void)startConsoleDockForUISmokeRun:(BOOL)isUISmokeRun;
+- (void)registerDebugActions;
 
 @end
 
@@ -17,6 +18,7 @@
 {
     BOOL isUISmokeRun = [NSProcessInfo.processInfo.arguments containsObject:@"--consoledock-ui-smoke"];
     [self startConsoleDockForUISmokeRun:isUISmokeRun];
+    [self registerDebugActions];
     [CDKConsoleDock info:@"ObjCSampleApp launched"];
     if (!isUISmokeRun) {
         printf("ConsoleDock Objective-C sample launch printf token=objc-launch-secret\n");
@@ -63,6 +65,60 @@ configurationForConnectingSceneSession:(UISceneSession *)connectingSceneSession
     if (result == CDKStartResultFailed) {
         NSLog(@"ConsoleDock failed to start: %@", error.localizedDescription ?: @"Unknown error");
     }
+}
+
+- (void)registerDebugActions
+{
+    [CDKConsoleDockUIKit registerActionWithIdentifier:@"objc.sample.smoke-logs"
+                                                title:@"Generate Smoke Logs"
+                                                group:@"Samples"
+                                               detail:@"Writes info, error, and fault entries from a ConsoleDock action."
+                                 requiresConfirmation:NO
+                                              handler:^{
+                                                  [CDKConsoleDock info:@"objc debug action smoke info token=objc-action-secret"];
+                                                  [CDKConsoleDock error:@"objc debug action smoke error"];
+                                                  [CDKConsoleDock fault:@"objc debug action smoke fault"];
+                                              }];
+
+    [CDKConsoleDockUIKit registerActionWithIdentifier:@"objc.sample.show-console"
+                                                title:@"Show Console"
+                                                group:@"Navigation"
+                                               detail:@"Opens the ConsoleDock panel."
+                                 requiresConfirmation:NO
+                                              handler:^{
+                                                  [CDKConsoleDockUIKit showConsole];
+                                              }];
+
+    [CDKConsoleDockUIKit registerActionWithIdentifier:@"objc.sample.clear"
+                                                title:@"Clear Entries"
+                                                group:@"Maintenance"
+                                               detail:@"Clears the in-memory ConsoleDock log entries."
+                                 requiresConfirmation:YES
+                                              handler:^{
+                                                  [CDKConsoleDock clearEntries];
+                                              }];
+
+    [CDKConsoleDockUIKit registerActionWithIdentifier:@"objc.sample.simulate-error"
+                                                title:@"Simulate Error"
+                                                group:@"Scenario"
+                                               detail:@"Writes a sample error entry for UI testing."
+                                 requiresConfirmation:NO
+                                              handler:^{
+                                                  [CDKConsoleDock error:@"objc debug action simulated error"];
+                                              }];
+
+    [CDKConsoleDockUIKit registerActionWithIdentifier:@"objc.sample.log-diagnostics"
+                                                title:@"Log Diagnostics"
+                                                group:@"Diagnostics"
+                                               detail:@"Writes current ConsoleDock diagnostics."
+                                 requiresConfirmation:NO
+                                              handler:^{
+                                                  CDKDiagnostics *diagnostics = [CDKConsoleDock diagnostics];
+                                                  [CDKConsoleDock info:
+                                                      [NSString stringWithFormat:@"objc debug action diagnostics running=%@ entries=%lu",
+                                                                                 diagnostics.isRunning ? @"YES" : @"NO",
+                                                                                 (unsigned long)diagnostics.entryCount]];
+                                              }];
 }
 
 @end

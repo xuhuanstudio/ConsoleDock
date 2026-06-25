@@ -69,3 +69,20 @@ ConsoleDock.clear()
 Use ``ConsoleDock/entriesDidChangeNotification`` when building a custom debug surface that displays entries. Use ``ConsoleDock/diagnosticsDidChangeNotification`` when the surface also displays running state, capture configuration, or store counts. Notification handlers should dispatch to the main queue before touching UIKit.
 
 Diagnostics report ConsoleDock's local runtime state only. They do not imply complete capture of Swift `Logger`, `os_log`, Apple unified logging, other-process logs, or debugger-only output.
+
+## Add Debug Actions
+
+Use Debug Actions when testers need an explicit local shortcut for a screen or scenario that is hard to reach through normal UI.
+
+```swift
+ConsoleDock.registerAction(
+    id: "debug.simulate-payment-error",
+    title: "Simulate Payment Error",
+    group: "Scenario",
+    detail: "Writes a payment error entry for testing."
+) {
+    ConsoleDock.error("Simulated payment failure")
+}
+```
+
+The host app owns the behavior. ConsoleDock does not automatically discover pages, control routing, bypass app permissions, or receive remote commands. See <doc:DebugActions>.

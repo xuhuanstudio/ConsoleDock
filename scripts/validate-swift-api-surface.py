@@ -135,6 +135,18 @@ REQUIRED_SNIPPETS = {
         "public static func clear()",
         "public static func showConsole()",
         "public static func hideConsole()",
+        """
+        public static func registerAction(
+            id: String,
+            title: String,
+            group: String? = nil,
+            detail: String? = nil,
+            requiresConfirmation: Bool = false,
+            handler: @escaping () throws -> Void
+        )
+        """,
+        "public static func unregisterAction(id: String)",
+        "public static func removeAllActions()",
         "public static func debug(_ message: String)",
         "public static func log(level: LogLevel, message: String)",
         "public static func info(_ message: String)",
@@ -155,6 +167,21 @@ REQUIRED_SNIPPETS = {
         "public static func showConsole()",
         "@objc(hideConsole)",
         "public static func hideConsole()",
+        "@objc(registerActionWithIdentifier:title:group:detail:requiresConfirmation:handler:)",
+        """
+        public static func registerAction(
+            identifier: String,
+            title: String,
+            group: String?,
+            detail: String?,
+            requiresConfirmation: Bool,
+            handler: @escaping () -> Void
+        )
+        """,
+        "@objc(unregisterActionWithIdentifier:)",
+        "public static func unregisterAction(identifier: String)",
+        "@objc(removeAllActions)",
+        "public static func removeAllActions()",
     ],
 }
 

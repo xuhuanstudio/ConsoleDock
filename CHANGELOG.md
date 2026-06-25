@@ -8,6 +8,16 @@ The project follows Semantic Versioning for public releases.
 
 No changes yet.
 
+## v0.3.0 - 2026-06-26
+
+### Added
+
+- Added local Debug Actions registration for Swift and Objective-C/UIKit integrations so apps can expose explicit test shortcuts in the bundled console.
+- Added a Logs / Actions switch in the bundled UIKit console, grouped Debug Actions, confirmation prompts for dangerous actions, and automatic action start/completion/failure log entries.
+- Added a log detail screen with full-message viewing and separate copy-message/copy-entry actions.
+- Added explicit share options for visible logs and all logs.
+- Added Debug Actions sample registrations and UI smoke coverage for the Swift and Objective-C sample apps.
+
 ## v0.2.0 - 2026-06-23
 
 ### Added

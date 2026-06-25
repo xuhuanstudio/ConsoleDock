@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate public docs describe v0.2.0 released APIs without stale main-only warnings."""
+"""Validate public docs describe released APIs without stale main-only warnings."""
 
 from __future__ import annotations
 
@@ -11,22 +11,30 @@ import tempfile
 
 REQUIRED_SNIPPETS = {
     "README.md": [
-        "Use the latest release tag from GitHub Releases. `v0.2.0` includes runtime diagnostics and the current release-validation hardening.",
+        "ConsoleDock `v0.3.0` is the current source-first Swift Package Manager preview release.",
+        "Use the latest release tag from GitHub Releases. `v0.3.0` includes Debug Actions, log detail, explicit visible/all sharing, runtime diagnostics, and release-validation hardening.",
         "Runtime diagnostics are available in `v0.2.0` and later.",
+        "Debug Actions are available in `v0.3.0` and later.",
     ],
     "README.zh-CN.md": [
-        "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.2.0` 已包含 runtime diagnostics 和当前 release validation 加固：",
+        "ConsoleDock `v0.3.0` 是当前 source-first Swift Package Manager 公开预览版本",
+        "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.3.0` 已包含 Debug Actions、日志详情、visible/all 分享、runtime diagnostics 和当前 release validation 加固：",
         "Runtime diagnostics 从 `v0.2.0` 开始属于已发布能力。",
+        "Debug Actions 从 `v0.3.0` 开始属于已发布能力。",
     ],
 }
 
 DENIED_SNIPPETS = {
     "README.md": [
         "Runtime diagnostics are available on `main` after `v0.1.0`",
+        "Debug Actions are available on `main`",
+        "upcoming `v0.3.0`",
         "skip this section until the next tag ships",
     ],
     "README.zh-CN.md": [
         "Runtime diagnostics 是 `v0.1.0` 之后在 `main` 上新增的能力",
+        "Debug Actions 是 `main`",
+        "为后续 `v0.3.0`",
         "等下一个 tag 发布后再使用这些符号",
     ],
 }
@@ -53,10 +61,11 @@ def validate(root: pathlib.Path) -> list[str]:
 
 
 def write_valid_docs(root: pathlib.Path) -> None:
+    english_required = "\n".join(REQUIRED_SNIPPETS["README.md"])
+    chinese_required = "\n".join(REQUIRED_SNIPPETS["README.zh-CN.md"])
     english = f"""# ConsoleDock
 
-{REQUIRED_SNIPPETS["README.md"][0]}
-{REQUIRED_SNIPPETS["README.md"][1]}
+{english_required}
 
 ### Check Runtime Diagnostics
 
@@ -72,8 +81,7 @@ Objective-C setup starts here.
 """
     chinese = f"""# ConsoleDock
 
-{REQUIRED_SNIPPETS["README.zh-CN.md"][0]}
-{REQUIRED_SNIPPETS["README.zh-CN.md"][1]}
+{chinese_required}
 
 ## 运行诊断
 
@@ -98,7 +106,7 @@ def self_test() -> list[str]:
         root = pathlib.Path(raw_directory)
         write_valid_docs(root)
         if validate(root):
-            errors.append("validate should accept docs with v0.2.0 released diagnostics guidance")
+            errors.append("validate should accept docs with released v0.3.0 guidance")
 
         missing_snippet_root = root / "missing-snippet"
         missing_snippet_root.mkdir()
@@ -109,7 +117,7 @@ def self_test() -> list[str]:
             encoding="utf-8",
         )
         if not validate(missing_snippet_root):
-            errors.append("validate should reject docs without the required v0.2.0 snippets")
+            errors.append("validate should reject docs without the required released-version snippets")
 
         stale_warning_root = root / "stale-warning"
         stale_warning_root.mkdir()

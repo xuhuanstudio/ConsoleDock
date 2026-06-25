@@ -18,6 +18,7 @@ ConsoleDock is not a full replacement for Xcode Console or Apple unified logging
 - <doc:LoggingBoundaries>
 - <doc:ExistingLoggerMigration>
 - <doc:IntegrationDiagnostics>
+- <doc:DebugActions>
 - <doc:PrivacyAndReleaseSafety>
 - <doc:ObjectiveCIntegration>
 
@@ -54,3 +55,9 @@ ConsoleDock is not a full replacement for Xcode Console or Apple unified logging
 
 - ``ConsoleDock/showConsole()``
 - ``ConsoleDock/hideConsole()``
+
+### Registering Debug Actions
+
+- ``ConsoleDock/registerAction(id:title:group:detail:requiresConfirmation:handler:)``
+- ``ConsoleDock/unregisterAction(id:)``
+- ``ConsoleDock/removeAllActions()``

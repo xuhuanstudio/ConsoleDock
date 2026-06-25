@@ -15,7 +15,7 @@ ConsoleDock is an early-stage iOS debug SDK that lets testers inspect app logs d
 
 ## Status
 
-ConsoleDock `v0.2.0` is the current source-first Swift Package Manager preview release. It contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, bounded in-memory entries with stable session identifiers and partial/redacted/truncated flags, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, runtime diagnostics, entry change notification, Release startup safety gates, a UIKit-only floating button/panel foundation, Swift and Objective-C sample apps, DocC documentation, release validation workflow, and focused tests.
+ConsoleDock `v0.3.0` is the current source-first Swift Package Manager preview release. It contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, bounded in-memory entries with stable session identifiers and partial/redacted/truncated flags, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, runtime diagnostics, entry change notification, Debug Actions, log detail, explicit visible/all sharing, Release startup safety gates, a UIKit-only floating button/panel foundation, Swift and Objective-C sample apps, DocC documentation, release validation workflow, and focused tests.
 
 Current limitations:
 
@@ -24,7 +24,7 @@ Current limitations:
 - File-descriptor capture can include framework or runtime warnings written through the app process descriptors, not only application-authored messages.
 - Runtime diagnostics report current ConsoleDock state and bounded in-memory store counts; they are not evidence of complete Swift `Logger`, `os_log`, or Apple unified logging capture.
 - Entry change notification exists as the refresh foundation for UI; notification handlers should fetch a snapshot through `entries`.
-- The UIKit floating button and console panel foundation can show, search, source-filter, level-filter, pause/resume live follow, live refresh, selected-entry copy, clear, share/export with diagnostics, and close the current in-memory snapshot.
+- The UIKit floating button and console panel foundation can show, search, source-filter, level-filter, pause/resume live follow, live refresh, log detail, copy, clear, visible/all share/export with diagnostics, Debug Actions, and close the current in-memory snapshot.
 - Persistence and advanced query syntax are not implemented yet.
 - Third-party adapters, CocoaPods, and XCFramework distribution are not implemented yet.
 - Redaction is a local in-memory baseline, not a complete privacy guarantee.
@@ -63,7 +63,7 @@ Add the public repository URL through Xcode's package dependency UI:
 https://github.com/xuhuanstudio/ConsoleDock.git
 ```
 
-Use the latest release tag from GitHub Releases. `v0.2.0` includes runtime diagnostics and the current release-validation hardening. Then depend on:
+Use the latest release tag from GitHub Releases. `v0.3.0` includes Debug Actions, log detail, explicit visible/all sharing, runtime diagnostics, and release-validation hardening. Then depend on:
 
 - `ConsoleDock` for Swift API plus the bundled UIKit console.
 - `ConsoleDockCore` for Objective-C/C-compatible core APIs.
@@ -102,6 +102,25 @@ NSLog(@"Stored entries: %lu", (unsigned long)diagnostics.entryCount);
 ```
 
 Diagnostics are local state only. They do not imply that Swift `Logger`, `os_log`, Apple unified logging, other-process logs, or debugger-only output are captured.
+
+### Register Debug Actions
+
+Debug Actions are available in `v0.3.0` and later. They let an app expose explicit local test shortcuts in the bundled ConsoleDock panel.
+
+```swift
+ConsoleDock.registerAction(
+    id: "open.checkout",
+    title: "Open Checkout",
+    group: "Navigation",
+    detail: "Jump to checkout test entry"
+) {
+    AppRouter.shared.openCheckout()
+}
+```
+
+Use non-empty stable `id` and `title` values. ConsoleDock trims required action metadata and replaces an existing action when the normalized `id` is registered again.
+
+ConsoleDock only stores, displays, and triggers actions registered by the host app. It does not discover screens, take over routing, bypass app permissions, receive remote commands, or act as an automation test framework.
 
 ### Start In Objective-C
 
