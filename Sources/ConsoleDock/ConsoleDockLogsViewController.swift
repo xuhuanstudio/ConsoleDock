@@ -12,7 +12,9 @@
         private let levelSegmentedControl = UISegmentedControl(
             items: ConsoleDockEntryFilter.LevelScope.allCases.map(\.title)
         )
+        private let inlineActionStackView = UIStackView()
         private let markInlineButton = UIButton(type: .system)
+        private let jumpInlineButton = UIButton(type: .system)
         private let statusLabel = UILabel()
         private let emptyStateLabel = UILabel()
         private var liveUpdateBuffer = ConsoleDockLiveUpdateBuffer()
@@ -25,7 +27,6 @@
         private var pauseButton: UIBarButtonItem?
         private var shareButton: UIBarButtonItem?
         private var clearButton: UIBarButtonItem?
-        private var jumpButton: UIBarButtonItem?
         private let formatter: DateFormatter = {
             let formatter = DateFormatter()
             formatter.dateFormat = "HH:mm:ss.SSS"
@@ -37,7 +38,7 @@
             view.backgroundColor = ConsoleDockUIColors.background
             configureSearchController()
             configureLevelSegmentedControl()
-            configureMarkInlineButton()
+            configureInlineActionStackView()
             configureStatusLabel()
             configureTableView()
             configureEmptyStateLabel()
@@ -96,23 +97,13 @@
             clearButton.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.clearButton
             self.clearButton = clearButton
 
-            let jumpButton = UIBarButtonItem(
-                title: "Jump",
-                style: .plain,
-                target: self,
-                action: #selector(showJumpOptions)
-            )
-            jumpButton.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.jumpButton
-            jumpButton.isEnabled = false
-            self.jumpButton = jumpButton
-
             let pauseButton = makePauseButton()
             self.pauseButton = pauseButton
             publishNavigationItems()
         }
 
         private func publishNavigationItems() {
-            navigationItemsDidChange?([clearButton, shareButton, jumpButton, pauseButton].compactMap { $0 })
+            navigationItemsDidChange?([clearButton, shareButton, pauseButton].compactMap { $0 })
         }
 
         private func configureSearchController() {
@@ -137,18 +128,46 @@
             view.addSubview(levelSegmentedControl)
         }
 
-        private func configureMarkInlineButton() {
-            markInlineButton.translatesAutoresizingMaskIntoConstraints = false
-            markInlineButton.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.markButton
-            markInlineButton.setTitle("Mark", for: .normal)
-            markInlineButton.setTitleColor(ConsoleDockUIColors.primaryText, for: .normal)
-            markInlineButton.titleLabel?.font = .preferredFont(forTextStyle: .callout)
-            markInlineButton.backgroundColor = ConsoleDockUIColors.panel
-            markInlineButton.layer.cornerRadius = 6
-            markInlineButton.layer.borderColor = ConsoleDockUIColors.separator.cgColor
-            markInlineButton.layer.borderWidth = 1
-            markInlineButton.addTarget(self, action: #selector(showMarkerPrompt), for: .touchUpInside)
-            view.addSubview(markInlineButton)
+        private func configureInlineActionStackView() {
+            inlineActionStackView.translatesAutoresizingMaskIntoConstraints = false
+            inlineActionStackView.axis = .horizontal
+            inlineActionStackView.spacing = 8
+            inlineActionStackView.distribution = .fillEqually
+            view.addSubview(inlineActionStackView)
+
+            configureInlineButton(
+                markInlineButton,
+                title: "Mark",
+                accessibilityIdentifier: ConsoleDockAccessibilityIdentifiers.markButton,
+                action: #selector(showMarkerPrompt)
+            )
+            configureInlineButton(
+                jumpInlineButton,
+                title: "Jump",
+                accessibilityIdentifier: ConsoleDockAccessibilityIdentifiers.jumpButton,
+                action: #selector(showJumpOptions)
+            )
+            jumpInlineButton.isEnabled = false
+        }
+
+        private func configureInlineButton(
+            _ button: UIButton,
+            title: String,
+            accessibilityIdentifier: String,
+            action: Selector
+        ) {
+            button.translatesAutoresizingMaskIntoConstraints = false
+            button.accessibilityIdentifier = accessibilityIdentifier
+            button.setTitle(title, for: .normal)
+            button.setTitleColor(ConsoleDockUIColors.primaryText, for: .normal)
+            button.setTitleColor(ConsoleDockUIColors.secondaryText, for: .disabled)
+            button.titleLabel?.font = .preferredFont(forTextStyle: .callout)
+            button.backgroundColor = ConsoleDockUIColors.panel
+            button.layer.cornerRadius = 6
+            button.layer.borderColor = ConsoleDockUIColors.separator.cgColor
+            button.layer.borderWidth = 1
+            button.addTarget(self, action: action, for: .touchUpInside)
+            inlineActionStackView.addArrangedSubview(button)
         }
 
         private func configureStatusLabel() {
@@ -187,13 +206,13 @@
                 levelSegmentedControl.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
                 levelSegmentedControl.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
                 levelSegmentedControl.heightAnchor.constraint(equalToConstant: 32),
-                markInlineButton.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
-                markInlineButton.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
-                markInlineButton.topAnchor.constraint(equalTo: levelSegmentedControl.bottomAnchor, constant: 8),
-                markInlineButton.heightAnchor.constraint(equalToConstant: 32),
+                inlineActionStackView.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
+                inlineActionStackView.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
+                inlineActionStackView.topAnchor.constraint(equalTo: levelSegmentedControl.bottomAnchor, constant: 8),
+                inlineActionStackView.heightAnchor.constraint(equalToConstant: 32),
                 statusLabel.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
                 statusLabel.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
-                statusLabel.topAnchor.constraint(equalTo: markInlineButton.bottomAnchor, constant: 8),
+                statusLabel.topAnchor.constraint(equalTo: inlineActionStackView.bottomAnchor, constant: 8),
                 tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
                 tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
                 tableView.topAnchor.constraint(equalTo: statusLabel.bottomAnchor, constant: 8),
@@ -234,7 +253,7 @@
                 levelScope: levelScope
             )
             shareButton?.isEnabled = !visibleEntries.isEmpty || !ConsoleDock.entries.isEmpty
-            jumpButton?.isEnabled = !visibleEntries.isEmpty
+            jumpInlineButton.isEnabled = !visibleEntries.isEmpty
             updateStatusHeader()
             updateEmptyState()
             tableView.reloadData()
@@ -317,7 +336,8 @@
             firstErrorAction.isEnabled = firstVisibleErrorIndex() != nil
             alert.addAction(firstErrorAction)
             alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-            alert.popoverPresentationController?.barButtonItem = jumpButton
+            alert.popoverPresentationController?.sourceView = jumpInlineButton
+            alert.popoverPresentationController?.sourceRect = jumpInlineButton.bounds
             present(alert, animated: true)
         }
 

@@ -54,11 +54,11 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         jumpButton.tap()
         XCTAssertTrue(app.buttons["consoledock.jump-latest-log"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["consoledock.jump-first-error"].waitForExistence(timeout: 5))
-        app.buttons["consoledock.jump-first-error"].tap()
+        app.buttons["consoledock.jump-first-error"].firstMatch.tap()
         XCTAssertTrue(entriesTable.waitForExistence(timeout: 5))
         jumpButton.tap()
         XCTAssertTrue(app.buttons["consoledock.jump-latest-log"].waitForExistence(timeout: 5))
-        app.buttons["consoledock.jump-latest-log"].tap()
+        app.buttons["consoledock.jump-latest-log"].firstMatch.tap()
         XCTAssertTrue(entriesTable.waitForExistence(timeout: 5))
 
         let redactedEntry = tableStaticText(containing: "token=<redacted>", in: entriesTable)

@@ -2,7 +2,7 @@
     import UIKit
 
     final class ConsoleDockActionsViewController: UIViewController, UITableViewDataSource, UITableViewDelegate,
-        UISearchResultsUpdating
+        UISearchBarDelegate
     {
         private struct Section {
             let title: String
@@ -10,7 +10,7 @@
         }
 
         private let tableView = UITableView(frame: .zero, style: .grouped)
-        private let searchController = UISearchController(searchResultsController: nil)
+        private let searchBar = UISearchBar(frame: .zero)
         private let emptyStateLabel = UILabel()
         private var sections: [Section] = []
         private var allActions: [ConsoleDockDebugAction] = []
@@ -45,23 +45,27 @@
         }
 
         func activateSearch(in navigationItem: UINavigationItem) {
-            navigationItem.searchController = searchController
-            navigationItem.hidesSearchBarWhenScrolling = false
+            navigationItem.searchController = nil
         }
 
         func deactivateSearch() {
-            searchController.isActive = false
-            searchController.searchBar.text = nil
+            searchBar.resignFirstResponder()
+            searchBar.text = nil
             searchQuery = ""
             reloadActions()
         }
 
         private func configureSearchController() {
-            searchController.searchResultsUpdater = self
-            searchController.obscuresBackgroundDuringPresentation = false
-            searchController.searchBar.placeholder = "Search actions"
-            searchController.searchBar.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.actionsSearchBar
-            definesPresentationContext = true
+            searchBar.translatesAutoresizingMaskIntoConstraints = false
+            searchBar.placeholder = "Search actions"
+            searchBar.delegate = self
+            searchBar.searchBarStyle = .minimal
+            searchBar.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.actionsSearchBar
+            if #available(iOS 13.0, *) {
+                searchBar.searchTextField.accessibilityIdentifier =
+                    ConsoleDockAccessibilityIdentifiers.actionsSearchBar
+            }
+            view.addSubview(searchBar)
         }
 
         private func configureTableView() {
@@ -76,9 +80,12 @@
             view.addSubview(tableView)
 
             NSLayoutConstraint.activate([
+                searchBar.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
+                searchBar.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
+                searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 4),
                 tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
                 tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-                tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+                tableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor, constant: 4),
                 tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
             ])
         }
@@ -137,8 +144,8 @@
             return sections
         }
 
-        func updateSearchResults(for searchController: UISearchController) {
-            searchQuery = searchController.searchBar.text ?? ""
+        func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+            searchQuery = searchText
             reloadActions()
         }
 
