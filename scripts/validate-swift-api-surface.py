@@ -115,6 +115,33 @@ REQUIRED_SNIPPETS = {
             partialEntryCount: Int
         )
         """,
+        "public struct SessionMetadata: Equatable",
+        "public let sessionIdentifier: String",
+        "public let startedAt: Date?",
+        "public let generatedAt: Date",
+        "public let bundleIdentifier: String?",
+        "public let appVersion: String?",
+        "public let appBuild: String?",
+        "public let processName: String",
+        "public let operatingSystemVersion: String",
+        "public let deviceModel: String",
+        "public let localeIdentifier: String",
+        "public let timeZoneIdentifier: String",
+        """
+        public init(
+            sessionIdentifier: String,
+            startedAt: Date?,
+            generatedAt: Date,
+            bundleIdentifier: String?,
+            appVersion: String?,
+            appBuild: String?,
+            processName: String,
+            operatingSystemVersion: String,
+            deviceModel: String,
+            localeIdentifier: String,
+            timeZoneIdentifier: String
+        )
+        """,
         "public enum StartResult: Equatable",
         "case started",
         "case alreadyRunning",
@@ -130,6 +157,7 @@ REQUIRED_SNIPPETS = {
         "public static var isRunning: Bool",
         "public static var entries: [LogEntry]",
         "public static var diagnostics: Diagnostics",
+        "public static var sessionMetadata: SessionMetadata",
         "public static let entriesDidChangeNotification",
         "public static let diagnosticsDidChangeNotification",
         "public static func clear()",
@@ -149,6 +177,7 @@ REQUIRED_SNIPPETS = {
         "public static func removeAllActions()",
         "public static func debug(_ message: String)",
         "public static func log(level: LogLevel, message: String)",
+        "public static func mark(_ message: String)",
         "public static func info(_ message: String)",
         "public static func warning(_ message: String)",
         "public static func error(_ message: String)",
@@ -187,7 +216,7 @@ REQUIRED_SNIPPETS = {
 
 REQUIRED_SNIPPET_COUNTS = {
     SWIFT_FACADE: {
-        "public init(": 4,
+        "public init(": 5,
         "public let message: String": 2,
     },
 }

@@ -8,6 +8,17 @@ The project follows Semantic Versioning for public releases.
 
 No changes yet.
 
+## v0.4.0 - 2026-06-26
+
+### Added
+
+- Added local session metadata snapshots for Swift and Objective-C integrations so issue reports can include app, process, OS, device, locale, time zone, session, and generation context.
+- Added manual marker APIs through `ConsoleDock.mark(_:)` and `[CDKConsoleDock mark:]`; markers are stored as native info entries and continue through the existing redaction and truncation path.
+- Added `Mark` and `Share Issue Report` actions to the bundled UIKit log panel.
+- Added an internal plain-text issue report formatter containing session metadata, diagnostics, marker index, and currently retained redacted logs.
+- Added sample app marker actions and UI smoke coverage for marker creation and issue-report share action availability.
+- Added DocC, README, roadmap, sample walkthrough, validator, and release-process documentation for Test Session Reports.
+
 ## v0.3.2 - 2026-06-26
 
 ### Changed

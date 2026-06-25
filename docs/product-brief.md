@@ -68,6 +68,16 @@ ConsoleDock.registerAction(id: "open.checkout", title: "Open Checkout") {
 
 ConsoleDock only displays and triggers actions that the app registers. It should not discover routes, control app navigation automatically, bypass business permissions, or accept remote commands.
 
+### Test Session Reports Mode
+
+Let testers mark important reproduction steps and share a local issue report from the bundled panel:
+
+```swift
+ConsoleDock.mark("Started checkout reproduction")
+```
+
+The report should contain session metadata, diagnostics, a marker index, and currently retained redacted logs. It should be generated only through a user-initiated local share action. ConsoleDock should not persist reports by default, upload them, or create remote issues automatically.
+
 ## Non-Goals
 
 - Do not try to replace Xcode debugger features.
@@ -75,6 +85,7 @@ ConsoleDock only displays and triggers actions that the app registers. It should
 - Do not read or expose logs from other processes.
 - Do not encourage enabling debug tooling in production builds without safeguards.
 - Do not turn Debug Actions into a remote command system or automatic route discovery layer.
+- Do not turn issue reports into default persistence, remote upload, or automatic issue creation.
 
 ## Naming Decision
 

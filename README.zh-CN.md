@@ -8,16 +8,17 @@ ConsoleDock 是一个早期阶段的 iOS debug SDK，目标是让测试人员在
 
 ## 当前状态
 
-ConsoleDock `v0.3.2` 是当前 source-first Swift Package Manager 公开预览版本，包含：
+ConsoleDock `v0.4.0` 是当前 source-first Swift Package Manager 公开预览版本，包含：
 
 - Swift Package Manager package；
 - Objective-C/C 兼容的 `ConsoleDockCore`；
 - Swift facade `ConsoleDock`；
 - stdout/stderr 文件描述符捕获、透传和恢复；
 - 带 session 内稳定 ID 和 partial/redacted/truncated 标记的本地内存日志存储；
+- session metadata 和手动 marker，用于标记一次本地测试复现过程；
 - runtime diagnostics，用于查看运行状态、capture 配置和当前内存 store 计数；
 - Debug Actions，用于注册 App 主动提供的本地测试快捷动作；
-- 日志详情页、单条复制，以及 visible/all 日志分享；
+- 日志详情页、单条复制，以及 visible/all/issue report 分享；
 - 默认敏感字段脱敏；
 - UIKit 浮动按钮和日志面板；
 - Swift 和 Objective-C 示例 App；
@@ -48,7 +49,7 @@ ConsoleDock 不能承诺完整、稳定、实时、零侵入捕获：
 
 ## Swift 快速开始
 
-通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.3.2` 已包含 Debug Actions、日志详情、visible/all 分享、runtime diagnostics 和当前 release validation 加固：
+通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.4.0` 已包含 Test Session Reports、manual markers、Debug Actions、日志详情、visible/all/issue-report 分享、runtime diagnostics 和当前 release validation 加固：
 
 ```text
 https://github.com/xuhuanstudio/ConsoleDock.git
@@ -104,6 +105,28 @@ ConsoleDock.registerAction(
 `id` 和 `title` 应使用非空的稳定值。ConsoleDock 会清理首尾空白，并在规范化后的 `id` 重复注册时替换旧 action。
 
 ConsoleDock 只展示和触发 App 注册的动作；它不会自动发现页面、接管路由、绕过业务权限、远程下发命令，也不是自动化测试平台。
+
+## 测试会话标记和问题报告
+
+Test Session Reports 从 `v0.4.0` 开始属于已发布能力。测试人员或 Debug Action 可以在本地复现流程中插入 marker：
+
+```swift
+ConsoleDock.mark("Started checkout reproduction")
+
+let metadata = ConsoleDock.sessionMetadata
+print(metadata.sessionIdentifier)
+```
+
+```objc
+[CDKConsoleDock mark:@"Started checkout reproduction"];
+
+CDKSessionMetadata *metadata = [CDKConsoleDock sessionMetadata];
+NSLog(@"%@", metadata.sessionIdentifier);
+```
+
+内置 UIKit 面板提供 `Mark` 和 `Share Issue Report`。issue report 通过系统分享面板由用户主动生成，包含 session metadata、diagnostics、marker 索引和当前内存中保留的已脱敏日志。
+
+marker 本质上是带 `[marker]` 前缀的 native info 日志，因此同样经过脱敏、截断、详情、搜索、复制和分享流程。ConsoleDock 默认不会持久化、上传或自动发送 issue report。
 
 ## Objective-C 快速开始
 

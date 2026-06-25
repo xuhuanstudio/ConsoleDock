@@ -171,6 +171,58 @@ public enum ConsoleDock {
         }
     }
 
+    /// Local app and device context for the current ConsoleDock session.
+    public struct SessionMetadata: Equatable {
+        /// Stable identifier for the current ConsoleDock runtime session.
+        public let sessionIdentifier: String
+        /// Time when ConsoleDock most recently started successfully, or nil before the first successful start.
+        public let startedAt: Date?
+        /// Time when this metadata snapshot was generated.
+        public let generatedAt: Date
+        /// Main bundle identifier, when available.
+        public let bundleIdentifier: String?
+        /// Main bundle short version string, when available.
+        public let appVersion: String?
+        /// Main bundle build version string, when available.
+        public let appBuild: String?
+        /// Current process name.
+        public let processName: String
+        /// Operating system version string from ProcessInfo.
+        public let operatingSystemVersion: String
+        /// Device model on UIKit platforms, otherwise unknown.
+        public let deviceModel: String
+        /// Current locale identifier.
+        public let localeIdentifier: String
+        /// Current time zone identifier.
+        public let timeZoneIdentifier: String
+
+        public init(
+            sessionIdentifier: String,
+            startedAt: Date?,
+            generatedAt: Date,
+            bundleIdentifier: String?,
+            appVersion: String?,
+            appBuild: String?,
+            processName: String,
+            operatingSystemVersion: String,
+            deviceModel: String,
+            localeIdentifier: String,
+            timeZoneIdentifier: String
+        ) {
+            self.sessionIdentifier = sessionIdentifier
+            self.startedAt = startedAt
+            self.generatedAt = generatedAt
+            self.bundleIdentifier = bundleIdentifier
+            self.appVersion = appVersion
+            self.appBuild = appBuild
+            self.processName = processName
+            self.operatingSystemVersion = operatingSystemVersion
+            self.deviceModel = deviceModel
+            self.localeIdentifier = localeIdentifier
+            self.timeZoneIdentifier = timeZoneIdentifier
+        }
+    }
+
     /// Startup result returned by `start(configuration:)`.
     public enum StartResult: Equatable {
         case started
@@ -237,6 +289,11 @@ public enum ConsoleDock {
         Diagnostics(coreDiagnostics: CDKConsoleDock.diagnostics())
     }
 
+    /// Snapshot of local session and app metadata for issue reports.
+    public static var sessionMetadata: SessionMetadata {
+        SessionMetadata(coreMetadata: CDKConsoleDock.sessionMetadata())
+    }
+
     /// Notification posted after entries are appended, reset, or cleared.
     public static let entriesDidChangeNotification = Notification.Name.CDKConsoleDockEntriesDidChange
     /// Notification posted after diagnostics values may have changed.
@@ -295,6 +352,11 @@ public enum ConsoleDock {
     /// Appends a native entry at a specific level.
     public static func log(level: LogLevel, message: String) {
         CDKConsoleDock.log(with: level.coreLevel, message: message)
+    }
+
+    /// Appends a native marker entry for a local test session timeline.
+    public static func mark(_ message: String) {
+        CDKConsoleDock.mark(message)
     }
 
     /// Appends a native info entry.
@@ -376,6 +438,22 @@ extension ConsoleDock.Diagnostics {
         redactedEntryCount = Int(coreDiagnostics.redactedEntryCount)
         truncatedEntryCount = Int(coreDiagnostics.truncatedEntryCount)
         partialEntryCount = Int(coreDiagnostics.partialEntryCount)
+    }
+}
+
+extension ConsoleDock.SessionMetadata {
+    fileprivate init(coreMetadata: CDKSessionMetadata) {
+        sessionIdentifier = coreMetadata.sessionIdentifier
+        startedAt = coreMetadata.startedAt
+        generatedAt = coreMetadata.generatedAt
+        bundleIdentifier = coreMetadata.bundleIdentifier
+        appVersion = coreMetadata.appVersion
+        appBuild = coreMetadata.appBuild
+        processName = coreMetadata.processName
+        operatingSystemVersion = coreMetadata.operatingSystemVersion
+        deviceModel = coreMetadata.deviceModel
+        localeIdentifier = coreMetadata.localeIdentifier
+        timeZoneIdentifier = coreMetadata.timeZoneIdentifier
     }
 }
 

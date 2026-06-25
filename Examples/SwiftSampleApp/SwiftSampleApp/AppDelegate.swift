@@ -56,6 +56,15 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         }
 
         ConsoleDock.registerAction(
+            id: "swift.sample.marker",
+            title: "Add Marker",
+            group: "Samples",
+            detail: "Writes a sample timeline marker."
+        ) {
+            ConsoleDock.mark("debug action sample marker")
+        }
+
+        ConsoleDock.registerAction(
             id: "swift.sample.show-console",
             title: "Show Console",
             group: "Navigation",

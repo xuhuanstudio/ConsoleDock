@@ -80,6 +80,15 @@ configurationForConnectingSceneSession:(UISceneSession *)connectingSceneSession
                                                   [CDKConsoleDock fault:@"objc debug action smoke fault"];
                                               }];
 
+    [CDKConsoleDockUIKit registerActionWithIdentifier:@"objc.sample.marker"
+                                                title:@"Add Marker"
+                                                group:@"Samples"
+                                               detail:@"Writes a sample timeline marker."
+                                 requiresConfirmation:NO
+                                              handler:^{
+                                                  [CDKConsoleDock mark:@"objc debug action sample marker"];
+                                              }];
+
     [CDKConsoleDockUIKit registerActionWithIdentifier:@"objc.sample.show-console"
                                                 title:@"Show Console"
                                                 group:@"Navigation"

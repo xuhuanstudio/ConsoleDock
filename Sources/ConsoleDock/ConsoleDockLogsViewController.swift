@@ -12,6 +12,7 @@
         private let levelSegmentedControl = UISegmentedControl(
             items: ConsoleDockEntryFilter.LevelScope.allCases.map(\.title)
         )
+        private let markInlineButton = UIButton(type: .system)
         private let statusLabel = UILabel()
         private let emptyStateLabel = UILabel()
         private var liveUpdateBuffer = ConsoleDockLiveUpdateBuffer()
@@ -35,6 +36,7 @@
             view.backgroundColor = ConsoleDockUIColors.background
             configureSearchController()
             configureLevelSegmentedControl()
+            configureMarkInlineButton()
             configureStatusLabel()
             configureTableView()
             configureEmptyStateLabel()
@@ -124,6 +126,20 @@
             view.addSubview(levelSegmentedControl)
         }
 
+        private func configureMarkInlineButton() {
+            markInlineButton.translatesAutoresizingMaskIntoConstraints = false
+            markInlineButton.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.markButton
+            markInlineButton.setTitle("Mark", for: .normal)
+            markInlineButton.setTitleColor(ConsoleDockUIColors.primaryText, for: .normal)
+            markInlineButton.titleLabel?.font = .preferredFont(forTextStyle: .callout)
+            markInlineButton.backgroundColor = ConsoleDockUIColors.panel
+            markInlineButton.layer.cornerRadius = 6
+            markInlineButton.layer.borderColor = ConsoleDockUIColors.separator.cgColor
+            markInlineButton.layer.borderWidth = 1
+            markInlineButton.addTarget(self, action: #selector(showMarkerPrompt), for: .touchUpInside)
+            view.addSubview(markInlineButton)
+        }
+
         private func configureStatusLabel() {
             statusLabel.translatesAutoresizingMaskIntoConstraints = false
             statusLabel.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.status
@@ -160,9 +176,13 @@
                 levelSegmentedControl.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
                 levelSegmentedControl.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
                 levelSegmentedControl.heightAnchor.constraint(equalToConstant: 32),
+                markInlineButton.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
+                markInlineButton.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
+                markInlineButton.topAnchor.constraint(equalTo: levelSegmentedControl.bottomAnchor, constant: 8),
+                markInlineButton.heightAnchor.constraint(equalToConstant: 32),
                 statusLabel.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
                 statusLabel.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
-                statusLabel.topAnchor.constraint(equalTo: levelSegmentedControl.bottomAnchor, constant: 8),
+                statusLabel.topAnchor.constraint(equalTo: markInlineButton.bottomAnchor, constant: 8),
                 tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
                 tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
                 tableView.topAnchor.constraint(equalTo: statusLabel.bottomAnchor, constant: 8),
@@ -235,6 +255,11 @@
             allAction.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.shareAllLogs
             allAction.isEnabled = !allEntries.isEmpty
             alert.addAction(allAction)
+            let reportAction = UIAlertAction(title: "Share Issue Report", style: .default) { [weak self] _ in
+                self?.shareIssueReport()
+            }
+            reportAction.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.shareIssueReport
+            alert.addAction(reportAction)
             alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
             alert.popoverPresentationController?.barButtonItem = shareButton
             present(alert, animated: true)
@@ -250,6 +275,37 @@
             let activityController = UIActivityViewController(activityItems: [snapshot], applicationActivities: nil)
             activityController.popoverPresentationController?.barButtonItem = shareButton
             present(activityController, animated: true)
+        }
+
+        private func shareIssueReport() {
+            let report = ConsoleDockIssueReportFormatter.reportText(
+                entries: ConsoleDock.entries,
+                metadata: ConsoleDock.sessionMetadata,
+                diagnostics: ConsoleDock.diagnostics
+            )
+            let activityController = UIActivityViewController(activityItems: [report], applicationActivities: nil)
+            activityController.popoverPresentationController?.barButtonItem = shareButton
+            present(activityController, animated: true)
+        }
+
+        @objc private func showMarkerPrompt() {
+            guard ConsoleDock.isRunning else { return }
+            let alert = UIAlertController(
+                title: "Add Marker",
+                message: nil,
+                preferredStyle: .alert
+            )
+            alert.addTextField { textField in
+                textField.placeholder = "What just happened?"
+                textField.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.markerTextField
+            }
+            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+            let addAction = UIAlertAction(title: "Add Marker", style: .default) { _ in
+                ConsoleDock.mark(alert.textFields?.first?.text ?? "")
+            }
+            addAction.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.addMarkerButton
+            alert.addAction(addAction)
+            present(alert, animated: true)
         }
 
         @objc private func toggleLiveUpdates() {

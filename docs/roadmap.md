@@ -77,7 +77,29 @@ Not included:
 - crash reporting.
 - CocoaPods or XCFramework distribution.
 
-## Post-v0.3 - Demand-Driven Compatibility Candidates
+## v0.4 - Test Session Reports
+
+Goal: help testers turn a local reproduction session into a useful issue report without connecting Xcode.
+
+Deliverables:
+
+- local session metadata snapshots for app, process, OS, device, locale, time zone, session, and generation context.
+- manual marker APIs for Swift and Objective-C integrations.
+- bundled UIKit `Mark` action for adding timeline markers during a test session.
+- `Share Issue Report` action that exports a local plain-text report with metadata, diagnostics, marker index, and currently retained redacted logs.
+- Swift and Objective-C sample marker actions.
+- focused UI smoke coverage for marker creation and issue-report share action availability.
+
+Not included:
+
+- persistent log storage.
+- automatic upload.
+- remote issue creation.
+- parameterized Debug Actions.
+- crash reporting.
+- network inspector.
+
+## Post-v0.4 - Demand-Driven Compatibility Candidates
 
 Goal: improve adoption in existing apps only when real integration feedback shows SPM and the current explicit API are not enough.
 

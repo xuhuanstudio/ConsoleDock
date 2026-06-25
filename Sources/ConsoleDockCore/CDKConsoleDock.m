@@ -1,6 +1,10 @@
 #import "ConsoleDockCore.h"
 #import "CDKStandardOutputCapture.h"
 
+#if __has_include(<UIKit/UIKit.h>)
+#import <UIKit/UIKit.h>
+#endif
+
 NSErrorDomain const CDKConsoleDockErrorDomain = @"CDKConsoleDockErrorDomain";
 NSNotificationName const CDKConsoleDockEntriesDidChangeNotification = @"CDKConsoleDockEntriesDidChangeNotification";
 NSNotificationName const CDKConsoleDockDiagnosticsDidChangeNotification = @"CDKConsoleDockDiagnosticsDidChangeNotification";
@@ -11,11 +15,15 @@ static CDKConfiguration *CDKConsoleDockConfiguration = nil;
 static NSMutableArray<CDKLogEntry *> *CDKConsoleDockEntries = nil;
 static CDKStandardOutputCapture *CDKConsoleDockCapture = nil;
 static unsigned long long CDKConsoleDockNextEntryIdentifier = 0;
+static NSString *CDKConsoleDockSessionIdentifier = nil;
+static NSDate *CDKConsoleDockStartedAt = nil;
 static BOOL CDKConsoleDockRedactNativeContinuation = NO;
 static BOOL CDKConsoleDockRedactStdoutContinuation = NO;
 static BOOL CDKConsoleDockRedactStderrContinuation = NO;
 
 static NSString *const CDKRedactedPartialContinuationMessage = @"<redacted partial continuation>";
+static NSString *const CDKMarkerPrefix = @"[marker]";
+static NSString *const CDKDefaultMarkerText = @"Marker";
 
 static NSString *CDKStringByReplacingMatches(NSString *message, NSString *pattern, NSString *replacement)
 {
@@ -128,6 +136,41 @@ static CDKLogLevel CDKDefaultLevelForSource(CDKLogSource source)
     }
 }
 
+static NSString *CDKTrimmedString(NSString *message)
+{
+    return [(message ?: @"") stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+}
+
+static NSString *CDKMarkerMessage(NSString *message)
+{
+    NSString *trimmedMessage = CDKTrimmedString(message);
+    NSString *body = trimmedMessage.length > 0 ? trimmedMessage : CDKDefaultMarkerText;
+    return [NSString stringWithFormat:@"%@ %@", CDKMarkerPrefix, body];
+}
+
+static NSString *CDKCurrentSessionIdentifier(void)
+{
+    if (CDKConsoleDockSessionIdentifier == nil) {
+        CDKConsoleDockSessionIdentifier = [[NSUUID UUID] UUIDString];
+    }
+    return CDKConsoleDockSessionIdentifier;
+}
+
+static NSString *CDKDeviceModel(void)
+{
+#if __has_include(<UIKit/UIKit.h>)
+    return UIDevice.currentDevice.model ?: @"unknown";
+#else
+    return @"unknown";
+#endif
+}
+
+static NSString *CDKBundleString(NSString *key)
+{
+    id value = [NSBundle.mainBundle objectForInfoDictionaryKey:key];
+    return [value isKindOfClass:NSString.class] ? value : nil;
+}
+
 static void CDKPostEntriesDidChangeNotification(void)
 {
     [[NSNotificationCenter defaultCenter] postNotificationName:CDKConsoleDockEntriesDidChangeNotification
@@ -200,6 +243,8 @@ static void CDKPostDiagnosticsDidChangeNotification(void)
         }
 
         CDKConsoleDockCapture = capture;
+        CDKConsoleDockSessionIdentifier = [[NSUUID UUID] UUIDString];
+        CDKConsoleDockStartedAt = [NSDate date];
         CDKConsoleDockRunning = YES;
     }
     if (didResetEntries) {
@@ -284,6 +329,29 @@ static void CDKPostDiagnosticsDidChangeNotification(void)
     }
 }
 
++ (CDKSessionMetadata *)sessionMetadata
+{
+    NSString *sessionIdentifier = nil;
+    NSDate *startedAt = nil;
+    @synchronized(self) {
+        sessionIdentifier = [CDKCurrentSessionIdentifier() copy];
+        startedAt = [CDKConsoleDockStartedAt copy];
+    }
+
+    NSProcessInfo *processInfo = NSProcessInfo.processInfo;
+    return [[CDKSessionMetadata alloc] initWithSessionIdentifier:sessionIdentifier
+                                                      startedAt:startedAt
+                                                    generatedAt:[NSDate date]
+                                               bundleIdentifier:NSBundle.mainBundle.bundleIdentifier
+                                                     appVersion:CDKBundleString(@"CFBundleShortVersionString")
+                                                       appBuild:CDKBundleString(@"CFBundleVersion")
+                                                    processName:processInfo.processName ?: @"unknown"
+                                         operatingSystemVersion:processInfo.operatingSystemVersionString ?: @"unknown"
+                                                    deviceModel:CDKDeviceModel()
+                                               localeIdentifier:NSLocale.currentLocale.localeIdentifier ?: @"unknown"
+                                             timeZoneIdentifier:NSTimeZone.localTimeZone.name ?: @"unknown"];
+}
+
 + (NSArray<CDKLogEntry *> *)entries
 {
     @synchronized(self) {
@@ -366,6 +434,11 @@ static void CDKPostDiagnosticsDidChangeNotification(void)
 + (void)logWithLevel:(CDKLogLevel)level message:(NSString *)message
 {
     [self appendEntryWithLevel:level source:CDKLogSourceNative message:message isPartial:NO];
+}
+
++ (void)mark:(NSString *)message
+{
+    [self logWithLevel:CDKLogLevelInfo message:CDKMarkerMessage(message)];
 }
 
 + (void)debug:(NSString *)message

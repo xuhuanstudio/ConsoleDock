@@ -8,7 +8,26 @@ release_tag="${CONSOLEDOCK_RELEASE_TAG:-}"
 if [[ -z "$release_tag" && "${GITHUB_REF_TYPE:-}" == "tag" ]]; then
   release_tag="${GITHUB_REF_NAME:-}"
 fi
-release_tag="${release_tag:-v0.2.0}"
+if [[ -z "$release_tag" ]]; then
+  release_tag="$(
+    python3 - <<'PY'
+import pathlib
+import re
+
+changelog = pathlib.Path("CHANGELOG.md").read_text(encoding="utf-8")
+release_heading = re.compile(r"^## \[?(v\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?)\]?(?:\s|-|$)")
+for line in changelog.splitlines():
+    match = release_heading.match(line)
+    if match:
+        print(match.group(1))
+        break
+PY
+  )"
+fi
+if [[ -z "$release_tag" ]]; then
+  echo "error: could not resolve release tag; set CONSOLEDOCK_RELEASE_TAG." >&2
+  exit 1
+fi
 
 section() {
   printf '\n==> %s\n' "$1"

@@ -56,6 +56,18 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
         tapBackButton(in: app)
         XCTAssertTrue(entriesTable.waitForExistence(timeout: 5))
 
+        let markButton = app.buttons["consoledock.mark"]
+        XCTAssertTrue(markButton.waitForExistence(timeout: 5))
+        markButton.tap()
+        let markerAlert = app.alerts.firstMatch
+        XCTAssertTrue(markerAlert.waitForExistence(timeout: 5))
+        let markerTextField = markerAlert.textFields["consoledock.marker-text"]
+        XCTAssertTrue(markerTextField.waitForExistence(timeout: 5))
+        markerTextField.tap()
+        markerTextField.typeText("Swift UI smoke marker")
+        markerAlert.buttons["consoledock.add-marker"].firstMatch.tap()
+        XCTAssertTrue(waitForTableEntry(containing: "[marker] Swift UI smoke marker", in: entriesTable, timeout: 5))
+
         let pauseButton = app.buttons["consoledock.pause-live"]
         XCTAssertTrue(pauseButton.waitForExistence(timeout: 5))
         pauseButton.tap()
@@ -102,6 +114,13 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
         XCTAssertTrue(closeButton.waitForExistence(timeout: 5))
         closeButton.tap()
         XCTAssertFalse(statusLabel.waitForExistence(timeout: 2))
+
+        XCTAssertTrue(showConsoleButton.waitForExistence(timeout: 5))
+        showConsoleButton.tap()
+        let shareButton = app.buttons["consoledock.share"]
+        XCTAssertTrue(shareButton.waitForExistence(timeout: 5))
+        shareButton.tap()
+        XCTAssertTrue(app.buttons["consoledock.share-issue-report"].waitForExistence(timeout: 5))
     }
 
     private func waitForTableEntry(in table: XCUIElement, timeout: TimeInterval) -> Bool {

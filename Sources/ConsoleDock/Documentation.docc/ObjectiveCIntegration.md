@@ -35,3 +35,16 @@ For older Objective-C projects, prefer adding a sink or appender to the existing
 ConsoleDock cannot fully capture Swift `Logger`, `os_log`, or Apple unified logging from inside the app, so adapters should forward to ConsoleDock explicitly when reliable in-app visibility is required.
 
 See <doc:ExistingLoggerMigration> for a macro-based forwarding example.
+
+## Mark A Test Session
+
+Objective-C apps can add local reproduction markers through `CDKConsoleDock`:
+
+```objc
+[CDKConsoleDock mark:@"Opened checkout"];
+
+CDKSessionMetadata *metadata = [CDKConsoleDock sessionMetadata];
+NSLog(@"ConsoleDock session: %@", metadata.sessionIdentifier);
+```
+
+Markers are native info entries with a stable `[marker]` prefix. The bundled UIKit console can also create markers and share a local issue report with session metadata, diagnostics, markers, and currently retained redacted logs.

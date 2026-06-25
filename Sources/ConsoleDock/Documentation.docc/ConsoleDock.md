@@ -19,6 +19,7 @@ ConsoleDock is not a full replacement for Xcode Console or Apple unified logging
 - <doc:ExistingLoggerMigration>
 - <doc:IntegrationDiagnostics>
 - <doc:DebugActions>
+- <doc:TestSessionReports>
 - <doc:PrivacyAndReleaseSafety>
 - <doc:ObjectiveCIntegration>
 
@@ -50,6 +51,12 @@ ConsoleDock is not a full replacement for Xcode Console or Apple unified logging
 - ``ConsoleDock/clear()``
 - ``ConsoleDock/LogEntry``
 - ``ConsoleDock/LogSource``
+
+### Test Session Reports
+
+- ``ConsoleDock/sessionMetadata``
+- ``ConsoleDock/SessionMetadata``
+- ``ConsoleDock/mark(_:)``
 
 ### Showing The UIKit Console
 

@@ -175,6 +175,36 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertEqual(diagnostics.partialEntryCount, 1)
     }
 
+    func testSwiftSessionMetadataMapsCoreFields() {
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+
+        let metadata = ConsoleDock.sessionMetadata
+
+        XCTAssertFalse(metadata.sessionIdentifier.isEmpty)
+        XCTAssertNotNil(metadata.startedAt)
+        XCTAssertGreaterThanOrEqual(
+            metadata.generatedAt.timeIntervalSince1970,
+            metadata.startedAt!.timeIntervalSince1970
+        )
+        XCTAssertFalse(metadata.processName.isEmpty)
+        XCTAssertFalse(metadata.operatingSystemVersion.isEmpty)
+        XCTAssertFalse(metadata.deviceModel.isEmpty)
+        XCTAssertFalse(metadata.localeIdentifier.isEmpty)
+        XCTAssertFalse(metadata.timeZoneIdentifier.isEmpty)
+    }
+
+    func testSwiftFacadeMarkStoresMarkerEntry() throws {
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+
+        ConsoleDock.mark("Tapped pay button token=secret")
+
+        let entry = try XCTUnwrap(ConsoleDock.entries.first)
+        XCTAssertEqual(entry.level, .info)
+        XCTAssertEqual(entry.source, .native)
+        XCTAssertEqual(entry.message, "[marker] Tapped pay button token=<redacted>")
+        XCTAssertTrue(entry.redacted)
+    }
+
     func testEntriesDidChangeNotificationNameIsExposed() {
         XCTAssertEqual(ConsoleDock.entriesDidChangeNotification.rawValue, "CDKConsoleDockEntriesDidChangeNotification")
     }
@@ -444,6 +474,134 @@ final class ConsoleDockTests: XCTestCase {
 
         XCTAssertFalse(snapshot.contains("Visible Entries:"))
         XCTAssertTrue(snapshot.contains("Entries: 1"))
+    }
+
+    func testIssueReportFormatterIncludesSessionDiagnosticsMarkersAndLogs() {
+        let metadata = ConsoleDock.SessionMetadata(
+            sessionIdentifier: "session-123",
+            startedAt: Date(timeIntervalSince1970: 1.25),
+            generatedAt: Date(timeIntervalSince1970: 0),
+            bundleIdentifier: "io.github.consoledock.Sample",
+            appVersion: "1.2.3",
+            appBuild: "456",
+            processName: "Sample",
+            operatingSystemVersion: "Version 18.0",
+            deviceModel: "iPhone",
+            localeIdentifier: "en_US",
+            timeZoneIdentifier: "UTC"
+        )
+        let diagnostics = ConsoleDock.Diagnostics(
+            isRunning: true,
+            capturesStandardOutput: false,
+            capturesStandardError: true,
+            showsFloatingButton: true,
+            allowsReleaseBuilds: false,
+            maximumEntries: 100,
+            maximumMessageLength: 4_096,
+            entryCount: 2,
+            redactedEntryCount: 1,
+            truncatedEntryCount: 0,
+            partialEntryCount: 0
+        )
+        let entries = [
+            ConsoleDock.LogEntry(
+                timestamp: Date(timeIntervalSince1970: 2.5),
+                level: .info,
+                source: .native,
+                message: "[marker] Started checkout"
+            ),
+            ConsoleDock.LogEntry(
+                timestamp: Date(timeIntervalSince1970: 3.75),
+                level: .error,
+                source: .stderr,
+                message: "payment token=<redacted>",
+                redacted: true
+            )
+        ]
+
+        let report = ConsoleDockIssueReportFormatter.reportText(
+            entries: entries,
+            metadata: metadata,
+            diagnostics: diagnostics
+        )
+
+        XCTAssertEqual(
+            report,
+            """
+            ConsoleDock Issue Report
+            Generated: 1970-01-01T00:00:00.000Z
+
+            Session:
+              Session ID: session-123
+              Started: 1970-01-01T00:00:01.250Z
+              Bundle ID: io.github.consoledock.Sample
+              App Version: 1.2.3
+              App Build: 456
+              Process: Sample
+              OS: Version 18.0
+              Device: iPhone
+              Locale: en_US
+              Time Zone: UTC
+
+            Diagnostics:
+              Running: true
+              stdout: disabled
+              stderr: enabled
+              Floating Button: enabled
+              Release Builds: disabled by runtime config
+              Limits: entries=100 messageLength=4096
+              Redacted: 1
+              Truncated: 0
+              Partial: 0
+
+            Markers:
+              [1970-01-01T00:00:02.500Z] [native] [INFO] [marker] Started checkout
+
+            Logs:
+              [1970-01-01T00:00:02.500Z] [native] [INFO] [marker] Started checkout
+              [1970-01-01T00:00:03.750Z] [stderr] [ERROR] [redacted] payment token=<redacted>
+            """
+        )
+    }
+
+    func testIssueReportFormatterHandlesEmptyEntriesAndMissingMetadata() {
+        let metadata = ConsoleDock.SessionMetadata(
+            sessionIdentifier: "session-empty",
+            startedAt: nil,
+            generatedAt: Date(timeIntervalSince1970: 0),
+            bundleIdentifier: nil,
+            appVersion: nil,
+            appBuild: nil,
+            processName: "Sample",
+            operatingSystemVersion: "Version 18.0",
+            deviceModel: "unknown",
+            localeIdentifier: "en_US",
+            timeZoneIdentifier: "UTC"
+        )
+        let diagnostics = ConsoleDock.Diagnostics(
+            isRunning: false,
+            capturesStandardOutput: false,
+            capturesStandardError: false,
+            showsFloatingButton: false,
+            allowsReleaseBuilds: false,
+            maximumEntries: 100,
+            maximumMessageLength: 4_096,
+            entryCount: 0,
+            redactedEntryCount: 0,
+            truncatedEntryCount: 0,
+            partialEntryCount: 0
+        )
+
+        let report = ConsoleDockIssueReportFormatter.reportText(
+            entries: [],
+            metadata: metadata,
+            diagnostics: diagnostics
+        )
+
+        XCTAssertTrue(report.contains("Started: unavailable"))
+        XCTAssertTrue(report.contains("Bundle ID: unavailable"))
+        XCTAssertTrue(report.contains("Markers:\n  (no markers)"))
+        XCTAssertTrue(report.contains("Logs:\n  (no entries)"))
     }
 
     func testDiagnosticsStatusTextIsCompactAndSafe() {

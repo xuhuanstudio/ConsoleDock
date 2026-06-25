@@ -17,12 +17,14 @@ REQUIRED_SNIPPETS = {
         "Reliable complete logging should go through ConsoleDock's explicit API or an adapter for an existing logging framework.",
         "ConsoleDock's on-device panel reads from ConsoleDock's own in-memory store.",
         "ConsoleDock only stores, displays, and triggers actions registered by the host app. It does not discover screens, take over routing, bypass app permissions, receive remote commands, or act as an automation test framework.",
+        "ConsoleDock does not persist issue reports by default, upload them, or send them anywhere automatically.",
     ],
     "README.zh-CN.md": [
         "ConsoleDock 不能被描述成 Xcode Console 或 Apple unified logging 的完整替代品。",
         "ConsoleDock 不能承诺完整、稳定、实时、零侵入捕获：",
         "如果需要可靠完整的 App 内日志展示，推荐使用 ConsoleDock 的显式 API，或者在已有 logger 中增加 sink/appender 转发。",
         "ConsoleDock 只展示和触发 App 注册的动作；它不会自动发现页面、接管路由、绕过业务权限、远程下发命令，也不是自动化测试平台。",
+        "ConsoleDock 默认不会持久化、上传或自动发送 issue report。",
     ],
     "docs/migration-existing-loggers.md": [
         "Do not depend on ConsoleDock reading Swift `Logger` or `os_log` entries back from Apple unified logging.",
@@ -33,10 +35,12 @@ REQUIRED_SNIPPETS = {
         "Swift `Logger`, `os_log`, and Apple unified logging are not validated by these samples",
         "ConsoleDock does not promise complete zero-intrusion capture of those systems.",
         "Debug Actions are local, app-registered shortcuts. ConsoleDock does not discover pages, control routing, bypass app permissions, or receive remote commands.",
+        "ConsoleDock does not write an export file by default, does not persist logs by default, and does not upload logs.",
     ],
     "docs/product-brief.md": [
         "ConsoleDock only displays and triggers actions that the app registers. It should not discover routes, control app navigation automatically, bypass business permissions, or accept remote commands.",
         "Do not turn Debug Actions into a remote command system or automatic route discovery layer.",
+        "ConsoleDock should not persist reports by default, upload them, or create remote issues automatically.",
     ],
     "docs/release-process.md": [
         "Do not describe ConsoleDock as a full Xcode Console, Swift `Logger`, `os_log`, or Apple unified logging replacement.",
@@ -58,6 +62,10 @@ REQUIRED_SNIPPETS = {
     ],
     "Sources/ConsoleDock/Documentation.docc/DebugActions.md": [
         "ConsoleDock does not discover screens, take over routing, bypass business permissions, receive remote commands, or act as an automation test framework.",
+    ],
+    "Sources/ConsoleDock/Documentation.docc/TestSessionReports.md": [
+        "ConsoleDock does not persist reports by default, upload them, or create remote issues automatically.",
+        "The report shares all currently retained entries, not only the visible filtered list",
     ],
 }
 
@@ -104,6 +112,14 @@ FORBIDDEN_PATTERNS = [
     (
         re.compile(r"\bDebug Actions?\s+(?:can\s+|will\s+)?(?:receive|accept|run)\s+remote\s+commands\b", re.IGNORECASE),
         "Debug Actions must not claim remote command support",
+    ),
+    (
+        re.compile(r"\bissue reports?\s+(?:can\s+|will\s+)?(?:upload|send)s?\s+automatically\b", re.IGNORECASE),
+        "Issue reports must not claim automatic upload or send behavior",
+    ),
+    (
+        re.compile(r"\bConsoleDock\s+(?:can\s+|will\s+)?(?:create|open)s?\s+remote\s+issues?\s+automatically\b", re.IGNORECASE),
+        "Issue reports must not claim automatic remote issue creation",
     ),
 ]
 
@@ -187,6 +203,8 @@ def self_test() -> list[str]:
             "- full `Logger` / `os_log` ingestion.",
             "Debug Actions can discover routes.",
             "Debug Actions can receive remote commands.",
+            "Issue reports upload automatically.",
+            "ConsoleDock will create remote issues automatically.",
         ]
     ):
         if not forbidden_claim_errors(f"bad-{index}.md", bad_text):

@@ -101,6 +101,73 @@ final class ConsoleDockCoreTests: XCTestCase {
         XCTAssertEqual(diagnostics.entryCount, 1)
     }
 
+    func testSessionMetadataBeforeAndAfterStartProvidesLocalContextAndRefreshesOnStart() {
+        let beforeStart = CDKConsoleDock.sessionMetadata()
+        XCTAssertFalse(beforeStart.sessionIdentifier.isEmpty)
+        XCTAssertFalse(beforeStart.processName.isEmpty)
+        XCTAssertFalse(beforeStart.operatingSystemVersion.isEmpty)
+        XCTAssertFalse(beforeStart.deviceModel.isEmpty)
+        XCTAssertFalse(beforeStart.localeIdentifier.isEmpty)
+        XCTAssertFalse(beforeStart.timeZoneIdentifier.isEmpty)
+
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+
+        let afterStart = CDKConsoleDock.sessionMetadata()
+        XCTAssertFalse(afterStart.sessionIdentifier.isEmpty)
+        XCTAssertNotEqual(afterStart.sessionIdentifier, beforeStart.sessionIdentifier)
+        XCTAssertNotNil(afterStart.startedAt)
+        XCTAssertGreaterThanOrEqual(
+            afterStart.generatedAt.timeIntervalSince1970,
+            afterStart.startedAt!.timeIntervalSince1970
+        )
+    }
+
+    func testSessionMetadataIdentifierChangesAcrossFreshStartSessions() {
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+        let firstSession = CDKConsoleDock.sessionMetadata()
+
+        CDKConsoleDock.stop()
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+        let secondSession = CDKConsoleDock.sessionMetadata()
+
+        XCTAssertNotEqual(firstSession.sessionIdentifier, secondSession.sessionIdentifier)
+        XCTAssertNotNil(secondSession.startedAt)
+    }
+
+    func testMarkerAppendsNativeInfoEntry() throws {
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+
+        CDKConsoleDock.mark("Started checkout reproduction")
+
+        let entry = try XCTUnwrap(CDKConsoleDock.entries().first)
+        XCTAssertEqual(entry.level, .info)
+        XCTAssertEqual(entry.source, .native)
+        XCTAssertEqual(entry.message, "[marker] Started checkout reproduction")
+        XCTAssertFalse(entry.redacted)
+        XCTAssertFalse(entry.truncated)
+    }
+
+    func testEmptyMarkerUsesDefaultText() {
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+
+        CDKConsoleDock.mark("   \n")
+
+        XCTAssertEqual(CDKConsoleDock.entries().first?.message, "[marker] Marker")
+    }
+
+    func testMarkerUsesRedactionAndTruncationPath() throws {
+        let configuration = noCaptureConfiguration()
+        configuration.maximumMessageLength = 18
+        XCTAssertEqual(CDKConsoleDock.start(with: configuration), .started)
+
+        CDKConsoleDock.mark("token=secret-value suffix")
+
+        let entry = try XCTUnwrap(CDKConsoleDock.entries().first)
+        XCTAssertEqual(entry.message, "[marker] token=<re")
+        XCTAssertTrue(entry.redacted)
+        XCTAssertTrue(entry.truncated)
+    }
+
     func testReleaseBuildDefaultStartGateIsDisabled() {
         let configuration = noCaptureConfiguration()
 

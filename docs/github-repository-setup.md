@@ -64,7 +64,8 @@ Then add the remote and push:
 
 ```sh
 git remote add origin <REMOTE_URL>
-python3 scripts/validate-public-release-preflight.py --tag v0.2.0 --local-only
+RELEASE_TAG=vX.Y.Z
+python3 scripts/validate-public-release-preflight.py --tag "$RELEASE_TAG" --local-only
 git push -u origin main
 ```
 
@@ -83,19 +84,20 @@ If branch protection is enabled, require the `CI` workflow after it has run succ
 Only after the current local `HEAD` has been pushed to `origin/main` and that exact commit's `main` workflow has passed:
 
 ```sh
-python3 scripts/validate-public-release-preflight.py --tag v0.2.0
-python3 scripts/validate-release-metadata.py --tag v0.2.0
+RELEASE_TAG=vX.Y.Z
+python3 scripts/validate-public-release-preflight.py --tag "$RELEASE_TAG"
+python3 scripts/validate-release-metadata.py --tag "$RELEASE_TAG"
 python3 scripts/audit-release-content.py
-CONSOLEDOCK_RELEASE_TAG=v0.2.0 scripts/validate-release.sh
+CONSOLEDOCK_RELEASE_TAG="$RELEASE_TAG" scripts/validate-release.sh
 python3 scripts/audit-source-archive.py .build/ConsoleDock-source.zip
 git status --short
-git tag -a v0.2.0 -m "ConsoleDock v0.2.0"
-git push origin v0.2.0
+git tag -a "$RELEASE_TAG" -m "ConsoleDock $RELEASE_TAG"
+git push origin "$RELEASE_TAG"
 ```
 
 Wait for the `Release Validation` workflow on the pushed tag. Do not publish a GitHub Release until it passes.
 
-Use the `v0.2.0` changelog section as the release notes source. Keep the release source-only; CocoaPods and XCFramework remain unsupported demand-driven channels.
+Use the matching changelog section as the release notes source. Keep the release source-only; CocoaPods and XCFramework remain unsupported demand-driven channels.
 
 ## Post-Release Verification
 
@@ -104,14 +106,14 @@ After publishing the GitHub Release:
 1. Run the automated public release verifier:
 
 ```sh
-python3 scripts/verify-public-release.py --repository <OWNER>/ConsoleDock --tag v0.2.0 --check-spi
+python3 scripts/verify-public-release.py --repository <OWNER>/ConsoleDock --tag "$RELEASE_TAG" --check-spi
 ```
 
 The verifier checks the GitHub repository, remote tag, GitHub Release state, release-note boundaries and matching validation link, `Release Validation` workflow, the workflow commit against the current remote tag commit, a clean external SwiftPM consumer build, and Swift Package Index package/DocC pages when `--check-spi` is supplied.
 If Swift Package Index returns a Cloudflare access challenge to automated HTTP checks, manually verify the package and DocC pages in a browser, then rerun with `--allow-spi-challenge` so the challenge is reported as a warning rather than hiding the rest of the post-release checks.
 
 2. Create a temporary iOS app or use a clean sample workspace when you need a manual Xcode UI check.
-3. Add the public repository URL through Swift Package Manager at tag `v0.2.0`.
+3. Add the public repository URL through Swift Package Manager at the release tag.
 4. Confirm both products resolve:
    - `ConsoleDock`
    - `ConsoleDockCore`

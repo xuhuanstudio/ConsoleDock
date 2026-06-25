@@ -141,6 +141,47 @@ FOUNDATION_EXPORT NSNotificationName const CDKConsoleDockDiagnosticsDidChangeNot
 
 @end
 
+@interface CDKSessionMetadata : NSObject <NSCopying>
+
+/// Stable identifier for the current ConsoleDock runtime session.
+@property (nonatomic, copy, readonly) NSString *sessionIdentifier;
+/// Time when ConsoleDock most recently started successfully, or nil before the first successful start.
+@property (nonatomic, copy, readonly, nullable) NSDate *startedAt;
+/// Time when this metadata snapshot was generated.
+@property (nonatomic, copy, readonly) NSDate *generatedAt;
+/// Main bundle identifier, when available.
+@property (nonatomic, copy, readonly, nullable) NSString *bundleIdentifier;
+/// Main bundle short version string, when available.
+@property (nonatomic, copy, readonly, nullable) NSString *appVersion;
+/// Main bundle build version string, when available.
+@property (nonatomic, copy, readonly, nullable) NSString *appBuild;
+/// Current process name.
+@property (nonatomic, copy, readonly) NSString *processName;
+/// Operating system version string from ProcessInfo.
+@property (nonatomic, copy, readonly) NSString *operatingSystemVersion;
+/// Device model on UIKit platforms, otherwise unknown.
+@property (nonatomic, copy, readonly) NSString *deviceModel;
+/// Current locale identifier.
+@property (nonatomic, copy, readonly) NSString *localeIdentifier;
+/// Current time zone identifier.
+@property (nonatomic, copy, readonly) NSString *timeZoneIdentifier;
+
+- (instancetype)init NS_UNAVAILABLE;
++ (instancetype)new NS_UNAVAILABLE;
+- (instancetype)initWithSessionIdentifier:(NSString *)sessionIdentifier
+                                startedAt:(nullable NSDate *)startedAt
+                              generatedAt:(NSDate *)generatedAt
+                         bundleIdentifier:(nullable NSString *)bundleIdentifier
+                               appVersion:(nullable NSString *)appVersion
+                                 appBuild:(nullable NSString *)appBuild
+                              processName:(NSString *)processName
+                   operatingSystemVersion:(NSString *)operatingSystemVersion
+                              deviceModel:(NSString *)deviceModel
+                         localeIdentifier:(NSString *)localeIdentifier
+                       timeZoneIdentifier:(NSString *)timeZoneIdentifier NS_DESIGNATED_INITIALIZER;
+
+@end
+
 @interface CDKLineEvent : NSObject <NSCopying>
 
 /// The descriptor source that produced this framed line.
@@ -185,6 +226,8 @@ FOUNDATION_EXPORT NSNotificationName const CDKConsoleDockDiagnosticsDidChangeNot
 + (BOOL)isRunning;
 /// Returns a snapshot of runtime configuration and current in-memory store counts.
 + (CDKDiagnostics *)diagnostics;
+/// Returns local session and app metadata for issue reports.
++ (CDKSessionMetadata *)sessionMetadata;
 
 /// Returns a snapshot of current in-memory entries.
 + (NSArray<CDKLogEntry *> *)entries;
@@ -195,6 +238,8 @@ FOUNDATION_EXPORT NSNotificationName const CDKConsoleDockDiagnosticsDidChangeNot
 
 /// Appends a native entry at a specific level.
 + (void)logWithLevel:(CDKLogLevel)level message:(NSString *)message;
+/// Appends a native marker entry for a local test session timeline.
++ (void)mark:(NSString *)message;
 /// Appends a native debug entry.
 + (void)debug:(NSString *)message;
 /// Appends a native info entry.

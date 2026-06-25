@@ -86,3 +86,13 @@ ConsoleDock.registerAction(
 ```
 
 The host app owns the behavior. ConsoleDock does not automatically discover pages, control routing, bypass app permissions, or receive remote commands. See <doc:DebugActions>.
+
+## Mark A Test Session
+
+Use ``ConsoleDock/mark(_:)`` to add a reproduction timeline entry from app code or a Debug Action.
+
+```swift
+ConsoleDock.mark("Opened checkout")
+```
+
+The bundled UIKit console also exposes a `Mark` action and a `Share Issue Report` option. Issue reports are local, user-initiated plain-text exports containing session metadata, diagnostics, markers, and currently retained redacted logs. ConsoleDock does not upload them or create remote issues automatically. See <doc:TestSessionReports>.

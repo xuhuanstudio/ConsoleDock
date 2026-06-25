@@ -32,6 +32,8 @@ REQUIRED_SNIPPETS = {
         "search control rendering",
         "level filtering",
         "log detail",
+        "markers",
+        "issue report sharing",
         "Debug Actions",
     ],
     "Examples/ObjCSampleApp/README.md": [
@@ -41,6 +43,8 @@ REQUIRED_SNIPPETS = {
         "search control rendering",
         "level filtering",
         "log detail",
+        "markers",
+        "issue report sharing",
         "Debug Actions",
     ],
     "docs/sample-app-walkthrough.md": [
@@ -50,6 +54,8 @@ REQUIRED_SNIPPETS = {
         "search control rendering",
         "level filtering",
         "log detail",
+        "marker creation",
+        "issue-report share action availability",
         "Debug Actions",
     ],
     "scripts/validate-release.sh": [
