@@ -66,7 +66,7 @@ ConsoleDock.registerAction(id: "open.checkout", title: "Open Checkout") {
 }
 ```
 
-Actions can optionally ask for small local parameters such as an order id, environment choice, quantity, or boolean flag before they run. Parameter values are not persisted by ConsoleDock.
+Actions can optionally ask for small local parameters such as an order id, environment choice, quantity, or boolean flag before they run. The bundled form can reuse recent values within the current process session, but ConsoleDock should not persist parameter values across app restarts by default.
 
 ConsoleDock only displays and triggers actions that the app registers. It should not discover routes, control app navigation automatically, bypass business permissions, or accept remote commands.
 
@@ -94,7 +94,7 @@ Let testers mark important reproduction steps and share a local issue report fro
 ConsoleDock.mark("Started checkout reproduction")
 ```
 
-The report should contain session metadata, diagnostics, App Context, a marker index, and currently retained redacted logs. It should be generated only through a user-initiated local share action. ConsoleDock should not persist reports by default, upload them, or create remote issues automatically.
+The report should contain session metadata, diagnostics, App Context, a reproduction timeline, a marker index, and currently retained redacted logs. The reproduction timeline should summarize markers, Debug Action executions, and retained error/fault logs before the full log section. It should be generated only through a user-initiated local share action. ConsoleDock should not persist reports by default, upload them, or create remote issues automatically.
 
 ## Non-Goals
 

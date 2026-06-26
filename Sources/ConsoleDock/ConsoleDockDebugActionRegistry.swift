@@ -163,6 +163,13 @@ final class ConsoleDockDebugActionRegistry {
         return snapshot
     }
 
+    func clearExecutionHistory() {
+        lock.lock()
+        executions.removeAll()
+        nextExecutionID = 1
+        lock.unlock()
+    }
+
     func resetSessionState() {
         lock.lock()
         executions.removeAll()

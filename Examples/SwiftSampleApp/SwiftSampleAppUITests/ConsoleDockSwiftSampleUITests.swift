@@ -140,6 +140,12 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
         )
 
         modeControl.buttons["Actions"].tap()
+        XCTAssertTrue(waitForTableEntry(containing: "Open Order", in: actionsTable, timeout: 5))
+        tableStaticText(containing: "Open Order", in: actionsTable).tap()
+        XCTAssertTrue(orderIDField.waitForExistence(timeout: 5))
+        XCTAssertEqual(orderIDField.value as? String, "A-100")
+        app.buttons["consoledock.action-parameters.cancel"].tap()
+
         XCTAssertTrue(waitForTableEntry(containing: "Clear Entries", in: actionsTable, timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "Destructive", in: actionsTable, timeout: 5))
         tableStaticText(containing: "Clear Entries", in: actionsTable).tap()

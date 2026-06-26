@@ -713,9 +713,9 @@ public enum ConsoleDock {
         ConsoleDockDebugActionRegistry.shared.removeAll()
     }
 
-    /// Clears the local Debug Action execution history and session-only parameter values.
+    /// Clears the local Debug Action execution history.
     public static func clearActionExecutionHistory() {
-        ConsoleDockDebugActionRegistry.shared.resetSessionState()
+        ConsoleDockDebugActionRegistry.shared.clearExecutionHistory()
     }
 
     /// Appends a native debug entry.

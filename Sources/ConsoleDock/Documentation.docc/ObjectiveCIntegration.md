@@ -73,7 +73,7 @@ CDKSessionMetadata *metadata = [CDKConsoleDock sessionMetadata];
 NSLog(@"ConsoleDock session: %@", metadata.sessionIdentifier);
 ```
 
-Markers are native info entries with a stable `[marker]` prefix. The bundled UIKit console can also create markers, share a local issue report, or copy the report text with session metadata, diagnostics, markers, and currently retained redacted logs.
+Markers are native info entries with a stable `[marker]` prefix. The bundled UIKit console can also create markers, share a local issue report, or copy the report text with session metadata, diagnostics, app context, a reproduction timeline, markers, and currently retained redacted logs.
 
 ```objc
 NSString *report = [CDKConsoleDockUIKit issueReportText];
@@ -102,7 +102,7 @@ CDKDebugActionParameter *orderID =
 }];
 ```
 
-The bundled console displays the parameter form locally before running the action. ConsoleDock does not persist parameter values or receive remote commands.
+The bundled console displays the parameter form locally before running the action. ConsoleDock can reuse recent values within the current process session, but it does not persist parameter values across app restarts or receive remote commands.
 
 ## Provide App Context
 

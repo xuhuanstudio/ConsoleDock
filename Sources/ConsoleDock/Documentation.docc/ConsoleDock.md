@@ -68,6 +68,10 @@ ConsoleDock is not a full replacement for Xcode Console or Apple unified logging
 - ``ConsoleDock/AppContextItem``
 - ``ConsoleDock/setAppContextProvider(_:)``
 - ``ConsoleDock/clearAppContextProvider()``
+- ``ConsoleDock/actionExecutionHistory``
+- ``ConsoleDock/DebugActionExecution``
+- ``ConsoleDock/DebugActionExecutionOutcome``
+- ``ConsoleDock/clearActionExecutionHistory()``
 
 ### Showing The UIKit Console
 
@@ -84,6 +88,8 @@ ConsoleDock is not a full replacement for Xcode Console or Apple unified logging
 - ``ConsoleDock/unregisterAction(id:)``
 - ``ConsoleDock/removeAllActions()``
 - ``ConsoleDock/DebugActionStyle``
+- ``ConsoleDock/DebugActionExecution``
+- ``ConsoleDock/DebugActionExecutionOutcome``
 - ``ConsoleDock/DebugActionChoice``
 - ``ConsoleDock/DebugActionParameter``
 - ``ConsoleDock/DebugActionParameterValue``

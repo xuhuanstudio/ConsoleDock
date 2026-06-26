@@ -152,7 +152,7 @@ Use ``ConsoleDock/mark(_:)`` to add a reproduction timeline entry from app code 
 ConsoleDock.mark("Opened checkout")
 ```
 
-The bundled UIKit console also exposes a `Mark` action plus `Share Issue Report` and `Copy Issue Report` options. Issue reports are local, user-initiated plain-text exports containing session metadata, diagnostics, app context, markers, and currently retained redacted logs. ConsoleDock does not upload them or create remote issues automatically. See <doc:TestSessionReports>.
+The bundled UIKit console also exposes a `Mark` action plus `Share Issue Report` and `Copy Issue Report` options. Issue reports are local, user-initiated plain-text exports containing session metadata, diagnostics, app context, a reproduction timeline, markers, and currently retained redacted logs. ConsoleDock does not upload them or create remote issues automatically. See <doc:TestSessionReports>.
 
 Use App Context for app-owned values that help explain a local report:
 

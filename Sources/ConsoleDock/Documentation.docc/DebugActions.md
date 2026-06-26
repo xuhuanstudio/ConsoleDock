@@ -4,7 +4,7 @@ Register local test shortcuts that appear in the bundled ConsoleDock panel.
 
 ## Overview
 
-Debug Actions let the host app expose explicit actions for test and debugging builds. ConsoleDock stores the registered actions in memory, shows them in the Actions tab, skips disabled actions, asks for confirmation when requested, and writes action start, completion, skip, or failure entries back into the log store.
+Debug Actions let the host app expose explicit actions for test and debugging builds. ConsoleDock stores the registered actions in memory, shows them in the Actions tab, skips disabled actions, asks for confirmation when requested, writes action start, completion, skip, or failure entries back into the log store, and records local execution history for the current process session.
 
 ConsoleDock does not discover screens, take over routing, bypass business permissions, receive remote commands, or act as an automation test framework. The host app decides what each action does.
 
@@ -61,7 +61,21 @@ ConsoleDock.registerAction(
 }
 ```
 
-The bundled UIKit console presents parameter fields locally before running the action. Parameter values are not persisted by ConsoleDock, and they are not remote commands. Keep this for bounded debug/test inputs such as identifiers, environment choices, counters, and feature toggles.
+The bundled UIKit console presents parameter fields locally before running the action. The form reuses the most recent valid values for the same action within the current process session, then falls back to parameter defaults. Parameter values are not persisted across app restarts by ConsoleDock, and they are not remote commands. Keep this for bounded debug/test inputs such as identifiers, environment choices, counters, and feature toggles.
+
+Submitted parameter values can appear in local Debug Action execution history and issue-report reproduction timelines as a compact parameter summary. Do not enter secrets or unnecessary personal data.
+
+## Read Action Execution History
+
+Use ``ConsoleDock/actionExecutionHistory`` when a custom debug surface needs the current session's local action outcomes.
+
+```swift
+for execution in ConsoleDock.actionExecutionHistory {
+    print("\(execution.title): \(execution.outcome)")
+}
+```
+
+Use ``ConsoleDock/clearActionExecutionHistory()`` to clear the current in-memory execution history. This does not unregister actions or clear session-only recent parameter values used by the bundled parameter form.
 
 ## Disable Or Style An Action
 

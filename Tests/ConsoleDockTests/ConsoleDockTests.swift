@@ -1324,7 +1324,7 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertEqual(ConsoleDock.actionExecutionHistory[2].message, "missing required parameters: orderId")
     }
 
-    func testActionExecutionHistoryAndRecentParametersAreSessionLocalAndClearable() {
+    func testActionExecutionHistoryIsClearableWithoutRemovingRecentParameters() {
         ConsoleDock.registerAction(
             id: "open.order",
             title: "Open Order",
@@ -1341,11 +1341,24 @@ final class ConsoleDockTests: XCTestCase {
         )
 
         XCTAssertEqual(ConsoleDock.actionExecutionHistory.count, 1)
-        XCTAssertEqual(ConsoleDock.recentDebugActionParameterValues(actionID: "open.order")["orderId"], .string("A-100"))
+        let recentValues = ConsoleDock.recentDebugActionParameterValues(actionID: "open.order")
+        XCTAssertEqual(recentValues["orderId"], .string("A-100"))
 
         ConsoleDock.clearActionExecutionHistory()
 
         XCTAssertTrue(ConsoleDock.actionExecutionHistory.isEmpty)
+        let retainedRecentValues = ConsoleDock.recentDebugActionParameterValues(actionID: "open.order")
+        XCTAssertEqual(retainedRecentValues["orderId"], .string("A-100"))
+    }
+
+    func testActionRecentParametersAreSessionLocal() {
+        ConsoleDock.storeRecentDebugActionParameterValues(
+            actionID: "open.order",
+            parameterValues: ["orderId": .string("A-100")]
+        )
+
+        ConsoleDockDebugActionRegistry.shared.resetSessionState()
+
         XCTAssertTrue(ConsoleDock.recentDebugActionParameterValues(actionID: "open.order").isEmpty)
     }
 

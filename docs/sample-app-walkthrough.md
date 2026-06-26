@@ -12,8 +12,9 @@ Use the samples to verify:
 - runtime diagnostics for capture state and current store counts;
 - Debug Actions for app-registered local test shortcuts;
 - parameterized Debug Actions for small local test inputs;
+- session-only recent parameter reuse and current-session Debug Action execution history;
 - App Context snapshots in the bundled Context tab and issue reports;
-- manual markers and local issue report sharing/copying;
+- manual markers, reproduction timeline issue reports, and local issue report sharing/copying;
 - `NSLog` output that reaches process stderr;
 - redaction before storage;
 - UIKit floating button configuration, trigger show/hide controls, search, source and level filtering, Logs jump controls, pause/resume live follow, log detail, copy, panel refresh, share/export, Actions search, action parameter forms, Context tab refresh, actions, clear, stop, and restart behavior.
@@ -47,7 +48,7 @@ For a focused simulator UI smoke run of the Objective-C sample:
 scripts/validate-objc-sample-ui-smoke.sh
 ```
 
-The smoke tests launch each sample app in a native-log-only UI automation mode, write native ConsoleDock entries containing sample tokens, open the bundled console, and verify the diagnostics header, entries table, visible redaction, search control rendering, level filtering, Logs jump controls, log detail, copy controls, marker creation, issue-report share action availability, issue-report copy action availability, pause/resume, clear refresh, Debug Actions, Actions search, parameterized Debug Actions, disabled/destructive action metadata, confirmation prompts, App Context tab refresh, and close controls through stable accessibility identifiers.
+The smoke tests launch each sample app in a native-log-only UI automation mode, write native ConsoleDock entries containing sample tokens, open the bundled console, and verify the diagnostics header, entries table, visible redaction, search control rendering, level filtering, Logs jump controls, log detail, copy controls, marker creation, issue-report share action availability, issue-report copy action availability, pause/resume, clear refresh, Debug Actions, Actions search, parameterized Debug Actions, disabled/destructive action metadata, confirmation prompts, App Context tab refresh, and close controls through stable accessibility identifiers. Unit and formatter tests cover local action execution history, session-only recent parameter values, temporary issue-report file generation, and reproduction timeline report output.
 
 Manual check:
 
@@ -67,9 +68,9 @@ Manual check:
 14. Tap the play/resume button and confirm the panel catches up to the latest stored entries.
 15. Tap a visible log row and confirm the detail screen shows the full redacted message, metadata flags, and copy buttons.
 16. Tap `Mark`, enter a short reproduction note, and confirm a `[marker]` entry appears under `Logs`.
-17. Tap the share button and choose visible logs, all logs, issue report, or copy issue report; confirm share actions open the system share sheet and the copy action is available for the same local report text.
+17. Tap the share button and choose visible logs, all logs, issue report, or copy issue report; confirm share actions open the system share sheet and the copy action is available for the same local report text. Issue report shares use a temporary local `.txt` item.
 18. Switch to `Actions`, search for `Smoke`, run `Generate Smoke Logs`, and confirm new action start/completion plus sample error entries appear under `Logs`.
-19. Run `Open Order`, enter an order id, keep the provided numeric, boolean, and environment defaults, and confirm the parameterized action writes a log containing the order id.
+19. Run `Open Order`, enter an order id, keep the provided numeric, boolean, and environment defaults, and confirm the parameterized action writes a log containing the order id. Open the same action again and confirm the form starts with the recent values from the current process session.
 20. Confirm `Disabled Placeholder` appears disabled and does not need to be triggered for the smoke path.
 21. Run the `Add Marker` action and confirm a sample marker entry appears under `Logs`.
 22. Run the `Clear Entries` action and confirm it is marked destructive and asks before executing.
@@ -117,9 +118,9 @@ Manual check:
 13. Tap the play/resume button and confirm the panel catches up to the latest stored entries.
 14. Tap a visible log row and confirm the detail screen shows the full redacted message, metadata flags, and copy buttons.
 15. Tap `Mark`, enter a short reproduction note, and confirm a `[marker]` entry appears under `Logs`.
-16. Tap the share button and choose visible logs, all logs, issue report, or copy issue report; confirm share actions open the system share sheet and the copy action is available for the same local report text.
+16. Tap the share button and choose visible logs, all logs, issue report, or copy issue report; confirm share actions open the system share sheet and the copy action is available for the same local report text. Issue report shares use a temporary local `.txt` item.
 17. Switch to `Actions`, search for `Smoke`, run `Generate Smoke Logs`, and confirm new action start/completion plus sample error entries appear under `Logs`.
-18. Run `Open Order`, enter an order id, keep the provided numeric, boolean, and environment defaults, and confirm the parameterized action writes a log containing the order id.
+18. Run `Open Order`, enter an order id, keep the provided numeric, boolean, and environment defaults, and confirm the parameterized action writes a log containing the order id. Open the same action again and confirm the form starts with the recent values from the current process session.
 19. Confirm `Disabled Placeholder` appears disabled and does not need to be triggered for the smoke path.
 20. Run the `Add Marker` action and confirm a sample marker entry appears under `Logs`.
 21. Run the `Clear Entries` action and confirm it is marked destructive and asks before executing.
@@ -150,15 +151,15 @@ Pause/resume only affects live UI follow. ConsoleDock continues capturing and st
 
 Tapping a row opens the log detail screen. Copy actions on that screen copy only that visible, already-redacted message or the selected entry with its metadata. They do not copy hidden filtered entries.
 
-The share sheet can export the current visible in-memory ConsoleDock entries, all currently retained entries, or a local issue report with session metadata, diagnostics, App Context, markers, and all currently retained redacted logs. `Copy Issue Report` copies the same local report text to the pasteboard. ConsoleDock does not write an export file by default, does not persist logs by default, and does not upload logs.
+The share sheet can export the current visible in-memory ConsoleDock entries, all currently retained entries, or a local issue report with session metadata, diagnostics, App Context, a reproduction timeline, markers, and all currently retained redacted logs. `Share Issue Report` creates a temporary local `.txt` item only for the user-initiated system share sheet. `Copy Issue Report` copies the same local report text to the pasteboard. ConsoleDock does not write an export file by default, does not persist logs by default, and does not upload logs.
 
-Markers are normal native info entries with a stable `[marker]` prefix. They are useful as a reproduction timeline, but they are not a separate persistent note system.
+Markers are normal native info entries with a stable `[marker]` prefix. They are useful as part of the reproduction timeline, but they are not a separate persistent note system.
 
 Debug Actions are local, app-registered shortcuts. ConsoleDock does not discover pages, control routing, bypass app permissions, or receive remote commands.
 
 Actions search is local UI filtering by id, title, group, and detail. It does not execute actions, persist queries, or change action registration.
 
-Parameterized Debug Actions are local forms for small tester inputs. ConsoleDock does not persist parameter values, keep async action state, or turn actions into a remote automation layer.
+Parameterized Debug Actions are local forms for small tester inputs. The bundled form can reuse recent values within the current process session only. ConsoleDock does not persist parameter values across restarts, keep async action state, or turn actions into a remote automation layer.
 
 App Context is an app-provided snapshot displayed in the bundled Context tab and included in issue reports. ConsoleDock reads it on demand and does not persist, upload, redact, or automatically refresh it in the background.
 

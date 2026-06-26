@@ -61,6 +61,31 @@ REQUIRED_SNIPPETS = {
         "public enum DebugActionStyle: Equatable",
         "case normal",
         "case destructive",
+        "public enum DebugActionExecutionOutcome: Equatable",
+        "case completed",
+        "case failed",
+        "case skipped",
+        "public struct DebugActionExecution: Equatable, Identifiable",
+        "public let actionID: String",
+        "public let group: String?",
+        "public let startedAt: Date",
+        "public let completedAt: Date",
+        "public let outcome: DebugActionExecutionOutcome",
+        "public let parameterSummary: String?",
+        "public let message: String?",
+        """
+        public init(
+            id: UInt64,
+            actionID: String,
+            title: String,
+            group: String?,
+            startedAt: Date,
+            completedAt: Date,
+            outcome: DebugActionExecutionOutcome,
+            parameterSummary: String? = nil,
+            message: String? = nil
+        )
+        """,
         "public struct DebugActionChoice: Equatable",
         "public let id: String",
         "public let title: String",
@@ -250,6 +275,7 @@ REQUIRED_SNIPPETS = {
         "public static var diagnostics: Diagnostics",
         "public static var sessionMetadata: SessionMetadata",
         "public static var appContext: [AppContextSection]",
+        "public static var actionExecutionHistory: [DebugActionExecution]",
         "public static let entriesDidChangeNotification",
         "public static let diagnosticsDidChangeNotification",
         "public static func clear()",
@@ -287,6 +313,7 @@ REQUIRED_SNIPPETS = {
         """,
         "public static func unregisterAction(id: String)",
         "public static func removeAllActions()",
+        "public static func clearActionExecutionHistory()",
         "public static func debug(_ message: String)",
         "public static func log(level: LogLevel, message: String)",
         "public static func mark(_ message: String)",
@@ -449,8 +476,8 @@ REQUIRED_SNIPPETS = {
 
 REQUIRED_SNIPPET_COUNTS = {
     SWIFT_FACADE: {
-        "public init(": 10,
-        "public let message: String": 2,
+        "public init(": 11,
+        "public let message: String": 3,
     },
 }
 

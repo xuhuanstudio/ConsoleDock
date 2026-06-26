@@ -8,6 +8,16 @@ The project follows Semantic Versioning for public releases.
 
 No changes yet.
 
+## v0.8.0 - 2026-06-26
+
+### Added
+
+- Added local Debug Action execution history through `ConsoleDock.actionExecutionHistory` and `ConsoleDock.clearActionExecutionHistory()`.
+- Added session-only recent parameter value reuse for bundled UIKit Debug Action parameter forms.
+- Added issue-report reproduction timelines that combine markers, Debug Action executions, and retained error/fault log entries in timestamp order.
+- Added temporary `.txt` issue-report file generation for user-initiated `Share Issue Report` while keeping `Copy Issue Report` and `ConsoleDock.issueReportText()` text-based.
+- Added unit tests, API validator coverage, README, DocC, roadmap, privacy, and sample walkthrough updates for the local reproduction workflow.
+
 ## v0.7.0 - 2026-06-26
 
 ### Added

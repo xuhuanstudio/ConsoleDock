@@ -11,23 +11,25 @@ import tempfile
 
 REQUIRED_SNIPPETS = {
     "README.md": [
-        "ConsoleDock `v0.7.0` is the current source-first Swift Package Manager preview release.",
-        "Use the latest release tag from GitHub Releases. `v0.7.0` includes parameterized Debug Actions, App Context snapshots for issue reports and the bundled Context tab, configurable floating trigger controls, Logs jump actions, Actions search, logger forwarders for existing logger sinks, Test Session Reports, manual markers, Debug Actions, log detail, explicit visible/all/issue-report sharing and copying, runtime diagnostics, and release-validation hardening.",
+        "ConsoleDock `v0.8.0` is the current source-first Swift Package Manager preview release.",
+        "Use the latest release tag from GitHub Releases. `v0.8.0` includes local Debug Action execution history, session-only recent parameter values for action forms, reproduction timeline issue reports, temporary `.txt` issue-report sharing, parameterized Debug Actions, App Context snapshots for issue reports and the bundled Context tab, configurable floating trigger controls, Logs jump actions, Actions search, logger forwarders for existing logger sinks, Test Session Reports, manual markers, Debug Actions, log detail, explicit visible/all/issue-report sharing and copying, runtime diagnostics, and release-validation hardening.",
         "Floating trigger configuration is available in `v0.6.0` and later.",
         "Logger forwarders are available in `v0.5.0` and later.",
         "Runtime diagnostics are available in `v0.2.0` and later.",
         "Debug Actions are available in `v0.3.0` and later.",
         "Parameterized Debug Actions and App Context are available in `v0.7.0` and later.",
+        "Local Debug Action execution history and reproduction timeline issue reports are available in `v0.8.0` and later.",
         "Test Session Reports are available in `v0.4.0` and later.",
     ],
     "README.zh-CN.md": [
-        "ConsoleDock `v0.7.0` 是当前 source-first Swift Package Manager 公开预览版本",
-        "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.7.0` 已包含 parameterized Debug Actions、App Context、可配置 floating trigger、Logs Jump、Actions 搜索、logger forwarders、Test Session Reports、manual markers、Debug Actions、日志详情、visible/all/issue-report 分享和复制、runtime diagnostics 和当前 release validation 加固：",
+        "ConsoleDock `v0.8.0` 是当前 source-first Swift Package Manager 公开预览版本",
+        "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.8.0` 已包含 local Debug Action execution history、action form session-only 最近参数值复用、reproduction timeline issue reports、临时 `.txt` issue-report 分享、parameterized Debug Actions、App Context、可配置 floating trigger、Logs Jump、Actions 搜索、logger forwarders、Test Session Reports、manual markers、Debug Actions、日志详情、visible/all/issue-report 分享和复制、runtime diagnostics 和当前 release validation 加固：",
         "Floating trigger 配置从 `v0.6.0` 开始属于已发布能力。",
         "`v0.5.0` 开始提供的 `ConsoleDock.LogForwarder` / `CDKLogForwarder` 就是为这个迁移路径准备的轻量工具。",
         "Runtime diagnostics 从 `v0.2.0` 开始属于已发布能力。",
         "Debug Actions 从 `v0.3.0` 开始属于已发布能力。",
         "Parameterized Debug Actions 和 App Context 从 `v0.7.0` 开始属于已发布能力。",
+        "Local Debug Action execution history 和 reproduction timeline issue reports 从 `v0.8.0` 开始属于已发布能力。",
         "Test Session Reports 从 `v0.4.0` 开始属于已发布能力。",
     ],
 }
@@ -116,7 +118,7 @@ def self_test() -> list[str]:
         root = pathlib.Path(raw_directory)
         write_valid_docs(root)
         if validate(root):
-            errors.append("validate should accept docs with released v0.7.0 guidance")
+            errors.append("validate should accept docs with released v0.8.0 guidance")
 
         missing_snippet_root = root / "missing-snippet"
         missing_snippet_root.mkdir()

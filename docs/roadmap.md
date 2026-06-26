@@ -178,7 +178,31 @@ Not included:
 - crash reporting.
 - CocoaPods or XCFramework distribution.
 
-## Post-v0.7 - Demand-Driven Compatibility Candidates
+## v0.8 - Local Reproduction Workflow
+
+Goal: make repeated local reproduction sessions easier to run and easier to explain to a developer without connecting Xcode.
+
+Deliverables:
+
+- local Debug Action execution history for the current process session.
+- public Swift access to action execution outcomes through `ConsoleDock.actionExecutionHistory`.
+- session-only recent parameter value reuse in bundled UIKit action parameter forms.
+- issue report reproduction timelines combining markers, Debug Action executions, and retained error/fault logs in timestamp order.
+- user-initiated temporary `.txt` item generation for `Share Issue Report`.
+- unchanged text report access through `ConsoleDock.issueReportText()` and `CDKConsoleDockUIKit.issueReportText`.
+- tests, validators, README, DocC, privacy, and sample walkthrough updates for the local reproduction workflow.
+
+Not included:
+
+- default persistent action history or parameter storage.
+- remote command delivery.
+- automatic route discovery.
+- async action state management.
+- network inspector.
+- crash reporting.
+- CocoaPods or XCFramework distribution.
+
+## Post-v0.8 - Demand-Driven Compatibility Candidates
 
 Goal: improve adoption in existing apps only when real integration feedback shows SPM and the current explicit API are not enough.
 
@@ -187,9 +211,8 @@ Candidate work, not committed deliverables:
 - CocoaLumberjack adapter if real users need it.
 - XCGLogger or SwiftyBeaver adapter, selected by real adoption demand.
 - CocoaPods compatibility evaluation only if real older Objective-C or mixed projects cannot adopt the Swift Package.
-- optional disk export file generation, still local-only and user-initiated.
 - richer issue report formatting only if real tester workflows need it.
-- optional parameter presets only if real tester workflows prove repeated manual entry is painful.
+- saved local-only presets only if real tester workflows prove session-only recent values are not enough.
 
 Not included:
 

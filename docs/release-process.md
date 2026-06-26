@@ -12,8 +12,8 @@ ConsoleDock releases are source-first Swift Package Manager releases. A public r
 
 ## Before Tagging
 
-1. Decide the version, for example `v0.7.0`.
-2. Move completed `CHANGELOG.md` entries from `Unreleased` into a heading that matches the tag, for example `## v0.7.0 - 2026-06-26`.
+1. Decide the version, for example `v0.8.0`.
+2. Move completed `CHANGELOG.md` entries from `Unreleased` into a heading that matches the tag, for example `## v0.8.0 - 2026-06-26`.
 3. Confirm README, DocC, sample app walkthrough, release-build safety, logging boundaries, security policy, GitHub repository setup, and roadmap still describe the current shipped behavior.
 4. Confirm the [distribution strategy](distribution-strategy.md) still says SPM is the supported channel unless CocoaPods or XCFramework support has actually been implemented and validated.
 5. Confirm there are no secrets, production logs, credentials, tokens, or private screenshots in docs, examples, or screenshots. `scripts/audit-release-content.py` covers generated paths, private key blocks, common token shapes, and local absolute paths; review app-specific sensitive content manually.
