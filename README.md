@@ -23,7 +23,7 @@ The bundled UIKit panel is local-only and organized around the tester's current 
 
 ## Status
 
-ConsoleDock `v0.13.1` is the current source-first Swift Package Manager preview release. It contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, logger forwarders for existing logger sinks, session metadata, manual markers, bounded in-memory entries with stable session identifiers and partial/redacted/truncated flags, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, runtime diagnostics, Integration Diagnosis text, ConsoleDock Health in the Context tab, entry change notification, Debug Actions with enabled/destructive metadata, local search, structured Logs queries, parameter forms, current-session execution history, and session-only recent parameter values, app-provided Context snapshots for the panel and issue reports, log detail, Session Timeline, Logs jump actions, explicit visible/all/issue-report sharing, temporary issue-report file sharing, issue-report copying, explicit Local Session Archive save/review/delete flows, Release startup safety gates, a configurable UIKit-only floating button/panel foundation, Swift and Objective-C sample apps, DocC documentation, release validation workflow, current Simulator screenshots, documentation asset validation, visual QA guidance, segmented-control contrast fixes, and focused tests.
+ConsoleDock `v0.14.0` is the current source-first Swift Package Manager preview release. It contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, logger forwarders for existing logger sinks, session metadata, manual markers, bounded in-memory entries with stable session identifiers and partial/redacted/truncated flags, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, runtime diagnostics, Integration Diagnosis text, ConsoleDock Health in the Context tab, entry change notification, Debug Actions with enabled/destructive metadata, local search, structured Logs queries, parameter forms, current-session execution history, and session-only recent parameter values, app-provided Context snapshots for the panel and reports, log detail, Session Timeline, Logs jump actions, explicit visible/all/issue-report sharing, temporary issue-report file sharing, issue-report copying, explicit Local Session Archive save/review/delete flows, on-demand time-range Support Reports for app-owned feedback flows, Release startup safety gates, a configurable UIKit-only floating button/panel foundation, Swift and Objective-C sample apps, DocC documentation, release validation workflow, current Simulator screenshots, documentation asset validation, visual QA guidance, segmented-control contrast fixes, and focused tests.
 
 Current limitations:
 
@@ -33,6 +33,7 @@ Current limitations:
 - Runtime diagnostics report current ConsoleDock state and bounded in-memory store counts; they are not evidence of complete Swift `Logger`, `os_log`, or Apple unified logging capture.
 - Entry change notification exists as the refresh foundation for UI; notification handlers should fetch a snapshot through `entries`.
 - The UIKit floating button and console panel foundation can show, free-text search, structured-query search, source-filter, level-filter, jump to latest/first/previous/next visible error, pause/resume live follow, live refresh, log detail, copy, clear, add manual markers, review a Session Timeline, visible/all/issue-report share/export with diagnostics, ConsoleDock Health, app context, action history, and a reproduction timeline, copy issue reports and integration diagnoses, save/review/delete local session archives, search and run Debug Actions, collect small action parameters, reuse recent parameter values within the current process session, show app context, and close the current in-memory snapshot.
+- App-owned feedback or support flows can generate a bounded, on-demand Support Report for all retained data, the last 5/10/30/60 minutes, or an explicit date range.
 - Default persistent raw logs, saved searches, and public query-language APIs are not implemented yet.
 - Third-party adapters, CocoaPods, and XCFramework distribution are not implemented yet.
 - Redaction is a local in-memory baseline, not a complete privacy guarantee.
@@ -71,7 +72,7 @@ Add the public repository URL through Xcode's package dependency UI:
 https://github.com/xuhuanstudio/ConsoleDock.git
 ```
 
-Use the latest release tag from GitHub Releases. `v0.13.1` includes Integration Diagnosis text, ConsoleDock Health in the bundled Context tab, Local Session Archive save/review/delete flows, the bundled Session Timeline view, local structured Logs queries, next/previous visible error jumps, local Debug Action execution history, session-only recent parameter values for action forms, reproduction timeline issue reports, temporary `.txt` issue-report sharing, parameterized Debug Actions, App Context snapshots for issue reports and the bundled Context tab, configurable floating trigger controls, Logs jump actions, Actions search, logger forwarders for existing logger sinks, Test Session Reports, manual markers, Debug Actions, log detail, explicit visible/all/issue-report sharing and copying, runtime diagnostics, current Simulator screenshots, documentation asset validation, visual QA guidance, segmented-control contrast fixes, and release-validation hardening. Then depend on:
+Use the latest release tag from GitHub Releases. `v0.14.0` includes on-demand Support Reports for app-owned feedback flows, Integration Diagnosis text, ConsoleDock Health in the bundled Context tab, Local Session Archive save/review/delete flows, the bundled Session Timeline view, local structured Logs queries, next/previous visible error jumps, local Debug Action execution history, session-only recent parameter values for action forms, reproduction timeline issue reports, temporary `.txt` issue-report sharing, parameterized Debug Actions, App Context snapshots for reports and the bundled Context tab, configurable floating trigger controls, Logs jump actions, Actions search, logger forwarders for existing logger sinks, Test Session Reports, manual markers, Debug Actions, log detail, explicit visible/all/issue-report sharing and copying, runtime diagnostics, current Simulator screenshots, documentation asset validation, visual QA guidance, segmented-control contrast fixes, and release-validation hardening. Then depend on:
 
 - `ConsoleDock` for Swift API plus the bundled UIKit console.
 - `ConsoleDockCore` for Objective-C/C-compatible core APIs.
@@ -335,6 +336,28 @@ NSArray<CDKSessionArchive *> *archives =
 
 The bundled Logs share menu includes `Save Session Archive` and `Saved Session Archives`. Saved archives are bounded local issue-report snapshots containing already-redacted and already-truncated report text. They are not raw log files, are not uploaded, are not created automatically in the background, and are not guaranteed crash-final evidence. Delete archives from the bundled archive screen or through the public clear/delete APIs when they are no longer needed.
 
+### Generate Support Reports For App-Owned Feedback
+
+Support Reports are available in `v0.14.0` and later. They are for app-owned feedback or support flows that need a local, already-redacted report for a time window such as the last 5, 10, 30, or 60 minutes.
+
+```swift
+let report = ConsoleDock.supportReport(options: .last10Minutes)
+let fileURL = try ConsoleDock.makeTemporarySupportReportFile(options: .last60Minutes)
+```
+
+```objc
+NSError *error = nil;
+CDKSupportReport *report =
+    [CDKConsoleDockUIKit supportReportWithLastMinutes:10
+                          maximumReportCharacterCount:0];
+NSURL *fileURL =
+    [CDKConsoleDockUIKit makeTemporarySupportReportFileWithLastMinutes:60
+                                           maximumReportCharacterCount:0
+                                                                 error:&error];
+```
+
+The default Support Report uses the last 10 minutes and a bounded text size. The 60-minute preset is available for longer manual test flows, but it still only includes entries and Debug Action executions currently retained in memory or session state. ConsoleDock does not upload Support Reports, collect analytics, run in the background, or write a continuous log file. Temporary Support Report files are created only on demand, and ConsoleDock prunes its own temporary report directory to avoid unbounded accumulation.
+
 ### Start In Objective-C
 
 ```objc
@@ -486,7 +509,7 @@ ConsoleDock.clear()
 
 Future UI or custom debug surfaces can observe `ConsoleDock.entriesDidChangeNotification` and then read `ConsoleDock.entries`. Notifications are posted on the thread that changed ConsoleDock state, so UI code should dispatch to the main queue before touching UIKit.
 
-ConsoleDock's on-device panel reads from ConsoleDock's own in-memory store. The current implementation does not write raw log files by default, upload logs, write to Apple unified logging, or read unified logging entries. The only built-in persistence is the explicit Local Session Archive flow, which stores bounded issue-report text after a user or app saves it. If an app also needs Apple unified logging output, keep that output in the app's existing logger and forward the same already-formatted message to ConsoleDock.
+ConsoleDock's on-device panel reads from ConsoleDock's own in-memory store. The current implementation does not write raw log files by default, upload logs, write to Apple unified logging, or read unified logging entries. The only built-in persistence is the explicit Local Session Archive flow, which stores bounded issue-report text after a user or app saves it. Support Reports are generated on demand from currently retained, already-redacted data and are left to the host app to share or upload through its own reviewed feedback flow. If an app also needs Apple unified logging output, keep that output in the app's existing logger and forward the same already-formatted message to ConsoleDock.
 
 ### Objective-C Core and UIKit
 

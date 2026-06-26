@@ -11,8 +11,9 @@ import tempfile
 
 REQUIRED_SNIPPETS = {
     "README.md": [
-        "ConsoleDock `v0.13.1` is the current source-first Swift Package Manager preview release.",
-        "Use the latest release tag from GitHub Releases. `v0.13.1` includes Integration Diagnosis text, ConsoleDock Health in the bundled Context tab, Local Session Archive save/review/delete flows, the bundled Session Timeline view, local structured Logs queries, next/previous visible error jumps, local Debug Action execution history, session-only recent parameter values for action forms, reproduction timeline issue reports, temporary `.txt` issue-report sharing, parameterized Debug Actions, App Context snapshots for issue reports and the bundled Context tab, configurable floating trigger controls, Logs jump actions, Actions search, logger forwarders for existing logger sinks, Test Session Reports, manual markers, Debug Actions, log detail, explicit visible/all/issue-report sharing and copying, runtime diagnostics, current Simulator screenshots, documentation asset validation, visual QA guidance, segmented-control contrast fixes, and release-validation hardening.",
+        "ConsoleDock `v0.14.0` is the current source-first Swift Package Manager preview release.",
+        "Use the latest release tag from GitHub Releases. `v0.14.0` includes on-demand Support Reports for app-owned feedback flows, Integration Diagnosis text, ConsoleDock Health in the bundled Context tab, Local Session Archive save/review/delete flows, the bundled Session Timeline view, local structured Logs queries, next/previous visible error jumps, local Debug Action execution history, session-only recent parameter values for action forms, reproduction timeline issue reports, temporary `.txt` issue-report sharing, parameterized Debug Actions, App Context snapshots for reports and the bundled Context tab, configurable floating trigger controls, Logs jump actions, Actions search, logger forwarders for existing logger sinks, Test Session Reports, manual markers, Debug Actions, log detail, explicit visible/all/issue-report sharing and copying, runtime diagnostics, current Simulator screenshots, documentation asset validation, visual QA guidance, segmented-control contrast fixes, and release-validation hardening.",
+        "Support Reports are available in `v0.14.0` and later.",
         "Integration Diagnosis is available in `v0.13.0` and later.",
         "Local Session Archive is available in `v0.11.0` and later.",
         "Session Timeline is available in `v0.10.0` and later.",
@@ -26,8 +27,9 @@ REQUIRED_SNIPPETS = {
         "Test Session Reports are available in `v0.4.0` and later.",
     ],
     "README.zh-CN.md": [
-        "ConsoleDock `v0.13.1` 是当前 source-first Swift Package Manager 公开预览版本",
-        "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.13.1` 已包含 Integration Diagnosis、Context 页 ConsoleDock Health、Local Session Archive 显式保存/查看/删除、内置 Session Timeline、Logs 本地结构化查询、next/previous visible error jump、local Debug Action execution history、action form session-only 最近参数值复用、reproduction timeline issue reports、临时 `.txt` issue-report 分享、parameterized Debug Actions、App Context、可配置 floating trigger、Logs Jump、Actions 搜索、logger forwarders、Test Session Reports、manual markers、Debug Actions、日志详情、visible/all/issue-report 分享和复制、runtime diagnostics、当前 iOS Simulator 截图、文档图片校验、视觉 QA 指南、segmented control 对比度修复和当前 release validation 加固：",
+        "ConsoleDock `v0.14.0` 是当前 source-first Swift Package Manager 公开预览版本",
+        "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.14.0` 已包含 Support Report、Integration Diagnosis、Context 页 ConsoleDock Health、Local Session Archive 显式保存/查看/删除、内置 Session Timeline、Logs 本地结构化查询、next/previous visible error jump、local Debug Action execution history、action form session-only 最近参数值复用、reproduction timeline issue reports、临时 `.txt` issue-report 分享、parameterized Debug Actions、App Context、可配置 floating trigger、Logs Jump、Actions 搜索、logger forwarders、Test Session Reports、manual markers、Debug Actions、日志详情、visible/all/issue-report 分享和复制、runtime diagnostics、当前 iOS Simulator 截图、文档图片校验、视觉 QA 指南、segmented control 对比度修复和当前 release validation 加固：",
+        "Support Report 从 `v0.14.0` 开始属于已发布能力。",
         "Integration Diagnosis 从 `v0.13.0` 开始属于已发布能力。",
         "Local Session Archive 从 `v0.11.0` 开始属于已发布能力。",
         "Session Timeline 从 `v0.10.0` 开始属于已发布能力。",
@@ -50,12 +52,14 @@ DENIED_SNIPPETS = {
         "ConsoleDock `v0.11.0` is the current source-first Swift Package Manager preview release.",
         "ConsoleDock `v0.12.0` is the current source-first Swift Package Manager preview release.",
         "ConsoleDock `v0.13.0` is the current source-first Swift Package Manager preview release.",
+        "ConsoleDock `v0.13.1` is the current source-first Swift Package Manager preview release.",
         "Use the latest release tag from GitHub Releases. `v0.8.0` includes",
         "Use the latest release tag from GitHub Releases. `v0.9.0` includes",
         "Use the latest release tag from GitHub Releases. `v0.10.0` includes",
         "Use the latest release tag from GitHub Releases. `v0.11.0` includes",
         "Use the latest release tag from GitHub Releases. `v0.12.0` includes",
         "Use the latest release tag from GitHub Releases. `v0.13.0` includes",
+        "Use the latest release tag from GitHub Releases. `v0.13.1` includes",
         "Runtime diagnostics are available on `main` after `v0.1.0`",
         "Debug Actions are available on `main`",
         "Parameterized Debug Actions are available on `main`",
@@ -69,12 +73,14 @@ DENIED_SNIPPETS = {
         "ConsoleDock `v0.11.0` 是当前 source-first Swift Package Manager 公开预览版本",
         "ConsoleDock `v0.12.0` 是当前 source-first Swift Package Manager 公开预览版本",
         "ConsoleDock `v0.13.0` 是当前 source-first Swift Package Manager 公开预览版本",
+        "ConsoleDock `v0.13.1` 是当前 source-first Swift Package Manager 公开预览版本",
         "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.8.0` 已包含",
         "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.9.0` 已包含",
         "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.10.0` 已包含",
         "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.11.0` 已包含",
         "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.12.0` 已包含",
         "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.13.0` 已包含",
+        "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.13.1` 已包含",
         "Runtime diagnostics 是 `v0.1.0` 之后在 `main` 上新增的能力",
         "Debug Actions 是 `main`",
         "Parameterized Debug Actions 是 `main`",
@@ -150,7 +156,7 @@ def self_test() -> list[str]:
         root = pathlib.Path(raw_directory)
         write_valid_docs(root)
         if validate(root):
-            errors.append("validate should accept docs with released v0.13.1 guidance")
+            errors.append("validate should accept docs with released v0.14.0 guidance")
 
         missing_snippet_root = root / "missing-snippet"
         missing_snippet_root.mkdir()

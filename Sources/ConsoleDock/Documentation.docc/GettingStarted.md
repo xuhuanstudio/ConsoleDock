@@ -166,6 +166,15 @@ try ConsoleDock.deleteSessionArchive(id: archive.id)
 
 Archives are explicit, bounded local report snapshots, not automatic raw-log persistence. See <doc:LocalSessionArchive>.
 
+Use Support Reports when an app-owned feedback or support flow needs a bounded report for a time window:
+
+```swift
+let report = ConsoleDock.supportReport(options: .last10Minutes)
+let fileURL = try ConsoleDock.makeTemporarySupportReportFile(options: .last60Minutes)
+```
+
+Support Reports are generated on demand from currently retained, already-redacted data. They are not analytics, background logging, or automatic upload. See <doc:SupportReports>.
+
 Use App Context for app-owned values that help explain a local report:
 
 ```swift

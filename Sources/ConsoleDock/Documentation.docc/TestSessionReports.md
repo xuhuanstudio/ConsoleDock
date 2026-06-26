@@ -15,7 +15,7 @@ ConsoleDock does this with three local pieces:
 - ``ConsoleDock/actionExecutionHistory`` returns local Debug Action outcomes for the current process session.
 - The bundled UIKit console offers `Mark`, `Timeline`, `Share Issue Report`, `Copy Issue Report`, and explicit Local Session Archive actions.
 
-Issue reports are generated locally through the system share sheet, copied locally through the pasteboard action, saved explicitly as a bounded Local Session Archive, or read as text through ``ConsoleDock/issueReportText()``. They include session metadata, diagnostics, ConsoleDock Health, app context, a reproduction timeline, a marker index, and all currently retained redacted logs. ConsoleDock does not persist reports by default, upload them, or create remote issues automatically.
+Issue reports are generated locally through the system share sheet, copied locally through the pasteboard action, saved explicitly as a bounded Local Session Archive, or read as text through ``ConsoleDock/issueReportText()``. They include session metadata, diagnostics, ConsoleDock Health, app context, a reproduction timeline, a marker index, and all currently retained redacted logs. ConsoleDock does not persist reports by default, upload them, or create remote issues automatically. App-owned feedback flows can use <doc:SupportReports> when they need a bounded time-range report.
 
 ## Add Markers
 
@@ -84,3 +84,13 @@ try ConsoleDock.deleteSessionArchive(id: archive.id)
 ```
 
 The bundled Logs share menu also provides `Save Session Archive` and `Saved Session Archives`. Saved archives contain already-redacted issue-report text, persist locally until deleted, and do not upload or create remote issues. See <doc:LocalSessionArchive>.
+
+## Generate A Support Report
+
+Use Support Reports when the app's own feedback flow needs a local report for a selected time window instead of the full currently retained issue report.
+
+```swift
+let report = ConsoleDock.supportReport(options: .last10Minutes)
+```
+
+Support Reports can cover all retained data, the last 5/10/30/60 minutes, or an explicit date range. They remain local until the host app decides what to do with the text or temporary file. See <doc:SupportReports>.

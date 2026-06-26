@@ -280,6 +280,56 @@ REQUIRED_SNIPPETS = {
             reportText: String
         )
         """,
+        "public enum SupportReportTimeRange: Equatable",
+        "case allRetained",
+        "case last(minutes: Int)",
+        "case range(from: Date, to: Date)",
+        "public struct SupportReportOptions: Equatable",
+        "public static let defaultMaximumReportCharacterCount = 256_000",
+        "public var timeRange: SupportReportTimeRange",
+        "public var maximumReportCharacterCount: Int",
+        "public var includesAppContext: Bool",
+        "public var includesIntegrationHealth: Bool",
+        """
+        public init(
+            timeRange: SupportReportTimeRange = .last(minutes: 10),
+            maximumReportCharacterCount: Int = SupportReportOptions.defaultMaximumReportCharacterCount,
+            includesAppContext: Bool = true,
+            includesIntegrationHealth: Bool = true
+        )
+        """,
+        "public static let last5Minutes = SupportReportOptions(timeRange: .last(minutes: 5))",
+        "public static let last10Minutes = SupportReportOptions(timeRange: .last(minutes: 10))",
+        "public static let last30Minutes = SupportReportOptions(timeRange: .last(minutes: 30))",
+        "public static let last60Minutes = SupportReportOptions(timeRange: .last(minutes: 60))",
+        """
+        public static func last(
+            minutes: Int,
+            maximumReportCharacterCount: Int = SupportReportOptions.defaultMaximumReportCharacterCount
+        ) -> SupportReportOptions
+        """,
+        "public struct SupportReport: Equatable",
+        "public let generatedAt: Date",
+        "public let timeRangeDescription: String",
+        "public let includedEntryCount: Int",
+        "public let omittedEntryCount: Int",
+        "public let includedActionExecutionCount: Int",
+        "public let omittedActionExecutionCount: Int",
+        "public let isReportTruncated: Bool",
+        "public let text: String",
+        """
+        public init(
+            generatedAt: Date,
+            timeRangeDescription: String,
+            includedEntryCount: Int,
+            omittedEntryCount: Int,
+            includedActionExecutionCount: Int,
+            omittedActionExecutionCount: Int,
+            reportCharacterCount: Int,
+            isReportTruncated: Bool,
+            text: String
+        )
+        """,
         "public enum StartResult: Equatable",
         "case started",
         "case alreadyRunning",
@@ -302,6 +352,8 @@ REQUIRED_SNIPPETS = {
         "public static let diagnosticsDidChangeNotification",
         "public static func clear()",
         "public static func issueReportText() -> String",
+        "public static func supportReport(options: SupportReportOptions = .default) -> SupportReport",
+        "public static func makeTemporarySupportReportFile(options: SupportReportOptions = .default) throws -> URL",
         "public static func integrationDiagnosisText() -> String",
         "public static func saveSessionArchive(note: String? = nil) throws -> SessionArchive",
         "public static func sessionArchives() throws -> [SessionArchive]",
@@ -451,6 +503,35 @@ REQUIRED_SNIPPETS = {
             reportText: String
         )
         """,
+        "@objc(CDKSupportReport)",
+        "public final class ConsoleDockSupportReport: NSObject",
+        "@objc public let generatedAt: Date",
+        "@objc public let timeRangeDescription: String",
+        "@objc public let includedEntryCount: Int",
+        "@objc public let omittedEntryCount: Int",
+        "@objc public let includedActionExecutionCount: Int",
+        "@objc public let omittedActionExecutionCount: Int",
+        "@objc public let isReportTruncated: Bool",
+        "@objc public let text: String",
+        """
+        @objc(
+            initWithGeneratedAt:timeRangeDescription:includedEntryCount:omittedEntryCount:
+            includedActionExecutionCount:omittedActionExecutionCount:reportCharacterCount:isReportTruncated:text:
+        )
+        """,
+        """
+        public init(
+            generatedAt: Date,
+            timeRangeDescription: String,
+            includedEntryCount: Int,
+            omittedEntryCount: Int,
+            includedActionExecutionCount: Int,
+            omittedActionExecutionCount: Int,
+            reportCharacterCount: Int,
+            isReportTruncated: Bool,
+            text: String
+        )
+        """,
         "@objc(CDKConsoleDockUIKit)",
         "public final class ConsoleDockUIKit: NSObject",
         "@objc(startWithConfiguration:error:)",
@@ -469,6 +550,38 @@ REQUIRED_SNIPPETS = {
         "public static func hideFloatingButton()",
         "@objc(issueReportText)",
         "public static func issueReportText() -> String",
+        "@objc(supportReportWithLastMinutes:maximumReportCharacterCount:)",
+        """
+        public static func supportReport(
+            lastMinutes: Int,
+            maximumReportCharacterCount: Int
+        ) -> ConsoleDockSupportReport
+        """,
+        "@objc(supportReportFromDate:toDate:maximumReportCharacterCount:)",
+        """
+        public static func supportReport(
+            from fromDate: Date,
+            to toDate: Date,
+            maximumReportCharacterCount: Int
+        ) -> ConsoleDockSupportReport
+        """,
+        "@objc(makeTemporarySupportReportFileWithLastMinutes:maximumReportCharacterCount:error:)",
+        """
+        public static func makeTemporarySupportReportFile(
+            lastMinutes: Int,
+            maximumReportCharacterCount: Int,
+            error errorPointer: NSErrorPointer
+        ) -> URL?
+        """,
+        "@objc(makeTemporarySupportReportFileFromDate:toDate:maximumReportCharacterCount:error:)",
+        """
+        public static func makeTemporarySupportReportFile(
+            from fromDate: Date,
+            to toDate: Date,
+            maximumReportCharacterCount: Int,
+            error errorPointer: NSErrorPointer
+        ) -> URL?
+        """,
         "@objc(integrationDiagnosisText)",
         "public static func integrationDiagnosisText() -> String",
         "@objc(saveSessionArchiveWithNote:error:)",
@@ -552,7 +665,7 @@ REQUIRED_SNIPPETS = {
 
 REQUIRED_SNIPPET_COUNTS = {
     SWIFT_FACADE: {
-        "public init(": 12,
+        "public init(": 14,
         "public let message: String": 3,
     },
 }

@@ -8,6 +8,17 @@ The project follows Semantic Versioning for public releases.
 
 No changes yet.
 
+## v0.14.0 - 2026-06-27
+
+### Added
+
+- Added on-demand Support Report APIs through `ConsoleDock.supportReport(options:)` and `ConsoleDock.makeTemporarySupportReportFile(options:)`.
+- Added `ConsoleDock.SupportReport`, `ConsoleDock.SupportReportOptions`, and `ConsoleDock.SupportReportTimeRange` with all-retained, last-minute, and explicit date-range report windows.
+- Added Objective-C/UIKit Support Report bridging through `CDKSupportReport` and `CDKConsoleDockUIKit`.
+- Added bounded Support Report text with included/omitted counts, time range, size limit, truncation state, and explicit local-only storage boundary.
+- Added temporary Support Report file generation with ConsoleDock-owned temporary report directory pruning to avoid unbounded accumulation.
+- Added focused unit tests, Swift API validator coverage, README, simplified Chinese README, DocC, privacy, roadmap, and sample walkthrough updates for Support Report boundaries.
+
 ## v0.13.1 - 2026-06-27
 
 ### Fixed

@@ -22,7 +22,7 @@ Stored entries include `partial`, `redacted`, and `truncated` flags. The `redact
 
 When stdout or stderr capture has to split an oversized line into partial fragments, ConsoleDock keeps redaction state per source. If one partial fragment is redacted, following fragments from the same source are stored as `<redacted partial continuation>` until that line ends. This favors privacy over preserving every byte of an oversized secret-bearing line.
 
-The UIKit console reads from that in-memory buffer. Log detail copy, share/export actions, markers, Session Timeline, issue reports, and explicitly saved Local Session Archives use already-redacted entries from the current in-memory store. App Context values come from the app-provided context provider and are included in issue reports as app-authored diagnostic text. Debug Action execution history and parameter summaries are local session state authored by the app or tester and can appear in the bundled Session Timeline and issue-report reproduction timelines. ConsoleDock does not persist raw logs, App Context, action history, or parameter values to disk by default, upload logs or context, or collect logs from other apps or system processes by default.
+The UIKit console reads from that in-memory buffer. Log detail copy, share/export actions, markers, Session Timeline, issue reports, Support Reports, and explicitly saved Local Session Archives use already-redacted entries from the current in-memory store. App Context values come from the app-provided context provider and are included in reports as app-authored diagnostic text. Debug Action execution history and parameter summaries are local session state authored by the app or tester and can appear in the bundled Session Timeline, issue-report reproduction timelines, and Support Reports. ConsoleDock does not persist raw logs, App Context, action history, or parameter values to disk by default, upload logs or context, or collect logs from other apps or system processes by default.
 
 ## Default Redaction Coverage
 
@@ -110,6 +110,8 @@ Issue reports include session metadata, diagnostics, App Context, a reproduction
 
 Local Session Archives persist locally until deleted. They store bounded issue-report text, not raw pre-redaction log streams, and may be truncated by the archive storage limit. Treat saved archives as local debug artifacts that still require privacy review before sharing outside the app team.
 
+Support Reports are generated only when the app calls the public API. They can cover all retained data, the last 5/10/30/60 minutes, or a date range, but they cannot recover entries already evicted from the bounded in-memory store. Temporary Support Report files are created on demand for file-based feedback flows, and ConsoleDock prunes its own temporary report directory to avoid unbounded accumulation. ConsoleDock does not upload Support Reports or collect analytics; the host app owns any feedback upload path.
+
 App Context is not passed through the log redaction pipeline. Only provide values that are already appropriate for a local debug report, such as non-secret environment names, feature flag names, route labels, or explicitly redacted identifiers.
 
 Debug Action parameter summaries are not a privacy filter. Keep parameter values limited to bounded local test inputs and avoid secrets, raw tokens, unnecessary personal data, or production customer data.
@@ -133,6 +135,7 @@ Before enabling ConsoleDock in a shared test build:
 - confirm Debug Action parameters do not ask testers for secrets or unnecessary personal data;
 - confirm testers understand that copy/share actions can expose visible logs;
 - confirm testers understand that Local Session Archives persist locally until deleted;
+- confirm app-owned Support Report upload flows have separate consent, retention, and privacy review;
 - confirm no logs are persisted or uploaded by another app-specific integration without a separate privacy review.
 
 Treat accidental Release activation, unsafe export behavior, or obvious redaction bypasses as security-relevant. See the repository [Security Policy](../SECURITY.md).

@@ -10,6 +10,8 @@ Copy and share actions are user-initiated from the UIKit console. They use alrea
 
 Local Session Archive is also explicit. It stores bounded issue-report text only after a user or app saves an archive, and archives remain local until deleted.
 
+Support Reports are generated on demand for app-owned feedback or support flows. They read currently retained, already-redacted in-memory/session data for a selected time range, do not send network requests, and do not create a continuous log file. Temporary Support Report files are created only when requested and ConsoleDock prunes its own temporary report directory to avoid unbounded accumulation.
+
 ## Redaction Runs Before Storage
 
 ConsoleDock redacts obvious authorization header values, cookie headers, token, ID token, auth token, session token, CSRF token, access token, refresh token, API key, client secret, key, password, passwd, and secret patterns before storing entries.

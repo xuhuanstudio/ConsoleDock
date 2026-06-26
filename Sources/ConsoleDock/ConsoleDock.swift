@@ -566,6 +566,95 @@ public enum ConsoleDock {
         }
     }
 
+    /// Time range used when building an on-demand local support report.
+    public enum SupportReportTimeRange: Equatable {
+        /// Includes every entry currently retained in ConsoleDock's bounded in-memory store.
+        case allRetained
+        /// Includes entries from the last number of minutes, relative to the report generation time.
+        case last(minutes: Int)
+        /// Includes entries between two dates. Reversed dates are normalized automatically.
+        case range(from: Date, to: Date)
+    }
+
+    /// Options for building an on-demand local support report.
+    public struct SupportReportOptions: Equatable {
+        public static let defaultMaximumReportCharacterCount = 256_000
+
+        public var timeRange: SupportReportTimeRange
+        public var maximumReportCharacterCount: Int
+        public var includesAppContext: Bool
+        public var includesIntegrationHealth: Bool
+
+        public init(
+            timeRange: SupportReportTimeRange = .last(minutes: 10),
+            maximumReportCharacterCount: Int = SupportReportOptions.defaultMaximumReportCharacterCount,
+            includesAppContext: Bool = true,
+            includesIntegrationHealth: Bool = true
+        ) {
+            self.timeRange = timeRange
+            self.maximumReportCharacterCount = maximumReportCharacterCount
+            self.includesAppContext = includesAppContext
+            self.includesIntegrationHealth = includesIntegrationHealth
+        }
+
+        public static let `default` = SupportReportOptions()
+        public static let last5Minutes = SupportReportOptions(timeRange: .last(minutes: 5))
+        public static let last10Minutes = SupportReportOptions(timeRange: .last(minutes: 10))
+        public static let last30Minutes = SupportReportOptions(timeRange: .last(minutes: 30))
+        public static let last60Minutes = SupportReportOptions(timeRange: .last(minutes: 60))
+
+        public static func last(
+            minutes: Int,
+            maximumReportCharacterCount: Int = SupportReportOptions.defaultMaximumReportCharacterCount
+        ) -> SupportReportOptions {
+            SupportReportOptions(
+                timeRange: .last(minutes: minutes),
+                maximumReportCharacterCount: maximumReportCharacterCount
+            )
+        }
+
+        func normalized() -> SupportReportOptions {
+            var copy = self
+            copy.maximumReportCharacterCount = max(1_024, maximumReportCharacterCount)
+            return copy
+        }
+    }
+
+    /// On-demand local support report suitable for app-owned feedback or support flows.
+    public struct SupportReport: Equatable {
+        public let generatedAt: Date
+        public let timeRangeDescription: String
+        public let includedEntryCount: Int
+        public let omittedEntryCount: Int
+        public let includedActionExecutionCount: Int
+        public let omittedActionExecutionCount: Int
+        public let reportCharacterCount: Int
+        public let isReportTruncated: Bool
+        public let text: String
+
+        public init(
+            generatedAt: Date,
+            timeRangeDescription: String,
+            includedEntryCount: Int,
+            omittedEntryCount: Int,
+            includedActionExecutionCount: Int,
+            omittedActionExecutionCount: Int,
+            reportCharacterCount: Int,
+            isReportTruncated: Bool,
+            text: String
+        ) {
+            self.generatedAt = generatedAt
+            self.timeRangeDescription = timeRangeDescription
+            self.includedEntryCount = includedEntryCount
+            self.omittedEntryCount = omittedEntryCount
+            self.includedActionExecutionCount = includedActionExecutionCount
+            self.omittedActionExecutionCount = omittedActionExecutionCount
+            self.reportCharacterCount = reportCharacterCount
+            self.isReportTruncated = isReportTruncated
+            self.text = text
+        }
+    }
+
     /// Startup result returned by `start(configuration:)`.
     public enum StartResult: Equatable {
         case started
@@ -681,6 +770,27 @@ public enum ConsoleDock {
             appContext: appContextSnapshot,
             actionExecutions: actionExecutionsSnapshot,
             integrationHealthLines: ConsoleDockIntegrationDiagnosisFormatter.issueReportLines(snapshot: healthSnapshot)
+        )
+    }
+
+    /// Builds an on-demand local support report from currently retained, already-redacted session data.
+    public static func supportReport(options: SupportReportOptions = .default) -> SupportReport {
+        ConsoleDockSupportReportBuilder.makeReport(
+            options: options,
+            entries: entries,
+            metadata: sessionMetadata,
+            diagnostics: diagnostics,
+            appContext: appContext,
+            actionExecutions: actionExecutionHistory
+        )
+    }
+
+    /// Builds a temporary local support-report text file. The caller owns upload, sharing, and cleanup.
+    public static func makeTemporarySupportReportFile(options: SupportReportOptions = .default) throws -> URL {
+        let report = supportReport(options: options)
+        return try ConsoleDockIssueReportFileExporter.makeTemporarySupportReportFile(
+            reportText: report.text,
+            generatedAt: report.generatedAt
         )
     }
 

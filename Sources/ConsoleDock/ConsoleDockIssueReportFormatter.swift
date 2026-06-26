@@ -2,11 +2,13 @@ import Foundation
 
 struct ConsoleDockIssueReportFormatter {
     static func reportText(
+        title: String = "ConsoleDock Issue Report",
         entries: [ConsoleDock.LogEntry],
         metadata: ConsoleDock.SessionMetadata,
         diagnostics: ConsoleDock.Diagnostics,
         appContext: [ConsoleDock.AppContextSection] = [],
         actionExecutions: [ConsoleDock.DebugActionExecution] = [],
+        headerLines: [String] = [],
         integrationHealthLines: [String] = []
     ) -> String {
         let markers = entries.filter(isMarker)
@@ -15,9 +17,15 @@ struct ConsoleDockIssueReportFormatter {
             actionExecutions: actionExecutions
         )
         var lines = [
-            "ConsoleDock Issue Report",
+            title,
             "Generated: \(ConsoleDockSnapshotFormatter.timestampText(metadata.generatedAt))",
-            "",
+            ""
+        ]
+        if !headerLines.isEmpty {
+            lines.append(contentsOf: headerLines)
+            lines.append("")
+        }
+        lines.append(contentsOf: [
             "Session:",
             "  Session ID: \(metadata.sessionIdentifier)",
             "  Started: \(metadata.startedAt.map(ConsoleDockSnapshotFormatter.timestampText) ?? "unavailable")",
@@ -30,7 +38,7 @@ struct ConsoleDockIssueReportFormatter {
             "  Locale: \(metadata.localeIdentifier)",
             "  Time Zone: \(metadata.timeZoneIdentifier)",
             ""
-        ]
+        ])
 
         lines.append(contentsOf: ConsoleDockDiagnosticsFormatter.snapshotLines(diagnostics: diagnostics))
         if !integrationHealthLines.isEmpty {

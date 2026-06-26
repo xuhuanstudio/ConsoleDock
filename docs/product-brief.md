@@ -112,6 +112,18 @@ try ConsoleDock.saveSessionArchive(note: "Checkout smoke test")
 
 Archives should persist already-redacted report text locally until deleted. They should not become raw log persistence, background telemetry, crash-final recovery, remote upload, or a searchable log database.
 
+### Support Report Mode
+
+Let app-owned feedback or support flows request a bounded time-range report on demand:
+
+```swift
+let report = ConsoleDock.supportReport(options: .last10Minutes)
+```
+
+Support Reports should read from currently retained, already-redacted in-memory/session data. They may cover all retained data, the last 5/10/30/60 minutes, or an explicit date range. The 60-minute preset is useful for longer manual flows, but it must not imply continuous file logging or longer retention than the configured in-memory store.
+
+The host app owns consent, upload, issue creation, cleanup, and privacy review. ConsoleDock should not send network requests, collect analytics, run a background uploader, or create remote tickets.
+
 ## Non-Goals
 
 - Do not try to replace Xcode debugger features.
@@ -122,6 +134,7 @@ Archives should persist already-redacted report text locally until deleted. They
 - Do not turn issue reports into default persistence, remote upload, or automatic issue creation.
 - Do not turn Session Timeline into default persistent history or telemetry.
 - Do not turn Local Session Archive into raw log persistence, crash reporting, remote upload, or a logging database.
+- Do not turn Support Reports into analytics, telemetry, background upload, remote issue creation, or continuous file logging.
 - Do not treat App Context as automatic redaction, route discovery, persistence, or remote telemetry.
 
 ## Naming Decision

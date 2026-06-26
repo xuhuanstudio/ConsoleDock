@@ -100,6 +100,21 @@ NSArray<CDKSessionArchive *> *archives =
 
 Archives are explicit bounded issue-report snapshots. They do not turn ConsoleDock into raw-log persistence, remote upload, or crash reporting. See <doc:LocalSessionArchive>.
 
+Use Support Reports when an Objective-C app-owned feedback flow needs a bounded local report for a recent time window:
+
+```objc
+NSError *error = nil;
+CDKSupportReport *supportReport =
+    [CDKConsoleDockUIKit supportReportWithLastMinutes:10
+                          maximumReportCharacterCount:0];
+NSURL *fileURL =
+    [CDKConsoleDockUIKit makeTemporarySupportReportFileWithLastMinutes:60
+                                           maximumReportCharacterCount:0
+                                                                 error:&error];
+```
+
+Support Reports are generated on demand and are not analytics, background logging, or automatic upload. See <doc:SupportReports>.
+
 ## Register Parameterized Debug Actions
 
 Objective-C apps can register actions with small local parameters through `CDKConsoleDockUIKit`.

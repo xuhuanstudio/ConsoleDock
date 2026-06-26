@@ -264,6 +264,58 @@ public final class ConsoleDockSessionArchive: NSObject {
     }
 }
 
+/// Objective-C-visible on-demand local support report.
+@objc(CDKSupportReport)
+public final class ConsoleDockSupportReport: NSObject {
+    @objc public let generatedAt: Date
+    @objc public let timeRangeDescription: String
+    @objc public let includedEntryCount: Int
+    @objc public let omittedEntryCount: Int
+    @objc public let includedActionExecutionCount: Int
+    @objc public let omittedActionExecutionCount: Int
+    @objc public let reportCharacterCount: Int
+    @objc public let isReportTruncated: Bool
+    @objc public let text: String
+
+    @objc(
+        initWithGeneratedAt:timeRangeDescription:includedEntryCount:omittedEntryCount:
+        includedActionExecutionCount:omittedActionExecutionCount:reportCharacterCount:isReportTruncated:text:
+    )
+    public init(
+        generatedAt: Date,
+        timeRangeDescription: String,
+        includedEntryCount: Int,
+        omittedEntryCount: Int,
+        includedActionExecutionCount: Int,
+        omittedActionExecutionCount: Int,
+        reportCharacterCount: Int,
+        isReportTruncated: Bool,
+        text: String
+    ) {
+        self.generatedAt = generatedAt
+        self.timeRangeDescription = timeRangeDescription
+        self.includedEntryCount = includedEntryCount
+        self.omittedEntryCount = omittedEntryCount
+        self.includedActionExecutionCount = includedActionExecutionCount
+        self.omittedActionExecutionCount = omittedActionExecutionCount
+        self.reportCharacterCount = reportCharacterCount
+        self.isReportTruncated = isReportTruncated
+        self.text = text
+    }
+
+    init(report: ConsoleDock.SupportReport) {
+        generatedAt = report.generatedAt
+        timeRangeDescription = report.timeRangeDescription
+        includedEntryCount = report.includedEntryCount
+        omittedEntryCount = report.omittedEntryCount
+        includedActionExecutionCount = report.includedActionExecutionCount
+        omittedActionExecutionCount = report.omittedActionExecutionCount
+        reportCharacterCount = report.reportCharacterCount
+        isReportTruncated = report.isReportTruncated
+        text = report.text
+    }
+}
+
 /// Objective-C-callable facade for using ConsoleDock with the bundled UIKit console.
 @objc(CDKConsoleDockUIKit)
 public final class ConsoleDockUIKit: NSObject {
@@ -321,6 +373,80 @@ public final class ConsoleDockUIKit: NSObject {
     @objc(issueReportText)
     public static func issueReportText() -> String {
         ConsoleDock.issueReportText()
+    }
+
+    /// Builds an on-demand local support report for the last number of minutes.
+    @objc(supportReportWithLastMinutes:maximumReportCharacterCount:)
+    public static func supportReport(
+        lastMinutes: Int,
+        maximumReportCharacterCount: Int
+    ) -> ConsoleDockSupportReport {
+        ConsoleDockSupportReport(
+            report: ConsoleDock.supportReport(
+                options: supportReportOptions(
+                    lastMinutes: lastMinutes,
+                    maximumReportCharacterCount: maximumReportCharacterCount
+                )
+            )
+        )
+    }
+
+    /// Builds an on-demand local support report between two dates.
+    @objc(supportReportFromDate:toDate:maximumReportCharacterCount:)
+    public static func supportReport(
+        from fromDate: Date,
+        to toDate: Date,
+        maximumReportCharacterCount: Int
+    ) -> ConsoleDockSupportReport {
+        ConsoleDockSupportReport(
+            report: ConsoleDock.supportReport(
+                options: supportReportOptions(
+                    timeRange: .range(from: fromDate, to: toDate),
+                    maximumReportCharacterCount: maximumReportCharacterCount
+                )
+            )
+        )
+    }
+
+    /// Builds a temporary local support-report text file for the last number of minutes.
+    @objc(makeTemporarySupportReportFileWithLastMinutes:maximumReportCharacterCount:error:)
+    public static func makeTemporarySupportReportFile(
+        lastMinutes: Int,
+        maximumReportCharacterCount: Int,
+        error errorPointer: NSErrorPointer
+    ) -> URL? {
+        do {
+            return try ConsoleDock.makeTemporarySupportReportFile(
+                options: supportReportOptions(
+                    lastMinutes: lastMinutes,
+                    maximumReportCharacterCount: maximumReportCharacterCount
+                )
+            )
+        } catch {
+            errorPointer?.pointee = error as NSError
+            return nil
+        }
+    }
+
+    /// Builds a temporary local support-report text file between two dates.
+    @objc(makeTemporarySupportReportFileFromDate:toDate:maximumReportCharacterCount:error:)
+    public static func makeTemporarySupportReportFile(
+        from fromDate: Date,
+        to toDate: Date,
+        maximumReportCharacterCount: Int,
+        error errorPointer: NSErrorPointer
+    ) -> URL? {
+        do {
+            return try ConsoleDock.makeTemporarySupportReportFile(
+                options: supportReportOptions(
+                    timeRange: .range(from: fromDate, to: toDate),
+                    maximumReportCharacterCount: maximumReportCharacterCount
+                )
+            )
+        } catch {
+            errorPointer?.pointee = error as NSError
+            return nil
+        }
     }
 
     /// Builds a local integration diagnosis for debugging ConsoleDock setup and capture coverage.
@@ -520,6 +646,28 @@ public final class ConsoleDockUIKit: NSObject {
                 return choiceID
             }
         }
+    }
+
+    private static func supportReportOptions(
+        lastMinutes: Int,
+        maximumReportCharacterCount: Int
+    ) -> ConsoleDock.SupportReportOptions {
+        supportReportOptions(
+            timeRange: .last(minutes: lastMinutes),
+            maximumReportCharacterCount: maximumReportCharacterCount
+        )
+    }
+
+    private static func supportReportOptions(
+        timeRange: ConsoleDock.SupportReportTimeRange,
+        maximumReportCharacterCount: Int
+    ) -> ConsoleDock.SupportReportOptions {
+        ConsoleDock.SupportReportOptions(
+            timeRange: timeRange,
+            maximumReportCharacterCount: maximumReportCharacterCount > 0
+                ? maximumReportCharacterCount
+                : ConsoleDock.SupportReportOptions.defaultMaximumReportCharacterCount
+        )
     }
 
     private static func shouldConfigureUI(result: CDKStartResult) -> Bool {

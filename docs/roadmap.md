@@ -325,7 +325,29 @@ Not included:
 - stable public typed health model.
 - remote upload, remote issue creation, network inspector, crash reporting, CocoaPods, or XCFramework distribution.
 
-## Post-v0.12 - Demand-Driven Compatibility Candidates
+## v0.14 - Support Reports
+
+Goal: support app-owned feedback and support flows with bounded, on-demand local reports without turning ConsoleDock into analytics, telemetry, or background logging.
+
+Deliverables:
+
+- `ConsoleDock.SupportReport`, `SupportReportOptions`, and `SupportReportTimeRange`.
+- Swift APIs for `supportReport(options:)` and `makeTemporarySupportReportFile(options:)`.
+- Objective-C/UIKit facade APIs through `CDKSupportReport` and `CDKConsoleDockUIKit`.
+- default last-10-minutes report window, presets for 5/10/30/60 minutes, all-retained reports, and explicit date ranges.
+- report headers with included/omitted entry and action-execution counts, time range, size limit, truncation state, storage boundary, and current-session scope.
+- bounded report text with explicit truncation notices.
+- on-demand temporary support-report text files with ConsoleDock-owned temp-directory pruning.
+- focused unit tests, API validators, README, DocC, privacy, roadmap, changelog, and sample walkthrough updates.
+
+Not included:
+
+- analytics, telemetry, user statistics, or behavioral event collection.
+- background upload, automatic remote issue creation, or server SDK behavior.
+- continuous raw log file persistence.
+- crash reporting, network inspector, remote commands, CocoaPods, or XCFramework distribution.
+
+## Post-v0.14 - Demand-Driven Compatibility Candidates
 
 Goal: improve adoption in existing apps only when real integration feedback shows SPM and the current explicit API are not enough.
 
@@ -334,7 +356,7 @@ Candidate work, not committed deliverables:
 - CocoaLumberjack adapter if real users need it.
 - XCGLogger or SwiftyBeaver adapter, selected by real adoption demand.
 - CocoaPods compatibility evaluation only if real older Objective-C or mixed projects cannot adopt the Swift Package.
-- richer issue report formatting only if real tester workflows need it.
+- richer report formatting only if real tester workflows need it.
 - saved local-only presets only if real tester workflows prove session-only recent values are not enough.
 
 Not included:
