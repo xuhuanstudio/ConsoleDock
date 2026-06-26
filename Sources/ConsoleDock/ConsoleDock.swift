@@ -662,13 +662,31 @@ public enum ConsoleDock {
 
     /// Builds a local issue report with session metadata, diagnostics, markers, and all retained entries.
     public static func issueReportText() -> String {
-        ConsoleDockIssueReportFormatter.reportText(
-            entries: entries,
-            metadata: sessionMetadata,
-            diagnostics: diagnostics,
-            appContext: appContext,
-            actionExecutions: actionExecutionHistory
+        let entriesSnapshot = entries
+        let metadataSnapshot = sessionMetadata
+        let diagnosticsSnapshot = diagnostics
+        let appContextSnapshot = appContext
+        let actionExecutionsSnapshot = actionExecutionHistory
+        let healthSnapshot = ConsoleDockIntegrationDiagnosisFormatter.snapshot(
+            entries: entriesSnapshot,
+            metadata: metadataSnapshot,
+            diagnostics: diagnosticsSnapshot,
+            appContext: appContextSnapshot,
+            actionExecutions: actionExecutionsSnapshot
         )
+        return ConsoleDockIssueReportFormatter.reportText(
+            entries: entriesSnapshot,
+            metadata: metadataSnapshot,
+            diagnostics: diagnosticsSnapshot,
+            appContext: appContextSnapshot,
+            actionExecutions: actionExecutionsSnapshot,
+            integrationHealthLines: ConsoleDockIntegrationDiagnosisFormatter.issueReportLines(snapshot: healthSnapshot)
+        )
+    }
+
+    /// Builds a local integration diagnosis for debugging ConsoleDock setup and capture coverage.
+    public static func integrationDiagnosisText() -> String {
+        ConsoleDockIntegrationDiagnosisFormatter.diagnosisText()
     }
 
     /// Saves the current local issue report as a bounded app-local archive.

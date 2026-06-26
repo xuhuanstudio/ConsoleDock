@@ -301,6 +301,30 @@ Not included:
 - crash reporting.
 - CocoaPods or XCFramework distribution.
 
+## v0.13 - Integration Doctor
+
+Goal: help developers and testers understand the current ConsoleDock integration state when expected logs or local debugging signals do not appear.
+
+Deliverables:
+
+- generated local Integration Diagnosis text.
+- `ConsoleDock.integrationDiagnosisText()` for Swift integrations.
+- `CDKConsoleDockUIKit.integrationDiagnosisText` for Objective-C/UIKit integrations.
+- ConsoleDock-owned `ConsoleDock Health` section in the existing Context tab.
+- `Copy Integration Diagnosis` from the Context tab.
+- source and level counts, redacted/truncated/partial counts, Debug Action counts, App Context status, Local Session Archive count, and local recommendations.
+- issue reports include the same ConsoleDock Health section.
+- Swift sample UI smoke coverage for the Context health section and copy action.
+- focused unit tests, API validators, README, DocC, changelog, and sample walkthrough updates.
+
+Not included:
+
+- automatic repair or configuration mutation.
+- complete Swift `Logger`, `os_log`, or Apple unified logging capture.
+- new tab, large UIKit redesign, or SwiftUI rewrite.
+- stable public typed health model.
+- remote upload, remote issue creation, network inspector, crash reporting, CocoaPods, or XCFramework distribution.
+
 ## Post-v0.12 - Demand-Driven Compatibility Candidates
 
 Goal: improve adoption in existing apps only when real integration feedback shows SPM and the current explicit API are not enough.

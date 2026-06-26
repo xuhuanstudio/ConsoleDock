@@ -49,6 +49,8 @@ REQUIRED_SNIPPETS = {
         "reproduction timeline",
         "Local Session Archive persistence boundaries",
         "App Context tab refresh",
+        "ConsoleDock Health",
+        "Copy Integration Diagnosis",
         "Floating trigger controls",
     ],
     "Examples/ObjCSampleApp/README.md": [
@@ -73,6 +75,8 @@ REQUIRED_SNIPPETS = {
         "reproduction timeline",
         "Local Session Archive persistence boundaries",
         "App Context tab refresh",
+        "ConsoleDock Health",
+        "Copy Integration Diagnosis",
         "Floating trigger controls",
     ],
     "docs/sample-app-walkthrough.md": [
@@ -100,6 +104,8 @@ REQUIRED_SNIPPETS = {
         "reproduction timeline",
         "Local Session Archive persistence boundaries",
         "App Context tab refresh",
+        "ConsoleDock Health",
+        "Copy Integration Diagnosis",
         "logger forwarder sink",
     ],
     "Examples/SwiftSampleApp/SwiftSampleApp/MainViewController.swift": [

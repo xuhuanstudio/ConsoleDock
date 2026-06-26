@@ -339,6 +339,17 @@
         private func configureModeControl() {
             modeControl.selectedSegmentIndex = 0
             modeControl.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.modeControl
+            modeControl.backgroundColor = UIColor(white: 0.1, alpha: 1)
+            if #available(iOS 13.0, *) {
+                modeControl.selectedSegmentTintColor = UIColor(white: 0.92, alpha: 1)
+            } else {
+                modeControl.tintColor = UIColor(white: 0.92, alpha: 1)
+            }
+            modeControl.setTitleTextAttributes([.foregroundColor: UIColor.black], for: .selected)
+            modeControl.setTitleTextAttributes(
+                [.foregroundColor: UIColor(white: 0.86, alpha: 1)],
+                for: .normal
+            )
             modeControl.addTarget(self, action: #selector(modeDidChange), for: .valueChanged)
             modeControl.translatesAutoresizingMaskIntoConstraints = false
             contentView.translatesAutoresizingMaskIntoConstraints = false

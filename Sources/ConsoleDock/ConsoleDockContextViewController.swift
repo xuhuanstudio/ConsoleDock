@@ -7,6 +7,9 @@
         private let tableView = UITableView(frame: .zero, style: .grouped)
         private let emptyStateLabel = UILabel()
         private var sections: [ConsoleDock.AppContextSection] = []
+        private var lastHealthSnapshot = ConsoleDockIntegrationDiagnosisFormatter.snapshot()
+        private var appContextSections: [ConsoleDock.AppContextSection] = []
+        private var copyDiagnosisButton: UIBarButtonItem?
         private var refreshButton: UIBarButtonItem?
 
         override func viewDidLoad() {
@@ -32,6 +35,17 @@
         func deactivate() {}
 
         private func configureNavigationItems() {
+            let copyDiagnosisButton = UIBarButtonItem(
+                title: "Copy",
+                style: .plain,
+                target: self,
+                action: #selector(copyIntegrationDiagnosis)
+            )
+            copyDiagnosisButton.accessibilityIdentifier =
+                ConsoleDockAccessibilityIdentifiers.contextCopyDiagnosisButton
+            copyDiagnosisButton.accessibilityLabel = "Copy Integration Diagnosis"
+            self.copyDiagnosisButton = copyDiagnosisButton
+
             let refreshButton = UIBarButtonItem(
                 barButtonSystemItem: .refresh,
                 target: self,
@@ -43,7 +57,7 @@
         }
 
         private func publishNavigationItems() {
-            navigationItemsDidChange?([refreshButton].compactMap { $0 })
+            navigationItemsDidChange?([copyDiagnosisButton, refreshButton].compactMap { $0 })
         }
 
         private func configureTableView() {
@@ -87,8 +101,27 @@
             reloadContext()
         }
 
+        @objc private func copyIntegrationDiagnosis() {
+            UIPasteboard.general.string =
+                ConsoleDockIntegrationDiagnosisFormatter.diagnosisText(snapshot: lastHealthSnapshot)
+            let alert = UIAlertController(
+                title: "Copied Integration Diagnosis",
+                message: nil,
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            present(alert, animated: true)
+        }
+
         private func reloadContext() {
-            sections = ConsoleDock.appContext
+            appContextSections = ConsoleDock.appContext
+            lastHealthSnapshot = ConsoleDockIntegrationDiagnosisFormatter.snapshot(
+                appContext: appContextSections
+            )
+            let healthSection = ConsoleDockIntegrationDiagnosisFormatter.healthSection(
+                snapshot: lastHealthSnapshot
+            )
+            sections = [healthSection] + appContextSections
             emptyStateLabel.isHidden = !sections.isEmpty
             tableView.reloadData()
         }

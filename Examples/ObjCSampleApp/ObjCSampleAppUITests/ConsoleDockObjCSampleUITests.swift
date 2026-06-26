@@ -195,8 +195,11 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         tapMode("Context", in: app)
         let contextTable = app.tables["consoledock.context-table"]
         XCTAssertTrue(contextTable.waitForExistence(timeout: 5))
+        XCTAssertTrue(waitForTableEntry(containing: "ConsoleDock Health", in: contextTable, timeout: 5))
+        XCTAssertTrue(waitForTableEntry(containing: "Entry Sources", in: contextTable, timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "Objective-C", in: contextTable, timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "ui-smoke", in: contextTable, timeout: 5))
+        XCTAssertTrue(app.buttons["consoledock.context.copy-diagnosis"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["consoledock.context-refresh"].waitForExistence(timeout: 5))
         app.buttons["consoledock.context-refresh"].tap()
         tapMode("Logs", in: app)

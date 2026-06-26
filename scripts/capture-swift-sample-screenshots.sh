@@ -35,6 +35,7 @@ rm -f \
   "$output_directory/swift-sample-logs.png" \
   "$output_directory/swift-sample-actions.png" \
   "$output_directory/swift-sample-timeline.png" \
+  "$output_directory/swift-sample-context.png" \
   "$output_directory/swift-sample-archive.png"
 
 printf 'Swift sample screenshot destination: %s\n' "$destination"
@@ -69,6 +70,7 @@ required_names = {
     "swift-sample-logs": "swift-sample-logs.png",
     "swift-sample-actions": "swift-sample-actions.png",
     "swift-sample-timeline": "swift-sample-timeline.png",
+    "swift-sample-context": "swift-sample-context.png",
     "swift-sample-archive": "swift-sample-archive.png",
 }
 found: dict[str, pathlib.Path] = {}

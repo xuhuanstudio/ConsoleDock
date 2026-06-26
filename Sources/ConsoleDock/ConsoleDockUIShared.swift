@@ -48,6 +48,7 @@
         static let actionsTable = "consoledock.actions-table"
         static let contextTable = "consoledock.context-table"
         static let contextRefreshButton = "consoledock.context-refresh"
+        static let contextCopyDiagnosisButton = "consoledock.context.copy-diagnosis"
         static let entryDetailMessage = "consoledock.entry-detail.message"
         static let copyMessageButton = "consoledock.copy-message"
         static let copyEntryButton = "consoledock.copy-entry"

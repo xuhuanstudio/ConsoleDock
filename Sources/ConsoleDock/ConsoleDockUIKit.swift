@@ -323,6 +323,12 @@ public final class ConsoleDockUIKit: NSObject {
         ConsoleDock.issueReportText()
     }
 
+    /// Builds a local integration diagnosis for debugging ConsoleDock setup and capture coverage.
+    @objc(integrationDiagnosisText)
+    public static func integrationDiagnosisText() -> String {
+        ConsoleDock.integrationDiagnosisText()
+    }
+
     /// Saves the current local issue report as a bounded app-local archive.
     @objc(saveSessionArchiveWithNote:error:)
     public static func saveSessionArchive(

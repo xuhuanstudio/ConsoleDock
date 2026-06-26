@@ -57,6 +57,7 @@ ConsoleDock is not a full replacement for Xcode Console or Apple unified logging
 - ``ConsoleDock/entriesDidChangeNotification``
 - ``ConsoleDock/clear()``
 - ``ConsoleDock/issueReportText()``
+- ``ConsoleDock/integrationDiagnosisText()``
 - ``ConsoleDock/saveSessionArchive(note:)``
 - ``ConsoleDock/sessionArchives()``
 - ``ConsoleDock/deleteSessionArchive(id:)``

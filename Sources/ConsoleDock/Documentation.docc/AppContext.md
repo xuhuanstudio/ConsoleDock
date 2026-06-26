@@ -6,7 +6,7 @@ Show app-provided local context in the bundled console and issue reports.
 
 App Context is a small, app-owned key-value snapshot for local testing. Use it for values that help interpret logs, such as environment, feature flags, test account type, current route name, or a redacted user identifier.
 
-ConsoleDock reads the provider on demand, displays the result in the bundled `Context` tab, and includes the same snapshot when building an issue report. Context is not persisted, uploaded, or refreshed in the background by ConsoleDock.
+ConsoleDock reads the provider on demand, displays the result in the bundled `Context` tab, and includes the same snapshot when building an issue report. The tab also prepends ConsoleDock Health for local integration diagnosis. Context is not persisted, uploaded, or refreshed in the background by ConsoleDock.
 
 Do not put raw secrets, access tokens, or unnecessary personal data in App Context values. ConsoleDock treats context as app-authored diagnostic text and includes it in user-initiated issue report exports.
 
@@ -49,4 +49,4 @@ Use `[CDKConsoleDockUIKit clearAppContextProvider]` when the app should stop pro
 
 ## Boundaries
 
-App Context is not an automatic route scanner, persistent state store, remote upload channel, or privacy filter. The host app decides what values are safe and useful to expose.
+App Context is not an automatic route scanner, persistent state store, remote upload channel, or privacy filter. ConsoleDock Health is local setup guidance only and does not read Swift `Logger`, `os_log`, Apple unified logging, or other-process logs. The host app decides what App Context values are safe and useful to expose.

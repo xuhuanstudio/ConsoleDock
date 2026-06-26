@@ -28,6 +28,7 @@ DENIED_FILE_NAMES = {
 ALLOWED_BINARY_PATHS = {
     pathlib.PurePosixPath("docs/assets/swift-sample-actions.png"),
     pathlib.PurePosixPath("docs/assets/swift-sample-archive.png"),
+    pathlib.PurePosixPath("docs/assets/swift-sample-context.png"),
     pathlib.PurePosixPath("docs/assets/swift-sample-logs.png"),
     pathlib.PurePosixPath("docs/assets/swift-sample-timeline.png"),
 }

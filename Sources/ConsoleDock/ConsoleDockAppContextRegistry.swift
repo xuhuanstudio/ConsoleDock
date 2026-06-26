@@ -21,6 +21,13 @@ final class ConsoleDockAppContextRegistry {
         lock.unlock()
     }
 
+    func hasProvider() -> Bool {
+        lock.lock()
+        let result = provider != nil
+        lock.unlock()
+        return result
+    }
+
     func snapshot() -> [ConsoleDock.AppContextSection] {
         lock.lock()
         let provider = self.provider

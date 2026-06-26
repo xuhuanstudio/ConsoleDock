@@ -57,6 +57,7 @@ REQUIRED_IDENTIFIERS = {
         "consoledock.actions-table",
         "consoledock.context-table",
         "consoledock.context-refresh",
+        "consoledock.context.copy-diagnosis",
         "consoledock.entry-detail.message",
         "consoledock.copy-message",
         "consoledock.copy-entry",

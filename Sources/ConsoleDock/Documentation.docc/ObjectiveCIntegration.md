@@ -79,6 +79,14 @@ Markers are native info entries with a stable `[marker]` prefix. The bundled UIK
 NSString *report = [CDKConsoleDockUIKit issueReportText];
 ```
 
+When expected entries or local debug surface data do not appear, copy the local Integration Diagnosis:
+
+```objc
+NSString *diagnosis = [CDKConsoleDockUIKit integrationDiagnosisText];
+```
+
+The bundled `Context` tab shows the same ConsoleDock Health state and includes a `Copy Integration Diagnosis` action.
+
 Use Local Session Archive when an Objective-C app or tester needs to save that report locally for later review:
 
 ```objc

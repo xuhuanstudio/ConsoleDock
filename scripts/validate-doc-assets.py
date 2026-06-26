@@ -18,6 +18,7 @@ REQUIRED_SCREENSHOTS = [
     pathlib.PurePosixPath("docs/assets/swift-sample-logs.png"),
     pathlib.PurePosixPath("docs/assets/swift-sample-actions.png"),
     pathlib.PurePosixPath("docs/assets/swift-sample-timeline.png"),
+    pathlib.PurePosixPath("docs/assets/swift-sample-context.png"),
     pathlib.PurePosixPath("docs/assets/swift-sample-archive.png"),
 ]
 
@@ -29,6 +30,7 @@ REQUIRED_REFERENCES = {
         "assets/swift-sample-logs.png",
         "assets/swift-sample-actions.png",
         "assets/swift-sample-timeline.png",
+        "assets/swift-sample-context.png",
         "assets/swift-sample-archive.png",
         "scripts/capture-swift-sample-screenshots.sh",
     ],

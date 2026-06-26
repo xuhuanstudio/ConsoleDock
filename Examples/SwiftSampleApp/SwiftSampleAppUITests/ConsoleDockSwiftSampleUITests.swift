@@ -53,6 +53,13 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
         XCTAssertTrue(waitForTableEntry(containing: "debug action smoke error", in: timelineTable, timeout: 5))
         captureDocumentationScreenshot(named: "swift-sample-timeline")
 
+        tapMode("Context", in: app)
+        let contextTable = app.tables["consoledock.context-table"]
+        XCTAssertTrue(contextTable.waitForExistence(timeout: 5))
+        XCTAssertTrue(waitForTableEntry(containing: "ConsoleDock Health", in: contextTable, timeout: 5))
+        XCTAssertTrue(waitForTableEntry(containing: "Entry Sources", in: contextTable, timeout: 5))
+        captureDocumentationScreenshot(named: "swift-sample-context")
+
         tapMode("Logs", in: app)
         let shareButton = app.buttons["consoledock.share"]
         XCTAssertTrue(shareButton.waitForExistence(timeout: 5))
@@ -265,8 +272,17 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
         tapMode("Context", in: app)
         let contextTable = app.tables["consoledock.context-table"]
         XCTAssertTrue(contextTable.waitForExistence(timeout: 5))
+        XCTAssertTrue(waitForTableEntry(containing: "ConsoleDock Health", in: contextTable, timeout: 5))
+        XCTAssertTrue(waitForTableEntry(containing: "Entry Sources", in: contextTable, timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "Swift", in: contextTable, timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "ui-smoke", in: contextTable, timeout: 5))
+        let copyDiagnosisButton = app.buttons["consoledock.context.copy-diagnosis"]
+        XCTAssertTrue(copyDiagnosisButton.waitForExistence(timeout: 5))
+        copyDiagnosisButton.tap()
+        let copiedDiagnosisAlert = app.alerts["Copied Integration Diagnosis"]
+        XCTAssertTrue(copiedDiagnosisAlert.waitForExistence(timeout: 5))
+        copiedDiagnosisAlert.buttons["OK"].tap()
+        XCTAssertTrue(waitForElementToDisappear(copiedDiagnosisAlert, timeout: 2))
         XCTAssertTrue(app.buttons["consoledock.context-refresh"].waitForExistence(timeout: 5))
         app.buttons["consoledock.context-refresh"].tap()
         tapMode("Logs", in: app)

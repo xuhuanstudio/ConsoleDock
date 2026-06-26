@@ -11,10 +11,11 @@ ConsoleDock does this with three local pieces:
 - ``ConsoleDock/sessionMetadata`` returns app, process, OS, device, locale, time zone, session, and generation context.
 - ``ConsoleDock/mark(_:)`` writes a native info entry with a stable `[marker]` prefix.
 - ``ConsoleDock/appContext`` returns app-provided local context when the host app registers a provider.
+- ``ConsoleDock/integrationDiagnosisText()`` returns local setup guidance for ConsoleDock Health.
 - ``ConsoleDock/actionExecutionHistory`` returns local Debug Action outcomes for the current process session.
 - The bundled UIKit console offers `Mark`, `Timeline`, `Share Issue Report`, `Copy Issue Report`, and explicit Local Session Archive actions.
 
-Issue reports are generated locally through the system share sheet, copied locally through the pasteboard action, saved explicitly as a bounded Local Session Archive, or read as text through ``ConsoleDock/issueReportText()``. They include session metadata, diagnostics, app context, a reproduction timeline, a marker index, and all currently retained redacted logs. ConsoleDock does not persist reports by default, upload them, or create remote issues automatically.
+Issue reports are generated locally through the system share sheet, copied locally through the pasteboard action, saved explicitly as a bounded Local Session Archive, or read as text through ``ConsoleDock/issueReportText()``. They include session metadata, diagnostics, ConsoleDock Health, app context, a reproduction timeline, a marker index, and all currently retained redacted logs. ConsoleDock does not persist reports by default, upload them, or create remote issues automatically.
 
 ## Add Markers
 

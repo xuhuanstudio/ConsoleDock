@@ -109,6 +109,8 @@ Use ``ConsoleDock/entriesDidChangeNotification`` when building a custom debug su
 
 Diagnostics report ConsoleDock's local runtime state only. They do not imply complete capture of Swift `Logger`, `os_log`, Apple unified logging, other-process logs, or debugger-only output.
 
+Use ``ConsoleDock/integrationDiagnosisText()`` when expected logs or debug surface data do not appear. The generated local text summarizes running state, capture configuration, source and level counts, Debug Actions, App Context, Local Session Archives, and setup recommendations.
+
 ## Add Debug Actions
 
 Use Debug Actions when testers need an explicit local shortcut for a screen or scenario that is hard to reach through normal UI.

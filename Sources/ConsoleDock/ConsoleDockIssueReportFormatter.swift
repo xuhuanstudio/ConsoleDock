@@ -6,7 +6,8 @@ struct ConsoleDockIssueReportFormatter {
         metadata: ConsoleDock.SessionMetadata,
         diagnostics: ConsoleDock.Diagnostics,
         appContext: [ConsoleDock.AppContextSection] = [],
-        actionExecutions: [ConsoleDock.DebugActionExecution] = []
+        actionExecutions: [ConsoleDock.DebugActionExecution] = [],
+        integrationHealthLines: [String] = []
     ) -> String {
         let markers = entries.filter(isMarker)
         let timelineLines = ConsoleDockTimelineBuilder.reportLines(
@@ -32,6 +33,10 @@ struct ConsoleDockIssueReportFormatter {
         ]
 
         lines.append(contentsOf: ConsoleDockDiagnosticsFormatter.snapshotLines(diagnostics: diagnostics))
+        if !integrationHealthLines.isEmpty {
+            lines.append("")
+            lines.append(contentsOf: integrationHealthLines)
+        }
         lines.append("")
         lines.append("App Context:")
         if appContext.isEmpty {

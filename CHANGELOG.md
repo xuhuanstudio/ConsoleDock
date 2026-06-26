@@ -8,6 +8,20 @@ The project follows Semantic Versioning for public releases.
 
 No changes yet.
 
+## v0.13.0 - 2026-06-27
+
+### Added
+
+- Added Integration Diagnosis text through `ConsoleDock.integrationDiagnosisText()` and `CDKConsoleDockUIKit.integrationDiagnosisText`.
+- Added a ConsoleDock Health section to the bundled Context tab with running state, capture configuration, source and level counts, entry flags, Debug Actions, App Context, Local Session Archive state, and local setup recommendations.
+- Added `Copy Integration Diagnosis` to the bundled Context tab.
+- Added ConsoleDock Health to issue reports so copied, shared, and archived reports include local setup guidance.
+- Added focused unit tests, API validator coverage, sample UI smoke coverage, DocC, README, sample walkthrough, and current Context Health screenshot coverage for Integration Diagnosis.
+
+### Changed
+
+- Improved the bundled panel mode selector contrast on dark backgrounds while keeping iOS 12 compatibility.
+
 ## v0.12.0 - 2026-06-27
 
 ### Added

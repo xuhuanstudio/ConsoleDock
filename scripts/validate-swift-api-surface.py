@@ -302,6 +302,7 @@ REQUIRED_SNIPPETS = {
         "public static let diagnosticsDidChangeNotification",
         "public static func clear()",
         "public static func issueReportText() -> String",
+        "public static func integrationDiagnosisText() -> String",
         "public static func saveSessionArchive(note: String? = nil) throws -> SessionArchive",
         "public static func sessionArchives() throws -> [SessionArchive]",
         "public static func deleteSessionArchive(id: String) throws",
@@ -468,6 +469,8 @@ REQUIRED_SNIPPETS = {
         "public static func hideFloatingButton()",
         "@objc(issueReportText)",
         "public static func issueReportText() -> String",
+        "@objc(integrationDiagnosisText)",
+        "public static func integrationDiagnosisText() -> String",
         "@objc(saveSessionArchiveWithNote:error:)",
         """
         public static func saveSessionArchive(

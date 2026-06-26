@@ -1362,6 +1362,170 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertTrue(report.contains("ObjC facade report"))
     }
 
+    func testIntegrationDiagnosisFormatterReportsCountsAndRecommendations() {
+        let entries = [
+            ConsoleDock.LogEntry(
+                timestamp: Date(timeIntervalSince1970: 1),
+                level: .info,
+                source: .native,
+                message: "native"
+            ),
+            ConsoleDock.LogEntry(
+                timestamp: Date(timeIntervalSince1970: 2),
+                level: .debug,
+                source: .stdout,
+                message: "stdout"
+            ),
+            ConsoleDock.LogEntry(
+                timestamp: Date(timeIntervalSince1970: 3),
+                level: .error,
+                source: .stderr,
+                message: "stderr",
+                partial: true,
+                redacted: true,
+                truncated: true
+            )
+        ]
+        let snapshot = ConsoleDockIntegrationDiagnosisFormatter.Snapshot(
+            generatedAt: Date(timeIntervalSince1970: 0),
+            metadata: fixtureMetadata(),
+            diagnostics: fixtureDiagnostics(
+                entryCount: 3,
+                redactedEntryCount: 1,
+                truncatedEntryCount: 1,
+                partialEntryCount: 1
+            ),
+            entries: entries,
+            debugActions: [ConsoleDockDebugAction(id: "open.checkout", title: "Open Checkout")],
+            actionExecutions: [
+                ConsoleDock.DebugActionExecution(
+                    id: 1,
+                    actionID: "open.checkout",
+                    title: "Open Checkout",
+                    group: nil,
+                    startedAt: Date(timeIntervalSince1970: 4),
+                    completedAt: Date(timeIntervalSince1970: 5),
+                    outcome: .completed
+                )
+            ],
+            appContextProviderRegistered: true,
+            appContext: [
+                ConsoleDock.AppContextSection(
+                    title: "App",
+                    items: [.init(key: "Environment", value: "staging")]
+                )
+            ],
+            archiveState: .available(count: 2)
+        )
+
+        let report = ConsoleDockIntegrationDiagnosisFormatter.diagnosisText(snapshot: snapshot)
+
+        XCTAssertTrue(report.contains("ConsoleDock Integration Diagnosis"))
+        XCTAssertTrue(report.contains("Generated: 1970-01-01T00:00:00.000Z"))
+        XCTAssertTrue(report.contains("Sources: native=1 stdout=1 stderr=1"))
+        XCTAssertTrue(report.contains("Levels: debug=1 info=1 warning=0 error=1 fault=0"))
+        XCTAssertTrue(report.contains("Flags: redacted=1 truncated=1 partial=1"))
+        XCTAssertTrue(report.contains("Debug Actions: registered=1 executions=1"))
+        XCTAssertTrue(report.contains("App Context: provider=registered sections=1 items=1"))
+        XCTAssertTrue(report.contains("Session Archives: count=2"))
+        XCTAssertTrue(report.contains("Swift Logger, os_log, and Apple unified logging are not fully captured"))
+    }
+
+    func testIntegrationDiagnosisFormatterReportsSetupGaps() {
+        let snapshot = ConsoleDockIntegrationDiagnosisFormatter.Snapshot(
+            generatedAt: Date(timeIntervalSince1970: 0),
+            metadata: fixtureMetadata(startedAt: nil),
+            diagnostics: fixtureDiagnostics(
+                isRunning: false,
+                capturesStandardOutput: false,
+                capturesStandardError: false,
+                showsFloatingButton: false,
+                entryCount: 0
+            ),
+            entries: [],
+            debugActions: [],
+            actionExecutions: [],
+            appContextProviderRegistered: false,
+            appContext: [],
+            archiveState: .available(count: 0)
+        )
+
+        let recommendations = ConsoleDockIntegrationDiagnosisFormatter.recommendations(snapshot)
+
+        XCTAssertTrue(recommendations.contains { $0.contains("ConsoleDock is not running") })
+        XCTAssertTrue(recommendations.contains { $0.contains("No entries are retained yet") })
+        XCTAssertTrue(recommendations.contains { $0.contains("stdout capture is disabled") })
+        XCTAssertTrue(recommendations.contains { $0.contains("stderr capture is disabled") })
+        XCTAssertTrue(recommendations.contains { $0.contains("No Debug Actions are registered") })
+        XCTAssertTrue(recommendations.contains { $0.contains("No App Context provider is registered") })
+    }
+
+    func testHealthSectionUsesIntegrationSnapshot() {
+        let snapshot = ConsoleDockIntegrationDiagnosisFormatter.Snapshot(
+            generatedAt: Date(timeIntervalSince1970: 0),
+            metadata: fixtureMetadata(),
+            diagnostics: fixtureDiagnostics(entryCount: 1),
+            entries: [
+                ConsoleDock.LogEntry(
+                    timestamp: Date(timeIntervalSince1970: 1),
+                    level: .warning,
+                    source: .native,
+                    message: "warning"
+                )
+            ],
+            debugActions: [],
+            actionExecutions: [],
+            appContextProviderRegistered: false,
+            appContext: [],
+            archiveState: .available(count: 0)
+        )
+
+        let section = ConsoleDockIntegrationDiagnosisFormatter.healthSection(snapshot: snapshot)
+
+        XCTAssertEqual(section.title, "ConsoleDock Health")
+        XCTAssertTrue(section.items.contains(.init(key: "Running", value: "on")))
+        XCTAssertTrue(section.items.contains(.init(key: "Entry Sources", value: "native=1 stdout=0 stderr=0")))
+        XCTAssertTrue(section.items.contains { $0.key == "Recommendations" })
+    }
+
+    func testConsoleDockIntegrationDiagnosisTextIncludesCurrentEntries() {
+        withTemporaryArchiveStore { _ in
+            XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+            ConsoleDock.info("diagnosis native entry")
+
+            let report = ConsoleDock.integrationDiagnosisText()
+
+            XCTAssertTrue(report.contains("ConsoleDock Integration Diagnosis"))
+            XCTAssertTrue(report.contains("Total: 1"))
+            XCTAssertTrue(report.contains("Sources: native=1 stdout=0 stderr=0"))
+            XCTAssertTrue(report.contains("stdout capture is disabled by configuration"))
+            XCTAssertTrue(report.contains("diagnosis native entry") == false)
+        }
+    }
+
+    func testObjectiveCUIKitFacadeIntegrationDiagnosisTextUsesSwiftFacade() {
+        withTemporaryArchiveStore { _ in
+            XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+            ConsoleDock.warning("ObjC facade diagnosis")
+
+            let report = ConsoleDockUIKit.integrationDiagnosisText()
+
+            XCTAssertTrue(report.contains("ConsoleDock Integration Diagnosis"))
+            XCTAssertTrue(report.contains("Sources: native=1 stdout=0 stderr=0"))
+        }
+    }
+
+    func testIssueReportIncludesConsoleDockHealth() {
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+        ConsoleDock.error("health issue report")
+
+        let report = ConsoleDock.issueReportText()
+
+        XCTAssertTrue(report.contains("ConsoleDock Health:"))
+        XCTAssertTrue(report.contains("Entry Sources: native=1 stdout=0 stderr=0"))
+        XCTAssertTrue(report.contains("health issue report"))
+    }
+
     func testAppContextProviderNormalizesAndClearsSnapshot() {
         ConsoleDock.setAppContextProvider {
             [
@@ -2300,6 +2464,52 @@ extension ConsoleDock.Configuration {
 }
 
 extension ConsoleDockTests {
+    fileprivate func fixtureMetadata(
+        startedAt: Date? = Date(timeIntervalSince1970: 0)
+    ) -> ConsoleDock.SessionMetadata {
+        ConsoleDock.SessionMetadata(
+            sessionIdentifier: "session-fixture",
+            startedAt: startedAt,
+            generatedAt: Date(timeIntervalSince1970: 0),
+            bundleIdentifier: "com.example.ConsoleDockTests",
+            appVersion: "1.0",
+            appBuild: "1",
+            processName: "ConsoleDockTests",
+            operatingSystemVersion: "Version 18.0",
+            deviceModel: "iPhone",
+            localeIdentifier: "en_US",
+            timeZoneIdentifier: "UTC"
+        )
+    }
+
+    fileprivate func fixtureDiagnostics(
+        isRunning: Bool = true,
+        capturesStandardOutput: Bool = true,
+        capturesStandardError: Bool = true,
+        showsFloatingButton: Bool = true,
+        allowsReleaseBuilds: Bool = false,
+        maximumEntries: Int = 2_000,
+        maximumMessageLength: Int = 8_192,
+        entryCount: Int = 0,
+        redactedEntryCount: Int = 0,
+        truncatedEntryCount: Int = 0,
+        partialEntryCount: Int = 0
+    ) -> ConsoleDock.Diagnostics {
+        ConsoleDock.Diagnostics(
+            isRunning: isRunning,
+            capturesStandardOutput: capturesStandardOutput,
+            capturesStandardError: capturesStandardError,
+            showsFloatingButton: showsFloatingButton,
+            allowsReleaseBuilds: allowsReleaseBuilds,
+            maximumEntries: maximumEntries,
+            maximumMessageLength: maximumMessageLength,
+            entryCount: entryCount,
+            redactedEntryCount: redactedEntryCount,
+            truncatedEntryCount: truncatedEntryCount,
+            partialEntryCount: partialEntryCount
+        )
+    }
+
     fileprivate static func fixtureUUID(_ value: Int) -> UUID {
         UUID(uuidString: String(format: "00000000-0000-0000-0000-%012d", value))!
     }
