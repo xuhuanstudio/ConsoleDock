@@ -220,7 +220,7 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
         XCTAssertTrue(app.buttons["consoledock.copy-issue-report"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["consoledock.save-session-archive"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["consoledock.saved-session-archives"].waitForExistence(timeout: 5))
-        app.buttons["consoledock.save-session-archive"].tap()
+        app.buttons["consoledock.save-session-archive"].firstMatch.tap()
 
         let savedAlert = app.alerts["Saved Session Archive"]
         XCTAssertTrue(savedAlert.waitForExistence(timeout: 5))
@@ -239,7 +239,7 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
         app.buttons["consoledock.session-archive-detail.copy"].tap()
         app.buttons["consoledock.session-archive-detail.delete"].tap()
         XCTAssertTrue(app.alerts.firstMatch.waitForExistence(timeout: 5))
-        app.alerts.firstMatch.buttons["consoledock.session-archive-detail.confirm-delete"].tap()
+        app.alerts.firstMatch.buttons["consoledock.session-archive-detail.confirm-delete"].firstMatch.tap()
         XCTAssertTrue(app.staticTexts["consoledock.session-archives.empty"].waitForExistence(timeout: 5))
     }
 
