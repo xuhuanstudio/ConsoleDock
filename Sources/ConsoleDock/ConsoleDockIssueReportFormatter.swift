@@ -4,7 +4,8 @@ struct ConsoleDockIssueReportFormatter {
     static func reportText(
         entries: [ConsoleDock.LogEntry],
         metadata: ConsoleDock.SessionMetadata,
-        diagnostics: ConsoleDock.Diagnostics
+        diagnostics: ConsoleDock.Diagnostics,
+        appContext: [ConsoleDock.AppContextSection] = []
     ) -> String {
         let markers = entries.filter(isMarker)
         var lines = [
@@ -27,6 +28,14 @@ struct ConsoleDockIssueReportFormatter {
 
         lines.append(contentsOf: ConsoleDockDiagnosticsFormatter.snapshotLines(diagnostics: diagnostics))
         lines.append("")
+        lines.append("App Context:")
+        if appContext.isEmpty {
+            lines.append("  (no app context)")
+        } else {
+            lines.append(contentsOf: appContextLines(appContext))
+        }
+
+        lines.append("")
         lines.append("Markers:")
         if markers.isEmpty {
             lines.append("  (no markers)")
@@ -46,5 +55,22 @@ struct ConsoleDockIssueReportFormatter {
 
     private static func isMarker(_ entry: ConsoleDock.LogEntry) -> Bool {
         entry.source == .native && entry.message.hasPrefix("[marker]")
+    }
+
+    private static func appContextLines(_ sections: [ConsoleDock.AppContextSection]) -> [String] {
+        var lines: [String] = []
+        for section in sections {
+            lines.append("  \(section.title):")
+            for item in section.items {
+                let valueLines = item.value.components(separatedBy: "\n")
+                if let firstLine = valueLines.first {
+                    lines.append("    \(item.key): \(firstLine)")
+                }
+                for continuation in valueLines.dropFirst() {
+                    lines.append("      \(continuation)")
+                }
+            }
+        }
+        return lines
     }
 }

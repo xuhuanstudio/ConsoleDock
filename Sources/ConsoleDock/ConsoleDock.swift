@@ -88,6 +88,194 @@ public enum ConsoleDock {
         case destructive
     }
 
+    /// A single choice option for a local parameterized debug action.
+    public struct DebugActionChoice: Equatable {
+        public let id: String
+        public let title: String
+
+        public init(id: String, title: String) {
+            self.id = id
+            self.title = title
+        }
+    }
+
+    /// A typed value supplied to a local parameterized debug action.
+    public enum DebugActionParameterValue: Equatable {
+        case string(String)
+        case number(Double)
+        case bool(Bool)
+        case choice(String)
+    }
+
+    /// A parameter definition for a local debug action.
+    public struct DebugActionParameter: Equatable {
+        public enum Kind: Equatable {
+            case string
+            case number
+            case bool
+            case choice([DebugActionChoice])
+        }
+
+        public let id: String
+        public let title: String
+        public let detail: String?
+        public let isRequired: Bool
+        public let defaultValue: DebugActionParameterValue?
+        public let kind: Kind
+
+        init(
+            id: String,
+            title: String,
+            detail: String?,
+            isRequired: Bool,
+            defaultValue: DebugActionParameterValue?,
+            kind: Kind
+        ) {
+            self.id = id
+            self.title = title
+            self.detail = detail
+            self.isRequired = isRequired
+            self.defaultValue = defaultValue
+            self.kind = kind
+        }
+
+        public static func string(
+            id: String,
+            title: String,
+            detail: String? = nil,
+            isRequired: Bool = false,
+            defaultValue: String? = nil
+        ) -> DebugActionParameter {
+            DebugActionParameter(
+                id: id,
+                title: title,
+                detail: detail,
+                isRequired: isRequired,
+                defaultValue: defaultValue.map(DebugActionParameterValue.string),
+                kind: .string
+            )
+        }
+
+        public static func number(
+            id: String,
+            title: String,
+            detail: String? = nil,
+            isRequired: Bool = false,
+            defaultValue: Double? = nil
+        ) -> DebugActionParameter {
+            DebugActionParameter(
+                id: id,
+                title: title,
+                detail: detail,
+                isRequired: isRequired,
+                defaultValue: defaultValue.map(DebugActionParameterValue.number),
+                kind: .number
+            )
+        }
+
+        public static func bool(
+            id: String,
+            title: String,
+            detail: String? = nil,
+            isRequired: Bool = false,
+            defaultValue: Bool? = nil
+        ) -> DebugActionParameter {
+            DebugActionParameter(
+                id: id,
+                title: title,
+                detail: detail,
+                isRequired: isRequired,
+                defaultValue: defaultValue.map(DebugActionParameterValue.bool),
+                kind: .bool
+            )
+        }
+
+        public static func choice(
+            id: String,
+            title: String,
+            choices: [DebugActionChoice],
+            detail: String? = nil,
+            isRequired: Bool = false,
+            defaultChoiceID: String? = nil
+        ) -> DebugActionParameter {
+            DebugActionParameter(
+                id: id,
+                title: title,
+                detail: detail,
+                isRequired: isRequired,
+                defaultValue: defaultChoiceID.map(DebugActionParameterValue.choice),
+                kind: .choice(choices)
+            )
+        }
+    }
+
+    /// Normalized parameter values supplied when a local debug action runs.
+    public struct DebugActionParameters: Equatable {
+        private let storage: [String: DebugActionParameterValue]
+
+        public init(_ values: [String: DebugActionParameterValue] = [:]) {
+            storage = values
+        }
+
+        public func value(_ id: String) -> DebugActionParameterValue? {
+            storage[id]
+        }
+
+        public func string(_ id: String) -> String? {
+            if case let .string(value)? = storage[id] {
+                return value
+            }
+            return nil
+        }
+
+        public func number(_ id: String) -> Double? {
+            if case let .number(value)? = storage[id] {
+                return value
+            }
+            return nil
+        }
+
+        public func bool(_ id: String) -> Bool? {
+            if case let .bool(value)? = storage[id] {
+                return value
+            }
+            return nil
+        }
+
+        public func choice(_ id: String) -> String? {
+            if case let .choice(value)? = storage[id] {
+                return value
+            }
+            return nil
+        }
+
+        var allValues: [String: DebugActionParameterValue] {
+            storage
+        }
+    }
+
+    /// One app-owned context value for local issue reports and the bundled context panel.
+    public struct AppContextItem: Equatable {
+        public let key: String
+        public let value: String
+
+        public init(key: String, value: String) {
+            self.key = key
+            self.value = value
+        }
+    }
+
+    /// A section of app-owned context values.
+    public struct AppContextSection: Equatable {
+        public let title: String
+        public let items: [AppContextItem]
+
+        public init(title: String, items: [AppContextItem]) {
+            self.title = title
+            self.items = items
+        }
+    }
+
     /// Initial corner for the bundled UIKit floating button.
     public enum FloatingButtonPosition: Equatable {
         case topLeading
@@ -375,6 +563,11 @@ public enum ConsoleDock {
         SessionMetadata(coreMetadata: CDKConsoleDock.sessionMetadata())
     }
 
+    /// Snapshot of app-owned local context for issue reports and the bundled context panel.
+    public static var appContext: [AppContextSection] {
+        ConsoleDockAppContextRegistry.shared.snapshot()
+    }
+
     /// Notification posted after entries are appended, reset, or cleared.
     public static let entriesDidChangeNotification = Notification.Name.CDKConsoleDockEntriesDidChange
     /// Notification posted after diagnostics values may have changed.
@@ -390,8 +583,19 @@ public enum ConsoleDock {
         ConsoleDockIssueReportFormatter.reportText(
             entries: entries,
             metadata: sessionMetadata,
-            diagnostics: diagnostics
+            diagnostics: diagnostics,
+            appContext: appContext
         )
+    }
+
+    /// Sets an app-owned local context provider for issue reports and the bundled context panel.
+    public static func setAppContextProvider(_ provider: @escaping () -> [AppContextSection]) {
+        ConsoleDockAppContextRegistry.shared.setProvider(provider)
+    }
+
+    /// Clears the app-owned local context provider.
+    public static func clearAppContextProvider() {
+        ConsoleDockAppContextRegistry.shared.clearProvider()
     }
 
     /// Shows the bundled UIKit console when ConsoleDock is running and UIKit is available.
@@ -435,6 +639,31 @@ public enum ConsoleDock {
             requiresConfirmation: requiresConfirmation,
             isEnabled: isEnabled,
             style: style,
+            handler: handler
+        )
+    }
+
+    /// Registers a local debug action that asks for local parameters before running.
+    public static func registerAction(
+        id: String,
+        title: String,
+        group: String? = nil,
+        detail: String? = nil,
+        requiresConfirmation: Bool = false,
+        isEnabled: Bool = true,
+        style: DebugActionStyle = .normal,
+        parameters: [DebugActionParameter],
+        handler: @escaping (DebugActionParameters) throws -> Void
+    ) {
+        ConsoleDockDebugActionRegistry.shared.register(
+            id: id,
+            title: title,
+            group: group,
+            detail: detail,
+            requiresConfirmation: requiresConfirmation,
+            isEnabled: isEnabled,
+            style: style,
+            parameters: parameters,
             handler: handler
         )
     }

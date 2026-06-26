@@ -8,6 +8,7 @@ struct ConsoleDockDebugAction: Equatable, Identifiable {
     let requiresConfirmation: Bool
     let isEnabled: Bool
     let style: ConsoleDock.DebugActionStyle
+    let parameters: [ConsoleDock.DebugActionParameter]
 
     init(
         id: String,
@@ -16,7 +17,8 @@ struct ConsoleDockDebugAction: Equatable, Identifiable {
         detail: String? = nil,
         requiresConfirmation: Bool = false,
         isEnabled: Bool = true,
-        style: ConsoleDock.DebugActionStyle = .normal
+        style: ConsoleDock.DebugActionStyle = .normal,
+        parameters: [ConsoleDock.DebugActionParameter] = []
     ) {
         self.id = id
         self.title = title
@@ -25,6 +27,7 @@ struct ConsoleDockDebugAction: Equatable, Identifiable {
         self.requiresConfirmation = requiresConfirmation
         self.isEnabled = isEnabled
         self.style = style
+        self.parameters = parameters
     }
 }
 
@@ -33,7 +36,7 @@ extension Notification.Name {
 }
 
 final class ConsoleDockDebugActionRegistry {
-    typealias Handler = () throws -> Void
+    typealias Handler = (ConsoleDock.DebugActionParameters) throws -> Void
 
     static let shared = ConsoleDockDebugActionRegistry()
 
@@ -58,6 +61,31 @@ final class ConsoleDockDebugActionRegistry {
         requiresConfirmation: Bool,
         isEnabled: Bool,
         style: ConsoleDock.DebugActionStyle,
+        handler: @escaping () throws -> Void
+    ) {
+        register(
+            id: id,
+            title: title,
+            group: group,
+            detail: detail,
+            requiresConfirmation: requiresConfirmation,
+            isEnabled: isEnabled,
+            style: style,
+            parameters: []
+        ) { _ in
+            try handler()
+        }
+    }
+
+    func register(
+        id: String,
+        title: String,
+        group: String?,
+        detail: String?,
+        requiresConfirmation: Bool,
+        isEnabled: Bool,
+        style: ConsoleDock.DebugActionStyle,
+        parameters: [ConsoleDock.DebugActionParameter],
         handler: @escaping Handler
     ) {
         guard let normalizedID = normalizedRequired(id),
@@ -66,6 +94,7 @@ final class ConsoleDockDebugActionRegistry {
             return
         }
 
+        let normalizedParameters = normalizedParameters(parameters)
         let action = ConsoleDockDebugAction(
             id: normalizedID,
             title: normalizedTitle,
@@ -73,7 +102,8 @@ final class ConsoleDockDebugActionRegistry {
             detail: normalizedOptional(detail),
             requiresConfirmation: requiresConfirmation,
             isEnabled: isEnabled,
-            style: style
+            style: style,
+            parameters: normalizedParameters
         )
         let record = Record(action: action, handler: handler)
 
@@ -120,7 +150,7 @@ final class ConsoleDockDebugActionRegistry {
         return snapshot
     }
 
-    func perform(id: String) {
+    func perform(id: String, parameterValues: [String: ConsoleDock.DebugActionParameterValue]? = nil) {
         guard let normalizedID = normalizedRequired(id),
             let record = record(for: normalizedID)
         else {
@@ -133,10 +163,19 @@ final class ConsoleDockDebugActionRegistry {
             return
         }
 
+        let resolution = resolvedParameters(for: record.action, suppliedValues: parameterValues)
+        if !resolution.missingRequiredParameterIDs.isEmpty {
+            let missingText = resolution.missingRequiredParameterIDs.joined(separator: ", ")
+            ConsoleDock.info(
+                "Debug action skipped: \(record.action.title) [\(record.action.id)] missing required parameters: \(missingText)"
+            )
+            return
+        }
+
         let run = {
             ConsoleDock.info("Debug action started: \(record.action.title) [\(record.action.id)]")
             do {
-                try record.handler()
+                try record.handler(resolution.parameters)
                 ConsoleDock.info("Debug action completed: \(record.action.title) [\(record.action.id)]")
             } catch {
                 ConsoleDock.error(
@@ -161,6 +200,121 @@ final class ConsoleDockDebugActionRegistry {
 
     private func postActionsChanged() {
         notificationCenter.post(name: .consoleDockDebugActionsDidChange, object: self)
+    }
+
+    private func normalizedParameters(
+        _ parameters: [ConsoleDock.DebugActionParameter]
+    ) -> [ConsoleDock.DebugActionParameter] {
+        var result: [ConsoleDock.DebugActionParameter] = []
+        var seenIDs = Set<String>()
+        for parameter in parameters {
+            guard let id = normalizedRequired(parameter.id),
+                let title = normalizedRequired(parameter.title),
+                !seenIDs.contains(id),
+                let kind = normalizedKind(parameter.kind),
+                let defaultValue = normalizedDefaultValue(parameter.defaultValue, kind: kind)
+            else {
+                continue
+            }
+
+            seenIDs.insert(id)
+            result.append(
+                ConsoleDock.DebugActionParameter(
+                    id: id,
+                    title: title,
+                    detail: normalizedOptional(parameter.detail),
+                    isRequired: parameter.isRequired,
+                    defaultValue: defaultValue,
+                    kind: kind
+                )
+            )
+        }
+        return result
+    }
+
+    private func normalizedKind(
+        _ kind: ConsoleDock.DebugActionParameter.Kind
+    ) -> ConsoleDock.DebugActionParameter.Kind? {
+        switch kind {
+        case .string, .number, .bool:
+            return kind
+        case let .choice(choices):
+            var normalizedChoices: [ConsoleDock.DebugActionChoice] = []
+            var seenIDs = Set<String>()
+            for choice in choices {
+                guard let id = normalizedRequired(choice.id),
+                    let title = normalizedRequired(choice.title),
+                    !seenIDs.contains(id)
+                else {
+                    continue
+                }
+                seenIDs.insert(id)
+                normalizedChoices.append(ConsoleDock.DebugActionChoice(id: id, title: title))
+            }
+            return normalizedChoices.isEmpty ? nil : .choice(normalizedChoices)
+        }
+    }
+
+    private func normalizedDefaultValue(
+        _ value: ConsoleDock.DebugActionParameterValue?,
+        kind: ConsoleDock.DebugActionParameter.Kind
+    ) -> ConsoleDock.DebugActionParameterValue?? {
+        guard let value else { return .some(nil) }
+        return normalizedValue(value, kind: kind).map(Optional.some) ?? nil
+    }
+
+    private func resolvedParameters(
+        for action: ConsoleDockDebugAction,
+        suppliedValues: [String: ConsoleDock.DebugActionParameterValue]?
+    ) -> (parameters: ConsoleDock.DebugActionParameters, missingRequiredParameterIDs: [String]) {
+        var values: [String: ConsoleDock.DebugActionParameterValue] = [:]
+        var missingRequiredIDs: [String] = []
+
+        for parameter in action.parameters {
+            let suppliedValue = suppliedValues?[parameter.id]
+            let rawValue = suppliedValue ?? parameter.defaultValue
+            guard let rawValue else {
+                if parameter.isRequired {
+                    missingRequiredIDs.append(parameter.id)
+                }
+                continue
+            }
+
+            guard let normalizedValue = normalizedValue(rawValue, kind: parameter.kind) else {
+                if parameter.isRequired {
+                    missingRequiredIDs.append(parameter.id)
+                }
+                continue
+            }
+            values[parameter.id] = normalizedValue
+        }
+
+        return (ConsoleDock.DebugActionParameters(values), missingRequiredIDs)
+    }
+
+    private func normalizedValue(
+        _ value: ConsoleDock.DebugActionParameterValue,
+        kind: ConsoleDock.DebugActionParameter.Kind
+    ) -> ConsoleDock.DebugActionParameterValue? {
+        switch (kind, value) {
+        case (.string, let .string(text)):
+            guard let normalized = normalizedRequired(text) else { return nil }
+            return .string(normalized)
+        case (.number, let .number(number)):
+            guard number.isFinite else { return nil }
+            return .number(number)
+        case (.bool, let .bool(flag)):
+            return .bool(flag)
+        case let (.choice(choices), .choice(choiceID)):
+            guard let normalizedID = normalizedRequired(choiceID),
+                choices.contains(where: { $0.id == normalizedID })
+            else {
+                return nil
+            }
+            return .choice(normalizedID)
+        default:
+            return nil
+        }
     }
 
     private func normalizedOptional(_ value: String?) -> String? {
@@ -193,7 +347,10 @@ extension ConsoleDock {
         ConsoleDockDebugActionRegistry.shared.actions()
     }
 
-    static func performDebugAction(id: String) {
-        ConsoleDockDebugActionRegistry.shared.perform(id: id)
+    static func performDebugAction(
+        id: String,
+        parameterValues: [String: ConsoleDock.DebugActionParameterValue]? = nil
+    ) {
+        ConsoleDockDebugActionRegistry.shared.perform(id: id, parameterValues: parameterValues)
     }
 }

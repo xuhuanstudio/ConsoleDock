@@ -19,6 +19,50 @@ public enum ConsoleDockDebugActionStyle: Int {
     }
 }
 
+/// Objective-C-visible app context item for local issue reports.
+@objc(CDKAppContextItem)
+public final class ConsoleDockAppContextItem: NSObject {
+    @objc public let key: String
+    @objc public let value: String
+
+    @objc(initWithKey:value:)
+    public init(key: String, value: String) {
+        self.key = key
+        self.value = value
+    }
+
+    @objc(itemWithKey:value:)
+    public static func item(key: String, value: String) -> ConsoleDockAppContextItem {
+        ConsoleDockAppContextItem(key: key, value: value)
+    }
+
+    var swiftItem: ConsoleDock.AppContextItem {
+        ConsoleDock.AppContextItem(key: key, value: value)
+    }
+}
+
+/// Objective-C-visible app context section for local issue reports.
+@objc(CDKAppContextSection)
+public final class ConsoleDockAppContextSection: NSObject {
+    @objc public let title: String
+    @objc public let items: [ConsoleDockAppContextItem]
+
+    @objc(initWithTitle:items:)
+    public init(title: String, items: [ConsoleDockAppContextItem]) {
+        self.title = title
+        self.items = items
+    }
+
+    @objc(sectionWithTitle:items:)
+    public static func section(title: String, items: [ConsoleDockAppContextItem]) -> ConsoleDockAppContextSection {
+        ConsoleDockAppContextSection(title: title, items: items)
+    }
+
+    var swiftSection: ConsoleDock.AppContextSection {
+        ConsoleDock.AppContextSection(title: title, items: items.map(\.swiftItem))
+    }
+}
+
 /// Objective-C-callable facade for using ConsoleDock with the bundled UIKit console.
 @objc(CDKConsoleDockUIKit)
 public final class ConsoleDockUIKit: NSObject {
@@ -76,6 +120,20 @@ public final class ConsoleDockUIKit: NSObject {
     @objc(issueReportText)
     public static func issueReportText() -> String {
         ConsoleDock.issueReportText()
+    }
+
+    /// Sets an app-owned local context provider for issue reports and the bundled context panel.
+    @objc(setAppContextProvider:)
+    public static func setAppContextProvider(_ provider: @escaping () -> [ConsoleDockAppContextSection]) {
+        ConsoleDock.setAppContextProvider {
+            provider().map(\.swiftSection)
+        }
+    }
+
+    /// Clears the app-owned local context provider.
+    @objc(clearAppContextProvider)
+    public static func clearAppContextProvider() {
+        ConsoleDock.clearAppContextProvider()
     }
 
     /// Registers a local debug action shown by the bundled UIKit console.

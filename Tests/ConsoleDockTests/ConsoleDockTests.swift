@@ -6,6 +6,7 @@ import XCTest
 final class ConsoleDockTests: XCTestCase {
     override func tearDown() {
         ConsoleDock.removeAllActions()
+        ConsoleDock.clearAppContextProvider()
         ConsoleDock.clear()
         ConsoleDock.stop()
         super.tearDown()
@@ -580,6 +581,9 @@ final class ConsoleDockTests: XCTestCase {
               Truncated: 0
               Partial: 0
 
+            App Context:
+              (no app context)
+
             Markers:
               [1970-01-01T00:00:02.500Z] [native] [INFO] [marker] Started checkout
 
@@ -952,6 +956,117 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertTrue(report.contains("ObjC facade report"))
     }
 
+    func testAppContextProviderNormalizesAndClearsSnapshot() {
+        ConsoleDock.setAppContextProvider {
+            [
+                ConsoleDock.AppContextSection(
+                    title: " App\nState ",
+                    items: [
+                        .init(key: " Environment ", value: " staging "),
+                        .init(key: "Environment", value: "duplicate"),
+                        .init(key: "\n", value: "missing key"),
+                        .init(key: "Flags", value: " new-checkout=on\r\nqa-mode=off ")
+                    ]
+                ),
+                ConsoleDock.AppContextSection(title: "Empty", items: [])
+            ]
+        }
+
+        XCTAssertEqual(
+            ConsoleDock.appContext,
+            [
+                ConsoleDock.AppContextSection(
+                    title: "App State",
+                    items: [
+                        .init(key: "Environment", value: "staging"),
+                        .init(key: "Flags", value: "new-checkout=on\nqa-mode=off")
+                    ]
+                )
+            ]
+        )
+
+        ConsoleDock.clearAppContextProvider()
+
+        XCTAssertTrue(ConsoleDock.appContext.isEmpty)
+    }
+
+    func testIssueReportIncludesAppContext() {
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+        ConsoleDock.setAppContextProvider {
+            [
+                ConsoleDock.AppContextSection(
+                    title: "App",
+                    items: [
+                        .init(key: "Environment", value: "staging"),
+                        .init(key: "User ID", value: "user-123")
+                    ]
+                )
+            ]
+        }
+
+        let report = ConsoleDock.issueReportText()
+
+        XCTAssertTrue(report.contains("App Context:"))
+        XCTAssertTrue(report.contains("  App:"))
+        XCTAssertTrue(report.contains("    Environment: staging"))
+        XCTAssertTrue(report.contains("    User ID: user-123"))
+    }
+
+    func testIssueReportIncludesEmptyAppContextState() {
+        let metadata = ConsoleDock.SessionMetadata(
+            sessionIdentifier: "session-empty",
+            startedAt: nil,
+            generatedAt: Date(timeIntervalSince1970: 0),
+            bundleIdentifier: nil,
+            appVersion: nil,
+            appBuild: nil,
+            processName: "Sample",
+            operatingSystemVersion: "Version 18.0",
+            deviceModel: "unknown",
+            localeIdentifier: "en_US",
+            timeZoneIdentifier: "UTC"
+        )
+        let diagnostics = ConsoleDock.Diagnostics(
+            isRunning: false,
+            capturesStandardOutput: false,
+            capturesStandardError: false,
+            showsFloatingButton: false,
+            allowsReleaseBuilds: false,
+            maximumEntries: 100,
+            maximumMessageLength: 4_096,
+            entryCount: 0,
+            redactedEntryCount: 0,
+            truncatedEntryCount: 0,
+            partialEntryCount: 0
+        )
+        let report = ConsoleDockIssueReportFormatter.reportText(
+            entries: [],
+            metadata: metadata,
+            diagnostics: diagnostics
+        )
+
+        XCTAssertTrue(report.contains("App Context:\n  (no app context)"))
+    }
+
+    func testObjectiveCUIKitFacadeAppContextProviderFeedsIssueReport() {
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+        ConsoleDockUIKit.setAppContextProvider {
+            [
+                ConsoleDockAppContextSection.section(
+                    title: "ObjC",
+                    items: [
+                        ConsoleDockAppContextItem.item(key: "Environment", value: "qa")
+                    ]
+                )
+            ]
+        }
+
+        let report = ConsoleDockUIKit.issueReportText()
+
+        XCTAssertTrue(report.contains("  ObjC:"))
+        XCTAssertTrue(report.contains("    Environment: qa"))
+    }
+
     func testDebugActionRegistrationStoresMetadata() {
         ConsoleDock.registerAction(
             id: "open.checkout",
@@ -972,6 +1087,145 @@ final class ConsoleDockTests: XCTestCase {
                     requiresConfirmation: true
                 )
             ]
+        )
+    }
+
+    func testParameterizedDebugActionRegistrationStoresNormalizedParameters() {
+        ConsoleDock.registerAction(
+            id: "open.order",
+            title: "Open Order",
+            parameters: [
+                .string(id: " orderId\n", title: " Order\nID ", detail: " Required\nidentifier ", isRequired: true),
+                .string(id: "orderId", title: "Duplicate"),
+                .choice(
+                    id: " environment ",
+                    title: " Environment ",
+                    choices: [
+                        .init(id: " staging ", title: " Staging "),
+                        .init(id: "staging", title: "Duplicate"),
+                        .init(id: "\n", title: "Missing ID"),
+                        .init(id: "qa", title: "QA")
+                    ],
+                    defaultChoiceID: " qa "
+                ),
+                .choice(id: "empty.choice", title: "Empty Choice", choices: [])
+            ]
+        ) { _ in }
+
+        let parameters = ConsoleDock.debugActions.first?.parameters
+
+        XCTAssertEqual(parameters?.map(\.id), ["orderId", "environment"])
+        XCTAssertEqual(parameters?.map(\.title), ["Order ID", "Environment"])
+        XCTAssertEqual(parameters?.first?.detail, "Required\nidentifier")
+        XCTAssertEqual(parameters?.first?.isRequired, true)
+        XCTAssertEqual(parameters?.last?.defaultValue, .choice("qa"))
+        XCTAssertEqual(
+            parameters?.last?.kind,
+            .choice([
+                .init(id: "staging", title: "Staging"),
+                .init(id: "qa", title: "QA")
+            ])
+        )
+    }
+
+    func testParameterizedDebugActionReceivesNormalizedValues() {
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+        let expectation = expectation(description: "Parameterized action executed")
+
+        ConsoleDock.registerAction(
+            id: "open.order",
+            title: "Open Order",
+            parameters: [
+                .string(id: "orderId", title: "Order ID", isRequired: true),
+                .number(id: "count", title: "Count", defaultValue: 2),
+                .bool(id: "animated", title: "Animated", defaultValue: true),
+                .choice(
+                    id: "environment",
+                    title: "Environment",
+                    choices: [
+                        .init(id: "staging", title: "Staging"),
+                        .init(id: "qa", title: "QA")
+                    ],
+                    defaultChoiceID: "staging"
+                )
+            ]
+        ) { parameters in
+            XCTAssertEqual(parameters.string("orderId"), "A123")
+            XCTAssertEqual(parameters.number("count"), 4)
+            XCTAssertEqual(parameters.bool("animated"), true)
+            XCTAssertEqual(parameters.choice("environment"), "qa")
+            expectation.fulfill()
+        }
+
+        ConsoleDock.performDebugAction(
+            id: "open.order",
+            parameterValues: [
+                "orderId": .string(" A123\n"),
+                "count": .number(4),
+                "environment": .choice(" qa ")
+            ]
+        )
+
+        wait(for: [expectation], timeout: 1.0)
+        XCTAssertTrue(ConsoleDock.entries.map(\.message).contains("Debug action completed: Open Order [open.order]"))
+    }
+
+    func testParameterizedDebugActionUsesDefaultsForProgrammaticExecution() {
+        var received: ConsoleDock.DebugActionParameters?
+        ConsoleDock.registerAction(
+            id: "defaults",
+            title: "Defaults",
+            parameters: [
+                .number(id: "count", title: "Count", defaultValue: 3),
+                .bool(id: "animated", title: "Animated", defaultValue: false),
+                .choice(
+                    id: "environment",
+                    title: "Environment",
+                    choices: [
+                        .init(id: "staging", title: "Staging")
+                    ],
+                    defaultChoiceID: "staging"
+                )
+            ]
+        ) { parameters in
+            received = parameters
+        }
+
+        ConsoleDock.performDebugAction(id: "defaults")
+
+        XCTAssertEqual(received?.number("count"), 3)
+        XCTAssertEqual(received?.bool("animated"), false)
+        XCTAssertEqual(received?.choice("environment"), "staging")
+    }
+
+    func testParameterizedDebugActionSkipsMissingRequiredParameters() {
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+        var didRun = false
+        ConsoleDock.registerAction(
+            id: "required",
+            title: "Required",
+            parameters: [
+                .string(id: "orderId", title: "Order ID", isRequired: true),
+                .choice(
+                    id: "environment",
+                    title: "Environment",
+                    choices: [.init(id: "staging", title: "Staging")],
+                    isRequired: true
+                )
+            ]
+        ) { _ in
+            didRun = true
+        }
+
+        ConsoleDock.performDebugAction(
+            id: "required",
+            parameterValues: ["environment": .choice("production")]
+        )
+
+        XCTAssertFalse(didRun)
+        XCTAssertEqual(
+            ConsoleDock.entries.map(\.message),
+            ["Debug action skipped: Required [required] missing required parameters: orderId, environment"]
         )
     }
 
