@@ -48,6 +48,9 @@ final class ConsoleDockDebugActionRegistry {
     private let lock = NSLock()
     private let notificationCenter: NotificationCenter
     private var records: [Record] = []
+    private var executions: [ConsoleDock.DebugActionExecution] = []
+    private var recentParameterValues: [String: [String: ConsoleDock.DebugActionParameterValue]] = [:]
+    private var nextExecutionID: UInt64 = 1
 
     init(notificationCenter: NotificationCenter = .default) {
         self.notificationCenter = notificationCenter
@@ -134,8 +137,11 @@ final class ConsoleDockDebugActionRegistry {
 
     func removeAll() {
         lock.lock()
-        let changed = !records.isEmpty
+        let changed = !records.isEmpty || !executions.isEmpty || !recentParameterValues.isEmpty
         records.removeAll()
+        executions.removeAll()
+        recentParameterValues.removeAll()
+        nextExecutionID = 1
         lock.unlock()
 
         if changed {
@@ -150,6 +156,42 @@ final class ConsoleDockDebugActionRegistry {
         return snapshot
     }
 
+    func executionHistory() -> [ConsoleDock.DebugActionExecution] {
+        lock.lock()
+        let snapshot = executions
+        lock.unlock()
+        return snapshot
+    }
+
+    func resetSessionState() {
+        lock.lock()
+        executions.removeAll()
+        recentParameterValues.removeAll()
+        nextExecutionID = 1
+        lock.unlock()
+    }
+
+    func recentParameters(actionID: String) -> [String: ConsoleDock.DebugActionParameterValue] {
+        guard let normalizedID = normalizedRequired(actionID) else { return [:] }
+
+        lock.lock()
+        let values = recentParameterValues[normalizedID] ?? [:]
+        lock.unlock()
+        return values
+    }
+
+    func storeRecentParameters(actionID: String, values: [String: ConsoleDock.DebugActionParameterValue]) {
+        guard let normalizedID = normalizedRequired(actionID) else { return }
+
+        lock.lock()
+        if values.isEmpty {
+            recentParameterValues.removeValue(forKey: normalizedID)
+        } else {
+            recentParameterValues[normalizedID] = values
+        }
+        lock.unlock()
+    }
+
     func perform(id: String, parameterValues: [String: ConsoleDock.DebugActionParameterValue]? = nil) {
         guard let normalizedID = normalizedRequired(id),
             let record = record(for: normalizedID)
@@ -160,26 +202,63 @@ final class ConsoleDockDebugActionRegistry {
 
         guard record.action.isEnabled else {
             ConsoleDock.info("Debug action skipped: \(record.action.title) [\(record.action.id)] disabled")
+            let now = Date()
+            appendExecution(
+                action: record.action,
+                startedAt: now,
+                completedAt: now,
+                outcome: .skipped,
+                parameterSummary: nil,
+                message: "disabled"
+            )
             return
         }
 
         let resolution = resolvedParameters(for: record.action, suppliedValues: parameterValues)
+        let parameterSummary = parameterSummary(for: record.action, parameters: resolution.parameters)
         if !resolution.missingRequiredParameterIDs.isEmpty {
             let missingText = resolution.missingRequiredParameterIDs.joined(separator: ", ")
             ConsoleDock.info(
                 "Debug action skipped: \(record.action.title) [\(record.action.id)] missing required parameters: \(missingText)"
             )
+            let now = Date()
+            appendExecution(
+                action: record.action,
+                startedAt: now,
+                completedAt: now,
+                outcome: .skipped,
+                parameterSummary: parameterSummary,
+                message: "missing required parameters: \(missingText)"
+            )
             return
         }
 
         let run = {
+            let startedAt = Date()
             ConsoleDock.info("Debug action started: \(record.action.title) [\(record.action.id)]")
             do {
                 try record.handler(resolution.parameters)
                 ConsoleDock.info("Debug action completed: \(record.action.title) [\(record.action.id)]")
+                self.appendExecution(
+                    action: record.action,
+                    startedAt: startedAt,
+                    completedAt: Date(),
+                    outcome: .completed,
+                    parameterSummary: parameterSummary,
+                    message: nil
+                )
             } catch {
+                let message = "error=\(error)"
                 ConsoleDock.error(
-                    "Debug action failed: \(record.action.title) [\(record.action.id)] error=\(error)"
+                    "Debug action failed: \(record.action.title) [\(record.action.id)] \(message)"
+                )
+                self.appendExecution(
+                    action: record.action,
+                    startedAt: startedAt,
+                    completedAt: Date(),
+                    outcome: .failed,
+                    parameterSummary: parameterSummary,
+                    message: message
                 )
             }
         }
@@ -196,6 +275,31 @@ final class ConsoleDockDebugActionRegistry {
         let record = records.first { $0.action.id == id }
         lock.unlock()
         return record
+    }
+
+    private func appendExecution(
+        action: ConsoleDockDebugAction,
+        startedAt: Date,
+        completedAt: Date,
+        outcome: ConsoleDock.DebugActionExecutionOutcome,
+        parameterSummary: String?,
+        message: String?
+    ) {
+        lock.lock()
+        let execution = ConsoleDock.DebugActionExecution(
+            id: nextExecutionID,
+            actionID: action.id,
+            title: action.title,
+            group: action.group,
+            startedAt: startedAt,
+            completedAt: completedAt,
+            outcome: outcome,
+            parameterSummary: parameterSummary,
+            message: message.map(singleLine)
+        )
+        nextExecutionID += 1
+        executions.append(execution)
+        lock.unlock()
     }
 
     private func postActionsChanged() {
@@ -292,6 +396,42 @@ final class ConsoleDockDebugActionRegistry {
         return (ConsoleDock.DebugActionParameters(values), missingRequiredIDs)
     }
 
+    private func parameterSummary(
+        for action: ConsoleDockDebugAction,
+        parameters: ConsoleDock.DebugActionParameters
+    ) -> String? {
+        var parts: [String] = []
+        let values = parameters.allValues
+        for parameter in action.parameters {
+            guard let value = values[parameter.id] else { continue }
+            parts.append("\(parameter.id)=\(parameterValueText(value))")
+        }
+        guard !parts.isEmpty else { return nil }
+        return truncated(singleLine(parts.joined(separator: ", ")), maximumLength: 240)
+    }
+
+    private func parameterValueText(_ value: ConsoleDock.DebugActionParameterValue) -> String {
+        switch value {
+        case .string(let text):
+            return "\"\(truncated(singleLine(text), maximumLength: 48))\""
+        case .number(let number):
+            if number.rounded() == number, number >= Double(Int64.min), number <= Double(Int64.max) {
+                return String(Int64(number))
+            }
+            return truncated(String(number), maximumLength: 32)
+        case .bool(let flag):
+            return flag ? "true" : "false"
+        case .choice(let choiceID):
+            return truncated(singleLine(choiceID), maximumLength: 48)
+        }
+    }
+
+    private func truncated(_ value: String, maximumLength: Int) -> String {
+        guard value.count > maximumLength else { return value }
+        let endIndex = value.index(value.startIndex, offsetBy: maximumLength)
+        return String(value[..<endIndex]) + "..."
+    }
+
     private func normalizedValue(
         _ value: ConsoleDock.DebugActionParameterValue,
         kind: ConsoleDock.DebugActionParameter.Kind
@@ -352,5 +492,18 @@ extension ConsoleDock {
         parameterValues: [String: ConsoleDock.DebugActionParameterValue]? = nil
     ) {
         ConsoleDockDebugActionRegistry.shared.perform(id: id, parameterValues: parameterValues)
+    }
+
+    static func recentDebugActionParameterValues(
+        actionID: String
+    ) -> [String: ConsoleDock.DebugActionParameterValue] {
+        ConsoleDockDebugActionRegistry.shared.recentParameters(actionID: actionID)
+    }
+
+    static func storeRecentDebugActionParameterValues(
+        actionID: String,
+        parameterValues: [String: ConsoleDock.DebugActionParameterValue]
+    ) {
+        ConsoleDockDebugActionRegistry.shared.storeRecentParameters(actionID: actionID, values: parameterValues)
     }
 }

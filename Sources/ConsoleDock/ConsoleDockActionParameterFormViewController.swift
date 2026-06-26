@@ -8,6 +8,7 @@
         }
 
         private let action: ConsoleDockDebugAction
+        private let recentParameterValues: [String: ConsoleDock.DebugActionParameterValue]
         private let onRun: ([String: ConsoleDock.DebugActionParameterValue]) -> Void
         private let scrollView = UIScrollView()
         private let stackView = UIStackView()
@@ -25,9 +26,11 @@
 
         init(
             action: ConsoleDockDebugAction,
+            recentParameterValues: [String: ConsoleDock.DebugActionParameterValue] = [:],
             onRun: @escaping ([String: ConsoleDock.DebugActionParameterValue]) -> Void
         ) {
             self.action = action
+            self.recentParameterValues = recentParameterValues
             self.onRun = onRun
             super.init(nibName: nil, bundle: nil)
         }
@@ -148,14 +151,14 @@
                     for: parameter,
                     baseIdentifier: ConsoleDockAccessibilityIdentifiers.actionParameterStringInput,
                     keyboardType: .default,
-                    text: defaultString(for: parameter)
+                    text: initialString(for: parameter)
                 )
             case .number:
                 return makeTextField(
                     for: parameter,
                     baseIdentifier: ConsoleDockAccessibilityIdentifiers.actionParameterNumberInput,
                     keyboardType: .decimalPad,
-                    text: defaultNumberText(for: parameter)
+                    text: initialNumberText(for: parameter)
                 )
             case .bool:
                 return makeBoolSwitch(for: parameter)
@@ -199,7 +202,7 @@
 
         private func makeBoolSwitch(for parameter: ConsoleDock.DebugActionParameter) -> UISwitch {
             let toggle = UISwitch()
-            toggle.isOn = defaultBool(for: parameter)
+            toggle.isOn = initialBool(for: parameter)
             toggle.accessibilityLabel = parameter.title
             toggle.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.identifier(
                 ConsoleDockAccessibilityIdentifiers.actionParameterBoolInput,
@@ -223,8 +226,8 @@
             control.setTitleTextAttributes([.foregroundColor: UIColor.white], for: .selected)
             control.setTitleTextAttributes([.foregroundColor: UIColor(white: 0.82, alpha: 1)], for: .normal)
 
-            if case .choice(let defaultID)? = parameter.defaultValue,
-                let index = choices.firstIndex(where: { $0.id == defaultID })
+            if let choiceID = initialChoiceID(for: parameter),
+                let index = choices.firstIndex(where: { $0.id == choiceID })
             {
                 control.selectedSegmentIndex = index
             } else {
@@ -235,25 +238,44 @@
             return control
         }
 
-        private func defaultString(for parameter: ConsoleDock.DebugActionParameter) -> String? {
+        private func initialString(for parameter: ConsoleDock.DebugActionParameter) -> String? {
+            if case .string(let value)? = recentParameterValues[parameter.id] {
+                return value
+            }
             if case .string(let value)? = parameter.defaultValue {
                 return value
             }
             return nil
         }
 
-        private func defaultNumberText(for parameter: ConsoleDock.DebugActionParameter) -> String? {
+        private func initialNumberText(for parameter: ConsoleDock.DebugActionParameter) -> String? {
+            if case .number(let value)? = recentParameterValues[parameter.id] {
+                return String(value)
+            }
             if case .number(let value)? = parameter.defaultValue {
                 return String(value)
             }
             return nil
         }
 
-        private func defaultBool(for parameter: ConsoleDock.DebugActionParameter) -> Bool {
+        private func initialBool(for parameter: ConsoleDock.DebugActionParameter) -> Bool {
+            if case .bool(let value)? = recentParameterValues[parameter.id] {
+                return value
+            }
             if case .bool(let value)? = parameter.defaultValue {
                 return value
             }
             return false
+        }
+
+        private func initialChoiceID(for parameter: ConsoleDock.DebugActionParameter) -> String? {
+            if case .choice(let value)? = recentParameterValues[parameter.id] {
+                return value
+            }
+            if case .choice(let value)? = parameter.defaultValue {
+                return value
+            }
+            return nil
         }
 
         @objc private func cancel() {

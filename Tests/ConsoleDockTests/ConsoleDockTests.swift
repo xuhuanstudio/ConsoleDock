@@ -584,6 +584,10 @@ final class ConsoleDockTests: XCTestCase {
             App Context:
               (no app context)
 
+            Reproduction Timeline:
+              [1970-01-01T00:00:02.500Z] [marker] Started checkout
+              [1970-01-01T00:00:03.750Z] [log] [ERROR] payment token=<redacted>
+
             Markers:
               [1970-01-01T00:00:02.500Z] [native] [INFO] [marker] Started checkout
 
@@ -630,8 +634,96 @@ final class ConsoleDockTests: XCTestCase {
 
         XCTAssertTrue(report.contains("Started: unavailable"))
         XCTAssertTrue(report.contains("Bundle ID: unavailable"))
+        XCTAssertTrue(report.contains("Reproduction Timeline:\n  (no timeline events)"))
         XCTAssertTrue(report.contains("Markers:\n  (no markers)"))
         XCTAssertTrue(report.contains("Logs:\n  (no entries)"))
+    }
+
+    func testIssueReportFormatterIncludesTimelineWithActionsMarkersAndErrorsInTimestampOrder() {
+        let metadata = ConsoleDock.SessionMetadata(
+            sessionIdentifier: "session-timeline",
+            startedAt: Date(timeIntervalSince1970: 1),
+            generatedAt: Date(timeIntervalSince1970: 0),
+            bundleIdentifier: nil,
+            appVersion: nil,
+            appBuild: nil,
+            processName: "Sample",
+            operatingSystemVersion: "Version 18.0",
+            deviceModel: "iPhone",
+            localeIdentifier: "en_US",
+            timeZoneIdentifier: "UTC"
+        )
+        let diagnostics = ConsoleDock.Diagnostics(
+            isRunning: true,
+            capturesStandardOutput: false,
+            capturesStandardError: false,
+            showsFloatingButton: false,
+            allowsReleaseBuilds: false,
+            maximumEntries: 100,
+            maximumMessageLength: 4_096,
+            entryCount: 2,
+            redactedEntryCount: 0,
+            truncatedEntryCount: 0,
+            partialEntryCount: 0
+        )
+        let entries = [
+            ConsoleDock.LogEntry(
+                timestamp: Date(timeIntervalSince1970: 4),
+                level: .error,
+                source: .native,
+                message: "Checkout failed"
+            ),
+            ConsoleDock.LogEntry(
+                timestamp: Date(timeIntervalSince1970: 2),
+                level: .info,
+                source: .native,
+                message: "[marker] Open checkout"
+            )
+        ]
+        let executions = [
+            ConsoleDock.DebugActionExecution(
+                id: 1,
+                actionID: "open.order",
+                title: "Open Order",
+                group: "Navigation",
+                startedAt: Date(timeIntervalSince1970: 3),
+                completedAt: Date(timeIntervalSince1970: 3.5),
+                outcome: .completed,
+                parameterSummary: "orderId=\"A-100\""
+            )
+        ]
+
+        let report = ConsoleDockIssueReportFormatter.reportText(
+            entries: entries,
+            metadata: metadata,
+            diagnostics: diagnostics,
+            actionExecutions: executions
+        )
+
+        XCTAssertTrue(
+            report.contains(
+                """
+                Reproduction Timeline:
+                  [1970-01-01T00:00:02.000Z] [marker] Open checkout
+                  [1970-01-01T00:00:03.000Z] [action] [completed] Open Order [open.order] group=Navigation params: orderId="A-100"
+                  [1970-01-01T00:00:04.000Z] [log] [ERROR] Checkout failed
+                """
+            )
+        )
+    }
+
+    func testIssueReportFileExporterWritesTemporaryTextFile() throws {
+        let reportText = "ConsoleDock Issue Report\nGenerated: fixture"
+
+        let fileURL = try ConsoleDockIssueReportFileExporter.makeTemporaryReportFile(
+            reportText: reportText,
+            generatedAt: Date(timeIntervalSince1970: 0)
+        )
+        defer { try? FileManager.default.removeItem(at: fileURL) }
+
+        XCTAssertEqual(fileURL.pathExtension, "txt")
+        XCTAssertTrue(fileURL.lastPathComponent.hasPrefix("ConsoleDock-Issue-Report-19700101-000000-000-"))
+        XCTAssertEqual(try String(contentsOf: fileURL), reportText)
     }
 
     func testDiagnosticsStatusTextIsCompactAndSafe() {
@@ -1168,6 +1260,93 @@ final class ConsoleDockTests: XCTestCase {
 
         wait(for: [expectation], timeout: 1.0)
         XCTAssertTrue(ConsoleDock.entries.map(\.message).contains("Debug action completed: Open Order [open.order]"))
+    }
+
+    func testParameterizedDebugActionRecordsExecutionHistoryWithParameterSummary() {
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+        ConsoleDock.registerAction(
+            id: "open.order",
+            title: "Open Order",
+            group: "Navigation",
+            parameters: [
+                .string(id: "orderId", title: "Order ID", isRequired: true),
+                .number(id: "count", title: "Count", defaultValue: 2),
+                .bool(id: "animated", title: "Animated", defaultValue: true),
+                .choice(
+                    id: "environment",
+                    title: "Environment",
+                    choices: [.init(id: "qa", title: "QA")],
+                    defaultChoiceID: "qa"
+                )
+            ]
+        ) { _ in }
+
+        ConsoleDock.performDebugAction(
+            id: "open.order",
+            parameterValues: [
+                "orderId": .string(" A123\n"),
+                "count": .number(4)
+            ]
+        )
+
+        let execution = ConsoleDock.actionExecutionHistory.first
+        XCTAssertEqual(ConsoleDock.actionExecutionHistory.count, 1)
+        XCTAssertEqual(execution?.id, 1)
+        XCTAssertEqual(execution?.actionID, "open.order")
+        XCTAssertEqual(execution?.title, "Open Order")
+        XCTAssertEqual(execution?.group, "Navigation")
+        XCTAssertEqual(execution?.outcome, .completed)
+        XCTAssertEqual(execution?.parameterSummary, "orderId=\"A123\", count=4, animated=true, environment=qa")
+        XCTAssertNil(execution?.message)
+    }
+
+    func testDebugActionRecordsFailedAndSkippedExecutions() {
+        struct FixtureError: Error {}
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+        ConsoleDock.registerAction(id: "throwing", title: "Throwing") {
+            throw FixtureError()
+        }
+        ConsoleDock.registerAction(id: "disabled", title: "Disabled", isEnabled: false) {}
+        ConsoleDock.registerAction(
+            id: "required",
+            title: "Required",
+            parameters: [.string(id: "orderId", title: "Order ID", isRequired: true)]
+        ) { _ in }
+
+        ConsoleDock.performDebugAction(id: "throwing")
+        ConsoleDock.performDebugAction(id: "disabled")
+        ConsoleDock.performDebugAction(id: "required")
+
+        XCTAssertEqual(ConsoleDock.actionExecutionHistory.map(\.actionID), ["throwing", "disabled", "required"])
+        XCTAssertEqual(ConsoleDock.actionExecutionHistory.map(\.outcome), [.failed, .skipped, .skipped])
+        XCTAssertTrue(ConsoleDock.actionExecutionHistory[0].message?.contains("error=") == true)
+        XCTAssertEqual(ConsoleDock.actionExecutionHistory[1].message, "disabled")
+        XCTAssertEqual(ConsoleDock.actionExecutionHistory[2].message, "missing required parameters: orderId")
+    }
+
+    func testActionExecutionHistoryAndRecentParametersAreSessionLocalAndClearable() {
+        ConsoleDock.registerAction(
+            id: "open.order",
+            title: "Open Order",
+            parameters: [.string(id: "orderId", title: "Order ID", isRequired: true)]
+        ) { _ in }
+
+        ConsoleDock.storeRecentDebugActionParameterValues(
+            actionID: "open.order",
+            parameterValues: ["orderId": .string("A-100")]
+        )
+        ConsoleDock.performDebugAction(
+            id: "open.order",
+            parameterValues: ["orderId": .string("A-100")]
+        )
+
+        XCTAssertEqual(ConsoleDock.actionExecutionHistory.count, 1)
+        XCTAssertEqual(ConsoleDock.recentDebugActionParameterValues(actionID: "open.order")["orderId"], .string("A-100"))
+
+        ConsoleDock.clearActionExecutionHistory()
+
+        XCTAssertTrue(ConsoleDock.actionExecutionHistory.isEmpty)
+        XCTAssertTrue(ConsoleDock.recentDebugActionParameterValues(actionID: "open.order").isEmpty)
     }
 
     func testObjectiveCUIKitFacadeParameterizedActionReceivesObjectiveCValues() {

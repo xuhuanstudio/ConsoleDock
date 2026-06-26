@@ -88,6 +88,48 @@ public enum ConsoleDock {
         case destructive
     }
 
+    /// Final state recorded for a local Debug Action execution.
+    public enum DebugActionExecutionOutcome: Equatable {
+        case completed
+        case failed
+        case skipped
+    }
+
+    /// One local Debug Action execution recorded in the current process session.
+    public struct DebugActionExecution: Equatable, Identifiable {
+        public let id: UInt64
+        public let actionID: String
+        public let title: String
+        public let group: String?
+        public let startedAt: Date
+        public let completedAt: Date
+        public let outcome: DebugActionExecutionOutcome
+        public let parameterSummary: String?
+        public let message: String?
+
+        public init(
+            id: UInt64,
+            actionID: String,
+            title: String,
+            group: String?,
+            startedAt: Date,
+            completedAt: Date,
+            outcome: DebugActionExecutionOutcome,
+            parameterSummary: String? = nil,
+            message: String? = nil
+        ) {
+            self.id = id
+            self.actionID = actionID
+            self.title = title
+            self.group = group
+            self.startedAt = startedAt
+            self.completedAt = completedAt
+            self.outcome = outcome
+            self.parameterSummary = parameterSummary
+            self.message = message
+        }
+    }
+
     /// A single choice option for a local parameterized debug action.
     public struct DebugActionChoice: Equatable {
         public let id: String
@@ -515,6 +557,9 @@ public enum ConsoleDock {
         var error: NSError?
         let result = CDKConsoleDock.start(with: configuration.makeCoreConfiguration(), error: &error)
         let startResult = StartResult(coreResult: result, error: error)
+        if startResult == .started {
+            ConsoleDockDebugActionRegistry.shared.resetSessionState()
+        }
         if shouldConfigureUI(startResult: startResult) {
             configureUIIfAvailable(configuration: configuration)
         }
@@ -552,6 +597,11 @@ public enum ConsoleDock {
         ConsoleDockAppContextRegistry.shared.snapshot()
     }
 
+    /// Local Debug Action executions recorded in the current process session.
+    public static var actionExecutionHistory: [DebugActionExecution] {
+        ConsoleDockDebugActionRegistry.shared.executionHistory()
+    }
+
     /// Notification posted after entries are appended, reset, or cleared.
     public static let entriesDidChangeNotification = Notification.Name.CDKConsoleDockEntriesDidChange
     /// Notification posted after diagnostics values may have changed.
@@ -568,7 +618,8 @@ public enum ConsoleDock {
             entries: entries,
             metadata: sessionMetadata,
             diagnostics: diagnostics,
-            appContext: appContext
+            appContext: appContext,
+            actionExecutions: actionExecutionHistory
         )
     }
 
@@ -660,6 +711,11 @@ public enum ConsoleDock {
     /// Removes all registered local debug actions.
     public static func removeAllActions() {
         ConsoleDockDebugActionRegistry.shared.removeAll()
+    }
+
+    /// Clears the local Debug Action execution history and session-only parameter values.
+    public static func clearActionExecutionHistory() {
+        ConsoleDockDebugActionRegistry.shared.resetSessionState()
     }
 
     /// Appends a native debug entry.

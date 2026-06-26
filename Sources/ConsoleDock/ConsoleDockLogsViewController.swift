@@ -315,7 +315,23 @@
 
         private func shareIssueReport() {
             let report = ConsoleDock.issueReportText()
-            let activityController = UIActivityViewController(activityItems: [report], applicationActivities: nil)
+            let activityItems: [Any]
+            let temporaryFileURL: URL?
+            do {
+                let fileURL = try ConsoleDockIssueReportFileExporter.makeTemporaryReportFile(reportText: report)
+                activityItems = [fileURL]
+                temporaryFileURL = fileURL
+            } catch {
+                ConsoleDock.error("Issue report file export failed: \(error)")
+                activityItems = [report]
+                temporaryFileURL = nil
+            }
+
+            let activityController = UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
+            activityController.completionWithItemsHandler = { _, _, _, _ in
+                guard let temporaryFileURL else { return }
+                try? FileManager.default.removeItem(at: temporaryFileURL)
+            }
             activityController.popoverPresentationController?.barButtonItem = shareButton
             present(activityController, animated: true)
         }

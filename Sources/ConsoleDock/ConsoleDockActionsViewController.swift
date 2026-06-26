@@ -249,7 +249,11 @@
                 return
             }
 
-            let formController = ConsoleDockActionParameterFormViewController(action: action) { parameterValues in
+            let formController = ConsoleDockActionParameterFormViewController(
+                action: action,
+                recentParameterValues: ConsoleDock.recentDebugActionParameterValues(actionID: action.id)
+            ) { parameterValues in
+                ConsoleDock.storeRecentDebugActionParameterValues(actionID: action.id, parameterValues: parameterValues)
                 ConsoleDock.performDebugAction(id: action.id, parameterValues: parameterValues)
             }
             navigationController?.pushViewController(formController, animated: true)
