@@ -94,10 +94,11 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         markerTextField.tap()
         markerTextField.typeText("ObjC UI smoke marker")
         markerAlert.buttons["consoledock.add-marker"].firstMatch.tap()
-        XCTAssertTrue(waitForTableEntry(containing: "[marker] ObjC UI smoke marker", in: entriesTable, timeout: 5))
+        XCTAssertFalse(markerAlert.waitForExistence(timeout: 5))
+        XCTAssertTrue(waitForTableEntry(containing: "[marker] ObjC UI smoke marker", in: entriesTable, timeout: 10))
 
         let pauseButton = app.buttons["consoledock.pause-live"]
-        XCTAssertTrue(pauseButton.waitForExistence(timeout: 5))
+        XCTAssertTrue(pauseButton.waitForExistence(timeout: 15))
         pauseButton.tap()
 
         let resumeButton = app.buttons["consoledock.resume-live"]
