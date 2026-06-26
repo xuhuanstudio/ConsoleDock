@@ -1170,6 +1170,120 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertTrue(ConsoleDock.entries.map(\.message).contains("Debug action completed: Open Order [open.order]"))
     }
 
+    func testObjectiveCUIKitFacadeParameterizedActionReceivesObjectiveCValues() {
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+        let expectation = expectation(description: "Objective-C parameterized action executed")
+
+        let environmentChoices = [
+            ConsoleDockDebugActionChoice.choice(identifier: "staging", title: "Staging"),
+            ConsoleDockDebugActionChoice.choice(identifier: "qa", title: "QA")
+        ]
+        let parameters = [
+            ConsoleDockDebugActionParameter.stringParameter(
+                identifier: "orderId",
+                title: "Order ID",
+                detail: nil,
+                isRequired: true,
+                defaultValue: nil
+            ),
+            ConsoleDockDebugActionParameter.numberParameter(
+                identifier: "count",
+                title: "Count",
+                detail: nil,
+                isRequired: false,
+                defaultValue: NSNumber(value: 2)
+            ),
+            ConsoleDockDebugActionParameter.boolParameter(
+                identifier: "animated",
+                title: "Animated",
+                detail: nil,
+                isRequired: false,
+                defaultValue: NSNumber(value: true)
+            ),
+            ConsoleDockDebugActionParameter.choiceParameter(
+                identifier: "environment",
+                title: "Environment",
+                detail: nil,
+                isRequired: false,
+                choices: environmentChoices,
+                defaultChoiceIdentifier: "staging"
+            )
+        ]
+
+        ConsoleDockUIKit.registerAction(
+            identifier: "objc.open.order",
+            title: "ObjC Open Order",
+            group: "Navigation",
+            detail: "Open an order from an Objective-C app",
+            requiresConfirmation: false,
+            parameters: parameters
+        ) { values in
+            XCTAssertEqual(values["orderId"] as? String, "A123")
+            XCTAssertEqual((values["count"] as? NSNumber)?.doubleValue, 4)
+            XCTAssertEqual((values["animated"] as? NSNumber)?.boolValue, true)
+            XCTAssertEqual(values["environment"] as? String, "qa")
+            expectation.fulfill()
+        }
+
+        ConsoleDock.performDebugAction(
+            id: "objc.open.order",
+            parameterValues: [
+                "orderId": .string(" A123 "),
+                "count": .number(4),
+                "environment": .choice("qa")
+            ]
+        )
+
+        wait(for: [expectation], timeout: 1.0)
+        XCTAssertTrue(ConsoleDock.entries.map(\.message).contains("Debug action completed: ObjC Open Order [objc.open.order]"))
+    }
+
+    func testObjectiveCUIKitFacadeParameterizedActionStoresMetadataAndHonorsDisabledState() {
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+        var didRun = false
+        let parameters = [
+            ConsoleDockDebugActionParameter.boolParameter(
+                identifier: "enabled",
+                title: "Enabled",
+                detail: "Optional flag",
+                isRequired: false,
+                defaultValue: NSNumber(value: true)
+            )
+        ]
+
+        ConsoleDockUIKit.registerAction(
+            identifier: " objc.disabled ",
+            title: " ObjC Disabled ",
+            group: " Tools ",
+            detail: " Cannot run ",
+            requiresConfirmation: true,
+            isEnabled: false,
+            style: .destructive,
+            parameters: parameters
+        ) { _ in
+            didRun = true
+        }
+
+        let action = ConsoleDock.debugActions.first
+        XCTAssertEqual(action?.id, "objc.disabled")
+        XCTAssertEqual(action?.title, "ObjC Disabled")
+        XCTAssertEqual(action?.group, "Tools")
+        XCTAssertEqual(action?.detail, "Cannot run")
+        XCTAssertEqual(action?.requiresConfirmation, true)
+        XCTAssertEqual(action?.isEnabled, false)
+        XCTAssertEqual(action?.style, .destructive)
+        XCTAssertEqual(action?.parameters.first?.id, "enabled")
+        XCTAssertEqual(action?.parameters.first?.defaultValue, .bool(true))
+
+        ConsoleDock.performDebugAction(id: "objc.disabled")
+
+        XCTAssertFalse(didRun)
+        XCTAssertEqual(
+            ConsoleDock.entries.map(\.message),
+            ["Debug action skipped: ObjC Disabled [objc.disabled] disabled"]
+        )
+    }
+
     func testParameterizedDebugActionUsesDefaultsForProgrammaticExecution() {
         var received: ConsoleDock.DebugActionParameters?
         ConsoleDock.registerAction(

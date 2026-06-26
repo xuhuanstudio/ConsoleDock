@@ -19,6 +19,151 @@ public enum ConsoleDockDebugActionStyle: Int {
     }
 }
 
+/// Objective-C-visible choice option for a local parameterized debug action.
+@objc(CDKDebugActionChoice)
+public final class ConsoleDockDebugActionChoice: NSObject {
+    @objc public let identifier: String
+    @objc public let title: String
+
+    @objc(initWithIdentifier:title:)
+    public init(identifier: String, title: String) {
+        self.identifier = identifier
+        self.title = title
+    }
+
+    @objc(choiceWithIdentifier:title:)
+    public static func choice(identifier: String, title: String) -> ConsoleDockDebugActionChoice {
+        ConsoleDockDebugActionChoice(identifier: identifier, title: title)
+    }
+
+    var swiftChoice: ConsoleDock.DebugActionChoice {
+        ConsoleDock.DebugActionChoice(id: identifier, title: title)
+    }
+}
+
+/// Objective-C-visible parameter definition for a local debug action.
+@objc(CDKDebugActionParameter)
+public final class ConsoleDockDebugActionParameter: NSObject {
+    @objc public let identifier: String
+    @objc public let title: String
+    @objc public let detail: String?
+    @objc public let isRequired: Bool
+
+    private let swiftParameter: ConsoleDock.DebugActionParameter
+
+    private init(
+        identifier: String,
+        title: String,
+        detail: String?,
+        isRequired: Bool,
+        swiftParameter: ConsoleDock.DebugActionParameter
+    ) {
+        self.identifier = identifier
+        self.title = title
+        self.detail = detail
+        self.isRequired = isRequired
+        self.swiftParameter = swiftParameter
+    }
+
+    @objc(stringParameterWithIdentifier:title:detail:isRequired:defaultValue:)
+    public static func stringParameter(
+        identifier: String,
+        title: String,
+        detail: String?,
+        isRequired: Bool,
+        defaultValue: String?
+    ) -> ConsoleDockDebugActionParameter {
+        ConsoleDockDebugActionParameter(
+            identifier: identifier,
+            title: title,
+            detail: detail,
+            isRequired: isRequired,
+            swiftParameter: .string(
+                id: identifier,
+                title: title,
+                detail: detail,
+                isRequired: isRequired,
+                defaultValue: defaultValue
+            )
+        )
+    }
+
+    @objc(numberParameterWithIdentifier:title:detail:isRequired:defaultValue:)
+    public static func numberParameter(
+        identifier: String,
+        title: String,
+        detail: String?,
+        isRequired: Bool,
+        defaultValue: NSNumber?
+    ) -> ConsoleDockDebugActionParameter {
+        ConsoleDockDebugActionParameter(
+            identifier: identifier,
+            title: title,
+            detail: detail,
+            isRequired: isRequired,
+            swiftParameter: .number(
+                id: identifier,
+                title: title,
+                detail: detail,
+                isRequired: isRequired,
+                defaultValue: defaultValue?.doubleValue
+            )
+        )
+    }
+
+    @objc(boolParameterWithIdentifier:title:detail:isRequired:defaultValue:)
+    public static func boolParameter(
+        identifier: String,
+        title: String,
+        detail: String?,
+        isRequired: Bool,
+        defaultValue: NSNumber?
+    ) -> ConsoleDockDebugActionParameter {
+        ConsoleDockDebugActionParameter(
+            identifier: identifier,
+            title: title,
+            detail: detail,
+            isRequired: isRequired,
+            swiftParameter: .bool(
+                id: identifier,
+                title: title,
+                detail: detail,
+                isRequired: isRequired,
+                defaultValue: defaultValue?.boolValue
+            )
+        )
+    }
+
+    @objc(choiceParameterWithIdentifier:title:detail:isRequired:choices:defaultChoiceIdentifier:)
+    public static func choiceParameter(
+        identifier: String,
+        title: String,
+        detail: String?,
+        isRequired: Bool,
+        choices: [ConsoleDockDebugActionChoice],
+        defaultChoiceIdentifier: String?
+    ) -> ConsoleDockDebugActionParameter {
+        ConsoleDockDebugActionParameter(
+            identifier: identifier,
+            title: title,
+            detail: detail,
+            isRequired: isRequired,
+            swiftParameter: .choice(
+                id: identifier,
+                title: title,
+                choices: choices.map(\.swiftChoice),
+                detail: detail,
+                isRequired: isRequired,
+                defaultChoiceID: defaultChoiceIdentifier
+            )
+        )
+    }
+
+    var swiftDebugActionParameter: ConsoleDock.DebugActionParameter {
+        swiftParameter
+    }
+}
+
 /// Objective-C-visible app context item for local issue reports.
 @objc(CDKAppContextItem)
 public final class ConsoleDockAppContextItem: NSObject {
@@ -159,6 +304,31 @@ public final class ConsoleDockUIKit: NSObject {
         }
     }
 
+    /// Registers a local parameterized debug action shown by the bundled UIKit console.
+    @objc(registerActionWithIdentifier:title:group:detail:requiresConfirmation:parameters:handler:)
+    public static func registerAction(
+        identifier: String,
+        title: String,
+        group: String?,
+        detail: String?,
+        requiresConfirmation: Bool,
+        parameters: [ConsoleDockDebugActionParameter],
+        handler: @escaping ([String: Any]) -> Void
+    ) {
+        ConsoleDock.registerAction(
+            id: identifier,
+            title: title,
+            group: group,
+            detail: detail,
+            requiresConfirmation: requiresConfirmation,
+            isEnabled: true,
+            style: .normal,
+            parameters: parameters.map(\.swiftDebugActionParameter)
+        ) { values in
+            handler(objectiveCParameterValues(values))
+        }
+    }
+
     /// Registers a local debug action with explicit enabled state and UI style.
     @objc(registerActionWithIdentifier:title:group:detail:requiresConfirmation:isEnabled:style:handler:)
     public static func registerAction(
@@ -184,6 +354,33 @@ public final class ConsoleDockUIKit: NSObject {
         }
     }
 
+    /// Registers a local parameterized debug action with explicit enabled state and UI style.
+    @objc(registerActionWithIdentifier:title:group:detail:requiresConfirmation:isEnabled:style:parameters:handler:)
+    public static func registerAction(
+        identifier: String,
+        title: String,
+        group: String?,
+        detail: String?,
+        requiresConfirmation: Bool,
+        isEnabled: Bool,
+        style: ConsoleDockDebugActionStyle,
+        parameters: [ConsoleDockDebugActionParameter],
+        handler: @escaping ([String: Any]) -> Void
+    ) {
+        ConsoleDock.registerAction(
+            id: identifier,
+            title: title,
+            group: group,
+            detail: detail,
+            requiresConfirmation: requiresConfirmation,
+            isEnabled: isEnabled,
+            style: style.swiftStyle,
+            parameters: parameters.map(\.swiftDebugActionParameter)
+        ) { values in
+            handler(objectiveCParameterValues(values))
+        }
+    }
+
     /// Removes a previously registered local debug action.
     @objc(unregisterActionWithIdentifier:)
     public static func unregisterAction(identifier: String) {
@@ -194,6 +391,21 @@ public final class ConsoleDockUIKit: NSObject {
     @objc(removeAllActions)
     public static func removeAllActions() {
         ConsoleDock.removeAllActions()
+    }
+
+    private static func objectiveCParameterValues(_ values: ConsoleDock.DebugActionParameters) -> [String: Any] {
+        values.allValues.mapValues { value in
+            switch value {
+            case let .string(text):
+                return text
+            case let .number(number):
+                return NSNumber(value: number)
+            case let .bool(flag):
+                return NSNumber(value: flag)
+            case let .choice(choiceID):
+                return choiceID
+            }
+        }
     }
 
     private static func shouldConfigureUI(result: CDKStartResult) -> Bool {
