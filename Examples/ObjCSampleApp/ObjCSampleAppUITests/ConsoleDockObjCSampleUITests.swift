@@ -97,8 +97,7 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         XCTAssertTrue(waitForElementToDisappear(markerAlert, timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "[marker] ObjC UI smoke marker", in: entriesTable, timeout: 10))
 
-        let modeControl = waitForModeControl(in: app)
-        modeControl.buttons["Timeline"].tap()
+        tapMode("Timeline", in: app)
         let timelineTable = app.tables["consoledock.timeline-table"]
         XCTAssertTrue(timelineTable.waitForExistence(timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "ObjC UI smoke marker", in: timelineTable, timeout: 5))
@@ -109,7 +108,7 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         tapBackButton(in: app)
         XCTAssertTrue(timelineTable.waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["consoledock.timeline-refresh"].waitForExistence(timeout: 5))
-        modeControl.buttons["Logs"].tap()
+        tapMode("Logs", in: app)
         XCTAssertTrue(entriesTable.waitForExistence(timeout: 5))
 
         let pauseButton = app.buttons["consoledock.pause-live"]
@@ -128,7 +127,7 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         XCTAssertTrue(waitForNoTableEntries(in: entriesTable, timeout: 5))
         XCTAssertTrue(waitForLabel(containing: "Entries: 0 visible 0", in: statusLabel, timeout: 5))
 
-        modeControl.buttons["Actions"].tap()
+        tapMode("Actions", in: app)
 
         let actionsTable = app.tables["consoledock.actions-table"]
         XCTAssertTrue(actionsTable.waitForExistence(timeout: 5))
@@ -143,9 +142,9 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         XCTAssertFalse(tableEntry(containing: "Clear Entries", existsIn: actionsTable))
         tableStaticText(containing: "Generate Smoke Logs", in: actionsTable).tap()
 
-        modeControl.buttons["Logs"].tap()
+        tapMode("Logs", in: app)
         XCTAssertTrue(waitForTableEntry(containing: "objc debug action smoke error", in: entriesTable, timeout: 5))
-        modeControl.buttons["Timeline"].tap()
+        tapMode("Timeline", in: app)
         XCTAssertTrue(timelineTable.waitForExistence(timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "Generate Smoke Logs", in: timelineTable, timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "objc debug action smoke error", in: timelineTable, timeout: 5))
@@ -156,7 +155,7 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         tapBackButton(in: app)
         XCTAssertTrue(timelineTable.waitForExistence(timeout: 5))
 
-        modeControl.buttons["Actions"].tap()
+        tapMode("Actions", in: app)
         XCTAssertTrue(waitForTableEntry(containing: "Open Order", in: actionsTable, timeout: 5))
         tableStaticText(containing: "Open Order", in: actionsTable).tap()
         let orderIDField = app.textFields["consoledock.action-parameters.string.orderId"]
@@ -169,12 +168,12 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
             app.segmentedControls["consoledock.action-parameters.choice.environment"].waitForExistence(timeout: 5)
         )
         app.buttons["consoledock.action-parameters.run"].tap()
-        modeControl.buttons["Logs"].tap()
+        tapMode("Logs", in: app)
         XCTAssertTrue(
             waitForTableEntry(containing: "objc parameterized order action orderId=O-100", in: entriesTable, timeout: 5)
         )
 
-        modeControl.buttons["Actions"].tap()
+        tapMode("Actions", in: app)
         XCTAssertTrue(waitForTableEntry(containing: "Open Order", in: actionsTable, timeout: 5))
         tableStaticText(containing: "Open Order", in: actionsTable).tap()
         XCTAssertTrue(orderIDField.waitForExistence(timeout: 5))
@@ -190,17 +189,17 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         tableStaticText(containing: "Clear Entries", in: actionsTable).tap()
         XCTAssertTrue(app.alerts.firstMatch.waitForExistence(timeout: 5))
         app.alerts.firstMatch.buttons["consoledock.confirm-action"].firstMatch.tap()
-        modeControl.buttons["Logs"].tap()
+        tapMode("Logs", in: app)
         XCTAssertTrue(waitForTableEntry(containing: "Debug action completed: Clear Entries", in: entriesTable, timeout: 5))
 
-        modeControl.buttons["Context"].tap()
+        tapMode("Context", in: app)
         let contextTable = app.tables["consoledock.context-table"]
         XCTAssertTrue(contextTable.waitForExistence(timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "Objective-C", in: contextTable, timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "ui-smoke", in: contextTable, timeout: 5))
         XCTAssertTrue(app.buttons["consoledock.context-refresh"].waitForExistence(timeout: 5))
         app.buttons["consoledock.context-refresh"].tap()
-        modeControl.buttons["Logs"].tap()
+        tapMode("Logs", in: app)
 
         let closeButton = app.buttons["consoledock.close"]
         XCTAssertTrue(closeButton.waitForExistence(timeout: 5))
@@ -249,10 +248,44 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         return !element.exists
     }
 
-    private func waitForModeControl(in app: XCUIApplication, timeout: TimeInterval = 20) -> XCUIElement {
-        let control = app.segmentedControls["consoledock.mode-control"]
-        XCTAssertTrue(control.waitForExistence(timeout: timeout))
-        return control
+    private func tapMode(_ title: String, in app: XCUIApplication, timeout: TimeInterval = 30) {
+        let deadline = Date().addingTimeInterval(timeout)
+        repeat {
+            dismissTransientInput(in: app)
+
+            let modeButton = app.segmentedControls["consoledock.mode-control"].buttons[title]
+            if modeButton.exists, modeButton.isHittable {
+                modeButton.tap()
+                return
+            }
+
+            let fallbackButton = app.buttons[title].firstMatch
+            if fallbackButton.exists, fallbackButton.isHittable {
+                fallbackButton.tap()
+                return
+            }
+
+            RunLoop.current.run(until: Date().addingTimeInterval(0.2))
+        } while Date() < deadline
+
+        XCTFail("Mode button '\(title)' did not become hittable")
+    }
+
+    private func dismissTransientInput(in app: XCUIApplication) {
+        let keyboardSearchButton = app.keyboards.buttons["Search"].firstMatch
+        if keyboardSearchButton.exists, keyboardSearchButton.isHittable {
+            keyboardSearchButton.tap()
+        }
+
+        let keyboardDoneButton = app.keyboards.buttons["Done"].firstMatch
+        if keyboardDoneButton.exists, keyboardDoneButton.isHittable {
+            keyboardDoneButton.tap()
+        }
+
+        let cancelButton = app.buttons["Cancel"].firstMatch
+        if cancelButton.exists, cancelButton.isHittable {
+            cancelButton.tap()
+        }
     }
 
     private func waitForTableEntry(containing text: String, in table: XCUIElement, timeout: TimeInterval) -> Bool {
@@ -309,6 +342,10 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
             searchButton.tap()
         } else {
             searchField.typeText("\n")
+        }
+        let cancelButton = app.buttons["Cancel"].firstMatch
+        if cancelButton.waitForExistence(timeout: 1), cancelButton.isHittable {
+            cancelButton.tap()
         }
         let closeSearchButton = app.buttons["close"].firstMatch
         if closeSearchButton.waitForExistence(timeout: 1) {
