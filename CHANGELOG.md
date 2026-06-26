@@ -8,6 +8,16 @@ The project follows Semantic Versioning for public releases.
 
 No changes yet.
 
+## v0.10.0 - 2026-06-26
+
+### Added
+
+- Added a bundled UIKit `Timeline` mode that aggregates current-session markers, local Debug Action executions, and retained error/fault logs.
+- Added a shared internal timeline builder used by both the Timeline view and issue-report reproduction timeline text.
+- Added Timeline detail navigation to existing log detail screens and a new Debug Action execution detail screen with copy support.
+- Added Swift and Objective-C sample UI smoke coverage for Timeline rows and detail navigation.
+- Added unit tests, accessibility identifier validation, README, DocC, roadmap, changelog, and sample walkthrough updates for local Session Timeline triage.
+
 ## v0.9.0 - 2026-06-26
 
 ### Added

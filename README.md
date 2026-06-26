@@ -15,7 +15,7 @@ ConsoleDock is an early-stage iOS debug SDK that lets testers inspect app logs d
 
 ## Status
 
-ConsoleDock `v0.9.0` is the current source-first Swift Package Manager preview release. It contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, logger forwarders for existing logger sinks, session metadata, manual markers, bounded in-memory entries with stable session identifiers and partial/redacted/truncated flags, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, runtime diagnostics, entry change notification, Debug Actions with enabled/destructive metadata, local search, structured Logs queries, parameter forms, current-session execution history, and session-only recent parameter values, app-provided Context snapshots for the panel and issue reports, log detail, Logs jump actions, explicit visible/all/issue-report sharing, temporary issue-report file sharing, issue-report copying, Release startup safety gates, a configurable UIKit-only floating button/panel foundation, Swift and Objective-C sample apps, DocC documentation, release validation workflow, and focused tests.
+ConsoleDock `v0.10.0` is the current source-first Swift Package Manager preview release. It contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, logger forwarders for existing logger sinks, session metadata, manual markers, bounded in-memory entries with stable session identifiers and partial/redacted/truncated flags, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, runtime diagnostics, entry change notification, Debug Actions with enabled/destructive metadata, local search, structured Logs queries, parameter forms, current-session execution history, and session-only recent parameter values, app-provided Context snapshots for the panel and issue reports, log detail, Session Timeline, Logs jump actions, explicit visible/all/issue-report sharing, temporary issue-report file sharing, issue-report copying, Release startup safety gates, a configurable UIKit-only floating button/panel foundation, Swift and Objective-C sample apps, DocC documentation, release validation workflow, and focused tests.
 
 Current limitations:
 
@@ -24,7 +24,7 @@ Current limitations:
 - File-descriptor capture can include framework or runtime warnings written through the app process descriptors, not only application-authored messages.
 - Runtime diagnostics report current ConsoleDock state and bounded in-memory store counts; they are not evidence of complete Swift `Logger`, `os_log`, or Apple unified logging capture.
 - Entry change notification exists as the refresh foundation for UI; notification handlers should fetch a snapshot through `entries`.
-- The UIKit floating button and console panel foundation can show, free-text search, structured-query search, source-filter, level-filter, jump to latest/first/previous/next visible error, pause/resume live follow, live refresh, log detail, copy, clear, add manual markers, visible/all/issue-report share/export with diagnostics, app context, action history, and a reproduction timeline, copy issue reports, search and run Debug Actions, collect small action parameters, reuse recent parameter values within the current process session, show app context, and close the current in-memory snapshot.
+- The UIKit floating button and console panel foundation can show, free-text search, structured-query search, source-filter, level-filter, jump to latest/first/previous/next visible error, pause/resume live follow, live refresh, log detail, copy, clear, add manual markers, review a Session Timeline, visible/all/issue-report share/export with diagnostics, app context, action history, and a reproduction timeline, copy issue reports, search and run Debug Actions, collect small action parameters, reuse recent parameter values within the current process session, show app context, and close the current in-memory snapshot.
 - Persistence, saved searches, and public query-language APIs are not implemented yet.
 - Third-party adapters, CocoaPods, and XCFramework distribution are not implemented yet.
 - Redaction is a local in-memory baseline, not a complete privacy guarantee.
@@ -63,7 +63,7 @@ Add the public repository URL through Xcode's package dependency UI:
 https://github.com/xuhuanstudio/ConsoleDock.git
 ```
 
-Use the latest release tag from GitHub Releases. `v0.9.0` includes local structured Logs queries, next/previous visible error jumps, local Debug Action execution history, session-only recent parameter values for action forms, reproduction timeline issue reports, temporary `.txt` issue-report sharing, parameterized Debug Actions, App Context snapshots for issue reports and the bundled Context tab, configurable floating trigger controls, Logs jump actions, Actions search, logger forwarders for existing logger sinks, Test Session Reports, manual markers, Debug Actions, log detail, explicit visible/all/issue-report sharing and copying, runtime diagnostics, and release-validation hardening. Then depend on:
+Use the latest release tag from GitHub Releases. `v0.10.0` includes the bundled Session Timeline view, local structured Logs queries, next/previous visible error jumps, local Debug Action execution history, session-only recent parameter values for action forms, reproduction timeline issue reports, temporary `.txt` issue-report sharing, parameterized Debug Actions, App Context snapshots for issue reports and the bundled Context tab, configurable floating trigger controls, Logs jump actions, Actions search, logger forwarders for existing logger sinks, Test Session Reports, manual markers, Debug Actions, log detail, explicit visible/all/issue-report sharing and copying, runtime diagnostics, and release-validation hardening. Then depend on:
 
 - `ConsoleDock` for Swift API plus the bundled UIKit console.
 - `ConsoleDockCore` for Objective-C/C-compatible core APIs.
@@ -144,6 +144,12 @@ is:redacted
 Supported keys are `level:`, `source:`, and `is:`. `level:` accepts `debug`, `info`, `warning`, `warn`, `error`, and `fault`; `source:` accepts `native`, `stdout`, and `stderr`; `is:` accepts `partial`, `redacted`, and `truncated`. Quoted phrases match the same local searchable text as plain search. A leading `-` excludes a text term.
 
 The query is local UI filtering only. It is combined with the source and level controls, does not persist, does not change stored entries, and is not a public query-language API.
+
+### Review The Session Timeline
+
+Session Timeline is available in `v0.10.0` and later. The bundled `Timeline` tab aggregates current-session markers, local Debug Action executions, and retained error/fault log entries into one timestamp-ordered triage view.
+
+Timeline rows are local UI summaries. Marker and error/fault rows open the existing log detail screen; Debug Action rows open an action detail screen that can copy the formatted execution metadata. Timeline does not persist history, upload events, discover app routes, or replace the full Logs list.
 
 ### Forward Existing Logger Output
 
@@ -259,7 +265,7 @@ CDKSessionMetadata *metadata = [CDKConsoleDock sessionMetadata];
 NSLog(@"ConsoleDock session: %@", metadata.sessionIdentifier);
 ```
 
-The bundled UIKit console includes `Mark`, `Share Issue Report`, and `Copy Issue Report` actions. The same local report text is available through `ConsoleDock.issueReportText()` and `CDKConsoleDockUIKit.issueReportText`. The issue report includes session metadata, diagnostics, app-provided context, a reproduction timeline, a marker index, and all currently retained redacted logs. The reproduction timeline combines markers, local Debug Action executions, and retained error/fault log entries in timestamp order.
+The bundled UIKit console includes `Mark`, `Timeline`, `Share Issue Report`, and `Copy Issue Report` actions. The same local report text is available through `ConsoleDock.issueReportText()` and `CDKConsoleDockUIKit.issueReportText`. The issue report includes session metadata, diagnostics, app-provided context, a reproduction timeline, a marker index, and all currently retained redacted logs. The bundled Timeline tab and issue-report reproduction timeline both combine markers, local Debug Action executions, and retained error/fault log entries in timestamp order.
 
 Apps can provide local context that appears in the bundled `Context` tab and in issue reports:
 

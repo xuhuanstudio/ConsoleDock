@@ -15,6 +15,7 @@ The app starts ConsoleDock on launch, enables stdout/stderr capture, shows the f
 - Parameterized Debug Actions for small local test inputs
 - Session-only recent parameter reuse and local action execution history
 - App Context snapshots for the bundled Context tab and issue reports
+- Session Timeline rows for markers, Debug Actions, and retained error/fault logs
 - Floating trigger controls through `CDKConsoleDockUIKit`
 - Manual markers through `CDKConsoleDock`
 - App-specific logger sink forwarding through `CDKLogForwarder`
@@ -51,7 +52,7 @@ From the package root:
 scripts/validate-objc-sample-ui-smoke.sh
 ```
 
-The script chooses an available iPhone simulator unless `CONSOLEDOCK_UI_SMOKE_DESTINATION` is set. It launches the app with `--consoledock-ui-smoke` so the test focuses on native `CDKConsoleDock` entries, redaction, the bundled panel, structured Logs search, level filtering, Logs jump controls, log detail, markers, issue report sharing, Debug Actions, Actions search, parameterized Debug Actions, disabled/destructive action metadata, App Context tab refresh, pause/resume, clear refresh, and close behavior without stdout/stderr capture descriptor noise. Unit tests cover structured Logs query parsing, the session-only recent parameter values, local action execution history, reproduction timeline, and temporary issue-report file output behind the sample flows.
+The script chooses an available iPhone simulator unless `CONSOLEDOCK_UI_SMOKE_DESTINATION` is set. It launches the app with `--consoledock-ui-smoke` so the test focuses on native `CDKConsoleDock` entries, redaction, the bundled panel, structured Logs search, level filtering, Logs jump controls, log detail, markers, Timeline rows and detail navigation, issue report sharing, Debug Actions, Actions search, parameterized Debug Actions, disabled/destructive action metadata, App Context tab refresh, pause/resume, clear refresh, and close behavior without stdout/stderr capture descriptor noise. Unit tests cover structured Logs query parsing, the session-only recent parameter values, local action execution history, Session Timeline building, reproduction timeline, and temporary issue-report file output behind the sample flows.
 
 ## Manual Check
 
@@ -64,11 +65,13 @@ For the full shared checklist, see [Sample app walkthrough](../../docs/sample-ap
 5. Confirm entries appear in the console, diagnostics are readable, and `token=...` values are displayed as `<redacted>`.
 6. Search Logs with `level:error`, then use the Logs `Jump` menu to jump to the latest visible log and first/previous/next visible error.
 7. Add a marker from the console and confirm the `[marker]` entry appears.
-8. Open the share menu and confirm `Share Issue Report` and `Copy Issue Report` are available. `Share Issue Report` uses a temporary local `.txt` item.
-9. Switch to `Actions`, search for `Smoke`, and confirm the smoke action remains executable.
-10. Run `Open Order` and confirm the parameterized action form accepts an order id, then open it again and confirm the current process session remembers the recent value.
-11. Switch to `Context`, refresh, and confirm the sample App Context is visible.
-12. Confirm the disabled placeholder and destructive clear action metadata are visible.
-13. Tap `Clear` in the console or `Clear ConsoleDock Entries` in the sample to verify live refresh.
+8. Switch to `Timeline` and confirm marker plus error/fault rows can open detail.
+9. Open the share menu and confirm `Share Issue Report` and `Copy Issue Report` are available. `Share Issue Report` uses a temporary local `.txt` item.
+10. Switch to `Actions`, search for `Smoke`, and confirm the smoke action remains executable.
+11. Switch back to `Timeline` after running the smoke action and confirm action detail copy is available.
+12. Run `Open Order` and confirm the parameterized action form accepts an order id, then open it again and confirm the current process session remembers the recent value.
+13. Switch to `Context`, refresh, and confirm the sample App Context is visible.
+14. Confirm the disabled placeholder and destructive clear action metadata are visible.
+15. Tap `Clear` in the console or `Clear ConsoleDock Entries` in the sample to verify live refresh.
 
 When testing ConsoleDock's own stdout/stderr capture, avoid using `simctl launch --stdout` or `simctl launch --stderr` as the primary validation path because those flags also modify the app process descriptors. Running from Xcode or launching normally through Simulator gives a closer app-integration signal.

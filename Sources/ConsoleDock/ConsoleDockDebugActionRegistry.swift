@@ -165,9 +165,14 @@ final class ConsoleDockDebugActionRegistry {
 
     func clearExecutionHistory() {
         lock.lock()
+        let changed = !executions.isEmpty
         executions.removeAll()
         nextExecutionID = 1
         lock.unlock()
+
+        if changed {
+            postActionsChanged()
+        }
     }
 
     func resetSessionState() {
@@ -307,6 +312,8 @@ final class ConsoleDockDebugActionRegistry {
         nextExecutionID += 1
         executions.append(execution)
         lock.unlock()
+
+        postActionsChanged()
     }
 
     private func postActionsChanged() {

@@ -96,6 +96,12 @@ ConsoleDock.mark("Started checkout reproduction")
 
 The report should contain session metadata, diagnostics, App Context, a reproduction timeline, a marker index, and currently retained redacted logs. The reproduction timeline should summarize markers, Debug Action executions, and retained error/fault logs before the full log section. It should be generated only through a user-initiated local share action. ConsoleDock should not persist reports by default, upload them, or create remote issues automatically.
 
+### Session Timeline Mode
+
+Show the same current-session triage signals inside the bundled panel before a tester exports a report. The Timeline view should aggregate markers, Debug Action executions, and retained error/fault logs in timestamp order, with detail navigation back to the relevant log or action execution.
+
+Timeline is a local UI summary. It should not become persistent history, telemetry, route discovery, remote commands, or a replacement for the full Logs list.
+
 ## Non-Goals
 
 - Do not try to replace Xcode debugger features.
@@ -104,6 +110,7 @@ The report should contain session metadata, diagnostics, App Context, a reproduc
 - Do not encourage enabling debug tooling in production builds without safeguards.
 - Do not turn Debug Actions into a remote command system or automatic route discovery layer.
 - Do not turn issue reports into default persistence, remote upload, or automatic issue creation.
+- Do not turn Session Timeline into default persistent history or telemetry.
 - Do not treat App Context as automatic redaction, route discovery, persistence, or remote telemetry.
 
 ## Naming Decision

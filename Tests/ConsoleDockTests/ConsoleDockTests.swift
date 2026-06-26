@@ -503,6 +503,167 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertTrue(snapshot.contains("Entries: 1"))
     }
 
+    func testTimelineBuilderReturnsNoEventsForEmptyInput() {
+        let events = ConsoleDockTimelineBuilder.events(entries: [], actionExecutions: [])
+
+        XCTAssertTrue(events.isEmpty)
+        XCTAssertTrue(ConsoleDockTimelineBuilder.reportLines(entries: [], actionExecutions: []).isEmpty)
+    }
+
+    func testTimelineBuilderIncludesMarkersActionsErrorsAndFaults() {
+        let entries = [
+            ConsoleDock.LogEntry(
+                id: 1,
+                timestamp: Date(timeIntervalSince1970: 2),
+                level: .info,
+                source: .native,
+                message: "[marker] Open checkout"
+            ),
+            ConsoleDock.LogEntry(
+                id: 2,
+                timestamp: Date(timeIntervalSince1970: 4),
+                level: .error,
+                source: .stderr,
+                message: "payment failed"
+            ),
+            ConsoleDock.LogEntry(
+                id: 3,
+                timestamp: Date(timeIntervalSince1970: 5),
+                level: .fault,
+                source: .native,
+                message: "checkout fault"
+            )
+        ]
+        let executions = [
+            ConsoleDock.DebugActionExecution(
+                id: 1,
+                actionID: "open.checkout",
+                title: "Open Checkout",
+                group: "Navigation",
+                startedAt: Date(timeIntervalSince1970: 3),
+                completedAt: Date(timeIntervalSince1970: 3.25),
+                outcome: .completed,
+                parameterSummary: "orderId=\"A-100\""
+            )
+        ]
+
+        let events = ConsoleDockTimelineBuilder.events(entries: entries, actionExecutions: executions)
+
+        XCTAssertEqual(events.map(\.kind), [.marker, .action, .log, .log])
+        XCTAssertEqual(events.map(\.title), ["Open checkout", "Open Checkout", "payment failed", "checkout fault"])
+        XCTAssertEqual(
+            events.map(\.reportText),
+            [
+                "[1970-01-01T00:00:02.000Z] [marker] Open checkout",
+                "[1970-01-01T00:00:03.000Z] [action] [completed] Open Checkout [open.checkout] group=Navigation params: orderId=\"A-100\"",
+                "[1970-01-01T00:00:04.000Z] [log] [ERROR] payment failed",
+                "[1970-01-01T00:00:05.000Z] [log] [FAULT] checkout fault"
+            ]
+        )
+        XCTAssertEqual(events[0].logEntry?.id, 1)
+        XCTAssertEqual(events[1].actionExecution?.id, 1)
+    }
+
+    func testTimelineBuilderExcludesNonMarkerDebugInfoAndWarningLogs() {
+        let entries = [
+            ConsoleDock.LogEntry(
+                id: 1,
+                timestamp: Date(timeIntervalSince1970: 1),
+                level: .debug,
+                source: .native,
+                message: "debug"
+            ),
+            ConsoleDock.LogEntry(
+                id: 2,
+                timestamp: Date(timeIntervalSince1970: 2),
+                level: .info,
+                source: .native,
+                message: "info"
+            ),
+            ConsoleDock.LogEntry(
+                id: 3,
+                timestamp: Date(timeIntervalSince1970: 3),
+                level: .warning,
+                source: .native,
+                message: "warning"
+            ),
+            ConsoleDock.LogEntry(
+                id: 4,
+                timestamp: Date(timeIntervalSince1970: 4),
+                level: .info,
+                source: .native,
+                message: "[marker] Still included"
+            )
+        ]
+
+        let events = ConsoleDockTimelineBuilder.events(entries: entries, actionExecutions: [])
+
+        XCTAssertEqual(events.map(\.title), ["Still included"])
+        XCTAssertEqual(events.map(\.kind), [.marker])
+    }
+
+    func testTimelineBuilderSortsByTimestampWithStableEqualTimeOrdering() {
+        let sharedDate = Date(timeIntervalSince1970: 10)
+        let entries = [
+            ConsoleDock.LogEntry(
+                id: 1,
+                timestamp: sharedDate,
+                level: .error,
+                source: .native,
+                message: "first error"
+            ),
+            ConsoleDock.LogEntry(
+                id: 2,
+                timestamp: sharedDate,
+                level: .info,
+                source: .native,
+                message: "[marker] second marker"
+            )
+        ]
+        let executions = [
+            ConsoleDock.DebugActionExecution(
+                id: 1,
+                actionID: "third.action",
+                title: "Third Action",
+                group: nil,
+                startedAt: sharedDate,
+                completedAt: sharedDate,
+                outcome: .skipped,
+                message: "disabled"
+            )
+        ]
+
+        let events = ConsoleDockTimelineBuilder.events(entries: entries, actionExecutions: executions)
+
+        XCTAssertEqual(events.map(\.title), ["first error", "second marker", "Third Action"])
+    }
+
+    func testTimelineBuilderActionDetailTextIncludesExecutionMetadata() {
+        let execution = ConsoleDock.DebugActionExecution(
+            id: 1,
+            actionID: "open.order",
+            title: "Open Order",
+            group: "Navigation",
+            startedAt: Date(timeIntervalSince1970: 2),
+            completedAt: Date(timeIntervalSince1970: 3),
+            outcome: .failed,
+            parameterSummary: "orderId=\"A-100\"",
+            message: "error=boom"
+        )
+
+        let detail = ConsoleDockTimelineBuilder.actionDetailText(execution)
+
+        XCTAssertTrue(detail.contains("Action ID: open.order"))
+        XCTAssertTrue(detail.contains("Title: Open Order"))
+        XCTAssertTrue(detail.contains("Outcome: failed"))
+        XCTAssertTrue(detail.contains("Started: 1970-01-01T00:00:02.000Z"))
+        XCTAssertTrue(detail.contains("Completed: 1970-01-01T00:00:03.000Z"))
+        XCTAssertTrue(detail.contains("Group: Navigation"))
+        XCTAssertTrue(detail.contains("Parameters: orderId=\"A-100\""))
+        XCTAssertTrue(detail.contains("Message: error=boom"))
+        XCTAssertFalse(detail.contains("Time:"))
+    }
+
     func testIssueReportFormatterIncludesSessionDiagnosticsMarkersAndLogs() {
         let metadata = ConsoleDock.SessionMetadata(
             sessionIdentifier: "session-123",

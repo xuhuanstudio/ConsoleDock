@@ -226,7 +226,32 @@ Not included:
 - crash reporting.
 - CocoaPods or XCFramework distribution.
 
-## Post-v0.9 - Demand-Driven Compatibility Candidates
+## v0.10 - Session Timeline
+
+Goal: make the current local debug session easier to understand at a glance without adding persistence or remote automation.
+
+Deliverables:
+
+- bundled UIKit `Timeline` mode alongside Logs, Actions, and Context.
+- shared internal timeline builder for manual markers, Debug Action executions, and retained error/fault logs.
+- Timeline rows for marker, action, and error/fault events in stable timestamp order.
+- log detail navigation for marker and error/fault timeline rows.
+- action detail navigation and copy support for Debug Action execution rows.
+- issue-report reproduction timeline reuse of the same internal builder.
+- Swift and Objective-C sample UI smoke coverage for Timeline rows and detail navigation.
+- focused unit tests, accessibility identifier validation, README, DocC, changelog, and sample walkthrough updates for current-session timeline triage.
+
+Not included:
+
+- default persistent logs, timeline history, filters, actions, parameters, context, or reports.
+- timeline filtering, saved views, regex, date ranges, or a public Timeline API.
+- remote upload.
+- automatic route discovery.
+- network inspector.
+- crash reporting.
+- CocoaPods or XCFramework distribution.
+
+## Post-v0.10 - Demand-Driven Compatibility Candidates
 
 Goal: improve adoption in existing apps only when real integration feedback shows SPM and the current explicit API are not enough.
 

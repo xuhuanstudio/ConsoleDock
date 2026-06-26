@@ -47,7 +47,7 @@ GitHub release validation runs the focused Swift and Objective-C sample UI smoke
 2. Generate native, stdout, stderr, and `NSLog` entries.
 3. Confirm generated `token=...` values are displayed as `token=<redacted>`.
 4. Open the ConsoleDock panel.
-5. Verify plain and structured Logs search, source filter, level filter, Jump controls, pause/resume, log detail copy, marker creation, visible/all/issue-report share, Debug Actions, parameterized actions, App Context, clear, stop, and restart behavior.
+5. Verify plain and structured Logs search, source filter, level filter, Jump controls, pause/resume, log detail copy, marker creation, Timeline rows/detail navigation, visible/all/issue-report share, Debug Actions, parameterized actions, App Context, clear, stop, and restart behavior.
 6. Run `scripts/validate-objc-sample-ui-smoke.sh` when Objective-C compatibility changed.
 
 ## Tag And Validate

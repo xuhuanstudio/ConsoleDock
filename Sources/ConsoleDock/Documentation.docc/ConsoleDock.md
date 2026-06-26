@@ -23,6 +23,7 @@ ConsoleDock is not a full replacement for Xcode Console or Apple unified logging
 - <doc:DebugActions>
 - <doc:AppContext>
 - <doc:TestSessionReports>
+- <doc:SessionTimeline>
 - <doc:DailyDebugUsability>
 - <doc:PrivacyAndReleaseSafety>
 - <doc:ObjectiveCIntegration>

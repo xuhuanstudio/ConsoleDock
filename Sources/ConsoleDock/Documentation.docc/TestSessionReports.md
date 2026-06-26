@@ -12,7 +12,7 @@ ConsoleDock does this with three local pieces:
 - ``ConsoleDock/mark(_:)`` writes a native info entry with a stable `[marker]` prefix.
 - ``ConsoleDock/appContext`` returns app-provided local context when the host app registers a provider.
 - ``ConsoleDock/actionExecutionHistory`` returns local Debug Action outcomes for the current process session.
-- The bundled UIKit console offers `Mark`, `Share Issue Report`, and `Copy Issue Report` actions.
+- The bundled UIKit console offers `Mark`, `Timeline`, `Share Issue Report`, and `Copy Issue Report` actions.
 
 Issue reports are generated locally through the system share sheet, copied locally through the pasteboard action, or read as text through ``ConsoleDock/issueReportText()``. They include session metadata, diagnostics, app context, a reproduction timeline, a marker index, and all currently retained redacted logs. ConsoleDock does not persist reports by default, upload them, or create remote issues automatically.
 
@@ -29,13 +29,13 @@ Markers are normal native info entries. They pass through the same redaction, tr
 
 ## Review The Reproduction Timeline
 
-The issue report's reproduction timeline combines three local sources in timestamp order:
+The bundled `Timeline` tab and the issue report's reproduction timeline combine three local sources in timestamp order:
 
 - marker entries created through ``ConsoleDock/mark(_:)`` or the bundled `Mark` action;
 - Debug Action executions from ``ConsoleDock/actionExecutionHistory``;
 - retained error and fault log entries.
 
-The full `Logs` section still includes all currently retained redacted entries. Timeline rows are a summary meant to help a developer scan the likely reproduction sequence first.
+The full `Logs` section still includes all currently retained redacted entries. Timeline rows are a summary meant to help a tester or developer scan the likely reproduction sequence first. See <doc:SessionTimeline> for the bundled Timeline view.
 
 ## Read Session Metadata
 

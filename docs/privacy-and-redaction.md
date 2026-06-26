@@ -22,7 +22,7 @@ Stored entries include `partial`, `redacted`, and `truncated` flags. The `redact
 
 When stdout or stderr capture has to split an oversized line into partial fragments, ConsoleDock keeps redaction state per source. If one partial fragment is redacted, following fragments from the same source are stored as `<redacted partial continuation>` until that line ends. This favors privacy over preserving every byte of an oversized secret-bearing line.
 
-The UIKit console reads from that in-memory buffer. Log detail copy, share/export actions, markers, and issue reports use already-redacted entries from the current in-memory store. App Context values come from the app-provided context provider and are included in issue reports as app-authored diagnostic text. Debug Action execution history and parameter summaries are local session state authored by the app or tester and can appear in issue-report reproduction timelines. ConsoleDock does not persist logs, App Context, action history, or parameter values to disk by default, upload logs or context, or collect logs from other apps or system processes by default.
+The UIKit console reads from that in-memory buffer. Log detail copy, share/export actions, markers, Session Timeline, and issue reports use already-redacted entries from the current in-memory store. App Context values come from the app-provided context provider and are included in issue reports as app-authored diagnostic text. Debug Action execution history and parameter summaries are local session state authored by the app or tester and can appear in the bundled Session Timeline and issue-report reproduction timelines. ConsoleDock does not persist logs, App Context, action history, or parameter values to disk by default, upload logs or context, or collect logs from other apps or system processes by default.
 
 ## Default Redaction Coverage
 
@@ -106,7 +106,7 @@ When adapting an existing logger, forward already-formatted messages only after 
 
 ConsoleDock's bundled UIKit console only copies or shares entries that are already stored in redacted form. The share sheet can export the current visible in-memory snapshot, all currently retained entries, or a local issue report as plain text. `Share Issue Report` creates a temporary local `.txt` item only for the user-initiated share sheet; it does not create a persistent export file by itself.
 
-Issue reports include session metadata, diagnostics, App Context, a reproduction timeline, a marker index, and all currently retained redacted logs. The reproduction timeline can include Debug Action titles, outcomes, messages, and compact parameter summaries. They are generated through a user-initiated local share action; ConsoleDock does not upload them or create remote issues automatically.
+Issue reports include session metadata, diagnostics, App Context, a reproduction timeline, a marker index, and all currently retained redacted logs. The bundled Session Timeline and issue-report reproduction timeline can include Debug Action titles, outcomes, messages, compact parameter summaries, markers, and retained error/fault logs. Issue reports are generated through a user-initiated local share action; ConsoleDock does not upload them or create remote issues automatically.
 
 App Context is not passed through the log redaction pipeline. Only provide values that are already appropriate for a local debug report, such as non-secret environment names, feature flag names, route labels, or explicitly redacted identifiers.
 
