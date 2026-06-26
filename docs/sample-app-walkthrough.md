@@ -17,9 +17,9 @@ Use the samples to verify:
 - manual markers, reproduction timeline issue reports, and local issue report sharing/copying;
 - `NSLog` output that reaches process stderr;
 - redaction before storage;
-- UIKit floating button configuration, trigger show/hide controls, search, source and level filtering, Logs jump controls, pause/resume live follow, log detail, copy, panel refresh, share/export, Actions search, action parameter forms, Context tab refresh, actions, clear, stop, and restart behavior.
+- UIKit floating button configuration, trigger show/hide controls, plain and structured Logs search, source and level filtering, Logs jump controls, pause/resume live follow, log detail, copy, panel refresh, share/export, Actions search, action parameter forms, Context tab refresh, actions, clear, stop, and restart behavior.
 
-The bundled console and sample controls expose stable accessibility identifiers so future UI smoke tests can target behavior without relying on localized text. Key bundled console identifiers include `consoledock.dock-button`, `consoledock.mode-control`, `consoledock.search`, `consoledock.actions-search`, `consoledock.level-filter`, `consoledock.jump`, `consoledock.jump-latest-log`, `consoledock.jump-first-error`, `consoledock.status`, `consoledock.entries-table`, `consoledock.actions-table`, `consoledock.context-table`, `consoledock.context-refresh`, `consoledock.action-parameters.form`, `consoledock.action-parameters.run`, `consoledock.mark`, `consoledock.marker-text`, `consoledock.add-marker`, `consoledock.share-issue-report`, and `consoledock.copy-issue-report`. Sample app button identifiers use `swift-sample.<button-slug>` and `objc-sample.<button-slug>`.
+The bundled console and sample controls expose stable accessibility identifiers so future UI smoke tests can target behavior without relying on localized text. Key bundled console identifiers include `consoledock.dock-button`, `consoledock.mode-control`, `consoledock.search`, `consoledock.actions-search`, `consoledock.level-filter`, `consoledock.jump`, `consoledock.jump-latest-log`, `consoledock.jump-first-error`, `consoledock.jump-previous-error`, `consoledock.jump-next-error`, `consoledock.status`, `consoledock.entries-table`, `consoledock.actions-table`, `consoledock.context-table`, `consoledock.context-refresh`, `consoledock.action-parameters.form`, `consoledock.action-parameters.run`, `consoledock.mark`, `consoledock.marker-text`, `consoledock.add-marker`, `consoledock.share-issue-report`, and `consoledock.copy-issue-report`. Sample app button identifiers use `swift-sample.<button-slug>` and `objc-sample.<button-slug>`.
 
 ![ConsoleDock Swift sample console](assets/swift-sample-console.png)
 
@@ -48,7 +48,7 @@ For a focused simulator UI smoke run of the Objective-C sample:
 scripts/validate-objc-sample-ui-smoke.sh
 ```
 
-The smoke tests launch each sample app in a native-log-only UI automation mode, write native ConsoleDock entries containing sample tokens, open the bundled console, and verify the diagnostics header, entries table, visible redaction, search control rendering, level filtering, Logs jump controls, log detail, copy controls, marker creation, issue-report share action availability, issue-report copy action availability, pause/resume, clear refresh, Debug Actions, Actions search, parameterized Debug Actions, disabled/destructive action metadata, confirmation prompts, App Context tab refresh, and close controls through stable accessibility identifiers. Unit and formatter tests cover local action execution history, session-only recent parameter values, temporary issue-report file generation, and reproduction timeline report output.
+The smoke tests launch each sample app in a native-log-only UI automation mode, write native ConsoleDock entries containing sample tokens, open the bundled console, and verify the diagnostics header, entries table, visible redaction, structured Logs search, level filtering, Logs jump controls, log detail, copy controls, marker creation, issue-report share action availability, issue-report copy action availability, pause/resume, clear refresh, Debug Actions, Actions search, parameterized Debug Actions, disabled/destructive action metadata, confirmation prompts, App Context tab refresh, and close controls through stable accessibility identifiers. Unit and formatter tests cover local structured query parsing, local action execution history, session-only recent parameter values, temporary issue-report file generation, and reproduction timeline report output.
 
 Manual check:
 
@@ -60,10 +60,10 @@ Manual check:
 6. Confirm `App logger sink` writes through the app's logger forwarder sink, preserving the original app logger output while adding a native ConsoleDock entry.
 7. Confirm the diagnostics header reports running state, entry count, stdout/stderr state, limits, and redacted/truncated/partial counts.
 8. Confirm generated `token=...` values are stored as `token=<redacted>`.
-9. Search for `stderr` or `token` and confirm the visible list filters without changing stored entries.
+9. Search for `stderr`, `token`, or `level:error` and confirm the visible list filters without changing stored entries.
 10. Change the source scope to `stdout` or `stderr` and confirm only matching entries remain visible.
 11. Change the level scope to `Info` or `Error` and confirm only matching entries remain visible.
-12. Use `Jump` to move to the latest visible log and first visible error/fault without changing filters.
+12. Use `Jump` to move to the latest visible log and first/previous/next visible error/fault without changing filters.
 13. Tap the pause button, generate another message from the sample, and confirm the visible list does not auto-refresh.
 14. Tap the play/resume button and confirm the panel catches up to the latest stored entries.
 15. Tap a visible log row and confirm the detail screen shows the full redacted message, metadata flags, and copy buttons.
@@ -110,10 +110,10 @@ Manual check:
 5. Confirm entries appear in the ConsoleDock panel.
 6. Confirm the diagnostics header reports running state, entry count, stdout/stderr state, limits, and redacted/truncated/partial counts.
 7. Confirm generated `token=...` values are stored as `token=<redacted>`.
-8. Search for `stderr` or `token` and confirm the visible list filters without changing stored entries.
+8. Search for `stderr`, `token`, or `level:error` and confirm the visible list filters without changing stored entries.
 9. Change the source scope to `stdout` or `stderr` and confirm only matching entries remain visible.
 10. Change the level scope to `Info` or `Error` and confirm only matching entries remain visible.
-11. Use `Jump` to move to the latest visible log and first visible error/fault without changing filters.
+11. Use `Jump` to move to the latest visible log and first/previous/next visible error/fault without changing filters.
 12. Tap the pause button, generate another message from the sample, and confirm the visible list does not auto-refresh.
 13. Tap the play/resume button and confirm the panel catches up to the latest stored entries.
 14. Tap a visible log row and confirm the detail screen shows the full redacted message, metadata flags, and copy buttons.

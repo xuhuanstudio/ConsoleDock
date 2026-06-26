@@ -202,7 +202,31 @@ Not included:
 - crash reporting.
 - CocoaPods or XCFramework distribution.
 
-## Post-v0.8 - Demand-Driven Compatibility Candidates
+## v0.9 - Local Log Query And Triage
+
+Goal: make larger local log sessions easier to narrow and navigate without turning ConsoleDock into a logging database or remote debug platform.
+
+Deliverables:
+
+- structured local Logs queries for source, level, and entry flags.
+- quoted phrase search and excluded text terms.
+- compatibility with existing plain-text search behavior.
+- Logs search placeholder that exposes the compact query hint.
+- Jump actions for previous and next visible error/fault entries in the current filtered result set.
+- Swift and Objective-C sample UI smoke coverage for structured Logs queries and expanded Jump controls.
+- focused unit tests, accessibility identifier validation, README, DocC, changelog, and sample walkthrough updates for local query triage.
+
+Not included:
+
+- default persistent logs, filters, or saved searches.
+- regex, boolean grouping, date ranges, or a public query-language API.
+- remote upload.
+- automatic route discovery.
+- network inspector.
+- crash reporting.
+- CocoaPods or XCFramework distribution.
+
+## Post-v0.9 - Demand-Driven Compatibility Candidates
 
 Goal: improve adoption in existing apps only when real integration feedback shows SPM and the current explicit API are not enough.
 

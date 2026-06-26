@@ -48,9 +48,25 @@ These calls do not start or stop ConsoleDock. They only affect the bundled trigg
 The Logs view includes a `Jump` menu for the current visible result set:
 
 - latest visible log;
-- first visible error or fault.
+- first visible error or fault;
+- previous visible error or fault;
+- next visible error or fault.
 
 Jump actions respect the current search, source filter, level filter, and pause/resume state. They do not change stored entries or filters.
+
+## Search Logs With Local Query Tokens
+
+The Logs search field supports plain text plus a small local query syntax:
+
+- `source:native`, `source:stdout`, and `source:stderr`;
+- `level:debug`, `level:info`, `level:warning`, `level:warn`, `level:error`, and `level:fault`;
+- `is:partial`, `is:redacted`, and `is:truncated`;
+- quoted phrases such as `"checkout failed"`;
+- excluded text terms such as `-heartbeat` or `-"cache warmup"`.
+
+Structured query tokens are combined with the source and level controls. Unknown `key:value` terms are treated as ordinary text so testers can keep searching without strict syntax errors.
+
+This is local UI filtering only. ConsoleDock does not persist queries, does not change stored entries, and does not expose a public query-language API.
 
 ## Search Debug Actions
 

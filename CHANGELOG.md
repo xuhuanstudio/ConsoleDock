@@ -8,6 +8,16 @@ The project follows Semantic Versioning for public releases.
 
 No changes yet.
 
+## v0.9.0 - 2026-06-26
+
+### Added
+
+- Added structured local Logs queries for `source:`, `level:`, and `is:` tokens while preserving plain-text search behavior.
+- Added quoted phrase search and excluded text terms for local Logs filtering.
+- Added previous and next visible error/fault actions to the Logs `Jump` menu.
+- Added Swift and Objective-C sample UI smoke coverage for structured Logs queries and expanded Jump controls.
+- Added unit tests, accessibility identifier validation, README, DocC, roadmap, changelog, and sample walkthrough updates for local log query triage.
+
 ## v0.8.0 - 2026-06-26
 
 ### Added

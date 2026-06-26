@@ -16,6 +16,8 @@
         static let jumpButton = "consoledock.jump"
         static let jumpLatestLog = "consoledock.jump-latest-log"
         static let jumpFirstError = "consoledock.jump-first-error"
+        static let jumpPreviousError = "consoledock.jump-previous-error"
+        static let jumpNextError = "consoledock.jump-next-error"
         static let pauseLiveButton = "consoledock.pause-live"
         static let resumeLiveButton = "consoledock.resume-live"
         static let searchBar = "consoledock.search"

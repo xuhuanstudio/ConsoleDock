@@ -12,8 +12,8 @@ ConsoleDock releases are source-first Swift Package Manager releases. A public r
 
 ## Before Tagging
 
-1. Decide the version, for example `v0.8.0`.
-2. Move completed `CHANGELOG.md` entries from `Unreleased` into a heading that matches the tag, for example `## v0.8.0 - 2026-06-26`.
+1. Decide the version, for example `v0.9.0`.
+2. Move completed `CHANGELOG.md` entries from `Unreleased` into a heading that matches the tag, for example `## v0.9.0 - 2026-06-26`.
 3. Confirm README, DocC, sample app walkthrough, release-build safety, logging boundaries, security policy, GitHub repository setup, and roadmap still describe the current shipped behavior.
 4. Confirm the [distribution strategy](distribution-strategy.md) still says SPM is the supported channel unless CocoaPods or XCFramework support has actually been implemented and validated.
 5. Confirm there are no secrets, production logs, credentials, tokens, or private screenshots in docs, examples, or screenshots. `scripts/audit-release-content.py` covers generated paths, private key blocks, common token shapes, and local absolute paths; review app-specific sensitive content manually.
@@ -47,7 +47,7 @@ GitHub release validation runs the focused Swift and Objective-C sample UI smoke
 2. Generate native, stdout, stderr, and `NSLog` entries.
 3. Confirm generated `token=...` values are displayed as `token=<redacted>`.
 4. Open the ConsoleDock panel.
-5. Verify search, source filter, level filter, pause/resume, log detail copy, marker creation, visible/all/issue-report share, Debug Actions, parameterized actions, App Context, clear, stop, and restart behavior.
+5. Verify plain and structured Logs search, source filter, level filter, Jump controls, pause/resume, log detail copy, marker creation, visible/all/issue-report share, Debug Actions, parameterized actions, App Context, clear, stop, and restart behavior.
 6. Run `scripts/validate-objc-sample-ui-smoke.sh` when Objective-C compatibility changed.
 
 ## Tag And Validate

@@ -898,6 +898,159 @@ final class ConsoleDockTests: XCTestCase {
         )
     }
 
+    func testEntryFilterSupportsStructuredSourceQueries() {
+        let entries = filterFixtureEntries()
+
+        XCTAssertEqual(
+            ConsoleDockEntryFilter.filteredEntries(entries, query: "source:stderr").map(\.message),
+            ["stderr network failure"]
+        )
+        XCTAssertEqual(
+            ConsoleDockEntryFilter.filteredEntries(entries, query: "source:STDOUT").map(\.message),
+            ["stdout response"]
+        )
+    }
+
+    func testEntryFilterSupportsStructuredLevelQueriesAndWarnAlias() {
+        let entries = filterFixtureEntries()
+
+        XCTAssertEqual(
+            ConsoleDockEntryFilter.filteredEntries(entries, query: "level:error").map(\.message),
+            ["stderr network failure"]
+        )
+        XCTAssertEqual(
+            ConsoleDockEntryFilter.filteredEntries(entries, query: "level:warn").map(\.message),
+            ["cache warning"]
+        )
+    }
+
+    func testEntryFilterSupportsStructuredFlagQueries() {
+        let entries = [
+            ConsoleDock.LogEntry(
+                timestamp: Date(timeIntervalSince1970: 1),
+                level: .info,
+                source: .native,
+                message: "partial entry",
+                partial: true
+            ),
+            ConsoleDock.LogEntry(
+                timestamp: Date(timeIntervalSince1970: 2),
+                level: .warning,
+                source: .stdout,
+                message: "redacted entry",
+                redacted: true
+            ),
+            ConsoleDock.LogEntry(
+                timestamp: Date(timeIntervalSince1970: 3),
+                level: .error,
+                source: .stderr,
+                message: "truncated entry",
+                truncated: true
+            )
+        ]
+
+        XCTAssertEqual(
+            ConsoleDockEntryFilter.filteredEntries(entries, query: "is:partial").map(\.message),
+            ["partial entry"]
+        )
+        XCTAssertEqual(
+            ConsoleDockEntryFilter.filteredEntries(entries, query: "is:redacted").map(\.message),
+            ["redacted entry"]
+        )
+        XCTAssertEqual(
+            ConsoleDockEntryFilter.filteredEntries(entries, query: "is:truncated").map(\.message),
+            ["truncated entry"]
+        )
+    }
+
+    func testEntryFilterSupportsQuotedPhrasesAndExcludedTerms() {
+        let entries = filterFixtureEntries()
+
+        XCTAssertEqual(
+            ConsoleDockEntryFilter.filteredEntries(entries, query: "\"network failure\"").map(\.message),
+            ["stderr network failure"]
+        )
+        XCTAssertEqual(
+            ConsoleDockEntryFilter.filteredEntries(entries, query: "native -login").map(\.message),
+            ["cache warning", "fatal fault"]
+        )
+        XCTAssertEqual(
+            ConsoleDockEntryFilter.filteredEntries(entries, query: "network -\"network failure\"").map(\.message),
+            []
+        )
+    }
+
+    func testEntryFilterUnknownStructuredTokensFallBackToText() {
+        let entries =
+            filterFixtureEntries()
+            + [
+                ConsoleDock.LogEntry(
+                    timestamp: Date(timeIntervalSince1970: 6),
+                    level: .info,
+                    source: .native,
+                    message: "manual source:external marker"
+                )
+            ]
+
+        XCTAssertEqual(
+            ConsoleDockEntryFilter.filteredEntries(entries, query: "source:external").map(\.message),
+            ["manual source:external marker"]
+        )
+    }
+
+    func testEntryFilterCombinesStructuredQueriesWithSegmentedScopes() {
+        let entries = filterFixtureEntries()
+
+        XCTAssertEqual(
+            ConsoleDockEntryFilter.filteredEntries(entries, query: "source:stderr level:error").map(\.message),
+            ["stderr network failure"]
+        )
+        XCTAssertEqual(
+            ConsoleDockEntryFilter.filteredEntries(entries, query: "source:stdout level:error").map(\.message),
+            []
+        )
+        XCTAssertEqual(
+            ConsoleDockEntryFilter.filteredEntries(
+                entries,
+                query: "level:error",
+                sourceScope: .stderr,
+                levelScope: .all
+            ).map(\.message),
+            ["stderr network failure"]
+        )
+        XCTAssertEqual(
+            ConsoleDockEntryFilter.filteredEntries(
+                entries,
+                query: "level:error",
+                sourceScope: .native,
+                levelScope: .all
+            ).map(\.message),
+            []
+        )
+        XCTAssertEqual(
+            ConsoleDockEntryFilter.filteredEntries(
+                entries,
+                query: "source:native",
+                sourceScope: .all,
+                levelScope: .fault
+            ).map(\.message),
+            ["fatal fault"]
+        )
+    }
+
+    func testEntryFilterUsesAndSemanticsForMultipleTerms() {
+        let entries = filterFixtureEntries()
+
+        XCTAssertEqual(
+            ConsoleDockEntryFilter.filteredEntries(entries, query: "network failure").map(\.message),
+            ["stderr network failure"]
+        )
+        XCTAssertEqual(
+            ConsoleDockEntryFilter.filteredEntries(entries, query: "network login").map(\.message),
+            []
+        )
+    }
+
     func testLiveUpdateBufferFreezesDisplayedEntriesWhilePaused() {
         var buffer = ConsoleDockLiveUpdateBuffer()
         let initialEntries = [filterFixtureEntries()[0]]

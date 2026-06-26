@@ -22,6 +22,7 @@
         private var searchQuery = ""
         private var sourceScope = ConsoleDockEntryFilter.SourceScope.all
         private var levelScope = ConsoleDockEntryFilter.LevelScope.all
+        private var focusedEntryID: UInt64?
         private var observer: ConsoleDockEntriesObserver?
         private var diagnosticsObserver: NSObjectProtocol?
         private var pauseButton: UIBarButtonItem?
@@ -109,7 +110,7 @@
         private func configureSearchController() {
             searchController.searchResultsUpdater = self
             searchController.obscuresBackgroundDuringPresentation = false
-            searchController.searchBar.placeholder = "Search logs"
+            searchController.searchBar.placeholder = "Search, level:error, source:stderr"
             searchController.searchBar.scopeButtonTitles = ConsoleDockEntryFilter.SourceScope.allCases.map(\.title)
             searchController.searchBar.delegate = self
             searchController.searchBar.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.searchBar
@@ -351,6 +352,21 @@
             firstErrorAction.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.jumpFirstError
             firstErrorAction.isEnabled = firstVisibleErrorIndex() != nil
             alert.addAction(firstErrorAction)
+
+            let previousErrorAction = UIAlertAction(title: "Previous Visible Error", style: .default) { [weak self] _ in
+                self?.scrollToPreviousVisibleError()
+            }
+            previousErrorAction.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.jumpPreviousError
+            previousErrorAction.isEnabled = previousVisibleErrorIndex() != nil
+            alert.addAction(previousErrorAction)
+
+            let nextErrorAction = UIAlertAction(title: "Next Visible Error", style: .default) { [weak self] _ in
+                self?.scrollToNextVisibleError()
+            }
+            nextErrorAction.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.jumpNextError
+            nextErrorAction.isEnabled = nextVisibleErrorIndex() != nil
+            alert.addAction(nextErrorAction)
+
             alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
             alert.popoverPresentationController?.sourceView = jumpInlineButton
             alert.popoverPresentationController?.sourceRect = jumpInlineButton.bounds
@@ -367,14 +383,48 @@
             scrollToVisibleEntry(at: index)
         }
 
+        private func scrollToPreviousVisibleError() {
+            guard let index = previousVisibleErrorIndex() else { return }
+            scrollToVisibleEntry(at: index)
+        }
+
+        private func scrollToNextVisibleError() {
+            guard let index = nextVisibleErrorIndex() else { return }
+            scrollToVisibleEntry(at: index)
+        }
+
         private func firstVisibleErrorIndex() -> Int? {
             visibleEntries.firstIndex { entry in
-                entry.level == .error || entry.level == .fault
+                isErrorOrFault(entry)
             }
+        }
+
+        private func previousVisibleErrorIndex() -> Int? {
+            let currentIndex = currentFocusedVisibleIndex() ?? visibleEntries.count
+            return visibleEntries.indices.reversed().first { index in
+                index < currentIndex && isErrorOrFault(visibleEntries[index])
+            }
+        }
+
+        private func nextVisibleErrorIndex() -> Int? {
+            let currentIndex = currentFocusedVisibleIndex() ?? -1
+            return visibleEntries.indices.first { index in
+                index > currentIndex && isErrorOrFault(visibleEntries[index])
+            }
+        }
+
+        private func currentFocusedVisibleIndex() -> Int? {
+            guard let focusedEntryID else { return nil }
+            return visibleEntries.firstIndex { $0.id == focusedEntryID }
+        }
+
+        private func isErrorOrFault(_ entry: ConsoleDock.LogEntry) -> Bool {
+            entry.level == .error || entry.level == .fault
         }
 
         private func scrollToVisibleEntry(at index: Int) {
             guard visibleEntries.indices.contains(index) else { return }
+            focusedEntryID = visibleEntries[index].id
             let indexPath = IndexPath(row: index, section: 0)
             tableView.scrollToRow(at: indexPath, at: .middle, animated: true)
             tableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
@@ -503,7 +553,9 @@
 
         func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
             guard visibleEntries.indices.contains(indexPath.row) else { return }
-            let detailController = ConsoleDockLogDetailViewController(entry: visibleEntries[indexPath.row])
+            let entry = visibleEntries[indexPath.row]
+            focusedEntryID = entry.id
+            let detailController = ConsoleDockLogDetailViewController(entry: entry)
             navigationController?.pushViewController(detailController, animated: true)
             tableView.deselectRow(at: indexPath, animated: true)
         }

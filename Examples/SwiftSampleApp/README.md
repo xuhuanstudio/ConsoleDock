@@ -45,7 +45,7 @@ From the package root:
 scripts/validate-swift-sample-ui-smoke.sh
 ```
 
-The script chooses an available iPhone simulator unless `CONSOLEDOCK_UI_SMOKE_DESTINATION` is set. It launches the app with `--consoledock-ui-smoke` so the test focuses on native ConsoleDock entries, redaction, the bundled panel, search control rendering, level filtering, Logs jump controls, log detail, markers, issue report sharing, Debug Actions, Actions search, parameterized Debug Actions, disabled/destructive action metadata, App Context tab refresh, pause/resume, clear refresh, and close behavior without stdout/stderr capture descriptor noise. Unit tests cover the session-only recent parameter values, local action execution history, reproduction timeline, and temporary issue-report file output behind the sample flows.
+The script chooses an available iPhone simulator unless `CONSOLEDOCK_UI_SMOKE_DESTINATION` is set. It launches the app with `--consoledock-ui-smoke` so the test focuses on native ConsoleDock entries, redaction, the bundled panel, structured Logs search, level filtering, Logs jump controls, log detail, markers, issue report sharing, Debug Actions, Actions search, parameterized Debug Actions, disabled/destructive action metadata, App Context tab refresh, pause/resume, clear refresh, and close behavior without stdout/stderr capture descriptor noise. Unit tests cover structured Logs query parsing, the session-only recent parameter values, local action execution history, reproduction timeline, and temporary issue-report file output behind the sample flows.
 
 ## Manual Check
 
@@ -56,7 +56,7 @@ For the full shared checklist, see [Sample app walkthrough](../../docs/sample-ap
 3. Tap `Hide Floating Button`, then `Show Floating Button`, and confirm the console can still be opened from the sample button.
 4. Tap each logging button, including `Log diagnostics` and `App logger sink`.
 5. Confirm entries appear in the console, diagnostics are readable, and `token=...` values are displayed as `<redacted>`.
-6. Use the Logs `Jump` menu to jump to the latest visible log and first visible error.
+6. Search Logs with `level:error`, then use the Logs `Jump` menu to jump to the latest visible log and first/previous/next visible error.
 7. Add a marker from the console and confirm the `[marker]` entry appears.
 8. Open the share menu and confirm `Share Issue Report` and `Copy Issue Report` are available. `Share Issue Report` uses a temporary local `.txt` item.
 9. Switch to `Actions`, search for `Smoke`, and confirm the smoke action remains executable.

@@ -25,6 +25,8 @@ REQUIRED_IDENTIFIERS = {
         "consoledock.jump",
         "consoledock.jump-latest-log",
         "consoledock.jump-first-error",
+        "consoledock.jump-previous-error",
+        "consoledock.jump-next-error",
         "consoledock.pause-live",
         "consoledock.resume-live",
         "consoledock.search",

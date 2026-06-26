@@ -79,7 +79,7 @@ struct ConsoleDockEntryFilter {
         sourceScope: SourceScope = .all,
         levelScope: LevelScope = .all
     ) -> [ConsoleDock.LogEntry] {
-        let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        let parsedQuery = Query(query)
 
         return entries.filter { entry in
             guard sourceScope.contains(entry.source) else {
@@ -88,10 +88,171 @@ struct ConsoleDockEntryFilter {
             guard levelScope.contains(entry.level) else {
                 return false
             }
-            guard !trimmedQuery.isEmpty else {
-                return true
+            return parsedQuery.matches(entry, searchableText: searchableText(for: entry))
+        }
+    }
+
+    private struct Query {
+        private let includedTerms: [String]
+        private let excludedTerms: [String]
+        private let sourcePredicates: [ConsoleDock.LogSource]
+        private let levelPredicates: [ConsoleDock.LogLevel]
+        private let flagPredicates: [EntryFlag]
+
+        init(_ rawValue: String) {
+            var includedTerms: [String] = []
+            var excludedTerms: [String] = []
+            var sourcePredicates: [ConsoleDock.LogSource] = []
+            var levelPredicates: [ConsoleDock.LogLevel] = []
+            var flagPredicates: [EntryFlag] = []
+
+            for token in Self.tokenize(rawValue) {
+                let trimmedToken = token.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !trimmedToken.isEmpty else { continue }
+
+                let isExcluded = trimmedToken.hasPrefix("-") && trimmedToken.count > 1
+                let value = isExcluded ? String(trimmedToken.dropFirst()) : trimmedToken
+                guard !value.isEmpty else { continue }
+
+                if isExcluded {
+                    excludedTerms.append(value)
+                    continue
+                }
+
+                if let predicate = Self.sourcePredicate(for: value) {
+                    sourcePredicates.append(predicate)
+                } else if let predicate = Self.levelPredicate(for: value) {
+                    levelPredicates.append(predicate)
+                } else if let predicate = Self.flagPredicate(for: value) {
+                    flagPredicates.append(predicate)
+                } else {
+                    includedTerms.append(value)
+                }
             }
-            return searchableText(for: entry).localizedCaseInsensitiveContains(trimmedQuery)
+
+            self.includedTerms = includedTerms
+            self.excludedTerms = excludedTerms
+            self.sourcePredicates = sourcePredicates
+            self.levelPredicates = levelPredicates
+            self.flagPredicates = flagPredicates
+        }
+
+        func matches(_ entry: ConsoleDock.LogEntry, searchableText: String) -> Bool {
+            for source in sourcePredicates where entry.source != source {
+                return false
+            }
+            for level in levelPredicates where entry.level != level {
+                return false
+            }
+            for flag in flagPredicates where !flag.contains(entry) {
+                return false
+            }
+            for term in includedTerms where !searchableText.localizedCaseInsensitiveContains(term) {
+                return false
+            }
+            for term in excludedTerms where searchableText.localizedCaseInsensitiveContains(term) {
+                return false
+            }
+            return true
+        }
+
+        private static func tokenize(_ rawValue: String) -> [String] {
+            var tokens: [String] = []
+            var current = ""
+            var isInsideQuotes = false
+            var index = rawValue.startIndex
+
+            while index < rawValue.endIndex {
+                let character = rawValue[index]
+                if character == "\"" {
+                    isInsideQuotes.toggle()
+                } else if character.isWhitespace && !isInsideQuotes {
+                    appendToken(current, to: &tokens)
+                    current = ""
+                } else {
+                    current.append(character)
+                }
+                index = rawValue.index(after: index)
+            }
+            appendToken(current, to: &tokens)
+            return tokens
+        }
+
+        private static func appendToken(_ rawToken: String, to tokens: inout [String]) {
+            let trimmedToken = rawToken.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmedToken.isEmpty else { return }
+            tokens.append(trimmedToken)
+        }
+
+        private static func sourcePredicate(for token: String) -> ConsoleDock.LogSource? {
+            guard let value = normalizedValue(forKey: "source", in: token) else { return nil }
+            switch value {
+            case "native":
+                return .native
+            case "stdout":
+                return .stdout
+            case "stderr":
+                return .stderr
+            default:
+                return nil
+            }
+        }
+
+        private static func levelPredicate(for token: String) -> ConsoleDock.LogLevel? {
+            guard let value = normalizedValue(forKey: "level", in: token) else { return nil }
+            switch value {
+            case "debug":
+                return .debug
+            case "info":
+                return .info
+            case "warning", "warn":
+                return .warning
+            case "error":
+                return .error
+            case "fault":
+                return .fault
+            default:
+                return nil
+            }
+        }
+
+        private static func flagPredicate(for token: String) -> EntryFlag? {
+            guard let value = normalizedValue(forKey: "is", in: token) else { return nil }
+            switch value {
+            case "partial":
+                return .partial
+            case "redacted":
+                return .redacted
+            case "truncated":
+                return .truncated
+            default:
+                return nil
+            }
+        }
+
+        private static func normalizedValue(forKey key: String, in token: String) -> String? {
+            let prefix = "\(key):"
+            guard token.lowercased().hasPrefix(prefix), token.count > prefix.count else {
+                return nil
+            }
+            return String(token.dropFirst(prefix.count)).lowercased()
+        }
+    }
+
+    private enum EntryFlag {
+        case partial
+        case redacted
+        case truncated
+
+        func contains(_ entry: ConsoleDock.LogEntry) -> Bool {
+            switch self {
+            case .partial:
+                return entry.partial
+            case .redacted:
+                return entry.redacted
+            case .truncated:
+                return entry.truncated
+            }
         }
     }
 

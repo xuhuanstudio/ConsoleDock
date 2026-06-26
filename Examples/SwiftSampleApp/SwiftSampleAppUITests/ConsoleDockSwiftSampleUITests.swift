@@ -37,7 +37,15 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
         XCTAssertTrue(waitForTableEntry(containing: "native error", in: entriesTable, timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "native fault", in: entriesTable, timeout: 5))
         XCTAssertFalse(tableEntry(containing: "sample-secret", existsIn: entriesTable))
-        XCTAssertTrue(app.searchFields.firstMatch.waitForExistence(timeout: 5))
+        let logsSearch = app.searchFields.firstMatch
+        XCTAssertTrue(logsSearch.waitForExistence(timeout: 5))
+        logsSearch.tap()
+        logsSearch.typeText("level:error")
+        XCTAssertTrue(waitForVisibleEntryCount(1, in: statusLabel, timeout: 10))
+        XCTAssertTrue(waitForTableEntry(containing: "native error", in: entriesTable, timeout: 5))
+        XCTAssertFalse(tableEntry(containing: "native fault", existsIn: entriesTable))
+        clearSearchField(logsSearch)
+        XCTAssertTrue(waitForVisibleEntryCount(4, in: statusLabel, timeout: 10))
 
         let levelFilter = app.segmentedControls["consoledock.level-filter"]
         XCTAssertTrue(levelFilter.waitForExistence(timeout: 5))
@@ -53,7 +61,13 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
         jumpButton.tap()
         XCTAssertTrue(app.buttons["consoledock.jump-latest-log"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["consoledock.jump-first-error"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["consoledock.jump-previous-error"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["consoledock.jump-next-error"].waitForExistence(timeout: 5))
         app.buttons["consoledock.jump-first-error"].firstMatch.tap()
+        XCTAssertTrue(entriesTable.waitForExistence(timeout: 5))
+        jumpButton.tap()
+        XCTAssertTrue(app.buttons["consoledock.jump-next-error"].waitForExistence(timeout: 5))
+        app.buttons["consoledock.jump-next-error"].firstMatch.tap()
         XCTAssertTrue(entriesTable.waitForExistence(timeout: 5))
         jumpButton.tap()
         XCTAssertTrue(app.buttons["consoledock.jump-latest-log"].waitForExistence(timeout: 5))
@@ -247,6 +261,14 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
             RunLoop.current.run(until: Date().addingTimeInterval(0.1))
         } while Date() < deadline
         return false
+    }
+
+    private func clearSearchField(_ searchField: XCUIElement) {
+        searchField.tap()
+        guard let value = searchField.value as? String, !value.isEmpty else {
+            return
+        }
+        searchField.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: value.count))
     }
 
     private func tableEntry(containing text: String, existsIn table: XCUIElement) -> Bool {
