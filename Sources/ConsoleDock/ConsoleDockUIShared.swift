@@ -98,6 +98,22 @@
         }
     }
 
+    enum ConsoleDockSegmentedControlStyle {
+        static func applyDarkPanelStyle(to control: UISegmentedControl) {
+            control.backgroundColor = UIColor(white: 0.1, alpha: 1)
+            if #available(iOS 13.0, *) {
+                control.selectedSegmentTintColor = UIColor(white: 0.92, alpha: 1)
+            } else {
+                control.tintColor = UIColor(white: 0.92, alpha: 1)
+            }
+            control.setTitleTextAttributes([.foregroundColor: UIColor.black], for: .selected)
+            control.setTitleTextAttributes(
+                [.foregroundColor: UIColor(white: 0.86, alpha: 1)],
+                for: .normal
+            )
+        }
+    }
+
     extension ConsoleDock.LogLevel {
         var consoleDockLabel: String {
             switch self {

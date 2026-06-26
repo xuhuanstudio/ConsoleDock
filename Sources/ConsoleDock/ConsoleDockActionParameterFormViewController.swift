@@ -222,9 +222,7 @@
                 ConsoleDockAccessibilityIdentifiers.actionParameterChoiceInput,
                 parameterID: parameter.id
             )
-            control.backgroundColor = UIColor(white: 0.1, alpha: 1)
-            control.setTitleTextAttributes([.foregroundColor: UIColor.white], for: .selected)
-            control.setTitleTextAttributes([.foregroundColor: UIColor(white: 0.82, alpha: 1)], for: .normal)
+            ConsoleDockSegmentedControlStyle.applyDarkPanelStyle(to: control)
 
             if let choiceID = initialChoiceID(for: parameter),
                 let index = choices.firstIndex(where: { $0.id == choiceID })

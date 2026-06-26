@@ -8,6 +8,13 @@ The project follows Semantic Versioning for public releases.
 
 No changes yet.
 
+## v0.13.1 - 2026-06-27
+
+### Fixed
+
+- Fixed selected segmented-control text contrast in the bundled UIKit panel and Debug Action parameter forms.
+- Refreshed current iOS Simulator documentation screenshots after the UIKit contrast fix.
+
 ## v0.13.0 - 2026-06-27
 
 ### Added

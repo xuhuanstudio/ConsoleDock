@@ -121,10 +121,7 @@
             levelSegmentedControl.translatesAutoresizingMaskIntoConstraints = false
             levelSegmentedControl.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.levelFilter
             levelSegmentedControl.selectedSegmentIndex = ConsoleDockEntryFilter.LevelScope.all.rawValue
-            levelSegmentedControl.backgroundColor = UIColor(white: 0.1, alpha: 1)
-            levelSegmentedControl.setTitleTextAttributes([.foregroundColor: UIColor.white], for: .selected)
-            levelSegmentedControl.setTitleTextAttributes(
-                [.foregroundColor: UIColor(white: 0.82, alpha: 1)], for: .normal)
+            ConsoleDockSegmentedControlStyle.applyDarkPanelStyle(to: levelSegmentedControl)
             levelSegmentedControl.addTarget(self, action: #selector(levelScopeDidChange), for: .valueChanged)
             view.addSubview(levelSegmentedControl)
         }
