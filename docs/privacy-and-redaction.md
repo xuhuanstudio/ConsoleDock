@@ -22,7 +22,7 @@ Stored entries include `partial`, `redacted`, and `truncated` flags. The `redact
 
 When stdout or stderr capture has to split an oversized line into partial fragments, ConsoleDock keeps redaction state per source. If one partial fragment is redacted, following fragments from the same source are stored as `<redacted partial continuation>` until that line ends. This favors privacy over preserving every byte of an oversized secret-bearing line.
 
-The UIKit console reads from that in-memory buffer. Log detail copy, share/export actions, markers, and issue reports use already-redacted entries from the current in-memory store. ConsoleDock does not persist logs to disk, upload logs, or collect logs from other apps or system processes by default.
+The UIKit console reads from that in-memory buffer. Log detail copy, share/export actions, markers, and issue reports use already-redacted entries from the current in-memory store. App Context values come from the app-provided context provider and are included in issue reports as app-authored diagnostic text. ConsoleDock does not persist logs or App Context to disk, upload logs or context, or collect logs from other apps or system processes by default.
 
 ## Default Redaction Coverage
 
@@ -106,7 +106,9 @@ When adapting an existing logger, forward already-formatted messages only after 
 
 ConsoleDock's bundled UIKit console only copies or shares entries that are already stored in redacted form. The share sheet can export the current visible in-memory snapshot, all currently retained entries, or a local issue report as plain text and does not create a persistent export file by itself.
 
-Issue reports include session metadata, diagnostics, a marker index, and all currently retained redacted logs. They are generated through a user-initiated local share action; ConsoleDock does not upload them or create remote issues automatically.
+Issue reports include session metadata, diagnostics, App Context, a marker index, and all currently retained redacted logs. They are generated through a user-initiated local share action; ConsoleDock does not upload them or create remote issues automatically.
+
+App Context is not passed through the log redaction pipeline. Only provide values that are already appropriate for a local debug report, such as non-secret environment names, feature flag names, route labels, or explicitly redacted identifiers.
 
 Filtering changes only the visible snapshot used by the panel and visible-log share action. It does not mutate stored entries and does not make hidden entries safe to expose elsewhere.
 
@@ -123,6 +125,7 @@ Before enabling ConsoleDock in a shared test build:
 - confirm the build is not an App Store production build;
 - confirm custom redaction covers app-specific identifiers;
 - confirm sample logs show `<redacted>` for expected sensitive values;
+- confirm App Context values do not contain raw secrets or unnecessary personal data;
 - confirm testers understand that copy/share actions can expose visible logs;
 - confirm no logs are persisted or uploaded by another app-specific integration without a separate privacy review.
 

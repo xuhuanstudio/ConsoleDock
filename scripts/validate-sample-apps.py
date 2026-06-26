@@ -38,6 +38,8 @@ REQUIRED_SNIPPETS = {
         "issue report sharing",
         "Debug Actions",
         "Actions search",
+        "parameterized Debug Actions",
+        "App Context tab refresh",
         "Floating trigger controls",
     ],
     "Examples/ObjCSampleApp/README.md": [
@@ -53,6 +55,8 @@ REQUIRED_SNIPPETS = {
         "issue report sharing",
         "Debug Actions",
         "Actions search",
+        "parameterized Debug Actions",
+        "App Context tab refresh",
         "Floating trigger controls",
     ],
     "docs/sample-app-walkthrough.md": [
@@ -68,6 +72,8 @@ REQUIRED_SNIPPETS = {
         "issue-report copy action availability",
         "Debug Actions",
         "Actions search",
+        "parameterized Debug Actions",
+        "App Context tab refresh",
         "logger forwarder sink",
     ],
     "Examples/SwiftSampleApp/SwiftSampleApp/MainViewController.swift": [
@@ -77,6 +83,8 @@ REQUIRED_SNIPPETS = {
         "style: .destructive",
         "isEnabled: false",
         "floatingButtonPosition: .bottomLeading",
+        "ConsoleDock.setAppContextProvider",
+        "id: \"orderId\"",
     ],
     "Examples/ObjCSampleApp/ObjCSampleApp/MainViewController.m": [
         "CDKLogForwarder *SampleAppLogForwarder",
@@ -85,6 +93,8 @@ REQUIRED_SNIPPETS = {
         "CDKDebugActionStyleDestructive",
         "isEnabled:NO",
         "CDKFloatingButtonPositionBottomLeading",
+        "setAppContextProvider",
+        "stringParameterWithIdentifier:@\"orderId\"",
     ],
     "scripts/validate-release.sh": [
         "scripts/validate-swift-sample-ui-smoke.sh",

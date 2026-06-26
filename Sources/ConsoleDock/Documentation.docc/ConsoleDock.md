@@ -21,6 +21,7 @@ ConsoleDock is not a full replacement for Xcode Console or Apple unified logging
 - <doc:ExistingLoggerMigration>
 - <doc:IntegrationDiagnostics>
 - <doc:DebugActions>
+- <doc:AppContext>
 - <doc:TestSessionReports>
 - <doc:DailyDebugUsability>
 - <doc:PrivacyAndReleaseSafety>
@@ -62,6 +63,11 @@ ConsoleDock is not a full replacement for Xcode Console or Apple unified logging
 - ``ConsoleDock/sessionMetadata``
 - ``ConsoleDock/SessionMetadata``
 - ``ConsoleDock/mark(_:)``
+- ``ConsoleDock/appContext``
+- ``ConsoleDock/AppContextSection``
+- ``ConsoleDock/AppContextItem``
+- ``ConsoleDock/setAppContextProvider(_:)``
+- ``ConsoleDock/clearAppContextProvider()``
 
 ### Showing The UIKit Console
 
@@ -74,6 +80,11 @@ ConsoleDock is not a full replacement for Xcode Console or Apple unified logging
 ### Registering Debug Actions
 
 - ``ConsoleDock/registerAction(id:title:group:detail:requiresConfirmation:isEnabled:style:handler:)``
+- ``ConsoleDock/registerAction(id:title:group:detail:requiresConfirmation:isEnabled:style:parameters:handler:)``
 - ``ConsoleDock/unregisterAction(id:)``
 - ``ConsoleDock/removeAllActions()``
 - ``ConsoleDock/DebugActionStyle``
+- ``ConsoleDock/DebugActionChoice``
+- ``ConsoleDock/DebugActionParameter``
+- ``ConsoleDock/DebugActionParameterValue``
+- ``ConsoleDock/DebugActionParameters``

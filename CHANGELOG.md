@@ -8,6 +8,18 @@ The project follows Semantic Versioning for public releases.
 
 No changes yet.
 
+## v0.7.0 - 2026-06-26
+
+### Added
+
+- Added parameterized Debug Actions with string, number, boolean, and choice inputs for Swift integrations.
+- Added Objective-C/UIKit parameterized Debug Action APIs through `CDKDebugActionParameter` and `CDKConsoleDockUIKit`.
+- Added a bundled UIKit action parameter form with validation and stable accessibility identifiers.
+- Added App Context snapshots through `ConsoleDock.setAppContextProvider` and `CDKConsoleDockUIKit.setAppContextProvider`.
+- Added a bundled UIKit Context tab with refresh support.
+- Added App Context output to local issue reports.
+- Added Swift and Objective-C sample parameterized actions, App Context providers, UI smoke coverage, API validators, DocC, README, roadmap, and sample walkthrough updates for contextual debugging.
+
 ## v0.6.0 - 2026-06-26
 
 ### Added

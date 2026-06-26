@@ -10,9 +10,10 @@ ConsoleDock does this with three local pieces:
 
 - ``ConsoleDock/sessionMetadata`` returns app, process, OS, device, locale, time zone, session, and generation context.
 - ``ConsoleDock/mark(_:)`` writes a native info entry with a stable `[marker]` prefix.
+- ``ConsoleDock/appContext`` returns app-provided local context when the host app registers a provider.
 - The bundled UIKit console offers `Mark`, `Share Issue Report`, and `Copy Issue Report` actions.
 
-Issue reports are generated locally through the system share sheet, copied locally through the pasteboard action, or read as text through ``ConsoleDock/issueReportText()``. They include session metadata, diagnostics, a marker index, and all currently retained redacted logs. ConsoleDock does not persist reports by default, upload them, or create remote issues automatically.
+Issue reports are generated locally through the system share sheet, copied locally through the pasteboard action, or read as text through ``ConsoleDock/issueReportText()``. They include session metadata, diagnostics, app context, a marker index, and all currently retained redacted logs. ConsoleDock does not persist reports by default, upload them, or create remote issues automatically.
 
 ## Add Markers
 
@@ -36,6 +37,23 @@ print(metadata.appVersion ?? "unknown")
 ```
 
 The metadata snapshot is local process context. It is not a persistent user identity and should not be treated as a privacy review substitute for exported logs.
+
+## Add App Context
+
+Register App Context when a useful issue report needs app-owned values that are not logs.
+
+```swift
+ConsoleDock.setAppContextProvider {
+    [
+        .init(title: "App", items: [
+            .init(key: "Environment", value: "staging"),
+            .init(key: "Current Screen", value: "Checkout")
+        ])
+    ]
+}
+```
+
+The bundled `Context` tab reads the same provider. See <doc:AppContext> for details and Objective-C usage.
 
 ## Share From The Bundled Console
 

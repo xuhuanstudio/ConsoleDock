@@ -128,6 +128,22 @@ ConsoleDock.registerAction(
 
 The host app owns the behavior. ConsoleDock does not automatically discover pages, control routing, bypass app permissions, or receive remote commands. See <doc:DebugActions>.
 
+When a local shortcut needs tester input, register a parameterized Debug Action:
+
+```swift
+ConsoleDock.registerAction(
+    id: "open.order",
+    title: "Open Order",
+    parameters: [
+        .string(id: "orderId", title: "Order ID", isRequired: true)
+    ]
+) { values in
+    AppRouter.shared.openOrder(id: values.string("orderId") ?? "")
+}
+```
+
+ConsoleDock collects parameters locally in the bundled Actions tab and does not persist the submitted values.
+
 ## Mark A Test Session
 
 Use ``ConsoleDock/mark(_:)`` to add a reproduction timeline entry from app code or a Debug Action.
@@ -136,4 +152,18 @@ Use ``ConsoleDock/mark(_:)`` to add a reproduction timeline entry from app code 
 ConsoleDock.mark("Opened checkout")
 ```
 
-The bundled UIKit console also exposes a `Mark` action plus `Share Issue Report` and `Copy Issue Report` options. Issue reports are local, user-initiated plain-text exports containing session metadata, diagnostics, markers, and currently retained redacted logs. ConsoleDock does not upload them or create remote issues automatically. See <doc:TestSessionReports>.
+The bundled UIKit console also exposes a `Mark` action plus `Share Issue Report` and `Copy Issue Report` options. Issue reports are local, user-initiated plain-text exports containing session metadata, diagnostics, app context, markers, and currently retained redacted logs. ConsoleDock does not upload them or create remote issues automatically. See <doc:TestSessionReports>.
+
+Use App Context for app-owned values that help explain a local report:
+
+```swift
+ConsoleDock.setAppContextProvider {
+    [
+        .init(title: "App", items: [
+            .init(key: "Environment", value: "staging")
+        ])
+    ]
+}
+```
+
+The same snapshot appears in the bundled `Context` tab. See <doc:AppContext>.

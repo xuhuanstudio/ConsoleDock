@@ -15,7 +15,7 @@ ConsoleDock is an early-stage iOS debug SDK that lets testers inspect app logs d
 
 ## Status
 
-ConsoleDock `v0.6.0` is the current source-first Swift Package Manager preview release. It contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, logger forwarders for existing logger sinks, session metadata, manual markers, bounded in-memory entries with stable session identifiers and partial/redacted/truncated flags, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, runtime diagnostics, entry change notification, Debug Actions with enabled/destructive metadata and local search, log detail, Logs jump actions, explicit visible/all/issue-report sharing and issue-report copying, Release startup safety gates, a configurable UIKit-only floating button/panel foundation, Swift and Objective-C sample apps, DocC documentation, release validation workflow, and focused tests.
+ConsoleDock `v0.7.0` is the current source-first Swift Package Manager preview release. It contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, logger forwarders for existing logger sinks, session metadata, manual markers, bounded in-memory entries with stable session identifiers and partial/redacted/truncated flags, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, runtime diagnostics, entry change notification, Debug Actions with enabled/destructive metadata, local search, and parameter forms, app-provided Context snapshots for the panel and issue reports, log detail, Logs jump actions, explicit visible/all/issue-report sharing and issue-report copying, Release startup safety gates, a configurable UIKit-only floating button/panel foundation, Swift and Objective-C sample apps, DocC documentation, release validation workflow, and focused tests.
 
 Current limitations:
 
@@ -24,7 +24,7 @@ Current limitations:
 - File-descriptor capture can include framework or runtime warnings written through the app process descriptors, not only application-authored messages.
 - Runtime diagnostics report current ConsoleDock state and bounded in-memory store counts; they are not evidence of complete Swift `Logger`, `os_log`, or Apple unified logging capture.
 - Entry change notification exists as the refresh foundation for UI; notification handlers should fetch a snapshot through `entries`.
-- The UIKit floating button and console panel foundation can show, search, source-filter, level-filter, jump to latest/first visible error, pause/resume live follow, live refresh, log detail, copy, clear, add manual markers, visible/all/issue-report share/export with diagnostics, copy issue reports, search and run Debug Actions, and close the current in-memory snapshot.
+- The UIKit floating button and console panel foundation can show, search, source-filter, level-filter, jump to latest/first visible error, pause/resume live follow, live refresh, log detail, copy, clear, add manual markers, visible/all/issue-report share/export with diagnostics and app context, copy issue reports, search and run Debug Actions, collect small action parameters, show app context, and close the current in-memory snapshot.
 - Persistence and advanced query syntax are not implemented yet.
 - Third-party adapters, CocoaPods, and XCFramework distribution are not implemented yet.
 - Redaction is a local in-memory baseline, not a complete privacy guarantee.
@@ -63,7 +63,7 @@ Add the public repository URL through Xcode's package dependency UI:
 https://github.com/xuhuanstudio/ConsoleDock.git
 ```
 
-Use the latest release tag from GitHub Releases. `v0.6.0` includes configurable floating trigger controls, Logs jump actions, Actions search, logger forwarders for existing logger sinks, Test Session Reports, manual markers, Debug Actions, log detail, explicit visible/all/issue-report sharing and copying, runtime diagnostics, and release-validation hardening. Then depend on:
+Use the latest release tag from GitHub Releases. `v0.7.0` includes parameterized Debug Actions, App Context snapshots for issue reports and the bundled Context tab, configurable floating trigger controls, Logs jump actions, Actions search, logger forwarders for existing logger sinks, Test Session Reports, manual markers, Debug Actions, log detail, explicit visible/all/issue-report sharing and copying, runtime diagnostics, and release-validation hardening. Then depend on:
 
 - `ConsoleDock` for Swift API plus the bundled UIKit console.
 - `ConsoleDockCore` for Objective-C/C-compatible core APIs.
@@ -188,6 +188,40 @@ ConsoleDock only stores, displays, and triggers actions registered by the host a
 
 The bundled Actions page can search registered actions by `id`, title, group, or detail. Search is local UI filtering only; it does not execute actions or persist query state.
 
+Parameterized Debug Actions and App Context are available in `v0.7.0` and later. Use parameters for small local values a tester can provide before an action runs:
+
+```swift
+ConsoleDock.registerAction(
+    id: "open.order",
+    title: "Open Order",
+    group: "Scenario",
+    detail: "Open a local order test entry",
+    parameters: [
+        .string(id: "orderId", title: "Order ID", isRequired: true),
+        .number(id: "quantity", title: "Quantity", defaultValue: 1),
+        .bool(id: "animated", title: "Animated", defaultValue: true),
+        .choice(
+            id: "environment",
+            title: "Environment",
+            choices: [
+                .init(id: "staging", title: "Staging"),
+                .init(id: "qa", title: "QA")
+            ],
+            defaultChoiceID: "qa"
+        )
+    ]
+) { values in
+    AppRouter.shared.openOrder(
+        id: values.string("orderId") ?? "",
+        quantity: values.number("quantity") ?? 1,
+        animated: values.bool("animated") ?? true,
+        environment: values.choice("environment") ?? "qa"
+    )
+}
+```
+
+Parameters are not persisted and are collected only by the local bundled UI. They are for debug/test builds, not remote commands or an automation platform.
+
 ### Mark Test Sessions And Share Issue Reports
 
 Test Session Reports are available in `v0.4.0` and later. Use markers when a tester or debug action reaches an important point in a local reproduction.
@@ -206,7 +240,25 @@ CDKSessionMetadata *metadata = [CDKConsoleDock sessionMetadata];
 NSLog(@"ConsoleDock session: %@", metadata.sessionIdentifier);
 ```
 
-The bundled UIKit console includes `Mark`, `Share Issue Report`, and `Copy Issue Report` actions. The same local report text is available through `ConsoleDock.issueReportText()` and `CDKConsoleDockUIKit.issueReportText`. The issue report includes session metadata, diagnostics, a marker index, and all currently retained redacted logs.
+The bundled UIKit console includes `Mark`, `Share Issue Report`, and `Copy Issue Report` actions. The same local report text is available through `ConsoleDock.issueReportText()` and `CDKConsoleDockUIKit.issueReportText`. The issue report includes session metadata, diagnostics, app-provided context, a marker index, and all currently retained redacted logs.
+
+Apps can provide local context that appears in the bundled `Context` tab and in issue reports:
+
+```swift
+ConsoleDock.setAppContextProvider {
+    [
+        ConsoleDock.AppContextSection(
+            title: "App",
+            items: [
+                .init(key: "Environment", value: "staging"),
+                .init(key: "User ID", value: "<redacted>")
+            ]
+        )
+    ]
+}
+```
+
+App Context is read on demand, kept local, and not persisted or uploaded by ConsoleDock. Do not put raw secrets or unnecessary personal data in context values.
 
 Markers are normal native info entries with a stable `[marker]` prefix, so existing redaction, truncation, detail, search, copy, and share behavior still applies. ConsoleDock does not persist issue reports by default, upload them, or send them anywhere automatically.
 

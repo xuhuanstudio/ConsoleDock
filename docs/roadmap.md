@@ -152,7 +152,33 @@ Not included:
 - crash reporting.
 - CocoaPods or XCFramework distribution.
 
-## Post-v0.6 - Demand-Driven Compatibility Candidates
+## v0.7 - Contextual Debug Actions
+
+Goal: make local Debug Actions useful for realistic tester flows that need small input values, and make issue reports carry app-owned context without expanding ConsoleDock into a remote testing platform.
+
+Deliverables:
+
+- parameterized Debug Actions with string, number, boolean, and choice parameters.
+- Swift parameter access through `ConsoleDock.DebugActionParameters`.
+- Objective-C/UIKit parameterized action registration through `CDKDebugActionParameter`.
+- bundled UIKit action parameter forms with local validation.
+- app-owned App Context sections and items for local diagnostics.
+- bundled UIKit Context tab with manual refresh.
+- issue reports including App Context snapshots.
+- Swift and Objective-C samples updated to demonstrate parameterized actions and App Context.
+- focused unit tests, UI smoke coverage, validators, README, DocC, and sample walkthrough updates for contextual debugging.
+
+Not included:
+
+- remote command delivery.
+- automatic route discovery.
+- default persistence of parameters or context.
+- async action state management.
+- network inspector.
+- crash reporting.
+- CocoaPods or XCFramework distribution.
+
+## Post-v0.7 - Demand-Driven Compatibility Candidates
 
 Goal: improve adoption in existing apps only when real integration feedback shows SPM and the current explicit API are not enough.
 
@@ -163,6 +189,7 @@ Candidate work, not committed deliverables:
 - CocoaPods compatibility evaluation only if real older Objective-C or mixed projects cannot adopt the Swift Package.
 - optional disk export file generation, still local-only and user-initiated.
 - richer issue report formatting only if real tester workflows need it.
+- optional parameter presets only if real tester workflows prove repeated manual entry is painful.
 
 Not included:
 

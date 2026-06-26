@@ -27,6 +27,42 @@ Use non-empty stable `id` and `title` values. ConsoleDock trims required action 
 
 The bundled Actions view can search by action id, title, group, or detail. Search is local UI filtering only; it does not execute actions, persist queries, or change registration.
 
+## Register A Parameterized Action
+
+Use parameters when a local test shortcut needs a small amount of tester input before it runs.
+
+```swift
+ConsoleDock.registerAction(
+    id: "open.order",
+    title: "Open Order",
+    group: "Scenario",
+    detail: "Open a local order test entry",
+    parameters: [
+        .string(id: "orderId", title: "Order ID", isRequired: true),
+        .number(id: "quantity", title: "Quantity", defaultValue: 1),
+        .bool(id: "animated", title: "Animated", defaultValue: true),
+        .choice(
+            id: "environment",
+            title: "Environment",
+            choices: [
+                .init(id: "staging", title: "Staging"),
+                .init(id: "qa", title: "QA")
+            ],
+            defaultChoiceID: "qa"
+        )
+    ]
+) { values in
+    AppRouter.shared.openOrder(
+        id: values.string("orderId") ?? "",
+        quantity: values.number("quantity") ?? 1,
+        animated: values.bool("animated") ?? true,
+        environment: values.choice("environment") ?? "qa"
+    )
+}
+```
+
+The bundled UIKit console presents parameter fields locally before running the action. Parameter values are not persisted by ConsoleDock, and they are not remote commands. Keep this for bounded debug/test inputs such as identifiers, environment choices, counters, and feature toggles.
+
 ## Disable Or Style An Action
 
 Use `isEnabled: false` when an action is relevant to the app but temporarily unavailable. Disabled actions remain visible in the panel and are skipped by the registry if triggered programmatically.
@@ -81,3 +117,24 @@ Use the extended Objective-C registration method when the action needs explicit 
 ```
 
 Objective-C handlers do not report thrown errors to ConsoleDock. If an Objective-C action can fail, log that failure from the app-specific handler.
+
+Objective-C parameterized actions receive a dictionary of normalized values:
+
+```objc
+CDKDebugActionParameter *orderID =
+    [CDKDebugActionParameter stringParameterWithIdentifier:@"orderId"
+                                                    title:@"Order ID"
+                                                   detail:nil
+                                               isRequired:YES
+                                              defaultValue:nil];
+
+[CDKConsoleDockUIKit registerActionWithIdentifier:@"open.order"
+                                            title:@"Open Order"
+                                            group:@"Scenario"
+                                           detail:@"Open a local order test entry"
+                             requiresConfirmation:NO
+                                       parameters:@[orderID]
+                                          handler:^(NSDictionary<NSString *, id> *values) {
+    [AppRouter openOrderWithIdentifier:values[@"orderId"]];
+}];
+```

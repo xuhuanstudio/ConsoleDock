@@ -66,7 +66,25 @@ ConsoleDock.registerAction(id: "open.checkout", title: "Open Checkout") {
 }
 ```
 
+Actions can optionally ask for small local parameters such as an order id, environment choice, quantity, or boolean flag before they run. Parameter values are not persisted by ConsoleDock.
+
 ConsoleDock only displays and triggers actions that the app registers. It should not discover routes, control app navigation automatically, bypass business permissions, or accept remote commands.
+
+### App Context Mode
+
+Expose app-owned local diagnostics that help interpret logs and issue reports:
+
+```swift
+ConsoleDock.setAppContextProvider {
+    [
+        .init(title: "App", items: [
+            .init(key: "Environment", value: "staging")
+        ])
+    ]
+}
+```
+
+Context appears in the bundled Context tab and issue reports. It should be read on demand, kept local, and treated as app-authored diagnostic text rather than a privacy filter.
 
 ### Test Session Reports Mode
 
@@ -76,7 +94,7 @@ Let testers mark important reproduction steps and share a local issue report fro
 ConsoleDock.mark("Started checkout reproduction")
 ```
 
-The report should contain session metadata, diagnostics, a marker index, and currently retained redacted logs. It should be generated only through a user-initiated local share action. ConsoleDock should not persist reports by default, upload them, or create remote issues automatically.
+The report should contain session metadata, diagnostics, App Context, a marker index, and currently retained redacted logs. It should be generated only through a user-initiated local share action. ConsoleDock should not persist reports by default, upload them, or create remote issues automatically.
 
 ## Non-Goals
 
@@ -86,6 +104,7 @@ The report should contain session metadata, diagnostics, a marker index, and cur
 - Do not encourage enabling debug tooling in production builds without safeguards.
 - Do not turn Debug Actions into a remote command system or automatic route discovery layer.
 - Do not turn issue reports into default persistence, remote upload, or automatic issue creation.
+- Do not treat App Context as automatic redaction, route discovery, persistence, or remote telemetry.
 
 ## Naming Decision
 

@@ -78,3 +78,44 @@ Markers are native info entries with a stable `[marker]` prefix. The bundled UIK
 ```objc
 NSString *report = [CDKConsoleDockUIKit issueReportText];
 ```
+
+## Register Parameterized Debug Actions
+
+Objective-C apps can register actions with small local parameters through `CDKConsoleDockUIKit`.
+
+```objc
+CDKDebugActionParameter *orderID =
+    [CDKDebugActionParameter stringParameterWithIdentifier:@"orderId"
+                                                    title:@"Order ID"
+                                                   detail:nil
+                                               isRequired:YES
+                                              defaultValue:nil];
+
+[CDKConsoleDockUIKit registerActionWithIdentifier:@"open.order"
+                                            title:@"Open Order"
+                                            group:@"Scenario"
+                                           detail:@"Open a local order test entry"
+                             requiresConfirmation:NO
+                                       parameters:@[orderID]
+                                          handler:^(NSDictionary<NSString *, id> *values) {
+    [AppRouter openOrderWithIdentifier:values[@"orderId"]];
+}];
+```
+
+The bundled console displays the parameter form locally before running the action. ConsoleDock does not persist parameter values or receive remote commands.
+
+## Provide App Context
+
+Use App Context for local key-value diagnostics that should appear in the bundled `Context` tab and issue reports.
+
+```objc
+[CDKConsoleDockUIKit setAppContextProvider:^NSArray<CDKAppContextSection *> *{
+    CDKAppContextItem *environment =
+        [CDKAppContextItem itemWithKey:@"Environment" value:@"staging"];
+    CDKAppContextSection *app =
+        [CDKAppContextSection sectionWithTitle:@"App" items:@[environment]];
+    return @[app];
+}];
+```
+
+Clear the provider with `[CDKConsoleDockUIKit clearAppContextProvider]`.
