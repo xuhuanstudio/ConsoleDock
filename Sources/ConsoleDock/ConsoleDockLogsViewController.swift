@@ -493,6 +493,10 @@
             reloadVisibleEntries(scrollToBottom: false)
         }
 
+        func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+            searchController.isActive = false
+        }
+
         @objc private func levelScopeDidChange() {
             levelScope = ConsoleDockEntryFilter.LevelScope(rawValue: levelSegmentedControl.selectedSegmentIndex) ?? .all
             reloadVisibleEntries(scrollToBottom: false)

@@ -45,7 +45,7 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         XCTAssertTrue(waitForVisibleEntryCount(1, in: statusLabel, timeout: 10))
         XCTAssertTrue(waitForTableEntry(containing: "objc native error", in: entriesTable, timeout: 5))
         XCTAssertFalse(tableEntry(containing: "objc native fault", existsIn: entriesTable))
-        clearSearchField(logsSearch)
+        clearSearchField(logsSearch, in: app)
         XCTAssertTrue(waitForVisibleEntryCount(4, in: statusLabel, timeout: 10))
 
         let levelFilter = app.segmentedControls["consoledock.level-filter"]
@@ -258,12 +258,21 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         return false
     }
 
-    private func clearSearchField(_ searchField: XCUIElement) {
+    private func clearSearchField(_ searchField: XCUIElement, in app: XCUIApplication) {
         searchField.tap()
-        guard let value = searchField.value as? String, !value.isEmpty else {
-            return
+        if let value = searchField.value as? String, !value.isEmpty {
+            searchField.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: value.count))
         }
-        searchField.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: value.count))
+        let searchButton = app.keyboards.buttons["Search"].firstMatch
+        if searchButton.waitForExistence(timeout: 1) {
+            searchButton.tap()
+        } else {
+            searchField.typeText("\n")
+        }
+        let closeSearchButton = app.buttons["close"].firstMatch
+        if closeSearchButton.waitForExistence(timeout: 1) {
+            closeSearchButton.tap()
+        }
     }
 
     private func tableEntry(containing text: String, existsIn table: XCUIElement) -> Bool {
