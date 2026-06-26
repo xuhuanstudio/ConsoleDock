@@ -84,6 +84,10 @@ swift test -c release -Xcc -DCONSOLEDOCK_ENABLE_RELEASE -Xswiftc -DCONSOLEDOCK_E
 section "Validate documentation links"
 python3 scripts/validate-doc-links.py
 
+section "Validate documentation assets"
+python3 scripts/validate-doc-assets.py --self-test
+python3 scripts/validate-doc-assets.py
+
 section "Validate versioned public documentation"
 python3 scripts/validate-versioned-docs.py --self-test
 python3 scripts/validate-versioned-docs.py

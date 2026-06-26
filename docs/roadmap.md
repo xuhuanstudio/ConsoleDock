@@ -277,7 +277,31 @@ Not included:
 - crash reporting.
 - CocoaPods or XCFramework distribution.
 
-## Post-v0.11 - Demand-Driven Compatibility Candidates
+## v0.12 - Public Readiness And Visual QA
+
+Goal: make the public repository, screenshots, and release validation reflect the product ConsoleDock has become before considering a stable `1.0.0` release.
+
+Deliverables:
+
+- current iOS Simulator screenshots captured from the Swift sample app.
+- curated public screenshot set for Logs, Actions, Timeline, and Local Session Archive.
+- screenshot capture script for regenerating the public Swift sample assets.
+- documentation asset validator for required PNG files, dimensions, references, and release-audit allow-list coverage.
+- release-process visual QA guidance that distinguishes behavioral UI smoke from public screenshot review.
+- README, simplified Chinese README, sample walkthrough, DocC, roadmap, changelog, and release validator cleanup for the current public presentation.
+- focused public API and compatibility wording review without unnecessary breaking changes.
+
+Not included:
+
+- new debugging panels or product modes.
+- UIKit redesign, SwiftUI rewrite, or marketing site.
+- default persistent raw logs.
+- remote upload, sync, remote issue creation, or automation-platform behavior.
+- network inspector.
+- crash reporting.
+- CocoaPods or XCFramework distribution.
+
+## Post-v0.12 - Demand-Driven Compatibility Candidates
 
 Goal: improve adoption in existing apps only when real integration feedback shows SPM and the current explicit API are not enough.
 

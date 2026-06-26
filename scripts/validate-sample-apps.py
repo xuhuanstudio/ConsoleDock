@@ -15,11 +15,13 @@ REQUIRED_FILES = [
     "Examples/SwiftSampleApp/SwiftSampleAppUITests/ConsoleDockSwiftSampleUITests.swift",
     "Examples/ObjCSampleApp/ObjCSampleApp.xcodeproj/xcshareddata/xcschemes/ObjCSampleApp.xcscheme",
     "Examples/ObjCSampleApp/ObjCSampleAppUITests/ConsoleDockObjCSampleUITests.swift",
+    "scripts/capture-swift-sample-screenshots.sh",
     "scripts/validate-swift-sample-ui-smoke.sh",
     "scripts/validate-objc-sample-ui-smoke.sh",
 ]
 
 EXECUTABLE_SCRIPTS = [
+    "scripts/capture-swift-sample-screenshots.sh",
     "scripts/validate-swift-sample-ui-smoke.sh",
     "scripts/validate-objc-sample-ui-smoke.sh",
 ]
@@ -74,6 +76,7 @@ REQUIRED_SNIPPETS = {
         "Floating trigger controls",
     ],
     "docs/sample-app-walkthrough.md": [
+        "scripts/capture-swift-sample-screenshots.sh",
         "scripts/validate-swift-sample-ui-smoke.sh",
         "scripts/validate-objc-sample-ui-smoke.sh",
         "native-log-only UI automation mode",

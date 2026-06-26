@@ -5,6 +5,71 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
         continueAfterFailure = false
     }
 
+    func testCaptureDocumentationScreenshots() throws {
+        let app = XCUIApplication()
+        app.launchArguments.append("--consoledock-ui-smoke")
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["ConsoleDock Swift Sample"].waitForExistence(timeout: 5))
+
+        let nativeInfoButton = app.buttons["swift-sample.consoledock-info"]
+        XCTAssertTrue(nativeInfoButton.waitForExistence(timeout: 5))
+        nativeInfoButton.tap()
+
+        let nativeErrorButton = app.buttons["swift-sample.consoledock-error"]
+        XCTAssertTrue(nativeErrorButton.waitForExistence(timeout: 5))
+        nativeErrorButton.tap()
+
+        let nativeFaultButton = app.buttons["swift-sample.consoledock-fault"]
+        XCTAssertTrue(nativeFaultButton.waitForExistence(timeout: 5))
+        nativeFaultButton.tap()
+
+        let showConsoleButton = app.buttons["swift-sample.show-console"]
+        XCTAssertTrue(showConsoleButton.waitForExistence(timeout: 5))
+        showConsoleButton.tap()
+
+        let statusLabel = app.descendants(matching: .any)["consoledock.status"]
+        XCTAssertTrue(statusLabel.waitForExistence(timeout: 5))
+        XCTAssertTrue(waitForLabel(containing: "Running: on", in: statusLabel, timeout: 5))
+
+        let entriesTable = app.tables["consoledock.entries-table"]
+        XCTAssertTrue(entriesTable.waitForExistence(timeout: 5))
+        XCTAssertTrue(waitForTableEntry(containing: "native error", in: entriesTable, timeout: 5))
+        XCTAssertTrue(waitForTableEntry(containing: "native fault", in: entriesTable, timeout: 5))
+        captureDocumentationScreenshot(named: "swift-sample-logs")
+
+        tapMode("Actions", in: app)
+        let actionsTable = app.tables["consoledock.actions-table"]
+        XCTAssertTrue(actionsTable.waitForExistence(timeout: 5))
+        XCTAssertTrue(waitForTableEntry(containing: "Generate Smoke Logs", in: actionsTable, timeout: 5))
+        XCTAssertTrue(waitForTableEntry(containing: "Open Order", in: actionsTable, timeout: 5))
+        captureDocumentationScreenshot(named: "swift-sample-actions")
+
+        tableStaticText(containing: "Generate Smoke Logs", in: actionsTable).tap()
+        tapMode("Timeline", in: app)
+        let timelineTable = app.tables["consoledock.timeline-table"]
+        XCTAssertTrue(timelineTable.waitForExistence(timeout: 5))
+        XCTAssertTrue(waitForTableEntry(containing: "Generate Smoke Logs", in: timelineTable, timeout: 5))
+        XCTAssertTrue(waitForTableEntry(containing: "debug action smoke error", in: timelineTable, timeout: 5))
+        captureDocumentationScreenshot(named: "swift-sample-timeline")
+
+        tapMode("Logs", in: app)
+        let shareButton = app.buttons["consoledock.share"]
+        XCTAssertTrue(shareButton.waitForExistence(timeout: 5))
+        shareButton.tap()
+        XCTAssertTrue(app.buttons["consoledock.save-session-archive"].waitForExistence(timeout: 5))
+        app.buttons["consoledock.save-session-archive"].firstMatch.tap()
+
+        let savedAlert = app.alerts["Saved Session Archive"]
+        XCTAssertTrue(savedAlert.waitForExistence(timeout: 5))
+        savedAlert.buttons["View Archives"].tap()
+
+        let archivesTable = app.tables["consoledock.session-archives.table"]
+        XCTAssertTrue(archivesTable.waitForExistence(timeout: 5))
+        XCTAssertTrue(waitForTableEntry(containing: "Session", in: archivesTable, timeout: 5))
+        captureDocumentationScreenshot(named: "swift-sample-archive")
+    }
+
     func testConsoleDockPanelSmokeFlow() throws {
         let app = XCUIApplication()
         app.launchArguments.append("--consoledock-ui-smoke")
@@ -409,5 +474,13 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
         } else {
             app.navigationBars.buttons.element(boundBy: 0).tap()
         }
+    }
+
+    private func captureDocumentationScreenshot(named name: String) {
+        let screenshot = XCUIScreen.main.screenshot()
+        let attachment = XCTAttachment(screenshot: screenshot)
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
     }
 }

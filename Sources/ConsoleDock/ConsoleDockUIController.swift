@@ -249,8 +249,31 @@
             let navigationController = UINavigationController(rootViewController: panel)
             navigationController.modalPresentationStyle = .overFullScreen
             navigationController.view.backgroundColor = UIColor.black.withAlphaComponent(0.92)
+            configurePanelNavigationBar(navigationController.navigationBar)
             panelController = panel
             rootViewController.present(navigationController, animated: true)
+        }
+
+        private func configurePanelNavigationBar(_ navigationBar: UINavigationBar) {
+            navigationBar.barStyle = .black
+            navigationBar.tintColor = ConsoleDockUIColors.primaryText
+            navigationBar.barTintColor = ConsoleDockUIColors.background
+            navigationBar.titleTextAttributes = [
+                .foregroundColor: ConsoleDockUIColors.primaryText
+            ]
+
+            if #available(iOS 13.0, *) {
+                let appearance = UINavigationBarAppearance()
+                appearance.configureWithOpaqueBackground()
+                appearance.backgroundColor = ConsoleDockUIColors.background
+                appearance.shadowColor = .clear
+                appearance.titleTextAttributes = [
+                    .foregroundColor: ConsoleDockUIColors.primaryText
+                ]
+                navigationBar.standardAppearance = appearance
+                navigationBar.scrollEdgeAppearance = appearance
+                navigationBar.compactAppearance = appearance
+            }
         }
 
         private func hideConsoleOnMain() {
@@ -278,6 +301,7 @@
         private let timelineViewController = ConsoleDockTimelineViewController()
         private let actionsViewController = ConsoleDockActionsViewController()
         private let contextViewController = ConsoleDockContextViewController()
+        private let contentView = UIView()
         private var currentViewController: UIViewController?
 
         override func viewDidLoad() {
@@ -316,7 +340,21 @@
             modeControl.selectedSegmentIndex = 0
             modeControl.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.modeControl
             modeControl.addTarget(self, action: #selector(modeDidChange), for: .valueChanged)
-            navigationItem.titleView = modeControl
+            modeControl.translatesAutoresizingMaskIntoConstraints = false
+            contentView.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview(modeControl)
+            view.addSubview(contentView)
+
+            NSLayoutConstraint.activate([
+                modeControl.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 12),
+                modeControl.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -12),
+                modeControl.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10),
+
+                contentView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                contentView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                contentView.topAnchor.constraint(equalTo: modeControl.bottomAnchor, constant: 10),
+                contentView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            ])
         }
 
         @objc private func modeDidChange() {
@@ -381,12 +419,12 @@
 
             addChild(nextViewController)
             nextViewController.view.translatesAutoresizingMaskIntoConstraints = false
-            view.addSubview(nextViewController.view)
+            contentView.addSubview(nextViewController.view)
             NSLayoutConstraint.activate([
-                nextViewController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-                nextViewController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-                nextViewController.view.topAnchor.constraint(equalTo: view.topAnchor),
-                nextViewController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+                nextViewController.view.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+                nextViewController.view.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+                nextViewController.view.topAnchor.constraint(equalTo: contentView.topAnchor),
+                nextViewController.view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
             ])
             nextViewController.didMove(toParent: self)
             currentViewController = nextViewController

@@ -20,7 +20,10 @@ DENIED_TRACKED_PATHS = [
 ]
 
 ALLOWED_BINARY_PATHS = {
-    pathlib.PurePosixPath("docs/assets/swift-sample-console.png"),
+    pathlib.PurePosixPath("docs/assets/swift-sample-actions.png"),
+    pathlib.PurePosixPath("docs/assets/swift-sample-archive.png"),
+    pathlib.PurePosixPath("docs/assets/swift-sample-logs.png"),
+    pathlib.PurePosixPath("docs/assets/swift-sample-timeline.png"),
 }
 
 SENSITIVE_PATTERNS = [
@@ -82,6 +85,10 @@ def audit(root: pathlib.Path) -> list[str]:
             errors.append(f"{display_path}: generated or local-only path is tracked")
 
         absolute_path = root / relative_path
+        if not absolute_path.exists():
+            errors.append(f"{display_path}: tracked file is missing from the working tree")
+            continue
+
         content = absolute_path.read_bytes()
         if is_binary(content):
             if posix_path not in ALLOWED_BINARY_PATHS:

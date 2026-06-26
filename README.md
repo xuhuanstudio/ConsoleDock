@@ -11,11 +11,19 @@ In-app debug console for iOS testing.
 
 ConsoleDock is an early-stage iOS debug SDK that lets testers inspect app logs directly on device without connecting Xcode. The project is designed for real iOS app integration: existing Objective-C apps should get useful baseline coverage, while Swift and mixed projects can opt into a more reliable explicit logging API.
 
-<img src="docs/assets/swift-sample-console.png" alt="ConsoleDock iOS sample console showing native, stdout, stderr, NSLog, and redacted token entries" width="320">
+<img src="docs/assets/swift-sample-logs.png" alt="ConsoleDock iOS sample Logs screen showing diagnostics, filters, jump controls, and redacted sample entries" width="320">
+
+The bundled UIKit panel is local-only and organized around the tester's current session:
+
+- `Logs`: inspect retained redacted entries, structured local queries, filters, jumps, detail, copy, clear, markers, and sharing.
+- `Actions`: run app-registered local debug shortcuts, including small parameter forms and confirmation prompts.
+- `Timeline`: review current-session markers, Debug Action executions, and retained error/fault logs in order.
+- `Context`: show app-provided diagnostics and include them in issue reports.
+- `Archives`: explicitly save and reopen bounded local issue-report snapshots after an app restart.
 
 ## Status
 
-ConsoleDock `v0.11.0` is the current source-first Swift Package Manager preview release. It contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, logger forwarders for existing logger sinks, session metadata, manual markers, bounded in-memory entries with stable session identifiers and partial/redacted/truncated flags, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, runtime diagnostics, entry change notification, Debug Actions with enabled/destructive metadata, local search, structured Logs queries, parameter forms, current-session execution history, and session-only recent parameter values, app-provided Context snapshots for the panel and issue reports, log detail, Session Timeline, Logs jump actions, explicit visible/all/issue-report sharing, temporary issue-report file sharing, issue-report copying, explicit Local Session Archive save/review/delete flows, Release startup safety gates, a configurable UIKit-only floating button/panel foundation, Swift and Objective-C sample apps, DocC documentation, release validation workflow, and focused tests.
+ConsoleDock `v0.12.0` is the current source-first Swift Package Manager preview release. It contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, logger forwarders for existing logger sinks, session metadata, manual markers, bounded in-memory entries with stable session identifiers and partial/redacted/truncated flags, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, runtime diagnostics, entry change notification, Debug Actions with enabled/destructive metadata, local search, structured Logs queries, parameter forms, current-session execution history, and session-only recent parameter values, app-provided Context snapshots for the panel and issue reports, log detail, Session Timeline, Logs jump actions, explicit visible/all/issue-report sharing, temporary issue-report file sharing, issue-report copying, explicit Local Session Archive save/review/delete flows, Release startup safety gates, a configurable UIKit-only floating button/panel foundation, Swift and Objective-C sample apps, DocC documentation, release validation workflow, current Simulator screenshots, documentation asset validation, visual QA guidance, and focused tests.
 
 Current limitations:
 
@@ -63,7 +71,7 @@ Add the public repository URL through Xcode's package dependency UI:
 https://github.com/xuhuanstudio/ConsoleDock.git
 ```
 
-Use the latest release tag from GitHub Releases. `v0.11.0` includes Local Session Archive save/review/delete flows, the bundled Session Timeline view, local structured Logs queries, next/previous visible error jumps, local Debug Action execution history, session-only recent parameter values for action forms, reproduction timeline issue reports, temporary `.txt` issue-report sharing, parameterized Debug Actions, App Context snapshots for issue reports and the bundled Context tab, configurable floating trigger controls, Logs jump actions, Actions search, logger forwarders for existing logger sinks, Test Session Reports, manual markers, Debug Actions, log detail, explicit visible/all/issue-report sharing and copying, runtime diagnostics, and release-validation hardening. Then depend on:
+Use the latest release tag from GitHub Releases. `v0.12.0` includes Local Session Archive save/review/delete flows, the bundled Session Timeline view, local structured Logs queries, next/previous visible error jumps, local Debug Action execution history, session-only recent parameter values for action forms, reproduction timeline issue reports, temporary `.txt` issue-report sharing, parameterized Debug Actions, App Context snapshots for issue reports and the bundled Context tab, configurable floating trigger controls, Logs jump actions, Actions search, logger forwarders for existing logger sinks, Test Session Reports, manual markers, Debug Actions, log detail, explicit visible/all/issue-report sharing and copying, runtime diagnostics, current Simulator screenshots, documentation asset validation, visual QA guidance, and release-validation hardening. Then depend on:
 
 - `ConsoleDock` for Swift API plus the bundled UIKit console.
 - `ConsoleDockCore` for Objective-C/C-compatible core APIs.

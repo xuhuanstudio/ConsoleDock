@@ -21,7 +21,25 @@ Use the samples to verify:
 
 The bundled console and sample controls expose stable accessibility identifiers so future UI smoke tests can target behavior without relying on localized text. Key bundled console identifiers include `consoledock.dock-button`, `consoledock.mode-control`, `consoledock.search`, `consoledock.actions-search`, `consoledock.level-filter`, `consoledock.jump`, `consoledock.jump-latest-log`, `consoledock.jump-first-error`, `consoledock.jump-previous-error`, `consoledock.jump-next-error`, `consoledock.status`, `consoledock.entries-table`, `consoledock.timeline-table`, `consoledock.timeline-refresh`, `consoledock.timeline-action-detail.text`, `consoledock.actions-table`, `consoledock.context-table`, `consoledock.context-refresh`, `consoledock.action-parameters.form`, `consoledock.action-parameters.run`, `consoledock.mark`, `consoledock.marker-text`, `consoledock.add-marker`, `consoledock.share-issue-report`, `consoledock.copy-issue-report`, `consoledock.save-session-archive`, `consoledock.saved-session-archives`, `consoledock.session-archives.table`, and `consoledock.session-archive-detail.text`. Sample app button identifiers use `swift-sample.<button-slug>` and `objc-sample.<button-slug>`.
 
-![ConsoleDock Swift sample console](assets/swift-sample-console.png)
+## Current Simulator Screenshots
+
+These screenshots are captured from the Swift sample app in iOS Simulator UI automation mode:
+
+| Logs | Actions |
+| --- | --- |
+| ![ConsoleDock Swift sample Logs screen](assets/swift-sample-logs.png) | ![ConsoleDock Swift sample Actions screen](assets/swift-sample-actions.png) |
+
+| Timeline | Local Session Archive |
+| --- | --- |
+| ![ConsoleDock Swift sample Timeline screen](assets/swift-sample-timeline.png) | ![ConsoleDock Swift sample Local Session Archive screen](assets/swift-sample-archive.png) |
+
+Regenerate the public screenshots after material UIKit changes:
+
+```sh
+scripts/capture-swift-sample-screenshots.sh
+```
+
+The screenshot capture script is a visual QA companion to the simulator UI smoke tests. UI smoke proves the flows are operable; screenshots prove the public docs still show the current product.
 
 ## Swift Sample
 

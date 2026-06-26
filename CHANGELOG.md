@@ -8,6 +8,20 @@ The project follows Semantic Versioning for public releases.
 
 No changes yet.
 
+## v0.12.0 - 2026-06-27
+
+### Added
+
+- Added current iOS Simulator screenshots for Logs, Actions, Timeline, and Local Session Archive documentation.
+- Added a Swift sample screenshot capture script for public documentation assets.
+- Added documentation asset validation for required screenshots, PNG dimensions, documentation references, and release-audit allow-list coverage.
+- Added visual QA release-process guidance that distinguishes screenshot review from behavioral UI smoke tests.
+
+### Changed
+
+- Updated README, simplified Chinese README, sample walkthrough, roadmap, and release validation documentation so the public repository no longer presents ConsoleDock as an early Logs-only panel.
+- Tightened release validation to include documentation asset checks before versioned documentation and content audits.
+
 ## v0.11.0 - 2026-06-27
 
 ### Added
