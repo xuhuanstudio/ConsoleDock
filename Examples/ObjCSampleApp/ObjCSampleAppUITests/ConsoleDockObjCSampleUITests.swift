@@ -97,8 +97,7 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         XCTAssertTrue(waitForElementToDisappear(markerAlert, timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "[marker] ObjC UI smoke marker", in: entriesTable, timeout: 10))
 
-        let modeControl = app.segmentedControls["consoledock.mode-control"]
-        XCTAssertTrue(modeControl.waitForExistence(timeout: 5))
+        let modeControl = waitForModeControl(in: app)
         modeControl.buttons["Timeline"].tap()
         let timelineTable = app.tables["consoledock.timeline-table"]
         XCTAssertTrue(timelineTable.waitForExistence(timeout: 5))
@@ -248,6 +247,12 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
             RunLoop.current.run(until: Date().addingTimeInterval(0.1))
         } while Date() < deadline
         return !element.exists
+    }
+
+    private func waitForModeControl(in app: XCUIApplication, timeout: TimeInterval = 20) -> XCUIElement {
+        let control = app.segmentedControls["consoledock.mode-control"]
+        XCTAssertTrue(control.waitForExistence(timeout: timeout))
+        return control
     }
 
     private func waitForTableEntry(containing text: String, in table: XCUIElement, timeout: TimeInterval) -> Bool {
