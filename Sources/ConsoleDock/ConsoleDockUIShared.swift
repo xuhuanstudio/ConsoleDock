@@ -26,11 +26,25 @@
         static let emptyState = "consoledock.empty-state"
         static let modeControl = "consoledock.mode-control"
         static let actionsTable = "consoledock.actions-table"
+        static let contextTable = "consoledock.context-table"
+        static let contextRefreshButton = "consoledock.context-refresh"
         static let entryDetailMessage = "consoledock.entry-detail.message"
         static let copyMessageButton = "consoledock.copy-message"
         static let copyEntryButton = "consoledock.copy-entry"
         static let confirmActionButton = "consoledock.confirm-action"
         static let cancelActionButton = "consoledock.cancel-action"
+        static let actionParameterForm = "consoledock.action-parameters.form"
+        static let actionParameterRunButton = "consoledock.action-parameters.run"
+        static let actionParameterCancelButton = "consoledock.action-parameters.cancel"
+        static let actionParameterError = "consoledock.action-parameters.error"
+        static let actionParameterStringInput = "consoledock.action-parameters.string"
+        static let actionParameterNumberInput = "consoledock.action-parameters.number"
+        static let actionParameterBoolInput = "consoledock.action-parameters.bool"
+        static let actionParameterChoiceInput = "consoledock.action-parameters.choice"
+
+        static func identifier(_ base: String, parameterID: String) -> String {
+            "\(base).\(parameterID)"
+        }
     }
 
     enum ConsoleDockFonts {

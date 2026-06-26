@@ -12,6 +12,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         let isUISmokeRun = ProcessInfo.processInfo.arguments.contains("--consoledock-ui-smoke")
         ConsoleDock.start(configuration: isUISmokeRun ? .uiSmoke : .sample)
         registerDebugActions()
+        registerAppContext(isUISmokeRun: isUISmokeRun)
         ConsoleDock.info("SwiftSampleApp launched")
         if !isUISmokeRun {
             print("ConsoleDock sample launch print token=launch-secret")
@@ -122,6 +123,51 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         }
 
         ConsoleDock.registerAction(
+            id: "swift.sample.open-order",
+            title: "Open Order",
+            group: "Scenario",
+            detail: "Writes a local parameterized navigation-style log entry.",
+            parameters: [
+                .string(
+                    id: "orderId",
+                    title: "Order ID",
+                    detail: "Example: A-100",
+                    isRequired: true
+                ),
+                .number(
+                    id: "quantity",
+                    title: "Quantity",
+                    detail: "Used only by this local sample action.",
+                    defaultValue: 1
+                ),
+                .bool(
+                    id: "animated",
+                    title: "Animated",
+                    defaultValue: true
+                ),
+                .choice(
+                    id: "environment",
+                    title: "Environment",
+                    choices: [
+                        .init(id: "staging", title: "Staging"),
+                        .init(id: "qa", title: "QA")
+                    ],
+                    defaultChoiceID: "qa"
+                )
+            ]
+        ) { parameters in
+            ConsoleDock.info(
+                [
+                    "parameterized order action",
+                    "orderId=\(parameters.string("orderId") ?? "missing")",
+                    "quantity=\(parameters.number("quantity") ?? 0)",
+                    "animated=\(parameters.bool("animated") ?? false)",
+                    "environment=\(parameters.choice("environment") ?? "none")"
+                ].joined(separator: " ")
+            )
+        }
+
+        ConsoleDock.registerAction(
             id: "swift.sample.log-diagnostics",
             title: "Log Diagnostics",
             group: "Diagnostics",
@@ -131,6 +177,29 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             ConsoleDock.info(
                 "debug action diagnostics running=\(diagnostics.isRunning) entries=\(diagnostics.entryCount)"
             )
+        }
+    }
+
+    private func registerAppContext(isUISmokeRun: Bool) {
+        ConsoleDock.setAppContextProvider {
+            let diagnostics = ConsoleDock.diagnostics
+            return [
+                ConsoleDock.AppContextSection(
+                    title: "Sample App",
+                    items: [
+                        .init(key: "Language", value: "Swift"),
+                        .init(key: "Mode", value: isUISmokeRun ? "ui-smoke" : "interactive"),
+                        .init(key: "Process", value: ProcessInfo.processInfo.processName)
+                    ]
+                ),
+                ConsoleDock.AppContextSection(
+                    title: "ConsoleDock",
+                    items: [
+                        .init(key: "Running", value: String(diagnostics.isRunning)),
+                        .init(key: "Entries", value: String(diagnostics.entryCount))
+                    ]
+                )
+            ]
         }
     }
 }

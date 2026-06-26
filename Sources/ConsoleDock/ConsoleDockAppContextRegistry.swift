@@ -63,7 +63,8 @@ final class ConsoleDockAppContextRegistry {
     }
 
     private func normalizedRequiredSingleLine(_ value: String) -> String? {
-        let normalized = value
+        let normalized =
+            value
             .replacingOccurrences(of: "\r\n", with: " ")
             .replacingOccurrences(of: "\n", with: " ")
             .replacingOccurrences(of: "\r", with: " ")
@@ -72,7 +73,8 @@ final class ConsoleDockAppContextRegistry {
     }
 
     private func normalizedRequiredValue(_ value: String) -> String? {
-        let normalized = value
+        let normalized =
+            value
             .replacingOccurrences(of: "\r\n", with: "\n")
             .replacingOccurrences(of: "\r", with: "\n")
             .trimmingCharacters(in: .whitespacesAndNewlines)

@@ -396,13 +396,13 @@ public final class ConsoleDockUIKit: NSObject {
     private static func objectiveCParameterValues(_ values: ConsoleDock.DebugActionParameters) -> [String: Any] {
         values.allValues.mapValues { value in
             switch value {
-            case let .string(text):
+            case .string(let text):
                 return text
-            case let .number(number):
+            case .number(let number):
                 return NSNumber(value: number)
-            case let .bool(flag):
+            case .bool(let flag):
                 return NSNumber(value: flag)
-            case let .choice(choiceID):
+            case .choice(let choiceID):
                 return choiceID
             }
         }

@@ -178,7 +178,7 @@
             cell.detailTextLabel?.text = detailText(for: action)
             cell.contentView.alpha = action.isEnabled ? 1 : 0.5
             cell.selectionStyle = action.isEnabled ? .default : .none
-            cell.accessoryType = .none
+            cell.accessoryType = action.parameters.isEmpty ? .none : .disclosureIndicator
             cell.accessibilityHint =
                 accessibilityHint(for: action)
             return cell
@@ -189,9 +189,11 @@
             tableView.deselectRow(at: indexPath, animated: true)
             guard action.isEnabled else { return }
             if action.requiresConfirmation {
-                confirm(action)
+                confirm(action) { [weak self] in
+                    self?.performOrRequestParameters(for: action)
+                }
             } else {
-                ConsoleDock.performDebugAction(id: action.id)
+                performOrRequestParameters(for: action)
             }
         }
 
@@ -218,6 +220,10 @@
             if action.requiresConfirmation {
                 parts.append("Requires confirmation")
             }
+            if !action.parameters.isEmpty {
+                let suffix = action.parameters.count == 1 ? "parameter" : "parameters"
+                parts.append("\(action.parameters.count) \(suffix)")
+            }
             return parts.joined(separator: "\n")
         }
 
@@ -225,13 +231,31 @@
             guard action.isEnabled else {
                 return "This debug action is disabled."
             }
+            if !action.parameters.isEmpty, action.requiresConfirmation {
+                return "Requires confirmation, then opens parameter fields before running."
+            }
+            if !action.parameters.isEmpty {
+                return "Opens parameter fields before running."
+            }
             if action.requiresConfirmation {
                 return "Requires confirmation before running."
             }
             return "Runs this debug action."
         }
 
-        private func confirm(_ action: ConsoleDockDebugAction) {
+        private func performOrRequestParameters(for action: ConsoleDockDebugAction) {
+            guard !action.parameters.isEmpty else {
+                ConsoleDock.performDebugAction(id: action.id)
+                return
+            }
+
+            let formController = ConsoleDockActionParameterFormViewController(action: action) { parameterValues in
+                ConsoleDock.performDebugAction(id: action.id, parameterValues: parameterValues)
+            }
+            navigationController?.pushViewController(formController, animated: true)
+        }
+
+        private func confirm(_ action: ConsoleDockDebugAction, onConfirm: @escaping () -> Void) {
             let alert = UIAlertController(
                 title: action.title,
                 message: action.detail,
@@ -242,7 +266,7 @@
             alert.addAction(cancel)
             let confirmStyle: UIAlertAction.Style = action.style == .destructive ? .destructive : .default
             let confirm = UIAlertAction(title: "Run Action", style: confirmStyle) { _ in
-                ConsoleDock.performDebugAction(id: action.id)
+                onConfirm()
             }
             confirm.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.confirmActionButton
             alert.addAction(confirm)

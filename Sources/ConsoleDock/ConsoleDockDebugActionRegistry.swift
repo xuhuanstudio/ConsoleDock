@@ -238,7 +238,7 @@ final class ConsoleDockDebugActionRegistry {
         switch kind {
         case .string, .number, .bool:
             return kind
-        case let .choice(choices):
+        case .choice(let choices):
             var normalizedChoices: [ConsoleDock.DebugActionChoice] = []
             var seenIDs = Set<String>()
             for choice in choices {
@@ -305,7 +305,7 @@ final class ConsoleDockDebugActionRegistry {
             return .number(number)
         case (.bool, let .bool(flag)):
             return .bool(flag)
-        case let (.choice(choices), .choice(choiceID)):
+        case (.choice(let choices), .choice(let choiceID)):
             guard let normalizedID = normalizedRequired(choiceID),
                 choices.contains(where: { $0.id == normalizedID })
             else {

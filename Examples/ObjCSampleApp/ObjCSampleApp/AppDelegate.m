@@ -9,6 +9,7 @@
 
 - (void)startConsoleDockForUISmokeRun:(BOOL)isUISmokeRun;
 - (void)registerDebugActions;
+- (void)registerAppContextForUISmokeRun:(BOOL)isUISmokeRun;
 
 @end
 
@@ -19,6 +20,7 @@
     BOOL isUISmokeRun = [NSProcessInfo.processInfo.arguments containsObject:@"--consoledock-ui-smoke"];
     [self startConsoleDockForUISmokeRun:isUISmokeRun];
     [self registerDebugActions];
+    [self registerAppContextForUISmokeRun:isUISmokeRun];
     [CDKConsoleDock info:@"ObjCSampleApp launched"];
     if (!isUISmokeRun) {
         printf("ConsoleDock Objective-C sample launch printf token=objc-launch-secret\n");
@@ -148,6 +150,54 @@ configurationForConnectingSceneSession:(UISceneSession *)connectingSceneSession
                                                   [CDKConsoleDock error:@"objc debug action simulated error"];
                                               }];
 
+    NSArray<CDKDebugActionChoice *> *environmentChoices = @[
+        [CDKDebugActionChoice choiceWithIdentifier:@"staging" title:@"Staging"],
+        [CDKDebugActionChoice choiceWithIdentifier:@"qa" title:@"QA"]
+    ];
+    NSArray<CDKDebugActionParameter *> *orderParameters = @[
+        [CDKDebugActionParameter stringParameterWithIdentifier:@"orderId"
+                                                        title:@"Order ID"
+                                                       detail:@"Example: O-100"
+                                                   isRequired:YES
+                                                 defaultValue:nil],
+        [CDKDebugActionParameter numberParameterWithIdentifier:@"quantity"
+                                                        title:@"Quantity"
+                                                       detail:@"Used only by this local sample action."
+                                                   isRequired:NO
+                                                 defaultValue:@1],
+        [CDKDebugActionParameter boolParameterWithIdentifier:@"animated"
+                                                      title:@"Animated"
+                                                     detail:nil
+                                                 isRequired:NO
+                                               defaultValue:@YES],
+        [CDKDebugActionParameter choiceParameterWithIdentifier:@"environment"
+                                                        title:@"Environment"
+                                                       detail:nil
+                                                   isRequired:NO
+                                                      choices:environmentChoices
+                                      defaultChoiceIdentifier:@"qa"]
+    ];
+    [CDKConsoleDockUIKit registerActionWithIdentifier:@"objc.sample.open-order"
+                                                title:@"Open Order"
+                                                group:@"Scenario"
+                                               detail:@"Writes a local parameterized navigation-style log entry."
+                                 requiresConfirmation:NO
+                                           parameters:orderParameters
+                                              handler:^(NSDictionary<NSString *, id> *values) {
+                                                  NSString *orderID = values[@"orderId"] ?: @"missing";
+                                                  NSNumber *quantity = values[@"quantity"] ?: @0;
+                                                  NSNumber *animated = values[@"animated"] ?: @NO;
+                                                  NSString *environment = values[@"environment"] ?: @"none";
+                                                  [CDKConsoleDock info:
+                                                      [NSString stringWithFormat:@"objc parameterized order action "
+                                                                                 @"orderId=%@ quantity=%@ animated=%@ "
+                                                                                 @"environment=%@",
+                                                                                 orderID,
+                                                                                 quantity,
+                                                                                 animated.boolValue ? @"YES" : @"NO",
+                                                                                 environment]];
+                                              }];
+
     [CDKConsoleDockUIKit registerActionWithIdentifier:@"objc.sample.log-diagnostics"
                                                 title:@"Log Diagnostics"
                                                 group:@"Diagnostics"
@@ -160,6 +210,30 @@ configurationForConnectingSceneSession:(UISceneSession *)connectingSceneSession
                                                                                  diagnostics.isRunning ? @"YES" : @"NO",
                                                                                  (unsigned long)diagnostics.entryCount]];
                                               }];
+}
+
+- (void)registerAppContextForUISmokeRun:(BOOL)isUISmokeRun
+{
+    [CDKConsoleDockUIKit setAppContextProvider:^NSArray<CDKAppContextSection *> *{
+        CDKDiagnostics *diagnostics = [CDKConsoleDock diagnostics];
+        NSString *entryCount = [NSString stringWithFormat:@"%lu", (unsigned long)diagnostics.entryCount];
+        return @[
+            [CDKAppContextSection sectionWithTitle:@"Sample App"
+                                             items:@[
+                                                 [CDKAppContextItem itemWithKey:@"Language" value:@"Objective-C"],
+                                                 [CDKAppContextItem itemWithKey:@"Mode"
+                                                                          value:isUISmokeRun ? @"ui-smoke" : @"interactive"],
+                                                 [CDKAppContextItem itemWithKey:@"Process"
+                                                                          value:NSProcessInfo.processInfo.processName]
+                                             ]],
+            [CDKAppContextSection sectionWithTitle:@"ConsoleDock"
+                                             items:@[
+                                                 [CDKAppContextItem itemWithKey:@"Running"
+                                                                          value:diagnostics.isRunning ? @"YES" : @"NO"],
+                                                 [CDKAppContextItem itemWithKey:@"Entries" value:entryCount]
+                                             ]]
+        ];
+    }];
 }
 
 @end

@@ -123,22 +123,6 @@ public enum ConsoleDock {
         public let defaultValue: DebugActionParameterValue?
         public let kind: Kind
 
-        init(
-            id: String,
-            title: String,
-            detail: String?,
-            isRequired: Bool,
-            defaultValue: DebugActionParameterValue?,
-            kind: Kind
-        ) {
-            self.id = id
-            self.title = title
-            self.detail = detail
-            self.isRequired = isRequired
-            self.defaultValue = defaultValue
-            self.kind = kind
-        }
-
         public static func string(
             id: String,
             title: String,
@@ -222,28 +206,28 @@ public enum ConsoleDock {
         }
 
         public func string(_ id: String) -> String? {
-            if case let .string(value)? = storage[id] {
+            if case .string(let value)? = storage[id] {
                 return value
             }
             return nil
         }
 
         public func number(_ id: String) -> Double? {
-            if case let .number(value)? = storage[id] {
+            if case .number(let value)? = storage[id] {
                 return value
             }
             return nil
         }
 
         public func bool(_ id: String) -> Bool? {
-            if case let .bool(value)? = storage[id] {
+            if case .bool(let value)? = storage[id] {
                 return value
             }
             return nil
         }
 
         public func choice(_ id: String) -> String? {
-            if case let .choice(value)? = storage[id] {
+            if case .choice(let value)? = storage[id] {
                 return value
             }
             return nil

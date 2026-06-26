@@ -1235,7 +1235,10 @@ final class ConsoleDockTests: XCTestCase {
         )
 
         wait(for: [expectation], timeout: 1.0)
-        XCTAssertTrue(ConsoleDock.entries.map(\.message).contains("Debug action completed: ObjC Open Order [objc.open.order]"))
+        XCTAssertTrue(
+            ConsoleDock.entries.map(\.message)
+                .contains("Debug action completed: ObjC Open Order [objc.open.order]")
+        )
     }
 
     func testObjectiveCUIKitFacadeParameterizedActionStoresMetadataAndHonorsDisabledState() {

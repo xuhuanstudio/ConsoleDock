@@ -273,9 +273,10 @@
     private final class ConsoleDockPanelViewController: UIViewController {
         var onClose: (() -> Void)?
 
-        private let modeControl = UISegmentedControl(items: ["Logs", "Actions"])
+        private let modeControl = UISegmentedControl(items: ["Logs", "Actions", "Context"])
         private let logsViewController = ConsoleDockLogsViewController()
         private let actionsViewController = ConsoleDockActionsViewController()
+        private let contextViewController = ConsoleDockContextViewController()
         private var currentViewController: UIViewController?
 
         override func viewDidLoad() {
@@ -300,6 +301,10 @@
                 guard self?.modeControl.selectedSegmentIndex == 0 else { return }
                 self?.navigationItem.rightBarButtonItems = items
             }
+            contextViewController.navigationItemsDidChange = { [weak self] items in
+                guard self?.modeControl.selectedSegmentIndex == 2 else { return }
+                self?.navigationItem.rightBarButtonItems = items
+            }
         }
 
         private func configureModeControl() {
@@ -310,10 +315,13 @@
         }
 
         @objc private func modeDidChange() {
-            if modeControl.selectedSegmentIndex == 0 {
+            switch modeControl.selectedSegmentIndex {
+            case 0:
                 showLogs()
-            } else {
+            case 1:
                 showActions()
+            default:
+                showContext()
             }
         }
 
@@ -321,6 +329,7 @@
             modeControl.selectedSegmentIndex = 0
             switchTo(logsViewController)
             actionsViewController.deactivateSearch()
+            contextViewController.deactivate()
             logsViewController.activateSearch(in: navigationItem)
         }
 
@@ -328,8 +337,18 @@
             modeControl.selectedSegmentIndex = 1
             switchTo(actionsViewController)
             logsViewController.deactivateSearch()
+            contextViewController.deactivate()
             actionsViewController.activateSearch(in: navigationItem)
             navigationItem.rightBarButtonItems = []
+        }
+
+        private func showContext() {
+            modeControl.selectedSegmentIndex = 2
+            switchTo(contextViewController)
+            logsViewController.deactivateSearch()
+            actionsViewController.deactivateSearch()
+            navigationItem.searchController = nil
+            contextViewController.activate()
         }
 
         private func switchTo(_ nextViewController: UIViewController) {

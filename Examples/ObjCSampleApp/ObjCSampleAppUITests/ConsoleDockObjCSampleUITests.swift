@@ -119,6 +119,24 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         XCTAssertTrue(waitForTableEntry(containing: "objc debug action smoke error", in: entriesTable, timeout: 5))
 
         modeControl.buttons["Actions"].tap()
+        XCTAssertTrue(waitForTableEntry(containing: "Open Order", in: actionsTable, timeout: 5))
+        tableStaticText(containing: "Open Order", in: actionsTable).tap()
+        let orderIDField = app.textFields["consoledock.action-parameters.string.orderId"]
+        XCTAssertTrue(orderIDField.waitForExistence(timeout: 5))
+        orderIDField.tap()
+        orderIDField.typeText("O-100")
+        XCTAssertTrue(app.textFields["consoledock.action-parameters.number.quantity"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.switches["consoledock.action-parameters.bool.animated"].waitForExistence(timeout: 5))
+        XCTAssertTrue(
+            app.segmentedControls["consoledock.action-parameters.choice.environment"].waitForExistence(timeout: 5)
+        )
+        app.buttons["consoledock.action-parameters.run"].tap()
+        modeControl.buttons["Logs"].tap()
+        XCTAssertTrue(
+            waitForTableEntry(containing: "objc parameterized order action orderId=O-100", in: entriesTable, timeout: 5)
+        )
+
+        modeControl.buttons["Actions"].tap()
         XCTAssertTrue(waitForTableEntry(containing: "Clear Entries", in: actionsTable, timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "Destructive", in: actionsTable, timeout: 5))
         tableStaticText(containing: "Clear Entries", in: actionsTable).tap()
@@ -130,6 +148,15 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         app.alerts.firstMatch.buttons["consoledock.confirm-action"].firstMatch.tap()
         modeControl.buttons["Logs"].tap()
         XCTAssertTrue(waitForTableEntry(containing: "Debug action completed: Clear Entries", in: entriesTable, timeout: 5))
+
+        modeControl.buttons["Context"].tap()
+        let contextTable = app.tables["consoledock.context-table"]
+        XCTAssertTrue(contextTable.waitForExistence(timeout: 5))
+        XCTAssertTrue(waitForTableEntry(containing: "Objective-C", in: contextTable, timeout: 5))
+        XCTAssertTrue(waitForTableEntry(containing: "ui-smoke", in: contextTable, timeout: 5))
+        XCTAssertTrue(app.buttons["consoledock.context-refresh"].waitForExistence(timeout: 5))
+        app.buttons["consoledock.context-refresh"].tap()
+        modeControl.buttons["Logs"].tap()
 
         let closeButton = app.buttons["consoledock.close"]
         XCTAssertTrue(closeButton.waitForExistence(timeout: 5))

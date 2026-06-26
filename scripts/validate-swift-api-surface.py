@@ -61,6 +61,76 @@ REQUIRED_SNIPPETS = {
         "public enum DebugActionStyle: Equatable",
         "case normal",
         "case destructive",
+        "public struct DebugActionChoice: Equatable",
+        "public let id: String",
+        "public let title: String",
+        "public init(id: String, title: String)",
+        "public enum DebugActionParameterValue: Equatable",
+        "case string(String)",
+        "case number(Double)",
+        "case bool(Bool)",
+        "case choice(String)",
+        "public struct DebugActionParameter: Equatable",
+        "public enum Kind: Equatable",
+        "case string",
+        "case number",
+        "case bool",
+        "case choice([DebugActionChoice])",
+        "public let detail: String?",
+        "public let isRequired: Bool",
+        "public let defaultValue: DebugActionParameterValue?",
+        "public let kind: Kind",
+        """
+        public static func string(
+            id: String,
+            title: String,
+            detail: String? = nil,
+            isRequired: Bool = false,
+            defaultValue: String? = nil
+        ) -> DebugActionParameter
+        """,
+        """
+        public static func number(
+            id: String,
+            title: String,
+            detail: String? = nil,
+            isRequired: Bool = false,
+            defaultValue: Double? = nil
+        ) -> DebugActionParameter
+        """,
+        """
+        public static func bool(
+            id: String,
+            title: String,
+            detail: String? = nil,
+            isRequired: Bool = false,
+            defaultValue: Bool? = nil
+        ) -> DebugActionParameter
+        """,
+        """
+        public static func choice(
+            id: String,
+            title: String,
+            choices: [DebugActionChoice],
+            detail: String? = nil,
+            isRequired: Bool = false,
+            defaultChoiceID: String? = nil
+        ) -> DebugActionParameter
+        """,
+        "public struct DebugActionParameters: Equatable",
+        "public init(_ values: [String: DebugActionParameterValue] = [:])",
+        "public func value(_ id: String) -> DebugActionParameterValue?",
+        "public func string(_ id: String) -> String?",
+        "public func number(_ id: String) -> Double?",
+        "public func bool(_ id: String) -> Bool?",
+        "public func choice(_ id: String) -> String?",
+        "public struct AppContextItem: Equatable",
+        "public let key: String",
+        "public let value: String",
+        "public init(key: String, value: String)",
+        "public struct AppContextSection: Equatable",
+        "public let items: [AppContextItem]",
+        "public init(title: String, items: [AppContextItem])",
         "public enum FloatingButtonPosition: Equatable",
         "case topLeading",
         "case topTrailing",
@@ -179,10 +249,13 @@ REQUIRED_SNIPPETS = {
         "public static var entries: [LogEntry]",
         "public static var diagnostics: Diagnostics",
         "public static var sessionMetadata: SessionMetadata",
+        "public static var appContext: [AppContextSection]",
         "public static let entriesDidChangeNotification",
         "public static let diagnosticsDidChangeNotification",
         "public static func clear()",
         "public static func issueReportText() -> String",
+        "public static func setAppContextProvider(_ provider: @escaping () -> [AppContextSection])",
+        "public static func clearAppContextProvider()",
         "public static func showConsole()",
         "public static func hideConsole()",
         "public static func showFloatingButton()",
@@ -197,6 +270,19 @@ REQUIRED_SNIPPETS = {
             isEnabled: Bool = true,
             style: DebugActionStyle = .normal,
             handler: @escaping () throws -> Void
+        )
+        """,
+        """
+        public static func registerAction(
+            id: String,
+            title: String,
+            group: String? = nil,
+            detail: String? = nil,
+            requiresConfirmation: Bool = false,
+            isEnabled: Bool = true,
+            style: DebugActionStyle = .normal,
+            parameters: [DebugActionParameter],
+            handler: @escaping (DebugActionParameters) throws -> Void
         )
         """,
         "public static func unregisterAction(id: String)",
@@ -214,6 +300,74 @@ REQUIRED_SNIPPETS = {
         "public enum ConsoleDockDebugActionStyle: Int",
         "case normal = 0",
         "case destructive = 1",
+        "@objc(CDKDebugActionChoice)",
+        "public final class ConsoleDockDebugActionChoice: NSObject",
+        "@objc public let identifier: String",
+        "@objc public let title: String",
+        "@objc(initWithIdentifier:title:)",
+        "public init(identifier: String, title: String)",
+        "@objc(choiceWithIdentifier:title:)",
+        "public static func choice(identifier: String, title: String) -> ConsoleDockDebugActionChoice",
+        "@objc(CDKDebugActionParameter)",
+        "public final class ConsoleDockDebugActionParameter: NSObject",
+        "@objc public let detail: String?",
+        "@objc public let isRequired: Bool",
+        "@objc(stringParameterWithIdentifier:title:detail:isRequired:defaultValue:)",
+        """
+        public static func stringParameter(
+            identifier: String,
+            title: String,
+            detail: String?,
+            isRequired: Bool,
+            defaultValue: String?
+        ) -> ConsoleDockDebugActionParameter
+        """,
+        "@objc(numberParameterWithIdentifier:title:detail:isRequired:defaultValue:)",
+        """
+        public static func numberParameter(
+            identifier: String,
+            title: String,
+            detail: String?,
+            isRequired: Bool,
+            defaultValue: NSNumber?
+        ) -> ConsoleDockDebugActionParameter
+        """,
+        "@objc(boolParameterWithIdentifier:title:detail:isRequired:defaultValue:)",
+        """
+        public static func boolParameter(
+            identifier: String,
+            title: String,
+            detail: String?,
+            isRequired: Bool,
+            defaultValue: NSNumber?
+        ) -> ConsoleDockDebugActionParameter
+        """,
+        "@objc(choiceParameterWithIdentifier:title:detail:isRequired:choices:defaultChoiceIdentifier:)",
+        """
+        public static func choiceParameter(
+            identifier: String,
+            title: String,
+            detail: String?,
+            isRequired: Bool,
+            choices: [ConsoleDockDebugActionChoice],
+            defaultChoiceIdentifier: String?
+        ) -> ConsoleDockDebugActionParameter
+        """,
+        "@objc(CDKAppContextItem)",
+        "public final class ConsoleDockAppContextItem: NSObject",
+        "@objc public let key: String",
+        "@objc public let value: String",
+        "@objc(initWithKey:value:)",
+        "public init(key: String, value: String)",
+        "@objc(itemWithKey:value:)",
+        "public static func item(key: String, value: String) -> ConsoleDockAppContextItem",
+        "@objc(CDKAppContextSection)",
+        "public final class ConsoleDockAppContextSection: NSObject",
+        "@objc public let items: [ConsoleDockAppContextItem]",
+        "@objc(initWithTitle:items:)",
+        "public init(title: String, items: [ConsoleDockAppContextItem])",
+        "@objc(sectionWithTitle:items:)",
+        "public static func section(title: String, items: [ConsoleDockAppContextItem]) -> ConsoleDockAppContextSection",
         "@objc(CDKConsoleDockUIKit)",
         "public final class ConsoleDockUIKit: NSObject",
         "@objc(startWithConfiguration:error:)",
@@ -232,6 +386,10 @@ REQUIRED_SNIPPETS = {
         "public static func hideFloatingButton()",
         "@objc(issueReportText)",
         "public static func issueReportText() -> String",
+        "@objc(setAppContextProvider:)",
+        "public static func setAppContextProvider(_ provider: @escaping () -> [ConsoleDockAppContextSection])",
+        "@objc(clearAppContextProvider)",
+        "public static func clearAppContextProvider()",
         "@objc(registerActionWithIdentifier:title:group:detail:requiresConfirmation:handler:)",
         """
         public static func registerAction(
@@ -241,6 +399,18 @@ REQUIRED_SNIPPETS = {
             detail: String?,
             requiresConfirmation: Bool,
             handler: @escaping () -> Void
+        )
+        """,
+        "@objc(registerActionWithIdentifier:title:group:detail:requiresConfirmation:parameters:handler:)",
+        """
+        public static func registerAction(
+            identifier: String,
+            title: String,
+            group: String?,
+            detail: String?,
+            requiresConfirmation: Bool,
+            parameters: [ConsoleDockDebugActionParameter],
+            handler: @escaping ([String: Any]) -> Void
         )
         """,
         "@objc(registerActionWithIdentifier:title:group:detail:requiresConfirmation:isEnabled:style:handler:)",
@@ -256,6 +426,20 @@ REQUIRED_SNIPPETS = {
             handler: @escaping () -> Void
         )
         """,
+        "@objc(registerActionWithIdentifier:title:group:detail:requiresConfirmation:isEnabled:style:parameters:handler:)",
+        """
+        public static func registerAction(
+            identifier: String,
+            title: String,
+            group: String?,
+            detail: String?,
+            requiresConfirmation: Bool,
+            isEnabled: Bool,
+            style: ConsoleDockDebugActionStyle,
+            parameters: [ConsoleDockDebugActionParameter],
+            handler: @escaping ([String: Any]) -> Void
+        )
+        """,
         "@objc(unregisterActionWithIdentifier:)",
         "public static func unregisterAction(identifier: String)",
         "@objc(removeAllActions)",
@@ -265,7 +449,7 @@ REQUIRED_SNIPPETS = {
 
 REQUIRED_SNIPPET_COUNTS = {
     SWIFT_FACADE: {
-        "public init(": 6,
+        "public init(": 10,
         "public let message: String": 2,
     },
 }
@@ -277,7 +461,6 @@ DENIED_PUBLIC_SNIPPETS = {
     ],
     UIKIT_FACADE: [
         "public var",
-        "public let",
     ],
 }
 
