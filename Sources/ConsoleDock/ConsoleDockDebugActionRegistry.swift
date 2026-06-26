@@ -297,13 +297,13 @@ final class ConsoleDockDebugActionRegistry {
         kind: ConsoleDock.DebugActionParameter.Kind
     ) -> ConsoleDock.DebugActionParameterValue? {
         switch (kind, value) {
-        case (.string, let .string(text)):
+        case (.string, .string(let text)):
             guard let normalized = normalizedRequired(text) else { return nil }
             return .string(normalized)
-        case (.number, let .number(number)):
+        case (.number, .number(let number)):
             guard number.isFinite else { return nil }
             return .number(number)
-        case (.bool, let .bool(flag)):
+        case (.bool, .bool(let flag)):
             return .bool(flag)
         case (.choice(let choices), .choice(let choiceID)):
             guard let normalizedID = normalizedRequired(choiceID),
