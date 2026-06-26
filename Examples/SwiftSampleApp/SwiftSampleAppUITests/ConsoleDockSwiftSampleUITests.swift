@@ -218,6 +218,29 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
         shareButton.tap()
         XCTAssertTrue(app.buttons["consoledock.share-issue-report"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["consoledock.copy-issue-report"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["consoledock.save-session-archive"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["consoledock.saved-session-archives"].waitForExistence(timeout: 5))
+        app.buttons["consoledock.save-session-archive"].tap()
+
+        let savedAlert = app.alerts["Saved Session Archive"]
+        XCTAssertTrue(savedAlert.waitForExistence(timeout: 5))
+        savedAlert.buttons["View Archives"].tap()
+
+        let archivesTable = app.tables["consoledock.session-archives.table"]
+        XCTAssertTrue(archivesTable.waitForExistence(timeout: 5))
+        XCTAssertTrue(waitForTableEntry(containing: "Session", in: archivesTable, timeout: 5))
+        tableStaticText(containing: "Session", in: archivesTable).tap()
+
+        let archiveDetailText = app.textViews["consoledock.session-archive-detail.text"]
+        XCTAssertTrue(archiveDetailText.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["consoledock.session-archive-detail.copy"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["consoledock.session-archive-detail.share"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["consoledock.session-archive-detail.delete"].waitForExistence(timeout: 5))
+        app.buttons["consoledock.session-archive-detail.copy"].tap()
+        app.buttons["consoledock.session-archive-detail.delete"].tap()
+        XCTAssertTrue(app.alerts.firstMatch.waitForExistence(timeout: 5))
+        app.alerts.firstMatch.buttons["consoledock.session-archive-detail.confirm-delete"].tap()
+        XCTAssertTrue(app.staticTexts["consoledock.session-archives.empty"].waitForExistence(timeout: 5))
     }
 
     private func waitForTableEntry(in table: XCUIElement, timeout: TimeInterval) -> Bool {

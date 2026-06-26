@@ -11,6 +11,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     ) -> Bool {
         let isUISmokeRun = ProcessInfo.processInfo.arguments.contains("--consoledock-ui-smoke")
         ConsoleDock.start(configuration: isUISmokeRun ? .uiSmoke : .sample)
+        if isUISmokeRun {
+            try? ConsoleDock.clearSessionArchives()
+        }
         registerDebugActions()
         registerAppContext(isUISmokeRun: isUISmokeRun)
         ConsoleDock.info("SwiftSampleApp launched")
@@ -177,6 +180,20 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             ConsoleDock.info(
                 "debug action diagnostics running=\(diagnostics.isRunning) entries=\(diagnostics.entryCount)"
             )
+        }
+
+        ConsoleDock.registerAction(
+            id: "swift.sample.save-archive",
+            title: "Save Session Archive",
+            group: "Diagnostics",
+            detail: "Saves the current local issue report as a bounded on-device archive."
+        ) {
+            do {
+                let archive = try ConsoleDock.saveSessionArchive(note: "Swift sample debug action")
+                ConsoleDock.info("debug action saved session archive id=\(archive.id)")
+            } catch {
+                ConsoleDock.error("debug action failed to save session archive: \(error)")
+            }
         }
     }
 

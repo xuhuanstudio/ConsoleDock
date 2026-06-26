@@ -297,6 +297,16 @@
             }
             copyReportAction.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.copyIssueReport
             alert.addAction(copyReportAction)
+            let saveArchiveAction = UIAlertAction(title: "Save Session Archive", style: .default) { [weak self] _ in
+                self?.saveSessionArchive()
+            }
+            saveArchiveAction.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.saveSessionArchive
+            alert.addAction(saveArchiveAction)
+            let savedArchivesAction = UIAlertAction(title: "Saved Session Archives", style: .default) { [weak self] _ in
+                self?.showSavedSessionArchives()
+            }
+            savedArchivesAction.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.savedSessionArchives
+            alert.addAction(savedArchivesAction)
             alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
             alert.popoverPresentationController?.barButtonItem = shareButton
             present(alert, animated: true)
@@ -335,6 +345,45 @@
             }
             activityController.popoverPresentationController?.barButtonItem = shareButton
             present(activityController, animated: true)
+        }
+
+        private func saveSessionArchive() {
+            do {
+                let archive = try ConsoleDock.saveSessionArchive()
+                UIAccessibility.post(notification: .announcement, argument: "Saved session archive")
+                showSavedArchiveAlert(archive)
+            } catch {
+                ConsoleDock.error("Session archive save failed: \(error)")
+                showArchiveErrorAlert(error)
+            }
+        }
+
+        private func showSavedArchiveAlert(_ archive: ConsoleDock.SessionArchive) {
+            let alert = UIAlertController(
+                title: "Saved Session Archive",
+                message: archive.title,
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            let viewAction = UIAlertAction(title: "View Archives", style: .default) { [weak self] _ in
+                self?.showSavedSessionArchives()
+            }
+            alert.addAction(viewAction)
+            present(alert, animated: true)
+        }
+
+        private func showArchiveErrorAlert(_ error: Error) {
+            let alert = UIAlertController(
+                title: "Archive Save Failed",
+                message: "\(error)",
+                preferredStyle: .alert
+            )
+            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            present(alert, animated: true)
+        }
+
+        private func showSavedSessionArchives() {
+            navigationController?.pushViewController(ConsoleDockSessionArchivesViewController(), animated: true)
         }
 
         @objc private func showJumpOptions() {

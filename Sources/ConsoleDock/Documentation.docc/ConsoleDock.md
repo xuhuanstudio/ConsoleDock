@@ -24,6 +24,7 @@ ConsoleDock is not a full replacement for Xcode Console or Apple unified logging
 - <doc:AppContext>
 - <doc:TestSessionReports>
 - <doc:SessionTimeline>
+- <doc:LocalSessionArchive>
 - <doc:DailyDebugUsability>
 - <doc:PrivacyAndReleaseSafety>
 - <doc:ObjectiveCIntegration>
@@ -56,6 +57,11 @@ ConsoleDock is not a full replacement for Xcode Console or Apple unified logging
 - ``ConsoleDock/entriesDidChangeNotification``
 - ``ConsoleDock/clear()``
 - ``ConsoleDock/issueReportText()``
+- ``ConsoleDock/saveSessionArchive(note:)``
+- ``ConsoleDock/sessionArchives()``
+- ``ConsoleDock/deleteSessionArchive(id:)``
+- ``ConsoleDock/clearSessionArchives()``
+- ``ConsoleDock/SessionArchive``
 - ``ConsoleDock/LogEntry``
 - ``ConsoleDock/LogSource``
 

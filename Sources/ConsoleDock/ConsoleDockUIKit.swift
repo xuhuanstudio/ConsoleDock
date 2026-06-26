@@ -208,6 +208,62 @@ public final class ConsoleDockAppContextSection: NSObject {
     }
 }
 
+/// Objective-C-visible saved local session archive.
+@objc(CDKSessionArchive)
+public final class ConsoleDockSessionArchive: NSObject {
+    @objc public let identifier: String
+    @objc public let createdAt: Date
+    @objc public let sourceSessionIdentifier: String
+    @objc public let sourceSessionStartedAt: Date?
+    @objc public let title: String
+    @objc public let note: String?
+    @objc public let entryCount: Int
+    @objc public let reportCharacterCount: Int
+    @objc public let isReportTruncated: Bool
+    @objc public let reportText: String
+
+    @objc(
+        initWithIdentifier:createdAt:sourceSessionIdentifier:sourceSessionStartedAt:title:note:entryCount:
+        reportCharacterCount:isReportTruncated:reportText:
+    )
+    public init(
+        identifier: String,
+        createdAt: Date,
+        sourceSessionIdentifier: String,
+        sourceSessionStartedAt: Date?,
+        title: String,
+        note: String?,
+        entryCount: Int,
+        reportCharacterCount: Int,
+        isReportTruncated: Bool,
+        reportText: String
+    ) {
+        self.identifier = identifier
+        self.createdAt = createdAt
+        self.sourceSessionIdentifier = sourceSessionIdentifier
+        self.sourceSessionStartedAt = sourceSessionStartedAt
+        self.title = title
+        self.note = note
+        self.entryCount = entryCount
+        self.reportCharacterCount = reportCharacterCount
+        self.isReportTruncated = isReportTruncated
+        self.reportText = reportText
+    }
+
+    init(archive: ConsoleDock.SessionArchive) {
+        identifier = archive.id
+        createdAt = archive.createdAt
+        sourceSessionIdentifier = archive.sourceSessionIdentifier
+        sourceSessionStartedAt = archive.sourceSessionStartedAt
+        title = archive.title
+        note = archive.note
+        entryCount = archive.entryCount
+        reportCharacterCount = archive.reportCharacterCount
+        isReportTruncated = archive.isReportTruncated
+        reportText = archive.reportText
+    }
+}
+
 /// Objective-C-callable facade for using ConsoleDock with the bundled UIKit console.
 @objc(CDKConsoleDockUIKit)
 public final class ConsoleDockUIKit: NSObject {
@@ -265,6 +321,58 @@ public final class ConsoleDockUIKit: NSObject {
     @objc(issueReportText)
     public static func issueReportText() -> String {
         ConsoleDock.issueReportText()
+    }
+
+    /// Saves the current local issue report as a bounded app-local archive.
+    @objc(saveSessionArchiveWithNote:error:)
+    public static func saveSessionArchive(
+        note: String?,
+        error errorPointer: NSErrorPointer
+    ) -> ConsoleDockSessionArchive? {
+        do {
+            return ConsoleDockSessionArchive(archive: try ConsoleDock.saveSessionArchive(note: note))
+        } catch {
+            errorPointer?.pointee = error as NSError
+            return nil
+        }
+    }
+
+    /// Returns saved local session archives, newest first.
+    @objc(sessionArchivesWithError:)
+    public static func sessionArchives(error errorPointer: NSErrorPointer) -> [ConsoleDockSessionArchive]? {
+        do {
+            return try ConsoleDock.sessionArchives().map(ConsoleDockSessionArchive.init(archive:))
+        } catch {
+            errorPointer?.pointee = error as NSError
+            return nil
+        }
+    }
+
+    /// Deletes one saved local session archive. Missing archive ids are ignored.
+    @objc(deleteSessionArchiveWithIdentifier:error:)
+    public static func deleteSessionArchive(
+        identifier: String,
+        error errorPointer: NSErrorPointer
+    ) -> Bool {
+        do {
+            try ConsoleDock.deleteSessionArchive(id: identifier)
+            return true
+        } catch {
+            errorPointer?.pointee = error as NSError
+            return false
+        }
+    }
+
+    /// Deletes all saved local session archives.
+    @objc(clearSessionArchivesWithError:)
+    public static func clearSessionArchives(error errorPointer: NSErrorPointer) -> Bool {
+        do {
+            try ConsoleDock.clearSessionArchives()
+            return true
+        } catch {
+            errorPointer?.pointee = error as NSError
+            return false
+        }
     }
 
     /// Sets an app-owned local context provider for issue reports and the bundled context panel.

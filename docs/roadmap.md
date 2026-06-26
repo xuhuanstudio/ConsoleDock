@@ -251,7 +251,33 @@ Not included:
 - crash reporting.
 - CocoaPods or XCFramework distribution.
 
-## Post-v0.10 - Demand-Driven Compatibility Candidates
+## v0.11 - Local Session Archive
+
+Goal: let testers explicitly save a bounded local issue-report snapshot so reproduction evidence can be reopened after an app restart without turning ConsoleDock into persistent raw logging.
+
+Deliverables:
+
+- `ConsoleDock.SessionArchive` metadata and report-text model.
+- Swift APIs for `saveSessionArchive`, `sessionArchives`, `deleteSessionArchive`, and `clearSessionArchives`.
+- Objective-C/UIKit facade APIs through `CDKSessionArchive` and `CDKConsoleDockUIKit`.
+- app-local JSON persistence of already-redacted issue-report snapshots, bounded by archive count and report length.
+- bundled UIKit `Save Session Archive` and `Saved Session Archives` flows from the Logs share menu.
+- archive list and detail screens with copy, share, delete, and clear-all controls.
+- Swift and Objective-C sample actions plus focused UI smoke coverage for archive menu and Swift archive detail/delete flow.
+- unit tests, accessibility identifier validation, README, DocC, privacy, roadmap, changelog, and sample walkthrough updates for explicit local session archives.
+
+Not included:
+
+- default persistent raw logs.
+- background auto-save of every session.
+- crash-final log recovery guarantees.
+- archive search, database queries, saved filters, or diffing.
+- remote upload, sync, remote issue creation, or automation-platform behavior.
+- network inspector.
+- crash reporting.
+- CocoaPods or XCFramework distribution.
+
+## Post-v0.11 - Demand-Driven Compatibility Candidates
 
 Goal: improve adoption in existing apps only when real integration feedback shows SPM and the current explicit API are not enough.
 

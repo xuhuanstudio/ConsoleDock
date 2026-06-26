@@ -11,8 +11,9 @@ import tempfile
 
 REQUIRED_SNIPPETS = {
     "README.md": [
-        "ConsoleDock `v0.10.0` is the current source-first Swift Package Manager preview release.",
-        "Use the latest release tag from GitHub Releases. `v0.10.0` includes the bundled Session Timeline view, local structured Logs queries, next/previous visible error jumps, local Debug Action execution history, session-only recent parameter values for action forms, reproduction timeline issue reports, temporary `.txt` issue-report sharing, parameterized Debug Actions, App Context snapshots for issue reports and the bundled Context tab, configurable floating trigger controls, Logs jump actions, Actions search, logger forwarders for existing logger sinks, Test Session Reports, manual markers, Debug Actions, log detail, explicit visible/all/issue-report sharing and copying, runtime diagnostics, and release-validation hardening.",
+        "ConsoleDock `v0.11.0` is the current source-first Swift Package Manager preview release.",
+        "Use the latest release tag from GitHub Releases. `v0.11.0` includes Local Session Archive save/review/delete flows, the bundled Session Timeline view, local structured Logs queries, next/previous visible error jumps, local Debug Action execution history, session-only recent parameter values for action forms, reproduction timeline issue reports, temporary `.txt` issue-report sharing, parameterized Debug Actions, App Context snapshots for issue reports and the bundled Context tab, configurable floating trigger controls, Logs jump actions, Actions search, logger forwarders for existing logger sinks, Test Session Reports, manual markers, Debug Actions, log detail, explicit visible/all/issue-report sharing and copying, runtime diagnostics, and release-validation hardening.",
+        "Local Session Archive is available in `v0.11.0` and later.",
         "Session Timeline is available in `v0.10.0` and later.",
         "Local structured Logs queries are available in `v0.9.0` and later.",
         "Floating trigger configuration is available in `v0.6.0` and later.",
@@ -24,8 +25,9 @@ REQUIRED_SNIPPETS = {
         "Test Session Reports are available in `v0.4.0` and later.",
     ],
     "README.zh-CN.md": [
-        "ConsoleDock `v0.10.0` 是当前 source-first Swift Package Manager 公开预览版本",
-        "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.10.0` 已包含内置 Session Timeline、Logs 本地结构化查询、next/previous visible error jump、local Debug Action execution history、action form session-only 最近参数值复用、reproduction timeline issue reports、临时 `.txt` issue-report 分享、parameterized Debug Actions、App Context、可配置 floating trigger、Logs Jump、Actions 搜索、logger forwarders、Test Session Reports、manual markers、Debug Actions、日志详情、visible/all/issue-report 分享和复制、runtime diagnostics 和当前 release validation 加固：",
+        "ConsoleDock `v0.11.0` 是当前 source-first Swift Package Manager 公开预览版本",
+        "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.11.0` 已包含 Local Session Archive 显式保存/查看/删除、内置 Session Timeline、Logs 本地结构化查询、next/previous visible error jump、local Debug Action execution history、action form session-only 最近参数值复用、reproduction timeline issue reports、临时 `.txt` issue-report 分享、parameterized Debug Actions、App Context、可配置 floating trigger、Logs Jump、Actions 搜索、logger forwarders、Test Session Reports、manual markers、Debug Actions、日志详情、visible/all/issue-report 分享和复制、runtime diagnostics 和当前 release validation 加固：",
+        "Local Session Archive 从 `v0.11.0` 开始属于已发布能力。",
         "Session Timeline 从 `v0.10.0` 开始属于已发布能力。",
         "Logs 本地结构化查询从 `v0.9.0` 开始属于已发布能力。",
         "Floating trigger 配置从 `v0.6.0` 开始属于已发布能力。",
@@ -42,8 +44,10 @@ DENIED_SNIPPETS = {
     "README.md": [
         "ConsoleDock `v0.8.0` is the current source-first Swift Package Manager preview release.",
         "ConsoleDock `v0.9.0` is the current source-first Swift Package Manager preview release.",
+        "ConsoleDock `v0.10.0` is the current source-first Swift Package Manager preview release.",
         "Use the latest release tag from GitHub Releases. `v0.8.0` includes",
         "Use the latest release tag from GitHub Releases. `v0.9.0` includes",
+        "Use the latest release tag from GitHub Releases. `v0.10.0` includes",
         "Runtime diagnostics are available on `main` after `v0.1.0`",
         "Debug Actions are available on `main`",
         "Parameterized Debug Actions are available on `main`",
@@ -53,8 +57,10 @@ DENIED_SNIPPETS = {
     "README.zh-CN.md": [
         "ConsoleDock `v0.8.0` 是当前 source-first Swift Package Manager 公开预览版本",
         "ConsoleDock `v0.9.0` 是当前 source-first Swift Package Manager 公开预览版本",
+        "ConsoleDock `v0.10.0` 是当前 source-first Swift Package Manager 公开预览版本",
         "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.8.0` 已包含",
         "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.9.0` 已包含",
+        "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.10.0` 已包含",
         "Runtime diagnostics 是 `v0.1.0` 之后在 `main` 上新增的能力",
         "Debug Actions 是 `main`",
         "Parameterized Debug Actions 是 `main`",
@@ -130,7 +136,7 @@ def self_test() -> list[str]:
         root = pathlib.Path(raw_directory)
         write_valid_docs(root)
         if validate(root):
-            errors.append("validate should accept docs with released v0.10.0 guidance")
+            errors.append("validate should accept docs with released v0.11.0 guidance")
 
         missing_snippet_root = root / "missing-snippet"
         missing_snippet_root.mkdir()

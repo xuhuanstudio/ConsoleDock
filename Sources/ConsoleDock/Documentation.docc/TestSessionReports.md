@@ -12,9 +12,9 @@ ConsoleDock does this with three local pieces:
 - ``ConsoleDock/mark(_:)`` writes a native info entry with a stable `[marker]` prefix.
 - ``ConsoleDock/appContext`` returns app-provided local context when the host app registers a provider.
 - ``ConsoleDock/actionExecutionHistory`` returns local Debug Action outcomes for the current process session.
-- The bundled UIKit console offers `Mark`, `Timeline`, `Share Issue Report`, and `Copy Issue Report` actions.
+- The bundled UIKit console offers `Mark`, `Timeline`, `Share Issue Report`, `Copy Issue Report`, and explicit Local Session Archive actions.
 
-Issue reports are generated locally through the system share sheet, copied locally through the pasteboard action, or read as text through ``ConsoleDock/issueReportText()``. They include session metadata, diagnostics, app context, a reproduction timeline, a marker index, and all currently retained redacted logs. ConsoleDock does not persist reports by default, upload them, or create remote issues automatically.
+Issue reports are generated locally through the system share sheet, copied locally through the pasteboard action, saved explicitly as a bounded Local Session Archive, or read as text through ``ConsoleDock/issueReportText()``. They include session metadata, diagnostics, app context, a reproduction timeline, a marker index, and all currently retained redacted logs. ConsoleDock does not persist reports by default, upload them, or create remote issues automatically.
 
 ## Add Markers
 
@@ -71,3 +71,15 @@ The bundled `Context` tab reads the same provider. See <doc:AppContext> for deta
 Open the ConsoleDock panel, tap the share button, and choose `Share Issue Report` or `Copy Issue Report`.
 
 The report shares all currently retained entries, not only the visible filtered list, so a tester does not accidentally omit surrounding context. `Share Issue Report` creates a temporary local `.txt` item for the user-initiated system share sheet. `Copy Issue Report` copies the same report text to the pasteboard. `Share Visible Logs` and `Share All Logs` remain available for smaller snapshots.
+
+## Save A Local Archive
+
+Use Local Session Archive when a tester needs to keep a bounded report snapshot across an app restart.
+
+```swift
+let archive = try ConsoleDock.saveSessionArchive(note: "Checkout smoke test")
+let archives = try ConsoleDock.sessionArchives()
+try ConsoleDock.deleteSessionArchive(id: archive.id)
+```
+
+The bundled Logs share menu also provides `Save Session Archive` and `Saved Session Archives`. Saved archives contain already-redacted issue-report text, persist locally until deleted, and do not upload or create remote issues. See <doc:LocalSessionArchive>.

@@ -79,6 +79,19 @@ Markers are native info entries with a stable `[marker]` prefix. The bundled UIK
 NSString *report = [CDKConsoleDockUIKit issueReportText];
 ```
 
+Use Local Session Archive when an Objective-C app or tester needs to save that report locally for later review:
+
+```objc
+NSError *error = nil;
+CDKSessionArchive *archive =
+    [CDKConsoleDockUIKit saveSessionArchiveWithNote:@"Checkout smoke test"
+                                             error:&error];
+NSArray<CDKSessionArchive *> *archives =
+    [CDKConsoleDockUIKit sessionArchivesWithError:&error];
+```
+
+Archives are explicit bounded issue-report snapshots. They do not turn ConsoleDock into raw-log persistence, remote upload, or crash reporting. See <doc:LocalSessionArchive>.
+
 ## Register Parameterized Debug Actions
 
 Objective-C apps can register actions with small local parameters through `CDKConsoleDockUIKit`.

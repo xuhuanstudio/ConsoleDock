@@ -8,6 +8,16 @@ The project follows Semantic Versioning for public releases.
 
 No changes yet.
 
+## v0.11.0 - 2026-06-27
+
+### Added
+
+- Added explicit Local Session Archive APIs for saving, listing, deleting, and clearing bounded local issue-report snapshots.
+- Added Objective-C/UIKit archive bridging through `CDKSessionArchive` and `CDKConsoleDockUIKit`.
+- Added bundled UIKit `Save Session Archive` and `Saved Session Archives` flows with archive list, detail, copy, share, delete, and clear-all controls.
+- Added Swift and Objective-C sample archive actions plus focused UI smoke coverage for archive menu and Swift archive detail/delete flow.
+- Added unit tests, API surface validation, accessibility identifier validation, README, DocC, privacy, roadmap, changelog, and sample walkthrough updates for local archive boundaries.
+
 ## v0.10.0 - 2026-06-26
 
 ### Added

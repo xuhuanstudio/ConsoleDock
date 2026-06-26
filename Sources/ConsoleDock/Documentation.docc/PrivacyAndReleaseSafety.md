@@ -4,9 +4,11 @@ Keep ConsoleDock local, memory-first, and disabled in production by default.
 
 ## Local Memory First
 
-ConsoleDock stores logs in a bounded in-memory buffer. It does not persist logs to disk, upload logs, or collect logs from other processes by default.
+ConsoleDock stores logs in a bounded in-memory buffer. It does not persist raw logs to disk, upload logs, or collect logs from other processes by default.
 
 Copy and share actions are user-initiated from the UIKit console. They use already-redacted entries from the current visible in-memory snapshot.
+
+Local Session Archive is also explicit. It stores bounded issue-report text only after a user or app saves an archive, and archives remain local until deleted.
 
 ## Redaction Runs Before Storage
 

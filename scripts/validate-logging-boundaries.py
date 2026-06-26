@@ -35,7 +35,7 @@ REQUIRED_SNIPPETS = {
         "Swift `Logger`, `os_log`, and Apple unified logging are not validated by these samples",
         "ConsoleDock does not promise complete zero-intrusion capture of those systems.",
         "Debug Actions are local, app-registered shortcuts. ConsoleDock does not discover pages, control routing, bypass app permissions, or receive remote commands.",
-        "ConsoleDock does not write an export file by default, does not persist logs by default, and does not upload logs.",
+        "ConsoleDock does not write raw log files by default, does not persist logs by default, and does not upload logs.",
     ],
     "docs/product-brief.md": [
         "ConsoleDock only displays and triggers actions that the app registers. It should not discover routes, control app navigation automatically, bypass business permissions, or accept remote commands.",

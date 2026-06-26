@@ -213,6 +213,8 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         shareButton.tap()
         XCTAssertTrue(app.buttons["consoledock.share-issue-report"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["consoledock.copy-issue-report"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["consoledock.save-session-archive"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["consoledock.saved-session-archives"].waitForExistence(timeout: 5))
     }
 
     private func waitForTableEntry(in table: XCUIElement, timeout: TimeInterval) -> Bool {

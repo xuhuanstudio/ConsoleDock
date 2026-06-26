@@ -102,6 +102,16 @@ Show the same current-session triage signals inside the bundled panel before a t
 
 Timeline is a local UI summary. It should not become persistent history, telemetry, route discovery, remote commands, or a replacement for the full Logs list.
 
+### Local Session Archive Mode
+
+Let testers explicitly save a bounded issue-report snapshot for later local review:
+
+```swift
+try ConsoleDock.saveSessionArchive(note: "Checkout smoke test")
+```
+
+Archives should persist already-redacted report text locally until deleted. They should not become raw log persistence, background telemetry, crash-final recovery, remote upload, or a searchable log database.
+
 ## Non-Goals
 
 - Do not try to replace Xcode debugger features.
@@ -111,6 +121,7 @@ Timeline is a local UI summary. It should not become persistent history, telemet
 - Do not turn Debug Actions into a remote command system or automatic route discovery layer.
 - Do not turn issue reports into default persistence, remote upload, or automatic issue creation.
 - Do not turn Session Timeline into default persistent history or telemetry.
+- Do not turn Local Session Archive into raw log persistence, crash reporting, remote upload, or a logging database.
 - Do not treat App Context as automatic redaction, route discovery, persistence, or remote telemetry.
 
 ## Naming Decision

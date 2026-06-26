@@ -154,6 +154,16 @@ ConsoleDock.mark("Opened checkout")
 
 The bundled UIKit console also exposes a `Mark` action, a `Timeline` tab, plus `Share Issue Report` and `Copy Issue Report` options. Issue reports are local, user-initiated plain-text exports containing session metadata, diagnostics, app context, a reproduction timeline, markers, and currently retained redacted logs. ConsoleDock does not upload them or create remote issues automatically. See <doc:TestSessionReports> and <doc:SessionTimeline>.
 
+Use Local Session Archive when a tester needs to reopen the current issue report after an app restart:
+
+```swift
+let archive = try ConsoleDock.saveSessionArchive(note: "Checkout smoke test")
+let archives = try ConsoleDock.sessionArchives()
+try ConsoleDock.deleteSessionArchive(id: archive.id)
+```
+
+Archives are explicit, bounded local report snapshots, not automatic raw-log persistence. See <doc:LocalSessionArchive>.
+
 Use App Context for app-owned values that help explain a local report:
 
 ```swift

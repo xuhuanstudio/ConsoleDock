@@ -258,6 +258,28 @@ REQUIRED_SNIPPETS = {
             timeZoneIdentifier: String
         )
         """,
+        "public struct SessionArchive: Equatable, Identifiable",
+        "public let sourceSessionIdentifier: String",
+        "public let sourceSessionStartedAt: Date?",
+        "public let note: String?",
+        "public let entryCount: Int",
+        "public let reportCharacterCount: Int",
+        "public let isReportTruncated: Bool",
+        "public let reportText: String",
+        """
+        public init(
+            id: String,
+            createdAt: Date,
+            sourceSessionIdentifier: String,
+            sourceSessionStartedAt: Date?,
+            title: String,
+            note: String? = nil,
+            entryCount: Int,
+            reportCharacterCount: Int,
+            isReportTruncated: Bool,
+            reportText: String
+        )
+        """,
         "public enum StartResult: Equatable",
         "case started",
         "case alreadyRunning",
@@ -280,6 +302,10 @@ REQUIRED_SNIPPETS = {
         "public static let diagnosticsDidChangeNotification",
         "public static func clear()",
         "public static func issueReportText() -> String",
+        "public static func saveSessionArchive(note: String? = nil) throws -> SessionArchive",
+        "public static func sessionArchives() throws -> [SessionArchive]",
+        "public static func deleteSessionArchive(id: String) throws",
+        "public static func clearSessionArchives() throws",
         "public static func setAppContextProvider(_ provider: @escaping () -> [AppContextSection])",
         "public static func clearAppContextProvider()",
         "public static func showConsole()",
@@ -395,6 +421,35 @@ REQUIRED_SNIPPETS = {
         "public init(title: String, items: [ConsoleDockAppContextItem])",
         "@objc(sectionWithTitle:items:)",
         "public static func section(title: String, items: [ConsoleDockAppContextItem]) -> ConsoleDockAppContextSection",
+        "@objc(CDKSessionArchive)",
+        "public final class ConsoleDockSessionArchive: NSObject",
+        "@objc public let sourceSessionIdentifier: String",
+        "@objc public let sourceSessionStartedAt: Date?",
+        "@objc public let note: String?",
+        "@objc public let entryCount: Int",
+        "@objc public let reportCharacterCount: Int",
+        "@objc public let isReportTruncated: Bool",
+        "@objc public let reportText: String",
+        """
+        @objc(
+            initWithIdentifier:createdAt:sourceSessionIdentifier:sourceSessionStartedAt:title:note:entryCount:
+            reportCharacterCount:isReportTruncated:reportText:
+        )
+        """,
+        """
+        public init(
+            identifier: String,
+            createdAt: Date,
+            sourceSessionIdentifier: String,
+            sourceSessionStartedAt: Date?,
+            title: String,
+            note: String?,
+            entryCount: Int,
+            reportCharacterCount: Int,
+            isReportTruncated: Bool,
+            reportText: String
+        )
+        """,
         "@objc(CDKConsoleDockUIKit)",
         "public final class ConsoleDockUIKit: NSObject",
         "@objc(startWithConfiguration:error:)",
@@ -413,6 +468,24 @@ REQUIRED_SNIPPETS = {
         "public static func hideFloatingButton()",
         "@objc(issueReportText)",
         "public static func issueReportText() -> String",
+        "@objc(saveSessionArchiveWithNote:error:)",
+        """
+        public static func saveSessionArchive(
+            note: String?,
+            error errorPointer: NSErrorPointer
+        ) -> ConsoleDockSessionArchive?
+        """,
+        "@objc(sessionArchivesWithError:)",
+        "public static func sessionArchives(error errorPointer: NSErrorPointer) -> [ConsoleDockSessionArchive]?",
+        "@objc(deleteSessionArchiveWithIdentifier:error:)",
+        """
+        public static func deleteSessionArchive(
+            identifier: String,
+            error errorPointer: NSErrorPointer
+        ) -> Bool
+        """,
+        "@objc(clearSessionArchivesWithError:)",
+        "public static func clearSessionArchives(error errorPointer: NSErrorPointer) -> Bool",
         "@objc(setAppContextProvider:)",
         "public static func setAppContextProvider(_ provider: @escaping () -> [ConsoleDockAppContextSection])",
         "@objc(clearAppContextProvider)",
@@ -476,7 +549,7 @@ REQUIRED_SNIPPETS = {
 
 REQUIRED_SNIPPET_COUNTS = {
     SWIFT_FACADE: {
-        "public init(": 11,
+        "public init(": 12,
         "public let message: String": 3,
     },
 }

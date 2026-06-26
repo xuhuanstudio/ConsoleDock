@@ -19,6 +19,9 @@
 {
     BOOL isUISmokeRun = [NSProcessInfo.processInfo.arguments containsObject:@"--consoledock-ui-smoke"];
     [self startConsoleDockForUISmokeRun:isUISmokeRun];
+    if (isUISmokeRun) {
+        [CDKConsoleDockUIKit clearSessionArchivesWithError:nil];
+    }
     [self registerDebugActions];
     [self registerAppContextForUISmokeRun:isUISmokeRun];
     [CDKConsoleDock info:@"ObjCSampleApp launched"];
@@ -209,6 +212,27 @@ configurationForConnectingSceneSession:(UISceneSession *)connectingSceneSession
                                                       [NSString stringWithFormat:@"objc debug action diagnostics running=%@ entries=%lu",
                                                                                  diagnostics.isRunning ? @"YES" : @"NO",
                                                                                  (unsigned long)diagnostics.entryCount]];
+                                              }];
+
+    [CDKConsoleDockUIKit registerActionWithIdentifier:@"objc.sample.save-archive"
+                                                title:@"Save Session Archive"
+                                                group:@"Diagnostics"
+                                               detail:@"Saves the current local issue report as a bounded on-device archive."
+                                 requiresConfirmation:NO
+                                              handler:^{
+                                                  NSError *error = nil;
+                                                  CDKSessionArchive *archive =
+                                                      [CDKConsoleDockUIKit saveSessionArchiveWithNote:@"Objective-C sample debug action"
+                                                                                                 error:&error];
+                                                  if (archive != nil) {
+                                                      [CDKConsoleDock info:
+                                                          [NSString stringWithFormat:@"objc debug action saved session archive id=%@",
+                                                                                     archive.identifier]];
+                                                  } else {
+                                                      [CDKConsoleDock error:
+                                                          [NSString stringWithFormat:@"objc debug action failed to save session archive: %@",
+                                                                                     error.localizedDescription ?: @"Unknown error"]];
+                                                  }
                                               }];
 }
 

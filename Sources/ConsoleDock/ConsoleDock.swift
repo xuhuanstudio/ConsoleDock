@@ -518,6 +518,54 @@ public enum ConsoleDock {
         }
     }
 
+    /// One explicitly saved local issue-report snapshot.
+    public struct SessionArchive: Equatable, Identifiable {
+        /// Stable archive identifier.
+        public let id: String
+        /// Time when this archive was saved.
+        public let createdAt: Date
+        /// ConsoleDock session identifier that produced the saved report.
+        public let sourceSessionIdentifier: String
+        /// Start time of the source ConsoleDock session, when available.
+        public let sourceSessionStartedAt: Date?
+        /// Human-readable archive title.
+        public let title: String
+        /// Optional app or tester note supplied when the archive was saved.
+        public let note: String?
+        /// Number of retained entries at save time.
+        public let entryCount: Int
+        /// Character count of the issue report before archive-level truncation.
+        public let reportCharacterCount: Int
+        /// Whether the saved report text was shortened to respect the archive storage limit.
+        public let isReportTruncated: Bool
+        /// Saved issue-report text. This is generated from ConsoleDock's already-redacted report pipeline.
+        public let reportText: String
+
+        public init(
+            id: String,
+            createdAt: Date,
+            sourceSessionIdentifier: String,
+            sourceSessionStartedAt: Date?,
+            title: String,
+            note: String? = nil,
+            entryCount: Int,
+            reportCharacterCount: Int,
+            isReportTruncated: Bool,
+            reportText: String
+        ) {
+            self.id = id
+            self.createdAt = createdAt
+            self.sourceSessionIdentifier = sourceSessionIdentifier
+            self.sourceSessionStartedAt = sourceSessionStartedAt
+            self.title = title
+            self.note = note
+            self.entryCount = entryCount
+            self.reportCharacterCount = reportCharacterCount
+            self.isReportTruncated = isReportTruncated
+            self.reportText = reportText
+        }
+    }
+
     /// Startup result returned by `start(configuration:)`.
     public enum StartResult: Equatable {
         case started
@@ -621,6 +669,32 @@ public enum ConsoleDock {
             appContext: appContext,
             actionExecutions: actionExecutionHistory
         )
+    }
+
+    /// Saves the current local issue report as a bounded app-local archive.
+    @discardableResult
+    public static func saveSessionArchive(note: String? = nil) throws -> SessionArchive {
+        try ConsoleDockSessionArchiveStore.shared.save(
+            reportText: issueReportText(),
+            metadata: sessionMetadata,
+            diagnostics: diagnostics,
+            note: note
+        )
+    }
+
+    /// Returns saved local session archives, newest first.
+    public static func sessionArchives() throws -> [SessionArchive] {
+        try ConsoleDockSessionArchiveStore.shared.archives()
+    }
+
+    /// Deletes one saved local session archive. Missing archive ids are ignored.
+    public static func deleteSessionArchive(id: String) throws {
+        try ConsoleDockSessionArchiveStore.shared.deleteArchive(id: id)
+    }
+
+    /// Deletes all saved local session archives.
+    public static func clearSessionArchives() throws {
+        try ConsoleDockSessionArchiveStore.shared.clearArchives()
     }
 
     /// Sets an app-owned local context provider for issue reports and the bundled context panel.
