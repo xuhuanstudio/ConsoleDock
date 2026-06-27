@@ -23,7 +23,7 @@ The bundled UIKit panel is local-only and organized around the tester's current 
 
 ## Status
 
-ConsoleDock `v1.0.0` is the current source-first Swift Package Manager stable release. It is usable as an in-app local debugging panel for Swift, Objective-C, and mixed iOS projects.
+ConsoleDock `v1.0.1` is the current source-first Swift Package Manager stable release. It is usable as an in-app local debugging panel for Swift, Objective-C, and mixed iOS projects.
 
 The current release includes:
 
@@ -41,8 +41,8 @@ Current limitations:
 - Entry change notification exists as the refresh foundation for UI; notification handlers should fetch a snapshot through `entries`.
 - The UIKit floating button and console panel foundation can show, free-text search, structured-query search, source-filter, level-filter, jump to latest/first/previous/next visible error, pause/resume live follow, live refresh, log detail, copy, clear, add manual markers, review a Session Timeline, visible/all/issue-report share/export with diagnostics, ConsoleDock Health, app context, action history, and a reproduction timeline, copy issue reports and integration diagnoses, save/review/delete local session archives, search and run Debug Actions, collect small action parameters, reuse recent parameter values within the current process session, show app context, and close the current in-memory snapshot.
 - App-owned feedback or support flows can generate a bounded, on-demand Support Report for all retained data, the last 5/10/30/60 minutes, or an explicit date range.
-- Default persistent raw logs, saved searches, and public query-language APIs are not implemented yet.
-- Third-party adapters, CocoaPods, and XCFramework distribution are not implemented yet.
+- Default persistent raw logs, saved searches, and public query-language APIs are not part of the current stable surface.
+- Third-party adapters, CocoaPods, and XCFramework distribution remain demand-driven compatibility evaluations, not active release targets.
 - Redaction is a local in-memory baseline, not a complete privacy guarantee.
 
 ## Core Boundary
@@ -86,7 +86,7 @@ Add the public repository URL through Xcode's package dependency UI:
 https://github.com/xuhuanstudio/ConsoleDock.git
 ```
 
-Use the latest release tag from GitHub Releases. `v1.0.0` includes the bundled UIKit console, Debug Actions, Timeline, App Context, issue reports, Local Session Archives, Support Reports, privacy/API-readiness hardening, logger forwarders, Swift and Objective-C samples, DocC, focused test-structure validation, 1.0 readiness guidance, and release validation. Then depend on:
+Use the latest release tag from GitHub Releases. `v1.0.1` includes the bundled UIKit console, Debug Actions, Timeline, App Context, issue reports, Local Session Archives, Support Reports, privacy/API-readiness hardening, logger forwarders, Swift and Objective-C samples, DocC, focused test-structure validation, 1.0 readiness guidance, and release validation. Then depend on:
 
 - `ConsoleDock` for Swift API plus the bundled UIKit console.
 - `ConsoleDockCore` for Objective-C/C-compatible core APIs.

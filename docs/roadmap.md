@@ -449,15 +449,22 @@ Not included:
 - reading logs from other processes.
 - debugger features such as breakpoints or LLDB expression evaluation.
 
-## Post-1.0 Ideas
+## Post-1.0 Evaluation
 
-Future features should be driven by real user demand:
+Post-1.0 work should start from real adoption feedback rather than speculative platform expansion.
 
-- network request panel;
-- crash breadcrumbs;
-- richer adapter ecosystem;
-- remote issue attachment workflow;
-- advanced log sharing formats;
-- SwiftUI-specific presentation helpers.
+Near-term candidates that fit the current product boundary:
 
-Each post-1.0 feature should preserve the default local-only, debug-first safety model.
+- framework-specific logger adapter guides or small source examples when real projects ask for them;
+- richer local report formatting or export choices while staying user-initiated and local by default;
+- local-only tester presets if repeated workflows prove session-only values are not enough;
+- SwiftUI presentation helpers that wrap the existing entry points without rewriting the core UIKit panel.
+
+Still out of scope unless a future major product decision changes the boundary:
+
+- network request inspection;
+- crash reporting or crash breadcrumb collection;
+- remote upload or remote issue attachment workflows;
+- analytics, telemetry, user statistics, or background collection.
+
+Each post-1.0 feature must preserve the default local-only, debug-first safety model.

@@ -8,6 +8,12 @@ The project follows Semantic Versioning for public releases.
 
 No changes yet.
 
+## v1.0.1 - 2026-06-27
+
+### Changed
+
+- Tightened post-1.0 roadmap and README wording so speculative network, crash, remote upload, CocoaPods, and XCFramework work is not presented as part of the active stable product path.
+
 ## v1.0.0 - 2026-06-27
 
 ### Changed
