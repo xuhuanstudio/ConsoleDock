@@ -23,7 +23,7 @@ The bundled UIKit panel is local-only and organized around the tester's current 
 
 ## Status
 
-ConsoleDock `v0.15.0` is the current source-first Swift Package Manager preview release. It is usable as an in-app local debugging panel for Swift, Objective-C, and mixed iOS projects.
+ConsoleDock `v0.16.0` is the current source-first Swift Package Manager preview release. It is usable as an in-app local debugging panel for Swift, Objective-C, and mixed iOS projects.
 
 The current release includes:
 
@@ -86,7 +86,7 @@ Add the public repository URL through Xcode's package dependency UI:
 https://github.com/xuhuanstudio/ConsoleDock.git
 ```
 
-Use the latest release tag from GitHub Releases. `v0.15.0` includes the bundled UIKit console, Debug Actions, Timeline, App Context, issue reports, Local Session Archives, Support Reports, privacy/readiness hardening, logger forwarders, Swift and Objective-C samples, DocC, and release validation. Then depend on:
+Use the latest release tag from GitHub Releases. `v0.16.0` includes the bundled UIKit console, Debug Actions, Timeline, App Context, issue reports, Local Session Archives, Support Reports, privacy/API-readiness hardening, logger forwarders, Swift and Objective-C samples, DocC, and release validation. Then depend on:
 
 - `ConsoleDock` for Swift API plus the bundled UIKit console.
 - `ConsoleDockCore` for Objective-C/C-compatible core APIs.

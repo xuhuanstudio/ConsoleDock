@@ -6,6 +6,10 @@ The project follows Semantic Versioning for public releases.
 
 ## Unreleased
 
+No changes yet.
+
+## v0.16.0 - 2026-06-27
+
 ### Added
 
 - Added first-class marker metadata on `CDKLogEntry` and `ConsoleDock.LogEntry` so Timeline and issue reports can identify explicit markers without relying only on a visible `[marker]` message prefix.
