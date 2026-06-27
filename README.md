@@ -9,7 +9,7 @@ In-app debug console for iOS testing.
 [![Release](https://img.shields.io/github/v/release/xuhuanstudio/ConsoleDock?sort=semver)](https://github.com/xuhuanstudio/ConsoleDock/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-ConsoleDock is an early-stage iOS debug SDK that lets testers inspect app logs directly on device without connecting Xcode. The project is designed for real iOS app integration: existing Objective-C apps should get useful baseline coverage, while Swift and mixed projects can opt into a more reliable explicit logging API.
+ConsoleDock is an iOS debug SDK that lets testers inspect app logs directly on device without connecting Xcode. The project is designed for real iOS app integration: existing Objective-C apps should get useful baseline coverage, while Swift and mixed projects can opt into a more reliable explicit logging API.
 
 <img src="docs/assets/swift-sample-logs.png" alt="ConsoleDock iOS sample Logs screen showing diagnostics, filters, jump controls, and redacted sample entries" width="320">
 
@@ -23,7 +23,7 @@ The bundled UIKit panel is local-only and organized around the tester's current 
 
 ## Status
 
-ConsoleDock `v0.17.0` is the current source-first Swift Package Manager preview release. It is usable as an in-app local debugging panel for Swift, Objective-C, and mixed iOS projects.
+ConsoleDock `v1.0.0` is the current source-first Swift Package Manager stable release. It is usable as an in-app local debugging panel for Swift, Objective-C, and mixed iOS projects.
 
 The current release includes:
 
@@ -86,7 +86,7 @@ Add the public repository URL through Xcode's package dependency UI:
 https://github.com/xuhuanstudio/ConsoleDock.git
 ```
 
-Use the latest release tag from GitHub Releases. `v0.17.0` includes the bundled UIKit console, Debug Actions, Timeline, App Context, issue reports, Local Session Archives, Support Reports, privacy/API-readiness hardening, logger forwarders, Swift and Objective-C samples, DocC, focused test-structure validation, 1.0 readiness guidance, and release validation. Then depend on:
+Use the latest release tag from GitHub Releases. `v1.0.0` includes the bundled UIKit console, Debug Actions, Timeline, App Context, issue reports, Local Session Archives, Support Reports, privacy/API-readiness hardening, logger forwarders, Swift and Objective-C samples, DocC, focused test-structure validation, 1.0 readiness guidance, and release validation. Then depend on:
 
 - `ConsoleDock` for Swift API plus the bundled UIKit console.
 - `ConsoleDockCore` for Objective-C/C-compatible core APIs.
@@ -418,7 +418,7 @@ scripts/validate-docc.sh
 
 GitHub Actions runs the shared release validation script for pull requests, pushes to `main`, and `v*` tag validation. The script validates the working tree is clean, then validates the SwiftPM manifest, package identity, Swift Package Index metadata, Objective-C API surface, Swift API surface, UI accessibility identifiers, sample app documentation and automation, Swift formatting, SwiftPM build/test, Release safety gates, documentation links, versioned public documentation, governance metadata, distribution documentation and artifacts, release content audit, DocC documentation, the package iOS Simulator build, both sample app builds, source archive creation, source archive contents, and source archive build/test before a GitHub Release is published. Branch CI keeps simulator UI smoke disabled for a deterministic required status check; `v*` release validation enables `CONSOLEDOCK_RUN_UI_SMOKE=1` so the focused Swift and Objective-C sample simulator UI smoke tests still gate releases. Set the same environment variable locally when you want the full simulator smoke path.
 
-The release validation script also checks that Swift facade tests remain split by product area. This keeps pre-1.0 maintenance work reviewable as ConsoleDock approaches a stable API.
+The release validation script also checks that Swift facade tests remain split by product area. This keeps long-term maintenance work reviewable as ConsoleDock evolves.
 
 ## Examples And Walkthrough
 

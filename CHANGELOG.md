@@ -8,6 +8,14 @@ The project follows Semantic Versioning for public releases.
 
 No changes yet.
 
+## v1.0.0 - 2026-06-27
+
+### Changed
+
+- Promoted ConsoleDock documentation from preview release wording to stable source-first Swift Package Manager release wording.
+- Updated versioned documentation validation so `1.x` releases require stable release wording while `0.x` releases continue to use preview wording.
+- Recorded the existing local-only, debug/test-first product boundary as the stable `1.0.0` release posture without adding analytics, telemetry, remote upload, crash reporting, network inspection, CocoaPods, or XCFramework distribution.
+
 ## v0.17.0 - 2026-06-27
 
 ### Added

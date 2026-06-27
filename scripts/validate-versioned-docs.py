@@ -14,11 +14,11 @@ VERSION_HEADING_RE = re.compile(r"^## (v\d+\.\d+\.\d+)\b", re.MULTILINE)
 
 CURRENT_RELEASE_SNIPPETS = {
     "README.md": [
-        "ConsoleDock `{tag}` is the current source-first Swift Package Manager preview release.",
+        "ConsoleDock `{tag}` is the current source-first Swift Package Manager {release_channel} release.",
         "Use the latest release tag from GitHub Releases. `{tag}` includes",
     ],
     "README.zh-CN.md": [
-        "ConsoleDock `{tag}` 是当前 source-first Swift Package Manager 公开预览版本",
+        "ConsoleDock `{tag}` 是当前 source-first Swift Package Manager {release_channel_zh}",
         "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`{tag}` 已包含",
     ],
 }
@@ -83,11 +83,27 @@ def current_release_tag(root: pathlib.Path) -> str:
     return released_tags(root)[0]
 
 
+def release_channel(tag: str) -> str:
+    major = int(tag.removeprefix("v").split(".", maxsplit=1)[0])
+    return "stable" if major >= 1 else "preview"
+
+
+def release_channel_zh(tag: str) -> str:
+    return "稳定版本" if release_channel(tag) == "stable" else "公开预览版本"
+
+
 def required_snippets(root: pathlib.Path) -> dict[str, list[str]]:
     tag = current_release_tag(root)
     required: dict[str, list[str]] = {}
     for path, snippets in CURRENT_RELEASE_SNIPPETS.items():
-        required[path] = [snippet.format(tag=tag) for snippet in snippets]
+        required[path] = [
+            snippet.format(
+                tag=tag,
+                release_channel=release_channel(tag),
+                release_channel_zh=release_channel_zh(tag),
+            )
+            for snippet in snippets
+        ]
     for path, snippets in FEATURE_SNIPPETS.items():
         required.setdefault(path, []).extend(snippets)
     return required
@@ -101,12 +117,14 @@ def denied_snippets(root: pathlib.Path) -> dict[str, list[str]]:
         denied.setdefault("README.md", []).extend(
             [
                 f"ConsoleDock `{tag}` is the current source-first Swift Package Manager preview release.",
+                f"ConsoleDock `{tag}` is the current source-first Swift Package Manager stable release.",
                 f"Use the latest release tag from GitHub Releases. `{tag}` includes",
             ]
         )
         denied.setdefault("README.zh-CN.md", []).extend(
             [
                 f"ConsoleDock `{tag}` 是当前 source-first Swift Package Manager 公开预览版本",
+                f"ConsoleDock `{tag}` 是当前 source-first Swift Package Manager 稳定版本",
                 f"通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`{tag}` 已包含",
             ]
         )
@@ -222,6 +240,22 @@ def self_test() -> list[str]:
         )
         if not validate(stale_release_root):
             errors.append("validate should reject docs that keep an older current release tag")
+
+        stable_release_root = root / "stable-release"
+        stable_release_root.mkdir()
+        (stable_release_root / "CHANGELOG.md").write_text(
+            "## Unreleased\n\nNo changes yet.\n\n"
+            "## v1.0.0 - 2026-06-27\n\n- Released.\n",
+            encoding="utf-8",
+        )
+        required = required_snippets(stable_release_root)
+        (stable_release_root / "README.md").write_text("\n".join(required["README.md"]), encoding="utf-8")
+        (stable_release_root / "README.zh-CN.md").write_text(
+            "\n".join(required["README.zh-CN.md"]),
+            encoding="utf-8",
+        )
+        if validate(stable_release_root):
+            errors.append("validate should accept stable release wording for v1.0.0 and later")
 
     return errors
 
