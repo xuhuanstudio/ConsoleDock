@@ -1,8 +1,8 @@
 # ConsoleDock
 
-面向 iOS 测试场景的 App 内调试日志面板。
+面向 iOS、Swift 和 Objective-C 测试场景的 App 内调试日志面板，不需要实时连接 Xcode。
 
-ConsoleDock 是一个 iOS debug SDK，目标是让测试人员在真机或模拟器上直接查看 App 日志，减少为了看基础日志而实时连接 Xcode 的依赖。
+ConsoleDock 是一个本地 on-device log viewer 和 debug panel，目标是让测试人员在真机或模拟器上直接查看 App 日志、触发 App 主动注册的本地调试动作，并按需导出有界的本地报告，减少为了看基础日志而实时连接 Xcode 的依赖。
 
 > 说明：英文 [README](README.md)、DocC 和 `docs/` 是项目的权威文档。本文是中文概览，方便快速理解项目定位和接入方式。
 

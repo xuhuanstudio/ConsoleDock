@@ -1,6 +1,6 @@
 # ConsoleDock
 
-In-app debug console for iOS testing.
+In-app debug console for iOS, Swift, and Objective-C testing without attaching Xcode.
 
 [简体中文概览](README.zh-CN.md)
 
@@ -9,9 +9,18 @@ In-app debug console for iOS testing.
 [![Release](https://img.shields.io/github/v/release/xuhuanstudio/ConsoleDock?sort=semver)](https://github.com/xuhuanstudio/ConsoleDock/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-ConsoleDock is an iOS debug SDK that lets testers inspect app logs directly on device without connecting Xcode. The project is designed for real iOS app integration: existing Objective-C apps should get useful baseline coverage, while Swift and mixed projects can opt into a more reliable explicit logging API.
+ConsoleDock is a local on-device log viewer and debug panel for iOS test builds. It helps testers and developers inspect useful app logs, run app-provided debug shortcuts, and export bounded local reports when a live Xcode session is not attached.
+
+It is designed for real app integration:
+
+- Swift and mixed apps can use the `ConsoleDock` Swift facade and bundled UIKit panel.
+- Older Objective-C apps can use `ConsoleDockCore` and the Objective-C-callable `CDKConsoleDockUIKit` facade.
+- Existing app loggers can add one `ConsoleDock.LogForwarder` or `CDKLogForwarder` sink instead of rewriting every old log call site.
+- App-owned feedback flows can generate local Support Reports for a bounded time range.
 
 <img src="docs/assets/swift-sample-logs.png" alt="ConsoleDock iOS sample Logs screen showing diagnostics, filters, jump controls, and redacted sample entries" width="320">
+
+Use ConsoleDock when you need an iOS debug console, on-device log viewer, or local tester panel for Swift and Objective-C apps. It is intentionally local-only: it is not analytics, telemetry, a network inspector, crash reporting, remote upload infrastructure, or a complete replacement for Xcode Console / Apple unified logging.
 
 The bundled UIKit panel is local-only and organized around the tester's current session:
 

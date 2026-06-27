@@ -10,6 +10,10 @@ The project follows Semantic Versioning for public releases.
 
 - Added adoption recipes for first-time Swift, Objective-C, existing logger, Debug Action, and app-owned feedback integrations.
 
+### Changed
+
+- Tightened README and Chinese README first-screen positioning for iOS, Swift, Objective-C, and Xcode-free testing discovery.
+
 ## v1.0.1 - 2026-06-27
 
 ### Changed
