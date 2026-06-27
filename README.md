@@ -23,14 +23,14 @@ The bundled UIKit panel is local-only and organized around the tester's current 
 
 ## Status
 
-ConsoleDock `v0.16.1` is the current source-first Swift Package Manager preview release. It is usable as an in-app local debugging panel for Swift, Objective-C, and mixed iOS projects.
+ConsoleDock `v0.17.0` is the current source-first Swift Package Manager preview release. It is usable as an in-app local debugging panel for Swift, Objective-C, and mixed iOS projects.
 
 The current release includes:
 
 - bounded in-memory log storage with redaction, truncation, stable entry ids, stdout/stderr capture, and explicit native logging APIs;
 - a UIKit panel with Logs, Actions, Timeline, Context, sharing, issue reports, and Local Session Archive flows;
 - Debug Actions with search, confirmation, disabled/destructive metadata, parameter forms, current-session execution history, and session-only recent values;
-- Integration Diagnosis, ConsoleDock Health, App Context, Test Session Reports, Support Reports, logger forwarders, Swift and Objective-C samples, DocC, screenshots, and release validation.
+- Integration Diagnosis, ConsoleDock Health, App Context, Test Session Reports, Support Reports, logger forwarders, Swift and Objective-C samples, DocC, screenshots, focused test-structure validation, 1.0 readiness guidance, and release validation.
 
 Current limitations:
 
@@ -86,7 +86,7 @@ Add the public repository URL through Xcode's package dependency UI:
 https://github.com/xuhuanstudio/ConsoleDock.git
 ```
 
-Use the latest release tag from GitHub Releases. `v0.16.1` includes the bundled UIKit console, Debug Actions, Timeline, App Context, issue reports, Local Session Archives, Support Reports, privacy/API-readiness hardening, logger forwarders, Swift and Objective-C samples, DocC, and release validation. Then depend on:
+Use the latest release tag from GitHub Releases. `v0.17.0` includes the bundled UIKit console, Debug Actions, Timeline, App Context, issue reports, Local Session Archives, Support Reports, privacy/API-readiness hardening, logger forwarders, Swift and Objective-C samples, DocC, focused test-structure validation, 1.0 readiness guidance, and release validation. Then depend on:
 
 - `ConsoleDock` for Swift API plus the bundled UIKit console.
 - `ConsoleDockCore` for Objective-C/C-compatible core APIs.
@@ -418,6 +418,8 @@ scripts/validate-docc.sh
 
 GitHub Actions runs the shared release validation script for pull requests, pushes to `main`, and `v*` tag validation. The script validates the working tree is clean, then validates the SwiftPM manifest, package identity, Swift Package Index metadata, Objective-C API surface, Swift API surface, UI accessibility identifiers, sample app documentation and automation, Swift formatting, SwiftPM build/test, Release safety gates, documentation links, versioned public documentation, governance metadata, distribution documentation and artifacts, release content audit, DocC documentation, the package iOS Simulator build, both sample app builds, source archive creation, source archive contents, and source archive build/test before a GitHub Release is published. Branch CI keeps simulator UI smoke disabled for a deterministic required status check; `v*` release validation enables `CONSOLEDOCK_RUN_UI_SMOKE=1` so the focused Swift and Objective-C sample simulator UI smoke tests still gate releases. Set the same environment variable locally when you want the full simulator smoke path.
 
+The release validation script also checks that Swift facade tests remain split by product area. This keeps pre-1.0 maintenance work reviewable as ConsoleDock approaches a stable API.
+
 ## Examples And Walkthrough
 
 The repository includes minimal UIKit sample apps:
@@ -556,6 +558,7 @@ Use `ConsoleDockCore` directly when an Objective-C app only needs capture, stora
 - [MVP architecture](docs/specs/2026-06-22-mvp-architecture.md)
 - [Open-source readiness](docs/open-source-readiness.md)
 - [Privacy and redaction](docs/privacy-and-redaction.md)
+- [1.0 readiness](docs/1.0-readiness.md)
 - [Release process](docs/release-process.md)
 - [Release build safety](docs/release-build-safety.md)
 - [Sample app walkthrough](docs/sample-app-walkthrough.md)

@@ -66,6 +66,10 @@ python3 scripts/validate-ui-accessibility-identifiers.py
 section "Validate sample app documentation and automation"
 python3 scripts/validate-sample-apps.py
 
+section "Validate test structure"
+python3 scripts/validate-test-structure.py --self-test
+python3 scripts/validate-test-structure.py
+
 section "Validate Swift formatting"
 scripts/validate-swift-format.sh
 

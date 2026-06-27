@@ -8,6 +8,18 @@ The project follows Semantic Versioning for public releases.
 
 No changes yet.
 
+## v0.17.0 - 2026-06-27
+
+### Added
+
+- Added a 1.0 readiness checklist that defines the stable release criteria, API boundary, adoption checks, validation gates, and out-of-scope features.
+- Added test-structure validation to keep Swift facade tests split by product area instead of regressing to a monolithic test file.
+
+### Changed
+
+- Split the large Swift facade test file into focused lifecycle, snapshot/timeline, report, filtering, integration/context, Debug Action, observer, and archive test suites backed by shared test fixtures.
+- Updated release validation and release-process documentation to include the focused test-structure gate.
+
 ## v0.16.1 - 2026-06-27
 
 ### Changed

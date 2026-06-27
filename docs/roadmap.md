@@ -389,7 +389,26 @@ Not included:
 - broad public API renaming unrelated to the equality correction.
 - SwiftUI rewrite, network inspector, crash reporting, remote commands, CocoaPods, or XCFramework distribution.
 
-## Post-v0.16 - Demand-Driven Compatibility Candidates
+## v0.17 - Pre-1.0 Adoption And Maintainability
+
+Goal: make the current SDK easier to validate, adopt, and stabilize before a `1.0.0` API commitment without expanding the product boundary.
+
+Deliverables:
+
+- split Swift facade tests by lifecycle, snapshot/timeline, reports, filtering, integration/context, Debug Actions, observer, and archive behavior;
+- shared Swift facade test fixtures through a focused test base class;
+- release-validation gate that prevents the Swift facade tests from regressing to one oversized monolithic file;
+- 1.0 readiness checklist for API stability, adoption, privacy, validation, and out-of-scope product boundaries;
+- README, simplified Chinese README, release-process, roadmap, and changelog updates for the pre-1.0 readiness path.
+
+Not included:
+
+- analytics, telemetry, automatic upload, or user-statistics collection;
+- default continuous file logging or background persistence;
+- public API renaming beyond real 1.0 blockers;
+- SwiftUI rewrite, network inspector, crash reporting, remote commands, CocoaPods, or XCFramework distribution.
+
+## Post-v0.17 - Demand-Driven Compatibility Candidates
 
 Goal: improve adoption in existing apps only when real integration feedback shows SPM and the current explicit API are not enough.
 
