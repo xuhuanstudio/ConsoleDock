@@ -8,6 +8,15 @@ The project follows Semantic Versioning for public releases.
 
 No changes yet.
 
+## v0.16.1 - 2026-06-27
+
+### Changed
+
+- Stabilized required branch CI by running deterministic release validation on `main` pushes and keeping simulator UI smoke tests as `v*` tag release gates.
+- Pinned GitHub Actions macOS runners to `macos-15` for CI and Release Validation.
+- Hardened Swift and Objective-C sample UI smoke text entry, mode selection, keyboard, wait, and retry behavior for release validation.
+- Updated release documentation to clarify the difference between branch CI, tag Release Validation, and local opt-in simulator UI smoke checks.
+
 ## v0.16.0 - 2026-06-27
 
 ### Added

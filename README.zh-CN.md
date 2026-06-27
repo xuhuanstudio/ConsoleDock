@@ -8,7 +8,7 @@ ConsoleDock 是一个早期阶段的 iOS debug SDK，目标是让测试人员在
 
 ## 当前状态
 
-ConsoleDock `v0.16.0` 是当前 source-first Swift Package Manager 公开预览版本，包含：
+ConsoleDock `v0.16.1` 是当前 source-first Swift Package Manager 公开预览版本，包含：
 
 - Swift Package Manager package；
 - Objective-C/C 兼容的 `ConsoleDockCore`；
@@ -63,7 +63,7 @@ ConsoleDock 不能承诺完整、稳定、实时、零侵入捕获：
 
 ## Swift 快速开始
 
-通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.16.0` 已包含 Support Report、Integration Diagnosis、Context 页 ConsoleDock Health、Local Session Archive 显式保存/查看/删除、内置 Session Timeline、Logs 本地结构化查询、next/previous visible error jump、local Debug Action execution history、action form session-only 最近参数值复用、reproduction timeline issue reports、临时 `.txt` issue-report 分享、parameterized Debug Actions、App Context、可配置 floating trigger、Logs Jump、Actions 搜索、logger forwarders、Test Session Reports、manual markers、Debug Actions、日志详情、visible/all/issue-report 分享和复制、runtime diagnostics、隐私/API readiness 加固、当前 iOS Simulator 截图、文档图片校验、视觉 QA 指南、segmented control 对比度修复和当前 release validation 加固：
+通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.16.1` 已包含 Support Report、Integration Diagnosis、Context 页 ConsoleDock Health、Local Session Archive 显式保存/查看/删除、内置 Session Timeline、Logs 本地结构化查询、next/previous visible error jump、local Debug Action execution history、action form session-only 最近参数值复用、reproduction timeline issue reports、临时 `.txt` issue-report 分享、parameterized Debug Actions、App Context、可配置 floating trigger、Logs Jump、Actions 搜索、logger forwarders、Test Session Reports、manual markers、Debug Actions、日志详情、visible/all/issue-report 分享和复制、runtime diagnostics、隐私/API readiness 加固、当前 iOS Simulator 截图、文档图片校验、视觉 QA 指南、segmented control 对比度修复和当前 release validation 加固：
 
 ```text
 https://github.com/xuhuanstudio/ConsoleDock.git
