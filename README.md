@@ -429,6 +429,8 @@ The repository includes minimal UIKit sample apps:
 
 For a guided manual check, see [Sample app walkthrough](docs/sample-app-walkthrough.md).
 
+For practical first-time integration paths, see [Adoption recipes](docs/adoption-recipes.md). It covers Swift apps, older Objective-C apps, existing logger sinks, Debug Actions, app-owned feedback reports, Release safety, and the first validation checklist.
+
 Build the Swift sample from the package root:
 
 ```sh
@@ -554,6 +556,7 @@ Use `ConsoleDockCore` directly when an Objective-C app only needs capture, stora
 - [DocC catalog](Sources/ConsoleDock/Documentation.docc/ConsoleDock.md)
 - [GitHub repository setup](docs/github-repository-setup.md)
 - [Integration diagnostics specification](docs/specs/2026-06-22-v0.2-integration-diagnostics.md)
+- [Adoption recipes](docs/adoption-recipes.md)
 - [Migrating existing loggers](docs/migration-existing-loggers.md)
 - [MVP architecture](docs/specs/2026-06-22-mvp-architecture.md)
 - [Open-source readiness](docs/open-source-readiness.md)

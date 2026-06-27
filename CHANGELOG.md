@@ -6,7 +6,9 @@ The project follows Semantic Versioning for public releases.
 
 ## Unreleased
 
-No changes yet.
+### Added
+
+- Added adoption recipes for first-time Swift, Objective-C, existing logger, Debug Action, and app-owned feedback integrations.
 
 ## v1.0.1 - 2026-06-27
 
