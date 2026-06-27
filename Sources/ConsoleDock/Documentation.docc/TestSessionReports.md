@@ -9,7 +9,7 @@ Test Session Reports help a tester turn an on-device debugging session into a us
 ConsoleDock does this with three local pieces:
 
 - ``ConsoleDock/sessionMetadata`` returns app, process, OS, device, locale, time zone, session, and generation context.
-- ``ConsoleDock/mark(_:)`` writes a native info entry with a stable `[marker]` prefix.
+- ``ConsoleDock/mark(_:)`` writes a native info entry marked as an explicit reproduction marker and displayed with a stable `[marker]` prefix.
 - ``ConsoleDock/appContext`` returns app-provided local context when the host app registers a provider.
 - ``ConsoleDock/integrationDiagnosisText()`` returns local setup guidance for ConsoleDock Health.
 - ``ConsoleDock/actionExecutionHistory`` returns local Debug Action outcomes for the current process session.
@@ -26,7 +26,7 @@ ConsoleDock.mark("Opened checkout")
 ConsoleDock.mark("Submitted payment form")
 ```
 
-Markers are normal native info entries. They pass through the same redaction, truncation, detail, search, copy, and share behavior as other entries.
+Markers are native info entries with explicit marker metadata. They pass through the same redaction, truncation, detail, search, copy, and share behavior as other entries, but Timeline and issue-report marker sections use the stored marker flag instead of treating ordinary `[marker]`-prefixed log messages as markers.
 
 ## Review The Reproduction Timeline
 

@@ -75,7 +75,7 @@ for execution in ConsoleDock.actionExecutionHistory {
 }
 ```
 
-Use ``ConsoleDock/clearActionExecutionHistory()`` to clear the current in-memory execution history. This does not unregister actions or clear session-only recent parameter values used by the bundled parameter form. ConsoleDock keeps the newest bounded execution history records for the current process session.
+Use ``ConsoleDock/clearActionExecutionHistory()`` to clear the current in-memory execution history. Objective-C/UIKit integrations can use `CDKConsoleDockUIKit.clearActionExecutionHistory` for the same cleanup path. This does not unregister actions or clear session-only recent parameter values used by the bundled parameter form. ConsoleDock keeps the newest bounded execution history records for the current process session.
 
 ## Disable Or Style An Action
 

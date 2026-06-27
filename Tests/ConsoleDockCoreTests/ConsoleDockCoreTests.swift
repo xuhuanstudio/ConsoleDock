@@ -156,8 +156,19 @@ final class ConsoleDockCoreTests: XCTestCase {
         XCTAssertEqual(entry.level, .info)
         XCTAssertEqual(entry.source, .native)
         XCTAssertEqual(entry.message, "[marker] Started checkout reproduction")
+        XCTAssertTrue(entry.isMarker)
         XCTAssertFalse(entry.redacted)
         XCTAssertFalse(entry.truncated)
+    }
+
+    func testNativeLogWithMarkerPrefixIsNotMarkerEntry() throws {
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+
+        CDKConsoleDock.info("[marker] ordinary log")
+
+        let entry = try XCTUnwrap(CDKConsoleDock.entries().first)
+        XCTAssertEqual(entry.message, "[marker] ordinary log")
+        XCTAssertFalse(entry.isMarker)
     }
 
     func testEmptyMarkerUsesDefaultText() {
@@ -177,6 +188,7 @@ final class ConsoleDockCoreTests: XCTestCase {
 
         let entry = try XCTUnwrap(CDKConsoleDock.entries().first)
         XCTAssertEqual(entry.message, "[marker] token=<re")
+        XCTAssertTrue(entry.isMarker)
         XCTAssertTrue(entry.redacted)
         XCTAssertTrue(entry.truncated)
     }

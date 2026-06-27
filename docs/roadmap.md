@@ -370,7 +370,26 @@ Not included:
 - marker storage model changes or broader public API freezing work.
 - SwiftUI rewrite, network inspector, crash reporting, remote commands, CocoaPods, or XCFramework distribution.
 
-## Post-v0.15 - Demand-Driven Compatibility Candidates
+## v0.16 - API Readiness
+
+Goal: remove 1.0 API-readiness issues that are already visible in the current SDK without expanding product scope.
+
+Deliverables:
+
+- first-class marker metadata on core and Swift log entries so Timeline and issue reports do not infer markers from a user-visible `[marker]` prefix alone.
+- `ConsoleDock.Configuration` no longer conforms to `Equatable` because its redactor closure cannot be compared lawfully.
+- Objective-C/UIKit action-history cleanup parity through `CDKConsoleDockUIKit.clearActionExecutionHistory`.
+- focused tests and API validators for marker metadata, ordinary `[marker]`-prefixed logs, and UIKit facade cleanup.
+- README, DocC, roadmap, changelog, and sample walkthrough cleanup for the API-readiness behavior.
+
+Not included:
+
+- analytics, telemetry, automatic upload, or user-statistics collection.
+- default continuous file logging or background persistence.
+- broad public API renaming unrelated to the equality correction.
+- SwiftUI rewrite, network inspector, crash reporting, remote commands, CocoaPods, or XCFramework distribution.
+
+## Post-v0.16 - Demand-Driven Compatibility Candidates
 
 Goal: improve adoption in existing apps only when real integration feedback shows SPM and the current explicit API are not enough.
 
@@ -402,8 +421,7 @@ Deliverables:
 - release-build safety tests.
 - documented decision to keep CocoaPods and XCFramework out of scope unless real consumer demand justifies them.
 - maintained migration guide from `print`, `NSLog`, and common logger frameworks.
-- public API audit for initializer visibility, `Configuration` equality semantics, low-level core exposure, and long-term source stability.
-- timeline/report marker model review so marker detection does not rely only on a user-visible `[marker]` message prefix.
+- public API audit for initializer visibility, low-level core exposure, and long-term source stability.
 
 Not included:
 

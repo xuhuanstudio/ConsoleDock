@@ -12,6 +12,8 @@ Session Timeline is available in `v0.10.0` and later. The bundled UIKit console'
 
 Events are sorted by timestamp so a tester can scan what happened during the current reproduction without reading the full Logs list first.
 
+Timeline marker rows use ConsoleDock's stored marker metadata. Ordinary native logs that happen to start with `[marker]` remain normal log entries unless they were created through the marker API.
+
 ## Open Details
 
 Marker, error, and fault timeline rows open the existing log detail screen. Debug Action rows open an action detail screen with the action id, title, outcome, timestamps, group, parameter summary, and message when available.

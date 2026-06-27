@@ -4,7 +4,7 @@ import Foundation
 /// App-facing Swift facade for starting ConsoleDock and writing native log entries.
 public enum ConsoleDock {
     /// Runtime options for the local in-app console.
-    public struct Configuration: Equatable {
+    public struct Configuration {
         /// Maximum number of entries retained in memory before oldest entries are evicted. Must be greater than zero.
         public var maximumEntries: Int
         /// Maximum stored message length after redaction. Must be greater than zero.
@@ -44,16 +44,6 @@ public enum ConsoleDock {
 
         /// The debug-safe default configuration.
         public static let `default` = Configuration()
-
-        public static func == (lhs: Configuration, rhs: Configuration) -> Bool {
-            lhs.maximumEntries == rhs.maximumEntries && lhs.maximumMessageLength == rhs.maximumMessageLength
-                && lhs.captureStandardOutput == rhs.captureStandardOutput
-                && lhs.captureStandardError == rhs.captureStandardError
-                && lhs.showsFloatingButton == rhs.showsFloatingButton
-                && lhs.floatingButtonPosition == rhs.floatingButtonPosition
-                && lhs.allowsReleaseBuilds == rhs.allowsReleaseBuilds
-                && (lhs.redactor == nil) == (rhs.redactor == nil)
-        }
 
         func makeCoreConfiguration() -> CDKConfiguration {
             let configuration = CDKConfiguration()
@@ -336,6 +326,8 @@ public enum ConsoleDock {
         public let level: LogLevel
         public let source: LogSource
         public let message: String
+        /// Whether this entry was created by the explicit marker API.
+        public let isMarker: Bool
         /// Whether this entry was flushed from an incomplete framed line.
         public let partial: Bool
         /// Whether ConsoleDock changed the message while applying default or app-specific redaction.
@@ -349,6 +341,7 @@ public enum ConsoleDock {
             level: LogLevel,
             source: LogSource,
             message: String,
+            isMarker: Bool = false,
             partial: Bool = false,
             redacted: Bool = false,
             truncated: Bool = false
@@ -358,6 +351,7 @@ public enum ConsoleDock {
             self.level = level
             self.source = source
             self.message = message
+            self.isMarker = isMarker
             self.partial = partial
             self.redacted = redacted
             self.truncated = truncated
@@ -1044,6 +1038,7 @@ extension ConsoleDock.LogEntry {
         level = ConsoleDock.LogLevel(coreLevel: coreEntry.level)
         source = ConsoleDock.LogSource(coreSource: coreEntry.source)
         message = coreEntry.message
+        isMarker = coreEntry.isMarker
         partial = coreEntry.isPartial
         redacted = coreEntry.redacted
         truncated = coreEntry.truncated

@@ -636,6 +636,12 @@ public final class ConsoleDockUIKit: NSObject {
         ConsoleDock.removeAllActions()
     }
 
+    /// Clears local Debug Action execution history without unregistering actions.
+    @objc(clearActionExecutionHistory)
+    public static func clearActionExecutionHistory() {
+        ConsoleDock.clearActionExecutionHistory()
+    }
+
     private static func objectiveCParameterValues(_ values: ConsoleDock.DebugActionParameters) -> [String: Any] {
         values.allValues.mapValues { value in
             switch value {

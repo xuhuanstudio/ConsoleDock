@@ -73,6 +73,8 @@ FOUNDATION_EXPORT NSNotificationName const CDKConsoleDockDiagnosticsDidChangeNot
 @property (nonatomic, readonly) CDKLogSource source;
 /// The redacted, truncated message stored by ConsoleDock.
 @property (nonatomic, copy, readonly) NSString *message;
+/// Whether this entry was created by the explicit marker API.
+@property (nonatomic, readonly, getter=isMarker) BOOL marker;
 /// Whether this entry was flushed from an incomplete framed line.
 @property (nonatomic, readonly, getter=isPartial) BOOL partial;
 /// Whether ConsoleDock changed the message while applying default or app-specific redaction.
@@ -100,6 +102,15 @@ FOUNDATION_EXPORT NSNotificationName const CDKConsoleDockDiagnosticsDidChangeNot
                             source:(CDKLogSource)source
                            message:(NSString *)message
                           isPartial:(BOOL)isPartial
+                          redacted:(BOOL)redacted
+                         truncated:(BOOL)truncated NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithIdentifier:(unsigned long long)identifier
+                         timestamp:(NSDate *)timestamp
+                             level:(CDKLogLevel)level
+                            source:(CDKLogSource)source
+                           message:(NSString *)message
+                          isPartial:(BOOL)isPartial
+                           isMarker:(BOOL)isMarker
                           redacted:(BOOL)redacted
                          truncated:(BOOL)truncated NS_DESIGNATED_INITIALIZER;
 - (instancetype)initWithTimestamp:(NSDate *)timestamp

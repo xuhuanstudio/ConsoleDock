@@ -181,7 +181,7 @@ Tapping a row opens the log detail screen. Copy actions on that screen copy only
 
 The share sheet can export the current visible in-memory ConsoleDock entries, all currently retained entries, or a local issue report with session metadata, diagnostics, App Context, a reproduction timeline, markers, and all currently retained redacted logs. `Share Issue Report` creates a temporary local `.txt` item only for the user-initiated system share sheet. `Copy Issue Report` copies the same local report text to the pasteboard with local-only expiration where supported. `Save Session Archive` explicitly persists a bounded, already-redacted issue-report snapshot until deleted. App-owned feedback flows can call the Support Report APIs to generate bounded time-range reports such as the last 5/10/30/60 minutes. ConsoleDock does not write raw log files by default, does not persist logs by default, and does not upload logs.
 
-Markers are normal native info entries with a stable `[marker]` prefix. They are useful as part of the Session Timeline and issue-report reproduction timeline, but they are not a separate persistent note system.
+Markers are native info entries created with explicit marker metadata and displayed with a stable `[marker]` prefix. They are useful as part of the Session Timeline and issue-report reproduction timeline, but they are not a separate persistent note system.
 
 Debug Actions are local, app-registered shortcuts. ConsoleDock does not discover pages, control routing, bypass app permissions, or receive remote commands.
 

@@ -286,7 +286,7 @@ ConsoleDock.registerAction(
 
 Parameters are not persisted and are collected only by the local bundled UI. `v0.8.0` and later reuse the most recent valid values for the same action within the current process session so repeated local tests need less typing. They are for debug/test builds, not remote commands or an automation platform.
 
-Local Debug Action execution history and reproduction timeline issue reports are available in `v0.8.0` and later. `ConsoleDock.actionExecutionHistory` exposes the current process session's action outcomes, and `ConsoleDock.clearActionExecutionHistory()` clears that history without clearing recent action parameter values. History is bounded to the newest executions, and obvious secret-like parameter names are redacted in compact summaries before they appear in Timeline, issue reports, or Support Reports.
+Local Debug Action execution history and reproduction timeline issue reports are available in `v0.8.0` and later. `ConsoleDock.actionExecutionHistory` exposes the current process session's action outcomes, and `ConsoleDock.clearActionExecutionHistory()` clears that history without clearing recent action parameter values. Objective-C/UIKit integrations can use `CDKConsoleDockUIKit.clearActionExecutionHistory` for the same cleanup path. History is bounded to the newest executions, and obvious secret-like parameter names are redacted in compact summaries before they appear in Timeline, issue reports, or Support Reports.
 
 ### Mark Test Sessions And Share Issue Reports
 
@@ -326,7 +326,7 @@ ConsoleDock.setAppContextProvider {
 
 App Context is read on demand, receives a baseline obvious-secret redaction pass, stays local, and is not persisted or uploaded by ConsoleDock. Do not put raw secrets or unnecessary personal data in context values.
 
-Markers are normal native info entries with a stable `[marker]` prefix, so existing redaction, truncation, detail, search, copy, and share behavior still applies. `Share Issue Report` creates a temporary local `.txt` item only for the user-initiated system share sheet; `Copy Issue Report` copies the same report text to the pasteboard. ConsoleDock does not persist issue reports by default, upload them, or send them anywhere automatically.
+Markers are native info entries created by the explicit marker API and displayed with a stable `[marker]` prefix, so existing redaction, truncation, detail, search, copy, and share behavior still applies. Timeline and issue-report marker sections use the stored marker flag rather than treating every ordinary `[marker]`-prefixed log message as a marker. `Share Issue Report` creates a temporary local `.txt` item only for the user-initiated system share sheet; `Copy Issue Report` copies the same report text to the pasteboard. ConsoleDock does not persist issue reports by default, upload them, or send them anywhere automatically.
 
 ### Save Local Session Archives
 

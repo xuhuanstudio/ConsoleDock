@@ -277,7 +277,18 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertEqual(entry.level, .info)
         XCTAssertEqual(entry.source, .native)
         XCTAssertEqual(entry.message, "[marker] Tapped pay button token=<redacted>")
+        XCTAssertTrue(entry.isMarker)
         XCTAssertTrue(entry.redacted)
+    }
+
+    func testSwiftFacadeNativeLogWithMarkerPrefixIsNotMarkerEntry() throws {
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+
+        ConsoleDock.info("[marker] ordinary log")
+
+        let entry = try XCTUnwrap(ConsoleDock.entries.first)
+        XCTAssertEqual(entry.message, "[marker] ordinary log")
+        XCTAssertFalse(entry.isMarker)
     }
 
     func testEntriesDidChangeNotificationNameIsExposed() {
@@ -409,6 +420,7 @@ final class ConsoleDockTests: XCTestCase {
 
         XCTAssertEqual(entry.id, 0)
         XCTAssertEqual(entry.message, "fixture")
+        XCTAssertFalse(entry.isMarker)
         XCTAssertFalse(entry.partial)
         XCTAssertFalse(entry.redacted)
         XCTAssertFalse(entry.truncated)
@@ -565,7 +577,8 @@ final class ConsoleDockTests: XCTestCase {
                 timestamp: Date(timeIntervalSince1970: 2),
                 level: .info,
                 source: .native,
-                message: "[marker] Open checkout"
+                message: "[marker] Open checkout",
+                isMarker: true
             ),
             ConsoleDock.LogEntry(
                 id: 2,
@@ -640,7 +653,15 @@ final class ConsoleDockTests: XCTestCase {
                 timestamp: Date(timeIntervalSince1970: 4),
                 level: .info,
                 source: .native,
-                message: "[marker] Still included"
+                message: "[marker] Still included",
+                isMarker: true
+            ),
+            ConsoleDock.LogEntry(
+                id: 5,
+                timestamp: Date(timeIntervalSince1970: 5),
+                level: .info,
+                source: .native,
+                message: "[marker] ordinary log prefix"
             )
         ]
 
@@ -665,7 +686,8 @@ final class ConsoleDockTests: XCTestCase {
                 timestamp: sharedDate,
                 level: .info,
                 source: .native,
-                message: "[marker] second marker"
+                message: "[marker] second marker",
+                isMarker: true
             )
         ]
         let executions = [
@@ -744,7 +766,8 @@ final class ConsoleDockTests: XCTestCase {
                 timestamp: Date(timeIntervalSince1970: 2.5),
                 level: .info,
                 source: .native,
-                message: "[marker] Started checkout"
+                message: "[marker] Started checkout",
+                isMarker: true
             ),
             ConsoleDock.LogEntry(
                 timestamp: Date(timeIntervalSince1970: 3.75),
@@ -886,7 +909,8 @@ final class ConsoleDockTests: XCTestCase {
                 timestamp: Date(timeIntervalSince1970: 2),
                 level: .info,
                 source: .native,
-                message: "[marker] Open checkout"
+                message: "[marker] Open checkout",
+                isMarker: true
             )
         ]
         let executions = [
@@ -917,6 +941,57 @@ final class ConsoleDockTests: XCTestCase {
                   [1970-01-01T00:00:03.000Z] [action] [completed] Open Order [open.order] group=Navigation params: orderId="A-100"
                   [1970-01-01T00:00:04.000Z] [log] [ERROR] Checkout failed
                 """
+            )
+        )
+    }
+
+    func testIssueReportFormatterDoesNotTreatOrdinaryMarkerPrefixLogAsMarker() {
+        let metadata = ConsoleDock.SessionMetadata(
+            sessionIdentifier: "session-prefix",
+            startedAt: Date(timeIntervalSince1970: 1),
+            generatedAt: Date(timeIntervalSince1970: 0),
+            bundleIdentifier: nil,
+            appVersion: nil,
+            appBuild: nil,
+            processName: "Sample",
+            operatingSystemVersion: "Version 18.0",
+            deviceModel: "iPhone",
+            localeIdentifier: "en_US",
+            timeZoneIdentifier: "UTC"
+        )
+        let diagnostics = ConsoleDock.Diagnostics(
+            isRunning: true,
+            capturesStandardOutput: false,
+            capturesStandardError: false,
+            showsFloatingButton: false,
+            allowsReleaseBuilds: false,
+            maximumEntries: 100,
+            maximumMessageLength: 4_096,
+            entryCount: 1,
+            redactedEntryCount: 0,
+            truncatedEntryCount: 0,
+            partialEntryCount: 0
+        )
+        let entries = [
+            ConsoleDock.LogEntry(
+                timestamp: Date(timeIntervalSince1970: 2),
+                level: .info,
+                source: .native,
+                message: "[marker] ordinary log prefix"
+            )
+        ]
+
+        let report = ConsoleDockIssueReportFormatter.reportText(
+            entries: entries,
+            metadata: metadata,
+            diagnostics: diagnostics
+        )
+
+        XCTAssertTrue(report.contains("Reproduction Timeline:\n  (no timeline events)"))
+        XCTAssertTrue(report.contains("Markers:\n  (no markers)"))
+        XCTAssertTrue(
+            report.contains(
+                "Logs:\n  [1970-01-01T00:00:02.000Z] [native] [INFO] [marker] ordinary log prefix"
             )
         )
     }
@@ -2167,6 +2242,18 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertTrue(ConsoleDock.actionExecutionHistory.isEmpty)
         let retainedRecentValues = ConsoleDock.recentDebugActionParameterValues(actionID: "open.order")
         XCTAssertEqual(retainedRecentValues["orderId"], .string("A-100"))
+    }
+
+    func testObjectiveCUIKitFacadeClearsActionExecutionHistory() {
+        ConsoleDock.registerAction(id: "smoke", title: "Smoke") {}
+        ConsoleDock.performDebugAction(id: "smoke")
+
+        XCTAssertEqual(ConsoleDock.actionExecutionHistory.count, 1)
+
+        ConsoleDockUIKit.clearActionExecutionHistory()
+
+        XCTAssertTrue(ConsoleDock.actionExecutionHistory.isEmpty)
+        XCTAssertEqual(ConsoleDock.debugActions.map(\.id), ["smoke"])
     }
 
     func testDebugActionUnregisterClearsRecentParameterValuesForAction() {

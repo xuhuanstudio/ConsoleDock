@@ -521,6 +521,7 @@ static void CDKPostDiagnosticsDidChangeNotification(void)
                       source:(CDKLogSource)source
                      message:(NSString *)message
                    isPartial:(BOOL)isPartial
+                    isMarker:(BOOL)isMarker
 {
     BOOL didAppend = NO;
     @synchronized(self) {
@@ -555,6 +556,7 @@ static void CDKPostDiagnosticsDidChangeNotification(void)
                                                               source:source
                                                              message:preparedMessage
                                                            isPartial:isPartial
+                                                            isMarker:isMarker
                                                             redacted:redacted
                                                            truncated:truncated];
         if (CDKConsoleDockEntries == nil) {
@@ -579,17 +581,22 @@ static void CDKPostDiagnosticsDidChangeNotification(void)
     [self appendEntryWithLevel:CDKDefaultLevelForSource(event.source)
                         source:event.source
                        message:event.message
-                     isPartial:event.partial];
+                     isPartial:event.partial
+                      isMarker:NO];
 }
 
 + (void)logWithLevel:(CDKLogLevel)level message:(NSString *)message
 {
-    [self appendEntryWithLevel:level source:CDKLogSourceNative message:message isPartial:NO];
+    [self appendEntryWithLevel:level source:CDKLogSourceNative message:message isPartial:NO isMarker:NO];
 }
 
 + (void)mark:(NSString *)message
 {
-    [self logWithLevel:CDKLogLevelInfo message:CDKMarkerMessage(message)];
+    [self appendEntryWithLevel:CDKLogLevelInfo
+                        source:CDKLogSourceNative
+                       message:CDKMarkerMessage(message)
+                     isPartial:NO
+                      isMarker:YES];
 }
 
 + (void)debug:(NSString *)message

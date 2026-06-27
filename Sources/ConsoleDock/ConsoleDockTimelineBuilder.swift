@@ -168,7 +168,7 @@ enum ConsoleDockTimelineBuilder {
     }
 
     private static func isMarker(_ entry: ConsoleDock.LogEntry) -> Bool {
-        entry.source == .native && entry.message.hasPrefix("[marker]")
+        entry.isMarker
     }
 
     private static func isErrorOrFault(_ entry: ConsoleDock.LogEntry) -> Bool {

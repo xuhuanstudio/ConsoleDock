@@ -80,7 +80,7 @@ struct ConsoleDockIssueReportFormatter {
     }
 
     private static func isMarker(_ entry: ConsoleDock.LogEntry) -> Bool {
-        entry.source == .native && entry.message.hasPrefix("[marker]")
+        entry.isMarker
     }
 
     private static func appContextLines(_ sections: [ConsoleDock.AppContextSection]) -> [String] {

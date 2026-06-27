@@ -6,7 +6,16 @@ The project follows Semantic Versioning for public releases.
 
 ## Unreleased
 
-No changes yet.
+### Added
+
+- Added first-class marker metadata on `CDKLogEntry` and `ConsoleDock.LogEntry` so Timeline and issue reports can identify explicit markers without relying only on a visible `[marker]` message prefix.
+- Added `CDKConsoleDockUIKit.clearActionExecutionHistory` to match the Swift facade's local Debug Action history cleanup API.
+- Added focused tests for marker metadata, ordinary `[marker]`-prefixed log messages, and Objective-C/UIKit Debug Action history cleanup.
+
+### Changed
+
+- Removed `Equatable` conformance from `ConsoleDock.Configuration` because its optional redactor closure cannot be compared with stable value semantics.
+- Updated Timeline and issue-report marker detection to use the stored marker flag while keeping marker display text unchanged.
 
 ## v0.15.0 - 2026-06-27
 

@@ -73,7 +73,7 @@ CDKSessionMetadata *metadata = [CDKConsoleDock sessionMetadata];
 NSLog(@"ConsoleDock session: %@", metadata.sessionIdentifier);
 ```
 
-Markers are native info entries with a stable `[marker]` prefix. The bundled UIKit console can also create markers, show a local Timeline, share a local issue report, or copy the report text with session metadata, diagnostics, app context, a reproduction timeline, markers, and currently retained redacted logs.
+Markers are native info entries created with explicit marker metadata and displayed with a stable `[marker]` prefix. The bundled UIKit console can also create markers, show a local Timeline, share a local issue report, or copy the report text with session metadata, diagnostics, app context, a reproduction timeline, markers, and currently retained redacted logs.
 
 ```objc
 NSString *report = [CDKConsoleDockUIKit issueReportText];

@@ -22,7 +22,7 @@ ALLOWED_PUBLIC_SWIFT_FILES = {
 REQUIRED_SNIPPETS = {
     SWIFT_FACADE: [
         "public enum ConsoleDock",
-        "public struct Configuration: Equatable",
+        "public struct Configuration",
         "public var maximumEntries: Int",
         "public var maximumMessageLength: Int",
         "public var captureStandardOutput: Bool",
@@ -171,6 +171,7 @@ REQUIRED_SNIPPETS = {
         "public let level: LogLevel",
         "public let source: LogSource",
         "public let message: String",
+        "public let isMarker: Bool",
         "public let partial: Bool",
         "public let redacted: Bool",
         "public let truncated: Bool",
@@ -179,6 +180,7 @@ REQUIRED_SNIPPETS = {
         "level: LogLevel",
         "source: LogSource",
         "message: String",
+        "isMarker: Bool = false",
         "partial: Bool = false",
         "redacted: Bool = false",
         "truncated: Bool = false",
@@ -189,6 +191,7 @@ REQUIRED_SNIPPETS = {
             level: LogLevel,
             source: LogSource,
             message: String,
+            isMarker: Bool = false,
             partial: Bool = false,
             redacted: Bool = false,
             truncated: Bool = false
@@ -662,6 +665,8 @@ REQUIRED_SNIPPETS = {
         "public static func unregisterAction(identifier: String)",
         "@objc(removeAllActions)",
         "public static func removeAllActions()",
+        "@objc(clearActionExecutionHistory)",
+        "public static func clearActionExecutionHistory()",
     ],
 }
 
@@ -676,6 +681,7 @@ DENIED_PUBLIC_SNIPPETS = {
     SWIFT_FACADE: [
         "public class",
         "public actor",
+        "public struct Configuration: Equatable",
     ],
     UIKIT_FACADE: [
         "public var",

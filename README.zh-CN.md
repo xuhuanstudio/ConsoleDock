@@ -203,7 +203,7 @@ ConsoleDock 只展示和触发 App 注册的动作；它不会自动发现页面
 
 Parameterized Debug Actions 和 App Context 从 `v0.7.0` 开始属于已发布能力。参数适合 order id、开关、数量、环境这类小型本地测试输入；ConsoleDock 不把它变成远程命令或自动化测试平台。
 
-Local Debug Action execution history 和 reproduction timeline issue reports 从 `v0.8.0` 开始属于已发布能力。内置参数表单会在当前进程 session 内复用同一 action 最近一次通过校验的参数值，方便重复本地测试；这些值不会跨 App 重启持久化。`ConsoleDock.actionExecutionHistory` 可以读取当前 session 的 action 执行结果，`ConsoleDock.clearActionExecutionHistory()` 可以清空这份历史，但不会清空最近参数值。执行历史是有界的，明显像密钥的参数名和值会在摘要中基础脱敏。
+Local Debug Action execution history 和 reproduction timeline issue reports 从 `v0.8.0` 开始属于已发布能力。内置参数表单会在当前进程 session 内复用同一 action 最近一次通过校验的参数值，方便重复本地测试；这些值不会跨 App 重启持久化。`ConsoleDock.actionExecutionHistory` 可以读取当前 session 的 action 执行结果，`ConsoleDock.clearActionExecutionHistory()` 可以清空这份历史，但不会清空最近参数值。Objective-C/UIKit 集成可用 `CDKConsoleDockUIKit.clearActionExecutionHistory` 走同样的清理路径。执行历史是有界的，明显像密钥的参数名和值会在摘要中基础脱敏。
 
 ```swift
 ConsoleDock.registerAction(
@@ -252,7 +252,7 @@ ConsoleDock.setAppContextProvider {
 
 App Context 按需读取，会经过一层基础的明显敏感字段脱敏，不会被 ConsoleDock 默认持久化、上传或自动发送。不要把原始密钥或不必要的个人信息放进 context value。
 
-marker 本质上是带 `[marker]` 前缀的 native info 日志，因此同样经过脱敏、截断、详情、搜索、复制和分享流程。`Share Issue Report` 只会在用户主动分享时创建临时本地 `.txt` 文件交给系统 share sheet；`Copy Issue Report` 会把同一份报告文本复制到剪贴板。ConsoleDock 默认不会持久化、上传或自动发送 issue report。
+marker 是通过显式 marker API 创建的 native info 日志，并以稳定的 `[marker]` 前缀展示，因此同样经过脱敏、截断、详情、搜索、复制和分享流程。Timeline 和 issue report 的 marker 区域使用存储层 marker 标记，不会把普通以 `[marker]` 开头的日志误判为 marker。`Share Issue Report` 只会在用户主动分享时创建临时本地 `.txt` 文件交给系统 share sheet；`Copy Issue Report` 会把同一份报告文本复制到剪贴板。ConsoleDock 默认不会持久化、上传或自动发送 issue report。
 
 ## Local Session Archive
 
