@@ -6,6 +6,10 @@ The project follows Semantic Versioning for public releases.
 
 ## Unreleased
 
+No changes yet.
+
+## v0.15.0 - 2026-06-27
+
 ### Added
 
 - Added focused hardening tests for partial-fragment redaction, Debug Action history bounds, App Context redaction, Local Session Archive note redaction, Objective-C/UIKit start side effects, and active diagnostics configuration.
