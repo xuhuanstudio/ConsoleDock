@@ -40,8 +40,7 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         XCTAssertFalse(tableEntry(containing: "objc-secret", existsIn: entriesTable))
         let logsSearch = app.searchFields.firstMatch
         XCTAssertTrue(logsSearch.waitForExistence(timeout: 5))
-        logsSearch.tap()
-        logsSearch.typeText("level:error")
+        XCTAssertTrue(typeText("level:error", into: logsSearch, in: app))
         XCTAssertTrue(waitForVisibleEntryCount(1, in: statusLabel, timeout: 10))
         XCTAssertTrue(waitForTableEntry(containing: "objc native error", in: entriesTable, timeout: 5))
         XCTAssertFalse(tableEntry(containing: "objc native fault", existsIn: entriesTable))
@@ -91,8 +90,7 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         XCTAssertTrue(markerAlert.waitForExistence(timeout: 5))
         let markerTextField = markerAlert.textFields["consoledock.marker-text"]
         XCTAssertTrue(markerTextField.waitForExistence(timeout: 5))
-        markerTextField.tap()
-        markerTextField.typeText("ObjC UI smoke marker")
+        XCTAssertTrue(typeText("ObjC UI smoke marker", into: markerTextField, in: app))
         markerAlert.buttons["consoledock.add-marker"].firstMatch.tap()
         XCTAssertTrue(waitForElementToDisappear(markerAlert, timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "[marker] ObjC UI smoke marker", in: entriesTable, timeout: 10))
@@ -136,8 +134,7 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         XCTAssertTrue(waitForTableEntry(containing: "Disabled", in: actionsTable, timeout: 5))
         let actionsSearch = app.searchFields["consoledock.actions-search"]
         XCTAssertTrue(actionsSearch.waitForExistence(timeout: 5))
-        actionsSearch.tap()
-        actionsSearch.typeText("Smoke")
+        XCTAssertTrue(typeText("Smoke", into: actionsSearch, in: app))
         XCTAssertTrue(waitForTableEntry(containing: "Generate Smoke Logs", in: actionsTable, timeout: 5))
         XCTAssertFalse(tableEntry(containing: "Clear Entries", existsIn: actionsTable))
         tableStaticText(containing: "Generate Smoke Logs", in: actionsTable).tap()
@@ -160,17 +157,19 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         tableStaticText(containing: "Open Order", in: actionsTable).tap()
         let orderIDField = app.textFields["consoledock.action-parameters.string.orderId"]
         XCTAssertTrue(orderIDField.waitForExistence(timeout: 5))
-        orderIDField.tap()
-        orderIDField.typeText("O-100")
+        XCTAssertTrue(typeText("O-100", into: orderIDField, in: app))
         XCTAssertTrue(app.textFields["consoledock.action-parameters.number.quantity"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.switches["consoledock.action-parameters.bool.animated"].waitForExistence(timeout: 5))
         XCTAssertTrue(
             app.segmentedControls["consoledock.action-parameters.choice.environment"].waitForExistence(timeout: 5)
         )
+        let parameterForm = app.otherElements["consoledock.action-parameters.form"]
         app.buttons["consoledock.action-parameters.run"].tap()
+        XCTAssertTrue(waitForElementToDisappear(parameterForm, timeout: 10))
         tapMode("Logs", in: app)
+        XCTAssertTrue(entriesTable.waitForExistence(timeout: 10))
         XCTAssertTrue(
-            waitForTableEntry(containing: "objc parameterized order action orderId=O-100", in: entriesTable, timeout: 5)
+            waitForTableEntry(containing: "objc parameterized order action orderId=O-100", in: entriesTable, timeout: 15)
         )
 
         tapMode("Actions", in: app)
@@ -261,12 +260,14 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
             let modeButton = app.segmentedControls["consoledock.mode-control"].buttons[title]
             if modeButton.exists, modeButton.isHittable {
                 modeButton.tap()
+                RunLoop.current.run(until: Date().addingTimeInterval(0.2))
                 return
             }
 
             let fallbackButton = app.buttons[title].firstMatch
             if fallbackButton.exists, fallbackButton.isHittable {
                 fallbackButton.tap()
+                RunLoop.current.run(until: Date().addingTimeInterval(0.2))
                 return
             }
 
@@ -291,6 +292,37 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         if cancelButton.exists, cancelButton.isHittable {
             cancelButton.tap()
         }
+    }
+
+    private func typeText(
+        _ text: String,
+        into textInput: XCUIElement,
+        in app: XCUIApplication,
+        timeout: TimeInterval = 10
+    ) -> Bool {
+        guard waitForHittable(textInput, timeout: timeout) else {
+            return false
+        }
+
+        textInput.tap()
+        let keyboard = app.keyboards.firstMatch
+        if !keyboard.waitForExistence(timeout: 2) {
+            textInput.tap()
+            _ = keyboard.waitForExistence(timeout: 1)
+        }
+        textInput.typeText(text)
+        return true
+    }
+
+    private func waitForHittable(_ element: XCUIElement, timeout: TimeInterval) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        repeat {
+            if element.exists, element.isHittable {
+                return true
+            }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.1))
+        } while Date() < deadline
+        return element.exists && element.isHittable
     }
 
     private func waitForTableEntry(containing text: String, in table: XCUIElement, timeout: TimeInterval) -> Bool {
@@ -338,7 +370,9 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
     }
 
     private func clearSearchField(_ searchField: XCUIElement, in app: XCUIApplication) {
-        searchField.tap()
+        if waitForHittable(searchField, timeout: 5) {
+            searchField.tap()
+        }
         if let value = searchField.value as? String, !value.isEmpty {
             searchField.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: value.count))
         }

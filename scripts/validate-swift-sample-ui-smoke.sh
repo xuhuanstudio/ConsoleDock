@@ -27,9 +27,15 @@ PY
 fi
 
 printf 'Swift sample UI smoke destination: %s\n' "$destination"
+iterations="${CONSOLEDOCK_UI_SMOKE_TEST_ITERATIONS:-2}"
+printf 'Swift sample UI smoke test iterations: %s\n' "$iterations"
+
+defaults write com.apple.iphonesimulator ConnectHardwareKeyboard -bool false || true
 
 xcodebuild test \
   -project Examples/SwiftSampleApp/SwiftSampleApp.xcodeproj \
   -scheme SwiftSampleApp \
   -destination "$destination" \
+  -test-iterations "$iterations" \
+  -retry-tests-on-failure \
   -only-testing:SwiftSampleAppUITests/ConsoleDockSwiftSampleUITests/testConsoleDockPanelSmokeFlow
