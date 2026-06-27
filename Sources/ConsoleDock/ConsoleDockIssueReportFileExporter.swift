@@ -28,10 +28,12 @@ struct ConsoleDockIssueReportFileExporter {
         let directory = FileManager.default.temporaryDirectory
             .appendingPathComponent(directoryName, isDirectory: true)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        try applyFileProtectionIfAvailable(to: directory)
 
         let filename = "\(filenamePrefix)-\(filenameTimestamp(generatedAt))-\(UUID().uuidString).txt"
         let fileURL = directory.appendingPathComponent(filename, isDirectory: false)
         try text.write(to: fileURL, atomically: true, encoding: .utf8)
+        try applyFileProtectionIfAvailable(to: fileURL)
         pruneTemporaryTextFiles(in: directory, filenamePrefix: filenamePrefix, protectedFileURL: fileURL)
         return fileURL
     }
@@ -54,11 +56,18 @@ struct ConsoleDockIssueReportFileExporter {
         let reportFileURLs = fileURLs.filter { fileURL in
             fileURL.pathExtension == "txt" && fileURL.lastPathComponent.hasPrefix(filenamePrefix)
         }
-        guard reportFileURLs.count > maximumTemporaryTextFileCount else {
+        let expirationDate = Date().addingTimeInterval(-maximumTemporaryTextFileAge)
+        for fileURL in reportFileURLs
+        where fileURL != protectedFileURL && modificationDate(for: fileURL) < expirationDate {
+            try? FileManager.default.removeItem(at: fileURL)
+        }
+
+        let remainingReportFileURLs = reportFileURLs.filter { FileManager.default.fileExists(atPath: $0.path) }
+        guard remainingReportFileURLs.count > maximumTemporaryTextFileCount else {
             return
         }
 
-        let removableFileURLs = reportFileURLs.filter { $0 != protectedFileURL }
+        let removableFileURLs = remainingReportFileURLs.filter { $0 != protectedFileURL }
         let sortedNewestFirst = removableFileURLs.sorted { lhs, rhs in
             modificationDate(for: lhs) > modificationDate(for: rhs)
         }
@@ -86,4 +95,16 @@ struct ConsoleDockIssueReportFileExporter {
     }()
 
     private static let maximumTemporaryTextFileCount = 20
+    private static let maximumTemporaryTextFileAge: TimeInterval = 24 * 60 * 60
+}
+
+private func applyFileProtectionIfAvailable(to fileURL: URL) throws {
+    #if os(iOS) || os(tvOS) || os(watchOS)
+        try FileManager.default.setAttributes(
+            [.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication],
+            ofItemAtPath: fileURL.path
+        )
+    #else
+        _ = fileURL
+    #endif
 }

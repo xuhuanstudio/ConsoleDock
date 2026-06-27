@@ -20,10 +20,14 @@ static NSDate *CDKConsoleDockStartedAt = nil;
 static BOOL CDKConsoleDockRedactNativeContinuation = NO;
 static BOOL CDKConsoleDockRedactStdoutContinuation = NO;
 static BOOL CDKConsoleDockRedactStderrContinuation = NO;
+static NSString *CDKConsoleDockSensitiveNativeContinuationTail = nil;
+static NSString *CDKConsoleDockSensitiveStdoutContinuationTail = nil;
+static NSString *CDKConsoleDockSensitiveStderrContinuationTail = nil;
 
 static NSString *const CDKRedactedPartialContinuationMessage = @"<redacted partial continuation>";
 static NSString *const CDKMarkerPrefix = @"[marker]";
 static NSString *const CDKDefaultMarkerText = @"Marker";
+static NSUInteger const CDKSensitiveContinuationTailLength = 64;
 
 static NSString *CDKStringByReplacingMatches(NSString *message, NSString *pattern, NSString *replacement)
 {
@@ -53,6 +57,111 @@ static NSString *CDKDefaultRedactedMessage(NSString *message)
                                            @"\\b(password|passwd|token|id[_-]?token|auth[_-]?token|session[_-]?token|csrf[_-]?token|access[_-]?token|refresh[_-]?token|x[_-]?api[_-]?key|api[_-]?key|client[_-]?secret|key|secret)\\b\\s*[:=]\\s*[^\\s,;&]+",
                                            @"$1=<redacted>");
     return redacted;
+}
+
+static BOOL CDKStringMatchesPattern(NSString *message, NSString *pattern)
+{
+    NSRegularExpression *expression = [NSRegularExpression regularExpressionWithPattern:pattern
+                                                                                options:NSRegularExpressionCaseInsensitive
+                                                                                  error:nil];
+    NSRange range = NSMakeRange(0, message.length);
+    return [expression firstMatchInString:message options:0 range:range] != nil;
+}
+
+static BOOL CDKDefaultRedactorWouldChangeMessage(NSString *message)
+{
+    NSString *original = message ?: @"";
+    return ![CDKDefaultRedactedMessage(original) isEqualToString:original];
+}
+
+static BOOL CDKTrailingIdentifierMayBeSensitivePrefix(NSString *message)
+{
+    NSCharacterSet *identifierCharacters = [NSCharacterSet characterSetWithCharactersInString:
+                                            @"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"];
+    NSUInteger end = message.length;
+    while (end > 0) {
+        unichar character = [message characterAtIndex:end - 1];
+        if ([identifierCharacters characterIsMember:character]) {
+            break;
+        }
+        end -= 1;
+    }
+    if (end == 0) {
+        return NO;
+    }
+
+    NSUInteger start = end;
+    while (start > 0) {
+        unichar character = [message characterAtIndex:start - 1];
+        if (![identifierCharacters characterIsMember:character]) {
+            break;
+        }
+        start -= 1;
+    }
+
+    NSString *trailingIdentifier = [[message substringWithRange:NSMakeRange(start, end - start)] lowercaseString];
+    NSString *compactTrailingIdentifier =
+        [[trailingIdentifier stringByReplacingOccurrencesOfString:@"_" withString:@""]
+            stringByReplacingOccurrencesOfString:@"-" withString:@""];
+    if (compactTrailingIdentifier.length < 3) {
+        return NO;
+    }
+
+    NSArray<NSString *> *sensitiveNames = @[
+        @"authorization",
+        @"setcookie",
+        @"cookie",
+        @"password",
+        @"passwd",
+        @"token",
+        @"idtoken",
+        @"authtoken",
+        @"sessiontoken",
+        @"csrftoken",
+        @"accesstoken",
+        @"refreshtoken",
+        @"xapikey",
+        @"apikey",
+        @"clientsecret",
+        @"privatekey",
+        @"secret"
+    ];
+    for (NSString *name in sensitiveNames) {
+        if ([name hasPrefix:compactTrailingIdentifier]) {
+            return YES;
+        }
+    }
+    return NO;
+}
+
+static BOOL CDKMessageMayStartSensitiveContinuation(NSString *message)
+{
+    NSString *trimmed = [(message ?: @"") stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    if (trimmed.length == 0) {
+        return NO;
+    }
+
+    NSArray<NSString *> *patterns = @[
+        @"\\bAuthorization\\s*[:=]\\s*(?:Bearer\\s*)?$",
+        @"\\b(?:Set-Cookie|Cookie)\\s*:\\s*$",
+        @"\\b(?:password|passwd|token|id[_-]?token|auth[_-]?token|session[_-]?token|csrf[_-]?token|access[_-]?token|refresh[_-]?token|x[_-]?api[_-]?key|api[_-]?key|client[_-]?secret|key|secret)\\b\\s*[:=]\\s*\"?$"
+    ];
+    for (NSString *pattern in patterns) {
+        if (CDKStringMatchesPattern(trimmed, pattern)) {
+            return YES;
+        }
+    }
+
+    return CDKTrailingIdentifierMayBeSensitivePrefix(trimmed);
+}
+
+static NSString *CDKContinuationTail(NSString *message)
+{
+    NSString *text = message ?: @"";
+    if (text.length <= CDKSensitiveContinuationTailLength) {
+        return [text copy];
+    }
+    return [text substringFromIndex:text.length - CDKSensitiveContinuationTailLength];
 }
 
 static NSString *CDKPreparedMessage(NSString *message,
@@ -117,11 +226,43 @@ static void CDKSetRedactContinuationForSource(CDKLogSource source, BOOL value)
     }
 }
 
+static NSString *CDKSensitiveContinuationTailForSource(CDKLogSource source)
+{
+    switch (source) {
+        case CDKLogSourceStdout:
+            return CDKConsoleDockSensitiveStdoutContinuationTail;
+        case CDKLogSourceStderr:
+            return CDKConsoleDockSensitiveStderrContinuationTail;
+        case CDKLogSourceNative:
+        default:
+            return CDKConsoleDockSensitiveNativeContinuationTail;
+    }
+}
+
+static void CDKSetSensitiveContinuationTailForSource(CDKLogSource source, NSString *value)
+{
+    switch (source) {
+        case CDKLogSourceStdout:
+            CDKConsoleDockSensitiveStdoutContinuationTail = [value copy];
+            break;
+        case CDKLogSourceStderr:
+            CDKConsoleDockSensitiveStderrContinuationTail = [value copy];
+            break;
+        case CDKLogSourceNative:
+        default:
+            CDKConsoleDockSensitiveNativeContinuationTail = [value copy];
+            break;
+    }
+}
+
 static void CDKClearRedactContinuationState(void)
 {
     CDKConsoleDockRedactNativeContinuation = NO;
     CDKConsoleDockRedactStdoutContinuation = NO;
     CDKConsoleDockRedactStderrContinuation = NO;
+    CDKConsoleDockSensitiveNativeContinuationTail = nil;
+    CDKConsoleDockSensitiveStdoutContinuationTail = nil;
+    CDKConsoleDockSensitiveStderrContinuationTail = nil;
 }
 
 static CDKLogLevel CDKDefaultLevelForSource(CDKLogSource source)
@@ -319,6 +460,7 @@ static void CDKPostDiagnosticsDidChangeNotification(void)
                                 captureStandardOutput:configuration.captureStandardOutput
                                  captureStandardError:configuration.captureStandardError
                                   showsFloatingButton:configuration.showsFloatingButton
+                                floatingButtonPosition:configuration.floatingButtonPosition
                                   allowsReleaseBuilds:configuration.allowsReleaseBuilds
                                        maximumEntries:configuration.maximumEntries
                                  maximumMessageLength:configuration.maximumMessageLength
@@ -389,13 +531,22 @@ static void CDKPostDiagnosticsDidChangeNotification(void)
         BOOL redacted = NO;
         BOOL truncated = NO;
         BOOL shouldRedactContinuation = CDKShouldRedactContinuationForSource(source);
-        NSString *messageToPrepare = shouldRedactContinuation ? CDKRedactedPartialContinuationMessage : message;
+        NSString *continuationTail = CDKSensitiveContinuationTailForSource(source);
+        NSString *messageForContinuationCheck = message ?: @"";
+        NSString *combinedContinuationMessage =
+            continuationTail.length > 0 ? [continuationTail stringByAppendingString:messageForContinuationCheck] : nil;
+        BOOL combinedMessageLooksSensitive = continuationTail.length > 0
+            && CDKDefaultRedactorWouldChangeMessage(combinedContinuationMessage);
+        BOOL shouldRedactCurrentFragment = shouldRedactContinuation || combinedMessageLooksSensitive;
+        NSString *messageToPrepare = shouldRedactCurrentFragment ? CDKRedactedPartialContinuationMessage : message;
         NSString *preparedMessage = CDKPreparedMessage(messageToPrepare, CDKConsoleDockConfiguration, &redacted, &truncated);
-        redacted = redacted || shouldRedactContinuation;
+        redacted = redacted || shouldRedactCurrentFragment;
         if (isPartial) {
-            CDKSetRedactContinuationForSource(source, redacted);
+            CDKSetRedactContinuationForSource(source, redacted || CDKMessageMayStartSensitiveContinuation(message));
+            CDKSetSensitiveContinuationTailForSource(source, CDKContinuationTail(message));
         } else {
             CDKSetRedactContinuationForSource(source, NO);
+            CDKSetSensitiveContinuationTailForSource(source, nil);
         }
         CDKConsoleDockNextEntryIdentifier += 1;
         CDKLogEntry *entry = [[CDKLogEntry alloc] initWithIdentifier:CDKConsoleDockNextEntryIdentifier

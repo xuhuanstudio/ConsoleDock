@@ -71,6 +71,17 @@ public enum ConsoleDock {
             }
             return configuration
         }
+
+        init(coreConfiguration: CDKConfiguration) {
+            maximumEntries = Int(coreConfiguration.maximumEntries)
+            maximumMessageLength = Int(coreConfiguration.maximumMessageLength)
+            captureStandardOutput = coreConfiguration.captureStandardOutput
+            captureStandardError = coreConfiguration.captureStandardError
+            showsFloatingButton = coreConfiguration.showsFloatingButton
+            floatingButtonPosition = FloatingButtonPosition(corePosition: coreConfiguration.floatingButtonPosition)
+            allowsReleaseBuilds = coreConfiguration.allowsReleaseBuilds
+            redactor = nil
+        }
     }
 
     /// Severity stored with a ConsoleDock entry.
@@ -424,6 +435,8 @@ public enum ConsoleDock {
         public let capturesStandardError: Bool
         /// Whether the effective configuration requests the bundled UIKit floating button.
         public let showsFloatingButton: Bool
+        /// Initial corner requested by the effective configuration for the bundled UIKit floating button.
+        public let floatingButtonPosition: FloatingButtonPosition
         /// Whether the effective runtime configuration allows Release startup when compiled with CONSOLEDOCK_ENABLE_RELEASE.
         public let allowsReleaseBuilds: Bool
         /// Maximum number of entries retained in memory before oldest entries are evicted.
@@ -444,6 +457,7 @@ public enum ConsoleDock {
             capturesStandardOutput: Bool,
             capturesStandardError: Bool,
             showsFloatingButton: Bool,
+            floatingButtonPosition: FloatingButtonPosition = .bottomTrailing,
             allowsReleaseBuilds: Bool,
             maximumEntries: Int,
             maximumMessageLength: Int,
@@ -456,6 +470,7 @@ public enum ConsoleDock {
             self.capturesStandardOutput = capturesStandardOutput
             self.capturesStandardError = capturesStandardError
             self.showsFloatingButton = showsFloatingButton
+            self.floatingButtonPosition = floatingButtonPosition
             self.allowsReleaseBuilds = allowsReleaseBuilds
             self.maximumEntries = maximumEntries
             self.maximumMessageLength = maximumMessageLength
@@ -694,12 +709,7 @@ public enum ConsoleDock {
         var error: NSError?
         let result = CDKConsoleDock.start(with: configuration.makeCoreConfiguration(), error: &error)
         let startResult = StartResult(coreResult: result, error: error)
-        if startResult == .started {
-            ConsoleDockDebugActionRegistry.shared.resetSessionState()
-        }
-        if shouldConfigureUI(startResult: startResult) {
-            configureUIIfAvailable(configuration: configuration)
-        }
+        handleStartSideEffects(startResult: startResult, requestedConfiguration: configuration)
         return startResult
     }
 
@@ -963,11 +973,35 @@ extension ConsoleDock {
 }
 
 extension ConsoleDock {
+    static func handleStartSideEffects(
+        startResult: StartResult,
+        requestedConfiguration: Configuration
+    ) {
+        switch startResult {
+        case .started:
+            ConsoleDockDebugActionRegistry.shared.resetSessionState()
+            configureUIIfAvailable(configuration: requestedConfiguration)
+        case .alreadyRunning:
+            configureUIIfAvailable(diagnostics: diagnostics)
+        case .disabled, .failed:
+            break
+        }
+    }
+
     fileprivate static func configureUIIfAvailable(configuration: Configuration) {
         #if canImport(UIKit)
             ConsoleDockUIController.shared.configure(
                 floatingButtonPosition: configuration.floatingButtonPosition,
                 showsFloatingButton: configuration.showsFloatingButton
+            )
+        #endif
+    }
+
+    fileprivate static func configureUIIfAvailable(diagnostics: Diagnostics) {
+        #if canImport(UIKit)
+            ConsoleDockUIController.shared.configure(
+                floatingButtonPosition: diagnostics.floatingButtonPosition,
+                showsFloatingButton: diagnostics.showsFloatingButton
             )
         #endif
     }
@@ -1022,6 +1056,9 @@ extension ConsoleDock.Diagnostics {
         capturesStandardOutput = coreDiagnostics.captureStandardOutput
         capturesStandardError = coreDiagnostics.captureStandardError
         showsFloatingButton = coreDiagnostics.showsFloatingButton
+        floatingButtonPosition = ConsoleDock.FloatingButtonPosition(
+            corePosition: coreDiagnostics.floatingButtonPosition
+        )
         allowsReleaseBuilds = coreDiagnostics.allowsReleaseBuilds
         maximumEntries = Int(coreDiagnostics.maximumEntries)
         maximumMessageLength = Int(coreDiagnostics.maximumMessageLength)
@@ -1147,7 +1184,7 @@ extension ConsoleDock.LogSource {
 }
 
 extension ConsoleDock.StartResult {
-    fileprivate init(coreResult: CDKStartResult, error: NSError?) {
+    init(coreResult: CDKStartResult, error: NSError?) {
         switch coreResult {
         case .started:
             self = .started

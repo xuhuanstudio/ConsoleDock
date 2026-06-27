@@ -290,7 +290,7 @@
             reportAction.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.shareIssueReport
             alert.addAction(reportAction)
             let copyReportAction = UIAlertAction(title: "Copy Issue Report", style: .default) { _ in
-                UIPasteboard.general.string = ConsoleDock.issueReportText()
+                ConsoleDockPasteboard.copy(ConsoleDock.issueReportText())
             }
             copyReportAction.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.copyIssueReport
             alert.addAction(copyReportAction)

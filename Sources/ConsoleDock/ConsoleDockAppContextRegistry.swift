@@ -59,7 +59,7 @@ final class ConsoleDockAppContextRegistry {
         for item in items {
             guard let key = normalizedRequiredSingleLine(item.key),
                 !seenKeys.contains(key),
-                let value = normalizedRequiredValue(item.value)
+                let value = normalizedRequiredValue(item.value, key: key)
             else {
                 continue
             }
@@ -79,16 +79,17 @@ final class ConsoleDockAppContextRegistry {
         return normalized.isEmpty ? nil : normalized
     }
 
-    private func normalizedRequiredValue(_ value: String) -> String? {
+    private func normalizedRequiredValue(_ value: String, key: String) -> String? {
         let normalized =
             value
             .replacingOccurrences(of: "\r\n", with: "\n")
             .replacingOccurrences(of: "\r", with: "\n")
             .trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalized.isEmpty else { return nil }
-        if normalized.count <= maximumValueLength {
-            return normalized
+        let redacted = ConsoleDockSensitiveTextRedactor.redactedValue(key: key, value: normalized)
+        if redacted.count <= maximumValueLength {
+            return redacted
         }
-        return String(normalized.prefix(maximumValueLength))
+        return String(redacted.prefix(maximumValueLength))
     }
 }

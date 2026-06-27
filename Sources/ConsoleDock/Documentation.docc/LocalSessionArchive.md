@@ -6,7 +6,7 @@ Save bounded local issue-report snapshots for later review.
 
 Local Session Archive is available in `v0.11.0` and later. It lets a tester or app explicitly save the current issue report so the same evidence can be reopened after an app restart.
 
-Archives are local, app-sandbox files containing already-redacted and already-truncated issue-report text. They include report metadata such as creation time, source session id, entry count, note, truncation state, and the saved report text.
+Archives are local, app-sandbox files containing already-redacted and already-truncated issue-report text. They include report metadata such as creation time, source session id, entry count, baseline-redacted note, truncation state, and the saved report text.
 
 ConsoleDock does not automatically persist raw logs in the background. Saving an archive is explicit through API or the bundled UIKit menu.
 
@@ -64,6 +64,7 @@ Archives:
 
 - are created only when saved explicitly;
 - store bounded issue-report text, not raw pre-redaction log streams;
+- apply file protection where available and are excluded from backup;
 - are sorted newest first;
 - may be truncated by the archive storage limit;
 - persist locally until deleted by the app/user;

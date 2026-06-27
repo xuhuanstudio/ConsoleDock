@@ -54,6 +54,13 @@ ConsoleDock 不能承诺完整、稳定、实时、零侵入捕获：
 
 如果需要可靠完整的 App 内日志展示，推荐使用 ConsoleDock 的显式 API，或者在已有 logger 中增加 sink/appender 转发。`v0.5.0` 开始提供的 `ConsoleDock.LogForwarder` / `CDKLogForwarder` 就是为这个迁移路径准备的轻量工具。
 
+## 基础要求
+
+- Swift Package Manager，Swift tools 5.9 或更高版本。
+- iOS 12 或更高版本用于 SDK 和内置 UIKit 面板。
+- macOS 12 或更高版本用于本地/CI 的 `swift build` 和 `swift test`；ConsoleDock 的产品目标仍然是 iOS App 调试。
+- 内置浮动按钮和面板依赖 UIKit；核心日志/存储 API 仍可在非 UIKit 平台构建和测试。
+
 ## Swift 快速开始
 
 通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.14.0` 已包含 Support Report、Integration Diagnosis、Context 页 ConsoleDock Health、Local Session Archive 显式保存/查看/删除、内置 Session Timeline、Logs 本地结构化查询、next/previous visible error jump、local Debug Action execution history、action form session-only 最近参数值复用、reproduction timeline issue reports、临时 `.txt` issue-report 分享、parameterized Debug Actions、App Context、可配置 floating trigger、Logs Jump、Actions 搜索、logger forwarders、Test Session Reports、manual markers、Debug Actions、日志详情、visible/all/issue-report 分享和复制、runtime diagnostics、当前 iOS Simulator 截图、文档图片校验、视觉 QA 指南、segmented control 对比度修复和当前 release validation 加固：
@@ -196,7 +203,7 @@ ConsoleDock 只展示和触发 App 注册的动作；它不会自动发现页面
 
 Parameterized Debug Actions 和 App Context 从 `v0.7.0` 开始属于已发布能力。参数适合 order id、开关、数量、环境这类小型本地测试输入；ConsoleDock 不把它变成远程命令或自动化测试平台。
 
-Local Debug Action execution history 和 reproduction timeline issue reports 从 `v0.8.0` 开始属于已发布能力。内置参数表单会在当前进程 session 内复用同一 action 最近一次通过校验的参数值，方便重复本地测试；这些值不会跨 App 重启持久化。`ConsoleDock.actionExecutionHistory` 可以读取当前 session 的 action 执行结果，`ConsoleDock.clearActionExecutionHistory()` 可以清空这份历史，但不会清空最近参数值。
+Local Debug Action execution history 和 reproduction timeline issue reports 从 `v0.8.0` 开始属于已发布能力。内置参数表单会在当前进程 session 内复用同一 action 最近一次通过校验的参数值，方便重复本地测试；这些值不会跨 App 重启持久化。`ConsoleDock.actionExecutionHistory` 可以读取当前 session 的 action 执行结果，`ConsoleDock.clearActionExecutionHistory()` 可以清空这份历史，但不会清空最近参数值。执行历史是有界的，明显像密钥的参数名和值会在摘要中基础脱敏。
 
 ```swift
 ConsoleDock.registerAction(
@@ -243,7 +250,7 @@ ConsoleDock.setAppContextProvider {
 }
 ```
 
-App Context 按需读取，不会被 ConsoleDock 默认持久化、上传或自动发送。不要把原始密钥或不必要的个人信息放进 context value。
+App Context 按需读取，会经过一层基础的明显敏感字段脱敏，不会被 ConsoleDock 默认持久化、上传或自动发送。不要把原始密钥或不必要的个人信息放进 context value。
 
 marker 本质上是带 `[marker]` 前缀的 native info 日志，因此同样经过脱敏、截断、详情、搜索、复制和分享流程。`Share Issue Report` 只会在用户主动分享时创建临时本地 `.txt` 文件交给系统 share sheet；`Copy Issue Report` 会把同一份报告文本复制到剪贴板。ConsoleDock 默认不会持久化、上传或自动发送 issue report。
 

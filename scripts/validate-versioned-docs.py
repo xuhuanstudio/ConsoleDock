@@ -5,14 +5,26 @@ from __future__ import annotations
 
 import argparse
 import pathlib
+import re
 import sys
 import tempfile
 
 
-REQUIRED_SNIPPETS = {
+VERSION_HEADING_RE = re.compile(r"^## (v\d+\.\d+\.\d+)\b", re.MULTILINE)
+
+CURRENT_RELEASE_SNIPPETS = {
     "README.md": [
-        "ConsoleDock `v0.14.0` is the current source-first Swift Package Manager preview release.",
-        "Use the latest release tag from GitHub Releases. `v0.14.0` includes on-demand Support Reports for app-owned feedback flows, Integration Diagnosis text, ConsoleDock Health in the bundled Context tab, Local Session Archive save/review/delete flows, the bundled Session Timeline view, local structured Logs queries, next/previous visible error jumps, local Debug Action execution history, session-only recent parameter values for action forms, reproduction timeline issue reports, temporary `.txt` issue-report sharing, parameterized Debug Actions, App Context snapshots for reports and the bundled Context tab, configurable floating trigger controls, Logs jump actions, Actions search, logger forwarders for existing logger sinks, Test Session Reports, manual markers, Debug Actions, log detail, explicit visible/all/issue-report sharing and copying, runtime diagnostics, current Simulator screenshots, documentation asset validation, visual QA guidance, segmented-control contrast fixes, and release-validation hardening.",
+        "ConsoleDock `{tag}` is the current source-first Swift Package Manager preview release.",
+        "Use the latest release tag from GitHub Releases. `{tag}` includes",
+    ],
+    "README.zh-CN.md": [
+        "ConsoleDock `{tag}` 是当前 source-first Swift Package Manager 公开预览版本",
+        "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`{tag}` 已包含",
+    ],
+}
+
+FEATURE_SNIPPETS = {
+    "README.md": [
         "Support Reports are available in `v0.14.0` and later.",
         "Integration Diagnosis is available in `v0.13.0` and later.",
         "Local Session Archive is available in `v0.11.0` and later.",
@@ -27,8 +39,6 @@ REQUIRED_SNIPPETS = {
         "Test Session Reports are available in `v0.4.0` and later.",
     ],
     "README.zh-CN.md": [
-        "ConsoleDock `v0.14.0` 是当前 source-first Swift Package Manager 公开预览版本",
-        "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.14.0` 已包含 Support Report、Integration Diagnosis、Context 页 ConsoleDock Health、Local Session Archive 显式保存/查看/删除、内置 Session Timeline、Logs 本地结构化查询、next/previous visible error jump、local Debug Action execution history、action form session-only 最近参数值复用、reproduction timeline issue reports、临时 `.txt` issue-report 分享、parameterized Debug Actions、App Context、可配置 floating trigger、Logs Jump、Actions 搜索、logger forwarders、Test Session Reports、manual markers、Debug Actions、日志详情、visible/all/issue-report 分享和复制、runtime diagnostics、当前 iOS Simulator 截图、文档图片校验、视觉 QA 指南、segmented control 对比度修复和当前 release validation 加固：",
         "Support Report 从 `v0.14.0` 开始属于已发布能力。",
         "Integration Diagnosis 从 `v0.13.0` 开始属于已发布能力。",
         "Local Session Archive 从 `v0.11.0` 开始属于已发布能力。",
@@ -44,22 +54,8 @@ REQUIRED_SNIPPETS = {
     ],
 }
 
-DENIED_SNIPPETS = {
+STATIC_DENIED_SNIPPETS = {
     "README.md": [
-        "ConsoleDock `v0.8.0` is the current source-first Swift Package Manager preview release.",
-        "ConsoleDock `v0.9.0` is the current source-first Swift Package Manager preview release.",
-        "ConsoleDock `v0.10.0` is the current source-first Swift Package Manager preview release.",
-        "ConsoleDock `v0.11.0` is the current source-first Swift Package Manager preview release.",
-        "ConsoleDock `v0.12.0` is the current source-first Swift Package Manager preview release.",
-        "ConsoleDock `v0.13.0` is the current source-first Swift Package Manager preview release.",
-        "ConsoleDock `v0.13.1` is the current source-first Swift Package Manager preview release.",
-        "Use the latest release tag from GitHub Releases. `v0.8.0` includes",
-        "Use the latest release tag from GitHub Releases. `v0.9.0` includes",
-        "Use the latest release tag from GitHub Releases. `v0.10.0` includes",
-        "Use the latest release tag from GitHub Releases. `v0.11.0` includes",
-        "Use the latest release tag from GitHub Releases. `v0.12.0` includes",
-        "Use the latest release tag from GitHub Releases. `v0.13.0` includes",
-        "Use the latest release tag from GitHub Releases. `v0.13.1` includes",
         "Runtime diagnostics are available on `main` after `v0.1.0`",
         "Debug Actions are available on `main`",
         "Parameterized Debug Actions are available on `main`",
@@ -67,20 +63,6 @@ DENIED_SNIPPETS = {
         "skip this section until the next tag ships",
     ],
     "README.zh-CN.md": [
-        "ConsoleDock `v0.8.0` 是当前 source-first Swift Package Manager 公开预览版本",
-        "ConsoleDock `v0.9.0` 是当前 source-first Swift Package Manager 公开预览版本",
-        "ConsoleDock `v0.10.0` 是当前 source-first Swift Package Manager 公开预览版本",
-        "ConsoleDock `v0.11.0` 是当前 source-first Swift Package Manager 公开预览版本",
-        "ConsoleDock `v0.12.0` 是当前 source-first Swift Package Manager 公开预览版本",
-        "ConsoleDock `v0.13.0` 是当前 source-first Swift Package Manager 公开预览版本",
-        "ConsoleDock `v0.13.1` 是当前 source-first Swift Package Manager 公开预览版本",
-        "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.8.0` 已包含",
-        "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.9.0` 已包含",
-        "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.10.0` 已包含",
-        "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.11.0` 已包含",
-        "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.12.0` 已包含",
-        "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.13.0` 已包含",
-        "通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`v0.13.1` 已包含",
         "Runtime diagnostics 是 `v0.1.0` 之后在 `main` 上新增的能力",
         "Debug Actions 是 `main`",
         "Parameterized Debug Actions 是 `main`",
@@ -90,9 +72,52 @@ DENIED_SNIPPETS = {
 }
 
 
+def released_tags(root: pathlib.Path) -> list[str]:
+    changelog = root / "CHANGELOG.md"
+    if not changelog.exists():
+        return ["v0.14.0"]
+    return VERSION_HEADING_RE.findall(changelog.read_text(encoding="utf-8")) or ["v0.14.0"]
+
+
+def current_release_tag(root: pathlib.Path) -> str:
+    return released_tags(root)[0]
+
+
+def required_snippets(root: pathlib.Path) -> dict[str, list[str]]:
+    tag = current_release_tag(root)
+    required: dict[str, list[str]] = {}
+    for path, snippets in CURRENT_RELEASE_SNIPPETS.items():
+        required[path] = [snippet.format(tag=tag) for snippet in snippets]
+    for path, snippets in FEATURE_SNIPPETS.items():
+        required.setdefault(path, []).extend(snippets)
+    return required
+
+
+def denied_snippets(root: pathlib.Path) -> dict[str, list[str]]:
+    current_tag = current_release_tag(root)
+    previous_tags = [tag for tag in released_tags(root) if tag != current_tag]
+    denied: dict[str, list[str]] = {path: list(snippets) for path, snippets in STATIC_DENIED_SNIPPETS.items()}
+    for tag in previous_tags:
+        denied.setdefault("README.md", []).extend(
+            [
+                f"ConsoleDock `{tag}` is the current source-first Swift Package Manager preview release.",
+                f"Use the latest release tag from GitHub Releases. `{tag}` includes",
+            ]
+        )
+        denied.setdefault("README.zh-CN.md", []).extend(
+            [
+                f"ConsoleDock `{tag}` 是当前 source-first Swift Package Manager 公开预览版本",
+                f"通过 Swift Package Manager 添加公开仓库地址，并选择 GitHub Releases 中最新的 release tag。`{tag}` 已包含",
+            ]
+        )
+    return denied
+
+
 def validate(root: pathlib.Path) -> list[str]:
     errors: list[str] = []
-    for relative_path, snippets in REQUIRED_SNIPPETS.items():
+    required = required_snippets(root)
+    denied = denied_snippets(root)
+    for relative_path, snippets in required.items():
         path = root / relative_path
         if not path.exists():
             errors.append(f"{relative_path}: required public documentation is missing")
@@ -103,7 +128,7 @@ def validate(root: pathlib.Path) -> list[str]:
             if snippet not in text:
                 errors.append(f"{relative_path}: missing required versioned-doc snippet: {snippet}")
 
-        for snippet in DENIED_SNIPPETS.get(relative_path, []):
+        for snippet in denied.get(relative_path, []):
             if snippet in text:
                 errors.append(f"{relative_path}: stale main-only version warning remains: {snippet}")
 
@@ -111,8 +136,14 @@ def validate(root: pathlib.Path) -> list[str]:
 
 
 def write_valid_docs(root: pathlib.Path) -> None:
-    english_required = "\n".join(REQUIRED_SNIPPETS["README.md"])
-    chinese_required = "\n".join(REQUIRED_SNIPPETS["README.zh-CN.md"])
+    root.mkdir(parents=True, exist_ok=True)
+    (root / "CHANGELOG.md").write_text(
+        "## Unreleased\n\nNo changes yet.\n\n## v0.14.0 - 2026-06-27\n\n- Released.\n",
+        encoding="utf-8",
+    )
+    required = required_snippets(root)
+    english_required = "\n".join(required["README.md"])
+    chinese_required = "\n".join(required["README.zh-CN.md"])
     english = f"""# ConsoleDock
 
 {english_required}
@@ -163,7 +194,7 @@ def self_test() -> list[str]:
         write_valid_docs(missing_snippet_root)
         readme = missing_snippet_root / "README.md"
         readme.write_text(
-            readme.read_text(encoding="utf-8").replace(REQUIRED_SNIPPETS["README.md"][1], ""),
+            readme.read_text(encoding="utf-8").replace(required_snippets(missing_snippet_root)["README.md"][1], ""),
             encoding="utf-8",
         )
         if not validate(missing_snippet_root):
@@ -180,6 +211,17 @@ def self_test() -> list[str]:
         )
         if not validate(stale_warning_root):
             errors.append("validate should reject stale main-only diagnostics warnings")
+
+        stale_release_root = root / "stale-release"
+        write_valid_docs(stale_release_root)
+        (stale_release_root / "CHANGELOG.md").write_text(
+            "## Unreleased\n\nNo changes yet.\n\n"
+            "## v0.15.0 - 2026-06-28\n\n- Released.\n\n"
+            "## v0.14.0 - 2026-06-27\n\n- Released.\n",
+            encoding="utf-8",
+        )
+        if not validate(stale_release_root):
+            errors.append("validate should reject docs that keep an older current release tag")
 
     return errors
 

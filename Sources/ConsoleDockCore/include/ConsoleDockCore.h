@@ -119,6 +119,8 @@ FOUNDATION_EXPORT NSNotificationName const CDKConsoleDockDiagnosticsDidChangeNot
 @property (nonatomic, readonly) BOOL captureStandardError;
 /// Whether the effective configuration requests the bundled UIKit floating button.
 @property (nonatomic, readonly) BOOL showsFloatingButton;
+/// Initial corner requested by the effective configuration for the bundled UIKit floating button.
+@property (nonatomic, readonly) CDKFloatingButtonPosition floatingButtonPosition;
 /// Whether the effective runtime configuration allows Release startup when compiled with CONSOLEDOCK_ENABLE_RELEASE.
 @property (nonatomic, readonly) BOOL allowsReleaseBuilds;
 /// Maximum number of entries retained in memory before oldest entries are evicted.
@@ -140,6 +142,7 @@ FOUNDATION_EXPORT NSNotificationName const CDKConsoleDockDiagnosticsDidChangeNot
           captureStandardOutput:(BOOL)captureStandardOutput
            captureStandardError:(BOOL)captureStandardError
             showsFloatingButton:(BOOL)showsFloatingButton
+          floatingButtonPosition:(CDKFloatingButtonPosition)floatingButtonPosition
             allowsReleaseBuilds:(BOOL)allowsReleaseBuilds
                  maximumEntries:(NSUInteger)maximumEntries
            maximumMessageLength:(NSUInteger)maximumMessageLength

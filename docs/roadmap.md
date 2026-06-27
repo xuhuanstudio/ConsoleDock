@@ -347,7 +347,30 @@ Not included:
 - continuous raw log file persistence.
 - crash reporting, network inspector, remote commands, CocoaPods, or XCFramework distribution.
 
-## Post-v0.14 - Demand-Driven Compatibility Candidates
+## v0.15 - Readiness Hardening
+
+Goal: make the current SDK more trustworthy for 1.0 evaluation by fixing real edge cases and tightening validation without changing the product boundary.
+
+Deliverables:
+
+- stronger partial-fragment redaction for oversized lines split around sensitive keys or values.
+- baseline redaction for App Context values, Debug Action summaries/messages, and Local Session Archive notes before they appear in reports.
+- bounded Debug Action execution history and cleanup of session-only recent parameter values on unregister.
+- local-only expiring pasteboard writes for bundled UIKit copy actions where supported.
+- file protection where available plus backup exclusion for ConsoleDock-owned temporary report and archive files.
+- Objective-C/UIKit start side effects aligned with the Swift facade.
+- API validators updated for effective floating button position diagnostics.
+- versioned documentation validation that derives the current release tag from the changelog.
+- README, DocC, privacy, roadmap, changelog, and sample walkthrough cleanup for the hardened behavior.
+
+Not included:
+
+- analytics, telemetry, automatic upload, or user-statistics collection.
+- default continuous file logging or background persistence.
+- marker storage model changes or broader public API freezing work.
+- SwiftUI rewrite, network inspector, crash reporting, remote commands, CocoaPods, or XCFramework distribution.
+
+## Post-v0.15 - Demand-Driven Compatibility Candidates
 
 Goal: improve adoption in existing apps only when real integration feedback shows SPM and the current explicit API are not enough.
 
@@ -379,6 +402,8 @@ Deliverables:
 - release-build safety tests.
 - documented decision to keep CocoaPods and XCFramework out of scope unless real consumer demand justifies them.
 - maintained migration guide from `print`, `NSLog`, and common logger frameworks.
+- public API audit for initializer visibility, `Configuration` equality semantics, low-level core exposure, and long-term source stability.
+- timeline/report marker model review so marker detection does not rely only on a user-visible `[marker]` message prefix.
 
 Not included:
 

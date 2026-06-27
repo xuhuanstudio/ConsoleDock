@@ -114,6 +114,23 @@
         }
     }
 
+    enum ConsoleDockPasteboard {
+        static func copy(_ text: String, expiration: TimeInterval = 10 * 60) {
+            let pasteboard = UIPasteboard.general
+            if #available(iOS 10.0, *) {
+                pasteboard.setItems(
+                    [["public.utf8-plain-text": text]],
+                    options: [
+                        .localOnly: true,
+                        .expirationDate: Date().addingTimeInterval(expiration)
+                    ]
+                )
+            } else {
+                pasteboard.string = text
+            }
+        }
+    }
+
     extension ConsoleDock.LogLevel {
         var consoleDockLabel: String {
             switch self {

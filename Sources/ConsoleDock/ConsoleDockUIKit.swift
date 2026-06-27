@@ -323,10 +323,13 @@ public final class ConsoleDockUIKit: NSObject {
     @discardableResult
     @objc(startWithConfiguration:error:)
     public static func start(configuration: CDKConfiguration?, error: NSErrorPointer) -> CDKStartResult {
-        let result = CDKConsoleDock.start(with: configuration, error: error)
-        if shouldConfigureUI(result: result) {
-            configureUIIfAvailable(configuration: configuration ?? CDKConfiguration())
-        }
+        let effectiveConfiguration = configuration ?? CDKConfiguration()
+        let result = CDKConsoleDock.start(with: effectiveConfiguration, error: error)
+        let startResult = ConsoleDock.StartResult(coreResult: result, error: nil)
+        ConsoleDock.handleStartSideEffects(
+            startResult: startResult,
+            requestedConfiguration: ConsoleDock.Configuration(coreConfiguration: effectiveConfiguration)
+        )
         return result
     }
 
@@ -668,21 +671,6 @@ public final class ConsoleDockUIKit: NSObject {
                 ? maximumReportCharacterCount
                 : ConsoleDock.SupportReportOptions.defaultMaximumReportCharacterCount
         )
-    }
-
-    private static func shouldConfigureUI(result: CDKStartResult) -> Bool {
-        result == .started || result == .alreadyRunning
-    }
-
-    private static func configureUIIfAvailable(configuration: CDKConfiguration) {
-        #if canImport(UIKit)
-            ConsoleDockUIController.shared.configure(
-                floatingButtonPosition: ConsoleDock.FloatingButtonPosition(
-                    corePosition: configuration.floatingButtonPosition
-                ),
-                showsFloatingButton: configuration.showsFloatingButton
-            )
-        #endif
     }
 
     private static func teardownUIIfAvailable() {

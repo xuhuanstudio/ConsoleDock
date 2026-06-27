@@ -92,6 +92,8 @@ final class ConsoleDockSessionArchiveStore {
 
     private func ensureDirectoryExists() throws {
         try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true)
+        try applyFileProtectionIfAvailable(to: directoryURL, fileManager: fileManager)
+        try excludeFromBackupIfAvailable(directoryURL)
     }
 
     private func archiveRecords() throws -> [SessionArchiveRecord] {
@@ -116,7 +118,10 @@ final class ConsoleDockSessionArchiveStore {
 
     private func writeRecord(_ record: SessionArchiveRecord) throws {
         let data = try encoder.encode(record)
-        try data.write(to: fileURL(for: record.id), options: [.atomic])
+        let url = fileURL(for: record.id)
+        try data.write(to: url, options: [.atomic])
+        try applyFileProtectionIfAvailable(to: url, fileManager: fileManager)
+        try excludeFromBackupIfAvailable(url)
     }
 
     private func pruneArchivesIfNeeded(keeping savedArchiveID: String) throws {
@@ -169,7 +174,8 @@ final class ConsoleDockSessionArchiveStore {
             .replacingOccurrences(of: "\r", with: "\n")
             .trimmingCharacters(in: .whitespacesAndNewlines)
         guard !normalized.isEmpty else { return nil }
-        return String(normalized.prefix(512))
+        let redacted = ConsoleDockSensitiveTextRedactor.redacted(normalized)
+        return String(redacted.prefix(512))
     }
 
     private static func newestFirst(
@@ -242,4 +248,23 @@ private struct SessionArchiveRecord: Codable {
             reportText: reportText
         )
     }
+}
+
+private func applyFileProtectionIfAvailable(to fileURL: URL, fileManager: FileManager) throws {
+    #if os(iOS) || os(tvOS) || os(watchOS)
+        try fileManager.setAttributes(
+            [.protectionKey: FileProtectionType.completeUntilFirstUserAuthentication],
+            ofItemAtPath: fileURL.path
+        )
+    #else
+        _ = fileURL
+        _ = fileManager
+    #endif
+}
+
+private func excludeFromBackupIfAvailable(_ url: URL) throws {
+    var resourceURL = url
+    var values = URLResourceValues()
+    values.isExcludedFromBackup = true
+    try resourceURL.setResourceValues(values)
 }

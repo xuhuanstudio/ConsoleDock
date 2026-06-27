@@ -109,7 +109,7 @@ struct ConsoleDockSupportReportBuilder {
         originalReportCharacterCount: Int?
     ) -> String {
         var headerLines = [
-            "Support Bundle:",
+            "Support Report:",
             "  Time Range: \(timeRangeDescription)",
             "  Included Entries: \(entries.count) of \(retainedEntryCount) retained",
             "  Omitted Entries: \(max(0, retainedEntryCount - entries.count))",

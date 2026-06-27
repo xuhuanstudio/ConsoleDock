@@ -6,6 +6,7 @@
           captureStandardOutput:(BOOL)captureStandardOutput
            captureStandardError:(BOOL)captureStandardError
             showsFloatingButton:(BOOL)showsFloatingButton
+          floatingButtonPosition:(CDKFloatingButtonPosition)floatingButtonPosition
             allowsReleaseBuilds:(BOOL)allowsReleaseBuilds
                  maximumEntries:(NSUInteger)maximumEntries
            maximumMessageLength:(NSUInteger)maximumMessageLength
@@ -20,6 +21,7 @@
         _captureStandardOutput = captureStandardOutput;
         _captureStandardError = captureStandardError;
         _showsFloatingButton = showsFloatingButton;
+        _floatingButtonPosition = floatingButtonPosition;
         _allowsReleaseBuilds = allowsReleaseBuilds;
         _maximumEntries = maximumEntries;
         _maximumMessageLength = maximumMessageLength;

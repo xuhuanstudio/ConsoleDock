@@ -61,9 +61,9 @@ ConsoleDock.registerAction(
 }
 ```
 
-The bundled UIKit console presents parameter fields locally before running the action. The form reuses the most recent valid values for the same action within the current process session, then falls back to parameter defaults. Parameter values are not persisted across app restarts by ConsoleDock, and they are not remote commands. Keep this for bounded debug/test inputs such as identifiers, environment choices, counters, and feature toggles.
+The bundled UIKit console presents parameter fields locally before running the action. The form reuses the most recent valid values for the same action within the current process session, then falls back to parameter defaults. Parameter values are not persisted across app restarts by ConsoleDock, and unregistering an action clears its session-only recent values. Keep this for bounded debug/test inputs such as identifiers, environment choices, counters, and feature toggles.
 
-Submitted parameter values can appear in local Debug Action execution history and issue-report reproduction timelines as a compact parameter summary. Do not enter secrets or unnecessary personal data.
+Submitted parameter values can appear in local Debug Action execution history and issue-report reproduction timelines as a compact parameter summary. ConsoleDock redacts obvious secret-like parameter names and common secret-looking values, but this is only a baseline. Do not enter secrets or unnecessary personal data.
 
 ## Read Action Execution History
 
@@ -75,7 +75,7 @@ for execution in ConsoleDock.actionExecutionHistory {
 }
 ```
 
-Use ``ConsoleDock/clearActionExecutionHistory()`` to clear the current in-memory execution history. This does not unregister actions or clear session-only recent parameter values used by the bundled parameter form.
+Use ``ConsoleDock/clearActionExecutionHistory()`` to clear the current in-memory execution history. This does not unregister actions or clear session-only recent parameter values used by the bundled parameter form. ConsoleDock keeps the newest bounded execution history records for the current process session.
 
 ## Disable Or Style An Action
 

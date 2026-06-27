@@ -6,7 +6,23 @@ The project follows Semantic Versioning for public releases.
 
 ## Unreleased
 
-No changes yet.
+### Added
+
+- Added focused hardening tests for partial-fragment redaction, Debug Action history bounds, App Context redaction, Local Session Archive note redaction, Objective-C/UIKit start side effects, and active diagnostics configuration.
+
+### Changed
+
+- Strengthened oversized partial-line redaction so sensitive values split after a key, delimiter, or partial key name are protected across stdout/stderr/native continuation fragments.
+- Redact obvious secret-like App Context values, Debug Action parameter summaries, Debug Action execution messages, and Local Session Archive notes before they appear in local reports or timelines.
+- Bound local Debug Action execution history to the newest 500 records and clear session-only recent parameter values when an action is unregistered.
+- Apply local-only expiring pasteboard writes for bundled UIKit copy actions on supported iOS versions.
+- Apply file protection where available and backup exclusion for ConsoleDock-owned temporary report files and Local Session Archive files.
+- Keep Objective-C/UIKit start side effects aligned with the Swift facade, including Debug Action session reset and active configuration diagnostics when the core is already running.
+- Simplified versioned documentation validation so it derives the current release tag from the changelog and checks stable public guidance instead of brittle long release paragraphs.
+
+### Fixed
+
+- Fixed public diagnostics/API validation coverage for the effective floating button position.
 
 ## v0.14.0 - 2026-06-27
 

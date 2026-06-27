@@ -39,6 +39,7 @@ final class ConsoleDockCoreTests: XCTestCase {
         XCTAssertTrue(diagnostics.captureStandardOutput)
         XCTAssertTrue(diagnostics.captureStandardError)
         XCTAssertTrue(diagnostics.showsFloatingButton)
+        XCTAssertEqual(diagnostics.floatingButtonPosition, .bottomTrailing)
         XCTAssertFalse(diagnostics.allowsReleaseBuilds)
         XCTAssertEqual(diagnostics.maximumEntries, 2_000)
         XCTAssertEqual(diagnostics.maximumMessageLength, 8_192)
@@ -53,6 +54,7 @@ final class ConsoleDockCoreTests: XCTestCase {
         configuration.maximumEntries = 7
         configuration.maximumMessageLength = 11
         configuration.showsFloatingButton = false
+        configuration.floatingButtonPosition = .topTrailing
         configuration.allowsReleaseBuilds = true
 
         XCTAssertEqual(CDKConsoleDock.start(with: configuration), .started)
@@ -62,6 +64,7 @@ final class ConsoleDockCoreTests: XCTestCase {
         XCTAssertFalse(diagnostics.captureStandardOutput)
         XCTAssertFalse(diagnostics.captureStandardError)
         XCTAssertFalse(diagnostics.showsFloatingButton)
+        XCTAssertEqual(diagnostics.floatingButtonPosition, .topTrailing)
         XCTAssertTrue(diagnostics.allowsReleaseBuilds)
         XCTAssertEqual(diagnostics.maximumEntries, 7)
         XCTAssertEqual(diagnostics.maximumMessageLength, 11)
@@ -529,6 +532,38 @@ final class ConsoleDockCoreTests: XCTestCase {
             entries.map(\.redacted),
             [true, true, true, false]
         )
+    }
+
+    func testPartialLineRedactsContinuationWhenSensitiveValueStartsAfterDelimiter() throws {
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+
+        CDKConsoleDock.append(CDKLineEvent(source: .stdout, message: "token=", isPartial: true))
+        CDKConsoleDock.append(CDKLineEvent(source: .stdout, message: "secret-fragment", isPartial: false))
+
+        let entries = CDKConsoleDock.entries()
+        XCTAssertEqual(entries.map(\.message), ["token=", "<redacted partial continuation>"])
+        XCTAssertEqual(entries.map(\.redacted), [false, true])
+    }
+
+    func testPartialLineRedactsContinuationWhenSensitiveKeySplitsAcrossFragments() throws {
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+
+        CDKConsoleDock.append(CDKLineEvent(source: .stdout, message: "Authorizat", isPartial: true))
+        CDKConsoleDock.append(CDKLineEvent(source: .stdout, message: "ion: Bearer bearer-secret", isPartial: true))
+        CDKConsoleDock.append(CDKLineEvent(source: .stdout, message: "tail-secret", isPartial: false))
+        CDKConsoleDock.append(CDKLineEvent(source: .stdout, message: "public next line", isPartial: false))
+
+        let entries = CDKConsoleDock.entries()
+        XCTAssertEqual(
+            entries.map(\.message),
+            [
+                "Authorizat",
+                "<redacted partial continuation>",
+                "<redacted partial continuation>",
+                "public next line"
+            ]
+        )
+        XCTAssertEqual(entries.map(\.redacted), [false, true, true, false])
     }
 
     func testRedactedPartialLineContinuationStateIsSourceScoped() throws {

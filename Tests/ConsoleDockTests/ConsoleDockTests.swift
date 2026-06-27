@@ -70,6 +70,31 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertFalse(ConsoleDockUIKit.isRunning())
     }
 
+    func testObjectiveCUIKitFacadeStartResetsDebugActionSessionState() {
+        let configuration = CDKConfiguration()
+        configuration.captureStandardOutput = false
+        configuration.captureStandardError = false
+        configuration.showsFloatingButton = false
+
+        XCTAssertEqual(ConsoleDockUIKit.start(configuration: configuration, error: nil), .started)
+        ConsoleDock.registerAction(id: "session.action", title: "Session Action") {}
+        ConsoleDock.storeRecentDebugActionParameterValues(
+            actionID: "session.action",
+            parameterValues: ["orderId": .string("A-100")]
+        )
+        ConsoleDock.performDebugAction(id: "session.action")
+
+        XCTAssertEqual(ConsoleDock.actionExecutionHistory.count, 1)
+        XCTAssertFalse(ConsoleDock.recentDebugActionParameterValues(actionID: "session.action").isEmpty)
+
+        ConsoleDockUIKit.stop()
+        XCTAssertEqual(ConsoleDockUIKit.start(configuration: configuration, error: nil), .started)
+
+        XCTAssertEqual(ConsoleDock.debugActions.map(\.id), ["session.action"])
+        XCTAssertTrue(ConsoleDock.actionExecutionHistory.isEmpty)
+        XCTAssertTrue(ConsoleDock.recentDebugActionParameterValues(actionID: "session.action").isEmpty)
+    }
+
     func testObjectiveCUIKitFacadeFloatingButtonControlsAreSafeBeforeStart() {
         ConsoleDockUIKit.hideFloatingButton()
         ConsoleDockUIKit.showFloatingButton()
@@ -171,6 +196,27 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertEqual(configuration.makeCoreConfiguration().floatingButtonPosition, .topLeading)
     }
 
+    func testSwiftFacadeAlreadyRunningKeepsActiveDiagnosticsConfiguration() {
+        let firstConfiguration = ConsoleDock.Configuration(
+            captureStandardOutput: false,
+            captureStandardError: false,
+            showsFloatingButton: false,
+            floatingButtonPosition: .topLeading
+        )
+        let secondConfiguration = ConsoleDock.Configuration(
+            captureStandardOutput: false,
+            captureStandardError: false,
+            showsFloatingButton: true,
+            floatingButtonPosition: .bottomLeading
+        )
+
+        XCTAssertEqual(ConsoleDock.start(configuration: firstConfiguration), .started)
+        XCTAssertEqual(ConsoleDock.start(configuration: secondConfiguration), .alreadyRunning)
+
+        XCTAssertFalse(ConsoleDock.diagnostics.showsFloatingButton)
+        XCTAssertEqual(ConsoleDock.diagnostics.floatingButtonPosition, .topLeading)
+    }
+
     func testSwiftDiagnosticsMapsCoreFields() {
         let configuration = ConsoleDock.Configuration(
             maximumEntries: 9,
@@ -178,6 +224,7 @@ final class ConsoleDockTests: XCTestCase {
             captureStandardOutput: false,
             captureStandardError: false,
             showsFloatingButton: false,
+            floatingButtonPosition: .topTrailing,
             allowsReleaseBuilds: true,
             redactor: { message in
                 message.replacingOccurrences(of: "secret", with: "public")
@@ -193,6 +240,7 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertFalse(diagnostics.capturesStandardOutput)
         XCTAssertFalse(diagnostics.capturesStandardError)
         XCTAssertFalse(diagnostics.showsFloatingButton)
+        XCTAssertEqual(diagnostics.floatingButtonPosition, .topTrailing)
         XCTAssertTrue(diagnostics.allowsReleaseBuilds)
         XCTAssertEqual(diagnostics.maximumEntries, 9)
         XCTAssertEqual(diagnostics.maximumMessageLength, 12)
@@ -944,6 +992,8 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertEqual(report.includedActionExecutionCount, 1)
         XCTAssertEqual(report.omittedActionExecutionCount, 1)
         XCTAssertTrue(report.text.contains("ConsoleDock Support Report"))
+        XCTAssertTrue(report.text.contains("Support Report:"))
+        XCTAssertFalse(report.text.contains("Support Bundle:"))
         XCTAssertTrue(report.text.contains("Included Entries: 2 of 3 retained"))
         XCTAssertTrue(report.text.contains("recent failure"))
         XCTAssertTrue(report.text.contains("latest fault"))
@@ -1810,6 +1860,31 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertTrue(report.contains("    User ID: user-123"))
     }
 
+    func testAppContextRedactsSensitiveValuesBeforeReports() {
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+        ConsoleDock.setAppContextProvider {
+            [
+                ConsoleDock.AppContextSection(
+                    title: "Auth",
+                    items: [
+                        .init(key: "Access Token", value: "secret-token-value"),
+                        .init(key: "Headers", value: "Authorization: Bearer bearer-secret")
+                    ]
+                )
+            ]
+        }
+
+        let snapshot = ConsoleDock.appContext
+        XCTAssertEqual(snapshot.first?.items.first?.value, "<redacted>")
+        XCTAssertEqual(snapshot.first?.items.last?.value, "Authorization: <redacted>")
+
+        let report = ConsoleDock.issueReportText()
+        XCTAssertTrue(report.contains("    Access Token: <redacted>"))
+        XCTAssertTrue(report.contains("    Headers: Authorization: <redacted>"))
+        XCTAssertFalse(report.contains("secret-token-value"))
+        XCTAssertFalse(report.contains("bearer-secret"))
+    }
+
     func testIssueReportIncludesEmptyAppContextState() {
         let metadata = ConsoleDock.SessionMetadata(
             sessionIdentifier: "session-empty",
@@ -2006,6 +2081,43 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertNil(execution?.message)
     }
 
+    func testParameterizedDebugActionRedactsSensitiveParameterSummaryValues() {
+        XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+        ConsoleDock.registerAction(
+            id: "auth.fixture",
+            title: "Auth Fixture",
+            parameters: [
+                .string(id: "accessToken", title: "Access Token", isRequired: true),
+                .string(id: "orderId", title: "Order ID", isRequired: true)
+            ]
+        ) { _ in }
+
+        ConsoleDock.performDebugAction(
+            id: "auth.fixture",
+            parameterValues: [
+                "accessToken": .string("secret-token-value"),
+                "orderId": .string("A123")
+            ]
+        )
+
+        let execution = ConsoleDock.actionExecutionHistory.first
+        XCTAssertEqual(execution?.parameterSummary, "accessToken=<redacted>, orderId=\"A123\"")
+        XCTAssertFalse(execution?.parameterSummary?.contains("secret-token-value") == true)
+    }
+
+    func testDebugActionExecutionHistoryKeepsNewestBoundedEntries() {
+        ConsoleDock.registerAction(id: "bounded", title: "Bounded") {}
+
+        for _ in 0..<505 {
+            ConsoleDock.performDebugAction(id: "bounded")
+        }
+
+        let history = ConsoleDock.actionExecutionHistory
+        XCTAssertEqual(history.count, 500)
+        XCTAssertEqual(history.first?.id, 6)
+        XCTAssertEqual(history.last?.id, 505)
+    }
+
     func testDebugActionRecordsFailedAndSkippedExecutions() {
         struct FixtureError: Error {}
         XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
@@ -2055,6 +2167,22 @@ final class ConsoleDockTests: XCTestCase {
         XCTAssertTrue(ConsoleDock.actionExecutionHistory.isEmpty)
         let retainedRecentValues = ConsoleDock.recentDebugActionParameterValues(actionID: "open.order")
         XCTAssertEqual(retainedRecentValues["orderId"], .string("A-100"))
+    }
+
+    func testDebugActionUnregisterClearsRecentParameterValuesForAction() {
+        ConsoleDock.registerAction(
+            id: "open.order",
+            title: "Open Order",
+            parameters: [.string(id: "orderId", title: "Order ID", isRequired: true)]
+        ) { _ in }
+        ConsoleDock.storeRecentDebugActionParameterValues(
+            actionID: "open.order",
+            parameterValues: ["orderId": .string("A-100")]
+        )
+
+        ConsoleDock.unregisterAction(id: "open.order")
+
+        XCTAssertTrue(ConsoleDock.recentDebugActionParameterValues(actionID: "open.order").isEmpty)
     }
 
     func testActionRecentParametersAreSessionLocal() {
@@ -2574,6 +2702,21 @@ final class ConsoleDockTests: XCTestCase {
             XCTAssertTrue(archive.reportText.contains("token=<redacted>"))
             XCTAssertFalse(archive.reportText.contains("session-secret"))
             XCTAssertEqual(try ConsoleDock.sessionArchives(), [archive])
+        }
+    }
+
+    func testSessionArchiveSaveRedactsSensitiveNote() throws {
+        let createdAt = Date(timeIntervalSince1970: 10)
+        try withTemporaryArchiveStore(
+            dates: [createdAt],
+            uuids: [Self.fixtureUUID(1)]
+        ) { _ in
+            XCTAssertEqual(ConsoleDock.start(configuration: .nativeOnly), .started)
+
+            let archive = try ConsoleDock.saveSessionArchive(note: "token=session-secret")
+
+            XCTAssertEqual(archive.note, "token=<redacted>")
+            XCTAssertFalse(archive.note?.contains("session-secret") == true)
         }
     }
 

@@ -102,8 +102,9 @@
         }
 
         @objc private func copyIntegrationDiagnosis() {
-            UIPasteboard.general.string =
+            ConsoleDockPasteboard.copy(
                 ConsoleDockIntegrationDiagnosisFormatter.diagnosisText(snapshot: lastHealthSnapshot)
+            )
             let alert = UIAlertController(
                 title: "Copied Integration Diagnosis",
                 message: nil,

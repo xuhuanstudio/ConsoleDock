@@ -6,7 +6,7 @@ Generate bounded local reports for app-owned feedback or support flows.
 
 Support Reports are available in `v0.14.0` and later. They are useful when the host app already has a feedback, support, QA, or bug-report flow and wants to attach ConsoleDock context for a specific time window.
 
-ConsoleDock does not upload Support Reports. It only builds local text from currently retained, already-redacted ConsoleDock data. The host app owns consent, upload, ticket creation, cleanup, and any extra privacy review.
+ConsoleDock does not upload Support Reports. It only builds local text from currently retained, already-redacted ConsoleDock data plus baseline-redacted report-adjacent text such as App Context and Debug Action summaries. The host app owns consent, upload, ticket creation, cleanup, and any extra privacy review.
 
 ## Build A Report
 
@@ -72,7 +72,7 @@ A Support Report includes:
 - optional App Context;
 - a reproduction timeline for retained markers, Debug Action executions, and retained error/fault logs in the selected range;
 - retained redacted log entries in the selected range;
-- a Support Bundle header with included/omitted counts, time range, size limit, and truncation state.
+- a Support Report header with included/omitted counts, time range, size limit, and truncation state.
 
 The report is generated from ConsoleDock's current bounded in-memory/session data. If older entries have already been evicted, a longer time range cannot recover them.
 

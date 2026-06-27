@@ -54,7 +54,7 @@
         }
 
         @objc private func copyAction() {
-            UIPasteboard.general.string = ConsoleDockTimelineBuilder.actionDetailText(execution)
+            ConsoleDockPasteboard.copy(ConsoleDockTimelineBuilder.actionDetailText(execution))
             UIAccessibility.post(notification: .announcement, argument: "Copied action detail")
         }
     }

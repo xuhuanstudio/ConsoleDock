@@ -23,7 +23,14 @@ The bundled UIKit panel is local-only and organized around the tester's current 
 
 ## Status
 
-ConsoleDock `v0.14.0` is the current source-first Swift Package Manager preview release. It contains a Swift Package manifest, `ConsoleDockCore` and `ConsoleDock` targets, Native API storage, logger forwarders for existing logger sinks, session metadata, manual markers, bounded in-memory entries with stable session identifiers and partial/redacted/truncated flags, basic redaction, byte-to-line framing utilities, stdout/stderr file-descriptor capture with pass-through and restore, runtime diagnostics, Integration Diagnosis text, ConsoleDock Health in the Context tab, entry change notification, Debug Actions with enabled/destructive metadata, local search, structured Logs queries, parameter forms, current-session execution history, and session-only recent parameter values, app-provided Context snapshots for the panel and reports, log detail, Session Timeline, Logs jump actions, explicit visible/all/issue-report sharing, temporary issue-report file sharing, issue-report copying, explicit Local Session Archive save/review/delete flows, on-demand time-range Support Reports for app-owned feedback flows, Release startup safety gates, a configurable UIKit-only floating button/panel foundation, Swift and Objective-C sample apps, DocC documentation, release validation workflow, current Simulator screenshots, documentation asset validation, visual QA guidance, segmented-control contrast fixes, and focused tests.
+ConsoleDock `v0.14.0` is the current source-first Swift Package Manager preview release. It is usable as an in-app local debugging panel for Swift, Objective-C, and mixed iOS projects.
+
+The current release includes:
+
+- bounded in-memory log storage with redaction, truncation, stable entry ids, stdout/stderr capture, and explicit native logging APIs;
+- a UIKit panel with Logs, Actions, Timeline, Context, sharing, issue reports, and Local Session Archive flows;
+- Debug Actions with search, confirmation, disabled/destructive metadata, parameter forms, current-session execution history, and session-only recent values;
+- Integration Diagnosis, ConsoleDock Health, App Context, Test Session Reports, Support Reports, logger forwarders, Swift and Objective-C samples, DocC, screenshots, and release validation.
 
 Current limitations:
 
@@ -60,6 +67,13 @@ ConsoleDock cannot promise complete, reliable, live, zero-intrusion capture of:
 
 Reliable complete logging should go through ConsoleDock's explicit API or an adapter for an existing logging framework.
 
+## Requirements
+
+- Swift Package Manager with Swift tools 5.9 or later.
+- iOS 12 or later for the SDK and bundled UIKit panel.
+- macOS 12 or later is included as a development and CI platform for `swift build` and `swift test`; ConsoleDock's product goal remains iOS app debugging.
+- UIKit is required for the bundled floating button and panel. The core logging/storage APIs can still be built and tested outside UIKit.
+
 ## Quick Start
 
 ### Add The Package
@@ -72,7 +86,7 @@ Add the public repository URL through Xcode's package dependency UI:
 https://github.com/xuhuanstudio/ConsoleDock.git
 ```
 
-Use the latest release tag from GitHub Releases. `v0.14.0` includes on-demand Support Reports for app-owned feedback flows, Integration Diagnosis text, ConsoleDock Health in the bundled Context tab, Local Session Archive save/review/delete flows, the bundled Session Timeline view, local structured Logs queries, next/previous visible error jumps, local Debug Action execution history, session-only recent parameter values for action forms, reproduction timeline issue reports, temporary `.txt` issue-report sharing, parameterized Debug Actions, App Context snapshots for reports and the bundled Context tab, configurable floating trigger controls, Logs jump actions, Actions search, logger forwarders for existing logger sinks, Test Session Reports, manual markers, Debug Actions, log detail, explicit visible/all/issue-report sharing and copying, runtime diagnostics, current Simulator screenshots, documentation asset validation, visual QA guidance, segmented-control contrast fixes, and release-validation hardening. Then depend on:
+Use the latest release tag from GitHub Releases. `v0.14.0` includes the bundled UIKit console, Debug Actions, Timeline, App Context, issue reports, Local Session Archives, Support Reports, logger forwarders, Swift and Objective-C samples, DocC, and release validation. Then depend on:
 
 - `ConsoleDock` for Swift API plus the bundled UIKit console.
 - `ConsoleDockCore` for Objective-C/C-compatible core APIs.
@@ -272,7 +286,7 @@ ConsoleDock.registerAction(
 
 Parameters are not persisted and are collected only by the local bundled UI. `v0.8.0` and later reuse the most recent valid values for the same action within the current process session so repeated local tests need less typing. They are for debug/test builds, not remote commands or an automation platform.
 
-Local Debug Action execution history and reproduction timeline issue reports are available in `v0.8.0` and later. `ConsoleDock.actionExecutionHistory` exposes the current process session's action outcomes, and `ConsoleDock.clearActionExecutionHistory()` clears that history without clearing recent action parameter values.
+Local Debug Action execution history and reproduction timeline issue reports are available in `v0.8.0` and later. `ConsoleDock.actionExecutionHistory` exposes the current process session's action outcomes, and `ConsoleDock.clearActionExecutionHistory()` clears that history without clearing recent action parameter values. History is bounded to the newest executions, and obvious secret-like parameter names are redacted in compact summaries before they appear in Timeline, issue reports, or Support Reports.
 
 ### Mark Test Sessions And Share Issue Reports
 
@@ -310,7 +324,7 @@ ConsoleDock.setAppContextProvider {
 }
 ```
 
-App Context is read on demand, kept local, and not persisted or uploaded by ConsoleDock. Do not put raw secrets or unnecessary personal data in context values.
+App Context is read on demand, receives a baseline obvious-secret redaction pass, stays local, and is not persisted or uploaded by ConsoleDock. Do not put raw secrets or unnecessary personal data in context values.
 
 Markers are normal native info entries with a stable `[marker]` prefix, so existing redaction, truncation, detail, search, copy, and share behavior still applies. `Share Issue Report` creates a temporary local `.txt` item only for the user-initiated system share sheet; `Copy Issue Report` copies the same report text to the pasteboard. ConsoleDock does not persist issue reports by default, upload them, or send them anywhere automatically.
 

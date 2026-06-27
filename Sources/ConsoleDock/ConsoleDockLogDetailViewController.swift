@@ -79,12 +79,12 @@
         }
 
         @objc private func copyMessage() {
-            UIPasteboard.general.string = entry.message
+            ConsoleDockPasteboard.copy(entry.message)
             UIAccessibility.post(notification: .announcement, argument: "Copied log message")
         }
 
         @objc private func copyEntry() {
-            UIPasteboard.general.string = ConsoleDockSnapshotFormatter.entryDetailText(entry)
+            ConsoleDockPasteboard.copy(ConsoleDockSnapshotFormatter.entryDetailText(entry))
             UIAccessibility.post(notification: .announcement, argument: "Copied log entry")
         }
     }

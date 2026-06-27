@@ -275,7 +275,7 @@
         }
 
         @objc private func copyArchive() {
-            UIPasteboard.general.string = archive.reportText
+            ConsoleDockPasteboard.copy(archive.reportText)
             UIAccessibility.post(notification: .announcement, argument: "Copied session archive")
         }
 

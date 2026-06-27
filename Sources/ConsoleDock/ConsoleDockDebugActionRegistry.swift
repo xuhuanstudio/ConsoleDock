@@ -127,7 +127,8 @@ final class ConsoleDockDebugActionRegistry {
         lock.lock()
         let originalCount = records.count
         records.removeAll { $0.action.id == normalizedID }
-        let changed = records.count != originalCount
+        let removedRecentValues = recentParameterValues.removeValue(forKey: normalizedID) != nil
+        let changed = records.count != originalCount || removedRecentValues
         lock.unlock()
 
         if changed {
@@ -307,10 +308,13 @@ final class ConsoleDockDebugActionRegistry {
             completedAt: completedAt,
             outcome: outcome,
             parameterSummary: parameterSummary,
-            message: message.map(singleLine)
+            message: message.map { ConsoleDockSensitiveTextRedactor.redacted(singleLine($0)) }
         )
         nextExecutionID += 1
         executions.append(execution)
+        if executions.count > maximumExecutionHistoryCount {
+            executions.removeFirst(executions.count - maximumExecutionHistoryCount)
+        }
         lock.unlock()
 
         postActionsChanged()
@@ -418,16 +422,21 @@ final class ConsoleDockDebugActionRegistry {
         let values = parameters.allValues
         for parameter in action.parameters {
             guard let value = values[parameter.id] else { continue }
-            parts.append("\(parameter.id)=\(parameterValueText(value))")
+            let valueText = isSensitiveParameter(parameter) ? "<redacted>" : parameterValueText(value)
+            parts.append("\(parameter.id)=\(valueText)")
         }
         guard !parts.isEmpty else { return nil }
         return truncated(singleLine(parts.joined(separator: ", ")), maximumLength: 240)
     }
 
+    private func isSensitiveParameter(_ parameter: ConsoleDock.DebugActionParameter) -> Bool {
+        ConsoleDockSensitiveTextRedactor.isSensitiveName("\(parameter.id) \(parameter.title)")
+    }
+
     private func parameterValueText(_ value: ConsoleDock.DebugActionParameterValue) -> String {
         switch value {
         case .string(let text):
-            return "\"\(truncated(singleLine(text), maximumLength: 48))\""
+            return "\"\(truncated(ConsoleDockSensitiveTextRedactor.redacted(singleLine(text)), maximumLength: 48))\""
         case .number(let number):
             if number.rounded() == number, number >= Double(Int64.min), number <= Double(Int64.max) {
                 return String(Int64(number))
@@ -436,7 +445,7 @@ final class ConsoleDockDebugActionRegistry {
         case .bool(let flag):
             return flag ? "true" : "false"
         case .choice(let choiceID):
-            return truncated(singleLine(choiceID), maximumLength: 48)
+            return truncated(ConsoleDockSensitiveTextRedactor.redacted(singleLine(choiceID)), maximumLength: 48)
         }
     }
 
@@ -494,6 +503,8 @@ final class ConsoleDockDebugActionRegistry {
             .replacingOccurrences(of: "\n", with: " ")
             .replacingOccurrences(of: "\r", with: " ")
     }
+
+    private let maximumExecutionHistoryCount = 500
 }
 
 extension ConsoleDock {
