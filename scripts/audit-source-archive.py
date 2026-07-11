@@ -30,6 +30,7 @@ ALLOWED_BINARY_PATHS = {
     pathlib.PurePosixPath("docs/assets/swift-sample-archive.png"),
     pathlib.PurePosixPath("docs/assets/swift-sample-context.png"),
     pathlib.PurePosixPath("docs/assets/swift-sample-logs.png"),
+    pathlib.PurePosixPath("docs/assets/swift-sample-report.png"),
     pathlib.PurePosixPath("docs/assets/swift-sample-timeline.png"),
 }
 

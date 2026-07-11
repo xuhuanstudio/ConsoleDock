@@ -112,19 +112,24 @@ def validate_stale_references(root: pathlib.Path) -> list[str]:
 
 
 def validate_release_audit_allowlist(root: pathlib.Path) -> list[str]:
-    audit_script = root / "scripts/audit-release-content.py"
-    if not audit_script.exists():
-        return ["scripts/audit-release-content.py: release content audit script is missing"]
-
-    content = audit_script.read_text(encoding="utf-8")
     errors: list[str] = []
-    for relative_path in REQUIRED_SCREENSHOTS:
-        snippet = f'pathlib.PurePosixPath("{relative_path.as_posix()}")'
-        if snippet not in content:
-            errors.append(
-                "scripts/audit-release-content.py: missing binary allow-list entry for "
-                f"{relative_path}"
-            )
+    audit_scripts = [
+        pathlib.Path("scripts/audit-release-content.py"),
+        pathlib.Path("scripts/audit-source-archive.py"),
+    ]
+    for audit_script in audit_scripts:
+        path = root / audit_script
+        if not path.exists():
+            errors.append(f"{audit_script}: release audit script is missing")
+            continue
+
+        content = path.read_text(encoding="utf-8")
+        for relative_path in REQUIRED_SCREENSHOTS:
+            snippet = f'pathlib.PurePosixPath("{relative_path.as_posix()}")'
+            if snippet not in content:
+                errors.append(
+                    f"{audit_script}: missing binary allow-list entry for {relative_path}"
+                )
     return errors
 
 
