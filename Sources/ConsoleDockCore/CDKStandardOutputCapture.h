@@ -10,6 +10,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)initWithConfiguration:(CDKConfiguration *)configuration NS_DESIGNATED_INITIALIZER;
 - (BOOL)startWithError:(NSError * _Nullable * _Nullable)error;
+- (BOOL)isExecutingOnReaderThread;
 - (void)stop;
 
 @end

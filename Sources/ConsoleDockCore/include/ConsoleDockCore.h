@@ -103,7 +103,7 @@ FOUNDATION_EXPORT NSNotificationName const CDKConsoleDockDiagnosticsDidChangeNot
                            message:(NSString *)message
                           isPartial:(BOOL)isPartial
                           redacted:(BOOL)redacted
-                         truncated:(BOOL)truncated NS_DESIGNATED_INITIALIZER;
+                         truncated:(BOOL)truncated;
 - (instancetype)initWithIdentifier:(unsigned long long)identifier
                          timestamp:(NSDate *)timestamp
                              level:(CDKLogLevel)level

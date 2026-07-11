@@ -1,6 +1,8 @@
 #import "ConsoleDockCore.h"
 #import "CDKStandardOutputCapture.h"
 
+#import <dispatch/dispatch.h>
+
 #if __has_include(<UIKit/UIKit.h>)
 #import <UIKit/UIKit.h>
 #endif
@@ -56,6 +58,9 @@ static NSString *CDKDefaultRedactedMessage(NSString *message)
     redacted = CDKStringByReplacingMatches(redacted,
                                            @"\\b(password|passwd|token|id[_-]?token|auth[_-]?token|session[_-]?token|csrf[_-]?token|access[_-]?token|refresh[_-]?token|x[_-]?api[_-]?key|api[_-]?key|client[_-]?secret|key|secret)\\b\\s*[:=]\\s*[^\\s,;&]+",
                                            @"$1=<redacted>");
+    redacted = CDKStringByReplacingMatches(redacted,
+                                           @"\\bBearer\\s+[^\\s,;&]+",
+                                           @"Bearer <redacted>");
     return redacted;
 }
 
@@ -124,6 +129,7 @@ static BOOL CDKTrailingIdentifierMayBeSensitivePrefix(NSString *message)
         @"apikey",
         @"clientsecret",
         @"privatekey",
+        @"bearer",
         @"secret"
     ];
     for (NSString *name in sensitiveNames) {
@@ -143,6 +149,7 @@ static BOOL CDKMessageMayStartSensitiveContinuation(NSString *message)
 
     NSArray<NSString *> *patterns = @[
         @"\\bAuthorization\\s*[:=]\\s*(?:Bearer\\s*)?$",
+        @"\\bBearer\\s*$",
         @"\\b(?:Set-Cookie|Cookie)\\s*:\\s*$",
         @"\\b(?:password|passwd|token|id[_-]?token|auth[_-]?token|session[_-]?token|csrf[_-]?token|access[_-]?token|refresh[_-]?token|x[_-]?api[_-]?key|api[_-]?key|client[_-]?secret|key|secret)\\b\\s*[:=]\\s*\"?$"
     ];
@@ -414,14 +421,22 @@ static void CDKPostDiagnosticsDidChangeNotification(void)
         CDKConsoleDockCapture = nil;
     }
 
-    [capture stop];
+    void (^finishStopping)(void) = ^{
+        [capture stop];
 
-    @synchronized(self) {
-        CDKConsoleDockRunning = NO;
-        CDKConsoleDockStopping = NO;
-        CDKClearRedactContinuationState();
+        @synchronized(self) {
+            CDKConsoleDockRunning = NO;
+            CDKConsoleDockStopping = NO;
+            CDKClearRedactContinuationState();
+        }
+        CDKPostDiagnosticsDidChangeNotification();
+    };
+
+    if ([capture isExecutingOnReaderThread]) {
+        dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), finishStopping);
+    } else {
+        finishStopping();
     }
-    CDKPostDiagnosticsDidChangeNotification();
 }
 
 + (BOOL)isRunning

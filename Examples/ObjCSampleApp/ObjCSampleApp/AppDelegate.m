@@ -20,7 +20,11 @@
     BOOL isUISmokeRun = [NSProcessInfo.processInfo.arguments containsObject:@"--consoledock-ui-smoke"];
     [self startConsoleDockForUISmokeRun:isUISmokeRun];
     if (isUISmokeRun) {
-        [CDKConsoleDockUIKit clearSessionArchivesWithError:nil];
+        NSError *archiveError = nil;
+        if (![CDKConsoleDockUIKit clearSessionArchivesWithError:&archiveError]) {
+            [CDKConsoleDock error:[NSString stringWithFormat:@"Failed to clear UI smoke archives: %@",
+                                                            archiveError.localizedDescription ?: @"unknown error"]];
+        }
     }
     [self registerDebugActions];
     [self registerAppContextForUISmokeRun:isUISmokeRun];

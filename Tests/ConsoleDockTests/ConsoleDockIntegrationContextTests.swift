@@ -331,21 +331,26 @@ final class ConsoleDockIntegrationContextTests: ConsoleDockTestCase {
                     title: "Auth",
                     items: [
                         .init(key: "Access Token", value: "secret-token-value"),
-                        .init(key: "Headers", value: "Authorization: Bearer bearer-secret")
+                        .init(key: "Headers", value: "Authorization: Bearer bearer-secret"),
+                        .init(key: "Command", value: "Bearer standalone-bearer-secret")
                     ]
                 )
             ]
         }
 
         let snapshot = ConsoleDock.appContext
-        XCTAssertEqual(snapshot.first?.items.first?.value, "<redacted>")
-        XCTAssertEqual(snapshot.first?.items.last?.value, "Authorization: <redacted>")
+        XCTAssertEqual(
+            snapshot.first?.items.map(\.value),
+            ["<redacted>", "Authorization: <redacted>", "Bearer <redacted>"]
+        )
 
         let report = ConsoleDock.issueReportText()
         XCTAssertTrue(report.contains("    Access Token: <redacted>"))
         XCTAssertTrue(report.contains("    Headers: Authorization: <redacted>"))
+        XCTAssertTrue(report.contains("    Command: Bearer <redacted>"))
         XCTAssertFalse(report.contains("secret-token-value"))
         XCTAssertFalse(report.contains("bearer-secret"))
+        XCTAssertFalse(report.contains("standalone-bearer-secret"))
     }
 
     func testIssueReportIncludesEmptyAppContextState() {

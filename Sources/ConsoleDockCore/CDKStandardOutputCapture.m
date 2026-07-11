@@ -70,6 +70,7 @@ static BOOL CDKWriteAll(int descriptor, const void *bytes, size_t length)
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 - (BOOL)startWithError:(NSError **)error;
+- (BOOL)isExecutingOnReaderThread;
 - (void)stop;
 
 @end
@@ -167,6 +168,11 @@ static BOOL CDKWriteAll(int descriptor, const void *bytes, size_t length)
     CDKCloseDescriptor(&_pipeReadDescriptor);
     CDKCloseDescriptor(&_pipeWriteDescriptor);
     CDKCloseDescriptor(&_originalDescriptor);
+}
+
+- (BOOL)isExecutingOnReaderThread
+{
+    return self.readerThread == NSThread.currentThread;
 }
 
 - (void)cleanupAfterFailedStart
@@ -281,6 +287,11 @@ static BOOL CDKWriteAll(int descriptor, const void *bytes, size_t length)
     [self.stderrCapture stop];
     self.stdoutCapture = nil;
     self.stderrCapture = nil;
+}
+
+- (BOOL)isExecutingOnReaderThread
+{
+    return [self.stdoutCapture isExecutingOnReaderThread] || [self.stderrCapture isExecutingOnReaderThread];
 }
 
 @end

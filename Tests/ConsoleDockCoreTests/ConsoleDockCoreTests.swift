@@ -462,6 +462,7 @@ final class ConsoleDockCoreTests: XCTestCase {
             Authorization=opaque123
             Cookie: session=cookie123; refresh=cookie456
             Set-Cookie: session=setcookie123
+            Bearer standaloneBearer123
             password=hunter2 passwd=pass123 token=tok123 access_token=access123 refresh-token=refresh123 api_key=api123 client_secret=client123 key=key123 secret=secret123
             {"refresh_token":"jsonRefresh123","client_secret":"jsonClient123"}
             """
@@ -482,6 +483,7 @@ final class ConsoleDockCoreTests: XCTestCase {
         XCTAssertFalse(message.contains("cookie123"))
         XCTAssertFalse(message.contains("cookie456"))
         XCTAssertFalse(message.contains("setcookie123"))
+        XCTAssertFalse(message.contains("standaloneBearer123"))
         XCTAssertFalse(message.contains("hunter2"))
         XCTAssertFalse(message.contains("pass123"))
         XCTAssertFalse(message.contains("tok123"))
@@ -576,6 +578,17 @@ final class ConsoleDockCoreTests: XCTestCase {
             ]
         )
         XCTAssertEqual(entries.map(\.redacted), [false, true, true, false])
+    }
+
+    func testPartialLineRedactsStandaloneBearerWhenKeywordSplitsAcrossFragments() throws {
+        XCTAssertEqual(CDKConsoleDock.start(with: noCaptureConfiguration()), .started)
+
+        CDKConsoleDock.append(CDKLineEvent(source: .stdout, message: "Bea", isPartial: true))
+        CDKConsoleDock.append(CDKLineEvent(source: .stdout, message: "rer bearer-secret", isPartial: false))
+
+        let entries = CDKConsoleDock.entries()
+        XCTAssertEqual(entries.map(\.message), ["Bea", "<redacted partial continuation>"])
+        XCTAssertEqual(entries.map(\.redacted), [false, true])
     }
 
     func testRedactedPartialLineContinuationStateIsSourceScoped() throws {
@@ -1138,6 +1151,14 @@ final class ConsoleDockCoreTests: XCTestCase {
             XCTAssertFalse(CDKConsoleDock.isRunning())
         }
     }
+
+    func testEntriesObserverCanStopFromStdoutCaptureNotification() throws {
+        try assertCaptureObserverCanStop(descriptor: STDOUT_FILENO, source: .stdout)
+    }
+
+    func testEntriesObserverCanStopFromStderrCaptureNotification() throws {
+        try assertCaptureObserverCanStop(descriptor: STDERR_FILENO, source: .stderr)
+    }
 }
 
 extension ConsoleDockCoreTests {
@@ -1172,6 +1193,44 @@ extension ConsoleDockCoreTests {
         configuration.captureStandardOutput = false
         configuration.captureStandardError = false
         return configuration
+    }
+
+    fileprivate func assertCaptureObserverCanStop(descriptor: Int32, source: CDKLogSource) throws {
+        try withOriginalDescriptorPipe(descriptor) { _ in
+            let configuration = CDKConfiguration.default()
+            configuration.captureStandardOutput = source == .stdout
+            configuration.captureStandardError = source == .stderr
+            XCTAssertEqual(CDKConsoleDock.start(with: configuration), .started)
+
+            let message = source == .stdout ? "cdk reentrant stdout stop" : "cdk reentrant stderr stop"
+            let stopReturned = expectation(description: "stop returned from captured entry observer")
+            let observer = observeEntriesDidChange { _ in
+                guard CDKConsoleDock.entries().contains(where: { $0.message == message && $0.source == source }) else {
+                    return
+                }
+                CDKConsoleDock.stop()
+                stopReturned.fulfill()
+            }
+            defer { NotificationCenter.default.removeObserver(observer) }
+
+            try writeAll("\(message)\n", to: descriptor)
+
+            wait(for: [stopReturned], timeout: 1.0)
+            XCTAssertTrue(waitForCondition { !CDKConsoleDock.isRunning() })
+            XCTAssertEqual(CDKConsoleDock.start(with: configuration), .started)
+            CDKConsoleDock.stop()
+        }
+    }
+
+    fileprivate func waitForCondition(timeout: TimeInterval = 1.0, condition: () -> Bool) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if condition() {
+                return true
+            }
+            usleep(10_000)
+        }
+        return condition()
     }
 
     fileprivate func withOriginalDescriptorPipe(_ descriptor: Int32, body: (Int32) throws -> Void) throws {

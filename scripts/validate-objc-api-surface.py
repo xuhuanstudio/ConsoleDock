@@ -63,7 +63,7 @@ REQUIRED_SNIPPETS = [
     "@property (nonatomic, readonly) BOOL truncated;",
     "- (instancetype)initWithIdentifier:(unsigned long long)identifier timestamp:(NSDate *)timestamp level:(CDKLogLevel)level source:(CDKLogSource)source message:(NSString *)message;",
     "- (instancetype)initWithIdentifier:(unsigned long long)identifier timestamp:(NSDate *)timestamp level:(CDKLogLevel)level source:(CDKLogSource)source message:(NSString *)message redacted:(BOOL)redacted truncated:(BOOL)truncated;",
-    "- (instancetype)initWithIdentifier:(unsigned long long)identifier timestamp:(NSDate *)timestamp level:(CDKLogLevel)level source:(CDKLogSource)source message:(NSString *)message isPartial:(BOOL)isPartial redacted:(BOOL)redacted truncated:(BOOL)truncated NS_DESIGNATED_INITIALIZER;",
+    "- (instancetype)initWithIdentifier:(unsigned long long)identifier timestamp:(NSDate *)timestamp level:(CDKLogLevel)level source:(CDKLogSource)source message:(NSString *)message isPartial:(BOOL)isPartial redacted:(BOOL)redacted truncated:(BOOL)truncated;",
     "- (instancetype)initWithIdentifier:(unsigned long long)identifier timestamp:(NSDate *)timestamp level:(CDKLogLevel)level source:(CDKLogSource)source message:(NSString *)message isPartial:(BOOL)isPartial isMarker:(BOOL)isMarker redacted:(BOOL)redacted truncated:(BOOL)truncated NS_DESIGNATED_INITIALIZER;",
     "- (instancetype)initWithTimestamp:(NSDate *)timestamp level:(CDKLogLevel)level source:(CDKLogSource)source message:(NSString *)message;",
     "@interface CDKDiagnostics : NSObject <NSCopying>",
