@@ -48,7 +48,7 @@ From the package root:
 scripts/validate-swift-sample-ui-smoke.sh
 ```
 
-The script chooses an available iPhone simulator unless `CONSOLEDOCK_UI_SMOKE_DESTINATION` is set. It launches the app with `--consoledock-ui-smoke` so the test focuses on native ConsoleDock entries, redaction, the bundled panel, structured Logs search, level filtering, Logs jump controls, log detail, markers, Timeline rows and detail navigation, issue report sharing, Local Session Archive save/detail/share/delete, Debug Actions, Actions search, parameterized Debug Actions, disabled/destructive action metadata, App Context tab refresh, ConsoleDock Health, Copy Integration Diagnosis, pause/resume, clear refresh, and close behavior without stdout/stderr capture descriptor noise. Unit tests cover structured Logs query parsing, the session-only recent parameter values, local action execution history, Session Timeline building, Integration Diagnosis text, reproduction timeline, temporary issue-report file output, and Local Session Archive persistence boundaries behind the sample flows.
+The script chooses an available iPhone simulator unless `CONSOLEDOCK_UI_SMOKE_DESTINATION` is set. It launches the app with `--consoledock-ui-smoke` so the test focuses on native ConsoleDock entries, redaction, the bundled panel, structured Logs search, level filtering, Logs jump controls, log detail, markers, Timeline rows and detail navigation, issue report sharing, the Support Report composer, Local Session Archive save/detail/share/delete, Debug Actions, Actions search, parameterized Debug Actions, disabled/destructive action metadata, App Context tab refresh, ConsoleDock Health, Copy Integration Diagnosis, pause/resume, clear refresh, and close behavior without stdout/stderr capture descriptor noise. Unit tests cover structured Logs query parsing, the session-only recent parameter values, local action execution history, Session Timeline building, Integration Diagnosis text, reproduction timeline, temporary issue-report file output, and Local Session Archive persistence boundaries behind the sample flows.
 
 ## Manual Check
 
@@ -62,13 +62,14 @@ For the full shared checklist, see [Sample app walkthrough](../../docs/sample-ap
 6. Search Logs with `level:error`, then use the Logs `Jump` menu to jump to the latest visible log and first/previous/next visible error.
 7. Add a marker from the console and confirm the `[marker]` entry appears.
 8. Switch to `Timeline` and confirm marker plus error/fault rows can open detail.
-9. Open the share menu and confirm `Share Issue Report`, `Copy Issue Report`, `Save Session Archive`, and `Saved Session Archives` are available. `Share Issue Report` uses a temporary local `.txt` item.
-10. Save a session archive, open it, confirm copy/share/delete controls are visible, then delete it.
-11. Switch to `Actions`, search for `Smoke`, and confirm the smoke action remains executable.
-12. Switch back to `Timeline` after running the smoke action and confirm action detail copy is available.
-13. Run `Open Order` and confirm the parameterized action form accepts an order id, then open it again and confirm the current process session remembers the recent value.
-14. Switch to `Context`, refresh, and confirm ConsoleDock Health, Copy Integration Diagnosis, and the sample App Context are visible.
-15. Confirm the disabled placeholder and destructive clear action metadata are visible.
-16. Tap `Clear` in the console or `Clear ConsoleDock Entries` in the sample to verify live refresh.
+9. Open the share menu and confirm `Share Issue Report`, `Copy Issue Report`, `Create Support Report`, `Save Session Archive`, and `Saved Session Archives` are available. `Share Issue Report` uses a temporary local `.txt` item.
+10. Open `Create Support Report`, verify presets, custom range, content switches, summary, preview, copy, and share, then return to Logs.
+11. Save a session archive, open it, confirm copy/share/delete controls are visible, then delete it.
+12. Switch to `Actions`, search for `Smoke`, and confirm the smoke action remains executable.
+13. Switch back to `Timeline` after running the smoke action and confirm action detail copy is available.
+14. Run `Open Order` and confirm the parameterized action form accepts an order id, then open it again and confirm the current process session remembers the recent value.
+15. Switch to `Context`, refresh, and confirm ConsoleDock Health, Copy Integration Diagnosis, and the sample App Context are visible.
+16. Confirm the disabled placeholder and destructive clear action metadata are visible.
+17. Tap `Clear` in the console or `Clear ConsoleDock Entries` in the sample to verify live refresh.
 
 When testing ConsoleDock's own stdout/stderr capture, avoid using `simctl launch --stdout` or `simctl launch --stderr` as the primary validation path because those flags also modify the app process descriptors. Running from Xcode or launching normally through Simulator gives a closer app-integration signal.

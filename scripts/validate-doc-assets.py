@@ -16,6 +16,7 @@ MIN_HEIGHT = 500
 
 REQUIRED_SCREENSHOTS = [
     pathlib.PurePosixPath("docs/assets/swift-sample-logs.png"),
+    pathlib.PurePosixPath("docs/assets/swift-sample-report.png"),
     pathlib.PurePosixPath("docs/assets/swift-sample-actions.png"),
     pathlib.PurePosixPath("docs/assets/swift-sample-timeline.png"),
     pathlib.PurePosixPath("docs/assets/swift-sample-context.png"),
@@ -28,6 +29,7 @@ REQUIRED_REFERENCES = {
     ],
     pathlib.Path("docs/sample-app-walkthrough.md"): [
         "assets/swift-sample-logs.png",
+        "assets/swift-sample-report.png",
         "assets/swift-sample-actions.png",
         "assets/swift-sample-timeline.png",
         "assets/swift-sample-context.png",

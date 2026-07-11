@@ -64,7 +64,7 @@ Simulator UI smoke tests and visual QA serve different purposes. UI smoke verifi
 For minor releases that materially affect the bundled UIKit panel:
 
 1. Run `scripts/capture-swift-sample-screenshots.sh`.
-2. Open `docs/assets/swift-sample-logs.png`, `docs/assets/swift-sample-actions.png`, `docs/assets/swift-sample-timeline.png`, and `docs/assets/swift-sample-archive.png`.
+2. Open `docs/assets/swift-sample-logs.png`, `docs/assets/swift-sample-report.png`, `docs/assets/swift-sample-actions.png`, `docs/assets/swift-sample-timeline.png`, `docs/assets/swift-sample-context.png`, and `docs/assets/swift-sample-archive.png`.
 3. Confirm screenshots show the current UI and deterministic sample data.
 4. Confirm all visible token-like sample values are redacted.
 5. Confirm no production logs, private app data, local filesystem paths, or generated build paths appear.

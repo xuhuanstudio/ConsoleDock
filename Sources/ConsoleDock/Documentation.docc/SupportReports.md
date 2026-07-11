@@ -8,6 +8,12 @@ Support Reports are available in `v0.14.0` and later. They are useful when the h
 
 ConsoleDock does not upload Support Reports. It only builds local text from currently retained, already-redacted ConsoleDock data plus baseline-redacted report-adjacent text such as App Context and Debug Action summaries. The host app owns consent, upload, ticket creation, cleanup, and any extra privacy review.
 
+## Use The Bundled Composer
+
+Open the Logs share menu and choose `Create Support Report` to build a report without adding a separate host-app screen. The bundled UIKit composer provides last 5/10/30/60 minute presets, all retained data, a custom start/end range, App Context and ConsoleDock Health switches, included/omitted counts, truncation status, a full text preview, local copy, and user-initiated `.txt` sharing.
+
+The composer is also available when the current log store is empty because diagnostics and App Context may still be useful. It does not add a top-level panel tab, persist selections, save raw logs, or send the report anywhere automatically.
+
 ## Build A Report
 
 The default report covers the last 10 minutes and uses a bounded maximum text size.

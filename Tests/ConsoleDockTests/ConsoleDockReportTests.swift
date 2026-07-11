@@ -4,6 +4,82 @@ import XCTest
 @testable import ConsoleDock
 
 final class ConsoleDockReportTests: ConsoleDockTestCase {
+    func testSupportReportComposerDefaultsToLast10MinutesWithContextAndHealth() {
+        let state = ConsoleDockSupportReportComposerState()
+
+        XCTAssertEqual(state.selectedPreset, .last10Minutes)
+        XCTAssertEqual(state.options.timeRange, .last(minutes: 10))
+        XCTAssertTrue(state.options.includesAppContext)
+        XCTAssertTrue(state.options.includesIntegrationHealth)
+        XCTAssertEqual(
+            state.options.maximumReportCharacterCount,
+            ConsoleDock.SupportReportOptions.defaultMaximumReportCharacterCount
+        )
+    }
+
+    func testSupportReportComposerPresetsMapToExpectedTimeRanges() {
+        let expectations:
+            [(
+                ConsoleDockSupportReportComposerState.TimeRangePreset,
+                ConsoleDock.SupportReportTimeRange
+            )] = [
+                (.last5Minutes, .last(minutes: 5)),
+                (.last10Minutes, .last(minutes: 10)),
+                (.last30Minutes, .last(minutes: 30)),
+                (.last60Minutes, .last(minutes: 60)),
+                (.allRetained, .allRetained)
+            ]
+        var state = ConsoleDockSupportReportComposerState()
+
+        for (preset, expectedRange) in expectations {
+            state.selectPreset(preset)
+            XCTAssertEqual(state.selectedPreset, preset)
+            XCTAssertEqual(state.options.timeRange, expectedRange)
+        }
+    }
+
+    func testSupportReportComposerNormalizesCustomRangeAndContentOptions() throws {
+        var state = ConsoleDockSupportReportComposerState()
+        let earlier = Date(timeIntervalSince1970: 10)
+        let later = Date(timeIntervalSince1970: 30)
+
+        state.selectCustomRange(from: later, to: earlier)
+        state.includesAppContext = false
+        state.includesIntegrationHealth = false
+
+        XCTAssertNil(state.selectedPreset)
+        let customRange = try XCTUnwrap(state.customRange)
+        XCTAssertEqual(customRange.from, earlier)
+        XCTAssertEqual(customRange.to, later)
+        XCTAssertEqual(state.options.timeRange, .range(from: earlier, to: later))
+        XCTAssertFalse(state.options.includesAppContext)
+        XCTAssertFalse(state.options.includesIntegrationHealth)
+    }
+
+    func testSupportReportComposerSummaryExposesCountsSizeAndTruncation() {
+        let state = ConsoleDockSupportReportComposerState(maximumReportCharacterCount: 1_024)
+        let report = ConsoleDock.SupportReport(
+            generatedAt: Date(timeIntervalSince1970: 100),
+            timeRangeDescription: "last 10 minutes",
+            includedEntryCount: 3,
+            omittedEntryCount: 2,
+            includedActionExecutionCount: 1,
+            omittedActionExecutionCount: 4,
+            reportCharacterCount: 2_000,
+            isReportTruncated: true,
+            text: String(repeating: "x", count: 1_024)
+        )
+
+        let summary = state.summaryText(for: report)
+
+        XCTAssertTrue(summary.contains("Range: last 10 minutes"))
+        XCTAssertTrue(summary.contains("Logs: 3 included, 2 omitted"))
+        XCTAssertTrue(summary.contains("Actions: 1 included, 4 omitted"))
+        XCTAssertTrue(summary.contains("1024 shown of 2000 generated characters"))
+        XCTAssertTrue(summary.contains("Status: truncated"))
+        XCTAssertTrue(summary.contains("Scope: current bounded session"))
+    }
+
     func testIssueReportFileExporterWritesTemporaryTextFile() throws {
         let reportText = "ConsoleDock Issue Report\nGenerated: fixture"
 

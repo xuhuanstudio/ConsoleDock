@@ -122,6 +122,8 @@ let report = ConsoleDock.supportReport(options: .last10Minutes)
 
 Support Reports should read from currently retained, already-redacted in-memory/session data. They may cover all retained data, the last 5/10/30/60 minutes, or an explicit date range. The 60-minute preset is useful for longer manual flows, but it must not imply continuous file logging or longer retention than the configured in-memory store.
 
+The bundled UIKit panel may expose an on-demand composer for these same options, summary metadata, preview, copy, and user-initiated sharing. It should remain an entry in the existing export/report flow rather than becoming a separate telemetry or feedback platform.
+
 The host app owns consent, upload, issue creation, cleanup, and privacy review. ConsoleDock should not send network requests, collect analytics, run a background uploader, or create remote tickets.
 
 ## Non-Goals

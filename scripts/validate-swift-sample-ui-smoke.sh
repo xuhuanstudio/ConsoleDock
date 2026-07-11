@@ -43,6 +43,8 @@ xcodebuild_arguments=(
   -destination "$destination"
   -only-testing:SwiftSampleAppUITests/ConsoleDockSwiftSampleUITests/testConsoleDockPanelSmokeFlow
   -only-testing:SwiftSampleAppUITests/ConsoleDockSwiftSampleUITests/testSessionArchiveSharePresentationKeepsAppRunning
+  -only-testing:SwiftSampleAppUITests/ConsoleDockSwiftSampleUITests/testSupportReportComposerRemainsAvailableWithEmptyStore
+  -only-testing:SwiftSampleAppUITests/ConsoleDockSwiftSampleUITests/testSupportReportSharePresentationKeepsAppRunning
 )
 if ((iterations > 1)); then
   xcodebuild_arguments+=(

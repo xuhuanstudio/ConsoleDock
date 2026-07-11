@@ -361,7 +361,9 @@ The bundled Logs share menu includes `Save Session Archive` and `Saved Session A
 
 ### Generate Support Reports For App-Owned Feedback
 
-Support Reports are available in `v0.14.0` and later. They are for app-owned feedback or support flows that need a local, already-redacted report for a time window such as the last 5, 10, 30, or 60 minutes.
+Support Reports are available in `v0.14.0` and later. They are for app-owned feedback or support flows that need a local, already-redacted report for a time window such as the last 5, 10, 30, or 60 minutes. The bundled Logs share menu also provides `Create Support Report`, so a tester can choose a preset, all retained data, or a custom start/end range; include or omit App Context and ConsoleDock Health; review included/omitted counts and truncation state; preview the complete report; then copy or share it as a temporary `.txt` file.
+
+<img src="docs/assets/swift-sample-report.png" alt="ConsoleDock iOS Support Report composer showing time-range presets, local content controls, report summary, and preview" width="320">
 
 ```swift
 let report = ConsoleDock.supportReport(options: .last10Minutes)

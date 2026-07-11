@@ -169,7 +169,8 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         tapMode("Logs", in: app)
         XCTAssertTrue(entriesTable.waitForExistence(timeout: 10))
         XCTAssertTrue(
-            waitForTableEntry(containing: "objc parameterized order action orderId=O-100", in: entriesTable, timeout: 15)
+            waitForTableEntry(
+                containing: "objc parameterized order action orderId=O-100", in: entriesTable, timeout: 15)
         )
 
         tapMode("Actions", in: app)
@@ -189,7 +190,8 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         XCTAssertTrue(app.alerts.firstMatch.waitForExistence(timeout: 5))
         app.alerts.firstMatch.buttons["consoledock.confirm-action"].firstMatch.tap()
         tapMode("Logs", in: app)
-        XCTAssertTrue(waitForTableEntry(containing: "Debug action completed: Clear Entries", in: entriesTable, timeout: 5))
+        XCTAssertTrue(
+            waitForTableEntry(containing: "Debug action completed: Clear Entries", in: entriesTable, timeout: 5))
 
         tapMode("Context", in: app)
         let contextTable = app.tables["consoledock.context-table"]
@@ -215,8 +217,26 @@ final class ConsoleDockObjCSampleUITests: XCTestCase {
         shareButton.tap()
         XCTAssertTrue(app.buttons["consoledock.share-issue-report"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["consoledock.copy-issue-report"].waitForExistence(timeout: 5))
+        let createSupportReportButton = app.buttons["consoledock.create-support-report"]
+        XCTAssertTrue(createSupportReportButton.waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["consoledock.save-session-archive"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["consoledock.saved-session-archives"].waitForExistence(timeout: 5))
+        createSupportReportButton.firstMatch.tap()
+
+        let supportReportPreview = app.textViews["consoledock.support-report.preview"]
+        XCTAssertTrue(supportReportPreview.waitForExistence(timeout: 5))
+        let supportReportRange = app.segmentedControls["consoledock.support-report.range"]
+        XCTAssertTrue(supportReportRange.waitForExistence(timeout: 5))
+        supportReportRange.buttons["60m"].tap()
+        let supportReportSummary = app.staticTexts["consoledock.support-report.summary"]
+        XCTAssertTrue(supportReportSummary.waitForExistence(timeout: 5))
+        XCTAssertTrue(waitForLabel(containing: "last 60 minutes", in: supportReportSummary, timeout: 5))
+        XCTAssertTrue(app.switches["consoledock.support-report.app-context"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.switches["consoledock.support-report.health"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["consoledock.support-report.copy"].waitForExistence(timeout: 5))
+        app.buttons["consoledock.support-report.copy"].tap()
+        tapBackButton(in: app)
+        XCTAssertTrue(entriesTable.waitForExistence(timeout: 5))
     }
 
     private func waitForTableEntry(in table: XCUIElement, timeout: TimeInterval) -> Bool {

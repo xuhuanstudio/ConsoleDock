@@ -269,7 +269,7 @@ try ConsoleDock.clearSessionArchives()
 
 ## Support Report
 
-Support Report 从 `v0.14.0` 开始属于已发布能力。它适合接入到 App 自己的用户反馈、客服或测试反馈入口中，用来按需生成一个本地、已脱敏、带时间范围的报告。
+Support Report 从 `v0.14.0` 开始属于已发布能力。它适合接入到 App 自己的用户反馈、客服或测试反馈入口中，用来按需生成一个本地、已脱敏、带时间范围的报告。内置 Logs 分享菜单也提供 `Create Support Report`：测试人员可以选择最近 5/10/30/60 分钟、全部保留内容或自定义起止时间，控制是否包含 App Context 和 ConsoleDock Health，查看包含/省略数量与截断状态，预览后再复制或分享临时 `.txt` 文件。
 
 ```swift
 let report = ConsoleDock.supportReport(options: .last10Minutes)

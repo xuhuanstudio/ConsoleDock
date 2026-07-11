@@ -86,7 +86,6 @@
                 action: #selector(showShareOptions)
             )
             shareButton.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.shareButton
-            shareButton.isEnabled = false
             self.shareButton = shareButton
 
             let clearButton = UIBarButtonItem(
@@ -250,7 +249,7 @@
                 sourceScope: sourceScope,
                 levelScope: levelScope
             )
-            shareButton?.isEnabled = !visibleEntries.isEmpty || !ConsoleDock.entries.isEmpty
+            shareButton?.isEnabled = true
             jumpInlineButton.isEnabled = !visibleEntries.isEmpty
             updateStatusHeader()
             updateEmptyState()
@@ -269,7 +268,7 @@
         }
 
         @objc private func showShareOptions() {
-            let alert = UIAlertController(title: "Share Logs", message: nil, preferredStyle: .actionSheet)
+            let alert = UIAlertController(title: "Export & Reports", message: nil, preferredStyle: .actionSheet)
             let visibleAction = UIAlertAction(title: "Share Visible Logs", style: .default) { [weak self] _ in
                 self?.share(entries: self?.visibleEntries ?? [], visibleEntryCount: self?.visibleEntries.count)
             }
@@ -294,6 +293,12 @@
             }
             copyReportAction.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.copyIssueReport
             alert.addAction(copyReportAction)
+            let supportReportAction = UIAlertAction(title: "Create Support Report", style: .default) {
+                [weak self] _ in
+                self?.showSupportReport()
+            }
+            supportReportAction.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.createSupportReport
+            alert.addAction(supportReportAction)
             let saveArchiveAction = UIAlertAction(title: "Save Session Archive", style: .default) { [weak self] _ in
                 self?.saveSessionArchive()
             }
@@ -342,6 +347,10 @@
             }
             activityController.popoverPresentationController?.barButtonItem = shareButton
             present(activityController, animated: true)
+        }
+
+        private func showSupportReport() {
+            navigationController?.pushViewController(ConsoleDockSupportReportViewController(), animated: true)
         }
 
         private func saveSessionArchive() {

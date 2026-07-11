@@ -449,6 +449,29 @@ Not included:
 - reading logs from other processes.
 - debugger features such as breakpoints or LLDB expression evaluation.
 
+## v1.1 - Local Report Composer
+
+Goal: make the existing bounded Support Report capability directly usable by testers without requiring every host app to build a separate report screen.
+
+Deliverables:
+
+- bundled UIKit composer opened from the existing Logs export and report menu;
+- last 5/10/30/60 minute, all-retained, and custom start/end range selection;
+- optional App Context and ConsoleDock Health sections;
+- included/omitted counts, size limit, truncation status, and full local preview;
+- copy and user-initiated temporary `.txt` sharing;
+- access when the retained log store is empty;
+- Swift and Objective-C sample smoke coverage plus maintained iPhone and iPad visual validation;
+- README, simplified Chinese README, DocC, changelog, and sample walkthrough updates.
+
+Not included:
+
+- analytics, telemetry, behavioral tracking, or automatic collection;
+- background upload, automatic issue creation, or remote commands;
+- continuous raw log files or expanded retention guarantees;
+- a new public Support Report API, top-level panel tab, saved presets, or report history;
+- SwiftUI rewrite, network inspector, crash reporting, CocoaPods, or XCFramework distribution.
+
 ## Post-1.0 Evaluation
 
 Post-1.0 work should start from real adoption feedback rather than speculative platform expansion.

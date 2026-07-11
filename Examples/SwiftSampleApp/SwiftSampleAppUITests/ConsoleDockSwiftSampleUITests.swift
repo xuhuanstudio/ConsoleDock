@@ -36,7 +36,25 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
         XCTAssertTrue(entriesTable.waitForExistence(timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "native error", in: entriesTable, timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "native fault", in: entriesTable, timeout: 5))
-        captureDocumentationScreenshot(named: "swift-sample-logs")
+        captureDocumentationScreenshot(named: "swift-sample-logs", in: app)
+
+        let shareButton = app.buttons["consoledock.share"]
+        XCTAssertTrue(shareButton.waitForExistence(timeout: 5))
+        shareButton.tap()
+        let createSupportReportButton = app.buttons["consoledock.create-support-report"]
+        XCTAssertTrue(createSupportReportButton.waitForExistence(timeout: 5))
+        createSupportReportButton.firstMatch.tap()
+        let supportReportPreview = app.textViews["consoledock.support-report.preview"]
+        XCTAssertTrue(supportReportPreview.waitForExistence(timeout: 5))
+        let supportReportRange = app.segmentedControls["consoledock.support-report.range"]
+        XCTAssertTrue(supportReportRange.waitForExistence(timeout: 5))
+        supportReportRange.buttons["60m"].tap()
+        let supportReportSummary = app.staticTexts["consoledock.support-report.summary"]
+        XCTAssertTrue(supportReportSummary.waitForExistence(timeout: 5))
+        XCTAssertTrue(waitForLabel(containing: "last 60 minutes", in: supportReportSummary, timeout: 5))
+        captureDocumentationScreenshot(named: "swift-sample-report", in: app)
+        tapBackButton(in: app)
+        XCTAssertTrue(entriesTable.waitForExistence(timeout: 5))
 
         tapMode("Actions", in: app)
         let actionsTable = app.tables["consoledock.actions-table"]
@@ -44,7 +62,7 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
         XCTAssertTrue(waitForTableEntry(containing: "Samples", in: actionsTable, timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "Generate Smoke Logs", in: actionsTable, timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "Open Order", in: actionsTable, timeout: 5))
-        captureDocumentationScreenshot(named: "swift-sample-actions")
+        captureDocumentationScreenshot(named: "swift-sample-actions", in: app)
 
         tableStaticText(containing: "Generate Smoke Logs", in: actionsTable).tap()
         tapMode("Timeline", in: app)
@@ -52,17 +70,16 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
         XCTAssertTrue(timelineTable.waitForExistence(timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "Generate Smoke Logs", in: timelineTable, timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "debug action smoke error", in: timelineTable, timeout: 5))
-        captureDocumentationScreenshot(named: "swift-sample-timeline")
+        captureDocumentationScreenshot(named: "swift-sample-timeline", in: app)
 
         tapMode("Context", in: app)
         let contextTable = app.tables["consoledock.context-table"]
         XCTAssertTrue(contextTable.waitForExistence(timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "ConsoleDock Health", in: contextTable, timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "Entry Sources", in: contextTable, timeout: 5))
-        captureDocumentationScreenshot(named: "swift-sample-context")
+        captureDocumentationScreenshot(named: "swift-sample-context", in: app)
 
         tapMode("Logs", in: app)
-        let shareButton = app.buttons["consoledock.share"]
         XCTAssertTrue(shareButton.waitForExistence(timeout: 5))
         shareButton.tap()
         XCTAssertTrue(app.buttons["consoledock.save-session-archive"].waitForExistence(timeout: 5))
@@ -75,7 +92,7 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
         let archivesTable = app.tables["consoledock.session-archives.table"]
         XCTAssertTrue(archivesTable.waitForExistence(timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "Session", in: archivesTable, timeout: 5))
-        captureDocumentationScreenshot(named: "swift-sample-archive")
+        captureDocumentationScreenshot(named: "swift-sample-archive", in: app)
     }
 
     func testConsoleDockPanelSmokeFlow() throws {
@@ -299,8 +316,42 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
         shareButton.tap()
         XCTAssertTrue(app.buttons["consoledock.share-issue-report"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["consoledock.copy-issue-report"].waitForExistence(timeout: 5))
+        let createSupportReportButton = app.buttons["consoledock.create-support-report"]
+        XCTAssertTrue(createSupportReportButton.waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["consoledock.save-session-archive"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["consoledock.saved-session-archives"].waitForExistence(timeout: 5))
+        createSupportReportButton.firstMatch.tap()
+
+        let supportReportPreview = app.textViews["consoledock.support-report.preview"]
+        XCTAssertTrue(supportReportPreview.waitForExistence(timeout: 5))
+        let supportReportRange = app.segmentedControls["consoledock.support-report.range"]
+        XCTAssertTrue(supportReportRange.waitForExistence(timeout: 5))
+        supportReportRange.buttons["60m"].tap()
+        let supportReportSummary = app.staticTexts["consoledock.support-report.summary"]
+        XCTAssertTrue(supportReportSummary.waitForExistence(timeout: 5))
+        XCTAssertTrue(waitForLabel(containing: "last 60 minutes", in: supportReportSummary, timeout: 5))
+        let appContextSwitch = app.switches["consoledock.support-report.app-context"]
+        XCTAssertTrue(appContextSwitch.waitForExistence(timeout: 5))
+        appContextSwitch.tap()
+        appContextSwitch.tap()
+        XCTAssertTrue(app.switches["consoledock.support-report.health"].waitForExistence(timeout: 5))
+
+        let customRangeButton = app.buttons["consoledock.support-report.custom-range"]
+        XCTAssertTrue(customRangeButton.waitForExistence(timeout: 5))
+        customRangeButton.tap()
+        XCTAssertTrue(app.datePickers["consoledock.support-report.start-date"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.datePickers["consoledock.support-report.end-date"].waitForExistence(timeout: 5))
+        let applyDateRangeButton = app.buttons["consoledock.support-report.apply-date-range"]
+        XCTAssertTrue(applyDateRangeButton.waitForExistence(timeout: 5))
+        applyDateRangeButton.tap()
+        XCTAssertTrue(supportReportPreview.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["consoledock.support-report.copy"].waitForExistence(timeout: 5))
+        app.buttons["consoledock.support-report.copy"].tap()
+        tapBackButton(in: app)
+        XCTAssertTrue(entriesTable.waitForExistence(timeout: 5))
+
+        shareButton.tap()
+        XCTAssertTrue(app.buttons["consoledock.save-session-archive"].waitForExistence(timeout: 5))
         app.buttons["consoledock.save-session-archive"].firstMatch.tap()
 
         let savedAlert = app.alerts["Saved Session Archive"]
@@ -359,6 +410,66 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
         RunLoop.current.run(until: Date().addingTimeInterval(1))
 
         XCTAssertEqual(app.state, .runningForeground)
+    }
+
+    func testSupportReportSharePresentationKeepsAppRunning() throws {
+        let app = XCUIApplication()
+        app.launchArguments.append("--consoledock-ui-smoke")
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["ConsoleDock Swift Sample"].waitForExistence(timeout: 5))
+        let nativeInfoButton = app.buttons["swift-sample.consoledock-info"]
+        XCTAssertTrue(nativeInfoButton.waitForExistence(timeout: 5))
+        nativeInfoButton.tap()
+        let showConsoleButton = app.buttons["swift-sample.show-console"]
+        XCTAssertTrue(showConsoleButton.waitForExistence(timeout: 5))
+        showConsoleButton.tap()
+
+        let shareButton = app.buttons["consoledock.share"]
+        XCTAssertTrue(shareButton.waitForExistence(timeout: 5))
+        shareButton.tap()
+        let createSupportReportButton = app.buttons["consoledock.create-support-report"]
+        XCTAssertTrue(createSupportReportButton.waitForExistence(timeout: 5))
+        createSupportReportButton.firstMatch.tap()
+
+        let reportShareButton = app.buttons["consoledock.support-report.share"]
+        XCTAssertTrue(reportShareButton.waitForExistence(timeout: 5))
+        reportShareButton.tap()
+        RunLoop.current.run(until: Date().addingTimeInterval(1))
+
+        XCTAssertEqual(app.state, .runningForeground)
+    }
+
+    func testSupportReportComposerRemainsAvailableWithEmptyStore() throws {
+        let app = XCUIApplication()
+        app.launchArguments.append("--consoledock-ui-smoke")
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["ConsoleDock Swift Sample"].waitForExistence(timeout: 5))
+        let showConsoleButton = app.buttons["swift-sample.show-console"]
+        XCTAssertTrue(showConsoleButton.waitForExistence(timeout: 5))
+        showConsoleButton.tap()
+
+        let statusLabel = app.descendants(matching: .any)["consoledock.status"]
+        XCTAssertTrue(statusLabel.waitForExistence(timeout: 5))
+        let clearButton = app.buttons["consoledock.clear"]
+        XCTAssertTrue(clearButton.waitForExistence(timeout: 5))
+        clearButton.tap()
+        XCTAssertTrue(waitForVisibleEntryCount(0, in: statusLabel, timeout: 10))
+
+        let shareButton = app.buttons["consoledock.share"]
+        XCTAssertTrue(shareButton.waitForExistence(timeout: 5))
+        XCTAssertTrue(shareButton.isHittable)
+        shareButton.tap()
+        let createSupportReportButton = app.buttons["consoledock.create-support-report"]
+        XCTAssertTrue(createSupportReportButton.waitForExistence(timeout: 5))
+        createSupportReportButton.firstMatch.tap()
+
+        let supportReportPreview = app.textViews["consoledock.support-report.preview"]
+        XCTAssertTrue(supportReportPreview.waitForExistence(timeout: 5))
+        let supportReportSummary = app.staticTexts["consoledock.support-report.summary"]
+        XCTAssertTrue(supportReportSummary.waitForExistence(timeout: 5))
+        XCTAssertTrue(waitForLabel(containing: "Logs: 0 included", in: supportReportSummary, timeout: 5))
     }
 
     private func waitForTableEntry(in table: XCUIElement, timeout: TimeInterval) -> Bool {
@@ -564,9 +675,9 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
         }
     }
 
-    private func captureDocumentationScreenshot(named name: String) {
+    private func captureDocumentationScreenshot(named name: String, in app: XCUIApplication) {
         RunLoop.current.run(until: Date().addingTimeInterval(1.5))
-        let screenshot = XCUIScreen.main.screenshot()
+        let screenshot = app.screenshot()
         let attachment = XCTAttachment(screenshot: screenshot)
         attachment.name = name
         attachment.lifetime = .keepAlways

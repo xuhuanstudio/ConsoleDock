@@ -6,7 +6,15 @@ The project follows Semantic Versioning for public releases.
 
 ## Unreleased
 
-No changes yet.
+### Added
+
+- Added a bundled UIKit Support Report composer with 5/10/30/60-minute, all-retained, and custom date-range selection, optional App Context and ConsoleDock Health sections, report summary, full preview, copy, and user-initiated temporary-file sharing.
+- Added Swift and Objective-C sample UI coverage for the shared composer, including custom ranges, empty-store access, copy, iPhone/iPad layout checks, and iPad share presentation.
+
+### Changed
+
+- Kept the Logs export and report menu available when no log entries are retained so diagnostics and App Context can still be reported.
+- Added the Support Report composer to the maintained documentation screenshot set and made screenshot capture target the app under test for more stable simulator output.
 
 ## v1.0.2 - 2026-07-11
 

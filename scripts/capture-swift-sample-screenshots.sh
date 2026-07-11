@@ -33,6 +33,7 @@ mkdir -p "$output_directory"
 rm -rf "$result_bundle" "$attachment_directory"
 rm -f \
   "$output_directory/swift-sample-logs.png" \
+  "$output_directory/swift-sample-report.png" \
   "$output_directory/swift-sample-actions.png" \
   "$output_directory/swift-sample-timeline.png" \
   "$output_directory/swift-sample-context.png" \
@@ -68,6 +69,7 @@ manifest_path = attachment_directory / "manifest.json"
 
 required_names = {
     "swift-sample-logs": "swift-sample-logs.png",
+    "swift-sample-report": "swift-sample-report.png",
     "swift-sample-actions": "swift-sample-actions.png",
     "swift-sample-timeline": "swift-sample-timeline.png",
     "swift-sample-context": "swift-sample-context.png",
