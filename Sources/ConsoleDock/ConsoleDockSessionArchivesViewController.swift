@@ -174,6 +174,7 @@
         private let onDeleted: () -> Void
         private let metadataLabel = UILabel()
         private let reportTextView = UITextView()
+        private var shareButton: UIBarButtonItem?
 
         init(archive: ConsoleDock.SessionArchive, onDeleted: @escaping () -> Void) {
             self.archive = archive
@@ -210,6 +211,7 @@
                 action: #selector(shareArchive)
             )
             shareButton.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.shareSessionArchiveButton
+            self.shareButton = shareButton
 
             let copyButton = UIBarButtonItem(
                 title: "Copy",
@@ -300,6 +302,7 @@
                 guard let temporaryFileURL else { return }
                 try? FileManager.default.removeItem(at: temporaryFileURL)
             }
+            activityController.popoverPresentationController?.barButtonItem = shareButton
             present(activityController, animated: true)
         }
 

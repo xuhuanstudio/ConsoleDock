@@ -41,6 +41,7 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
         tapMode("Actions", in: app)
         let actionsTable = app.tables["consoledock.actions-table"]
         XCTAssertTrue(actionsTable.waitForExistence(timeout: 5))
+        XCTAssertTrue(waitForTableEntry(containing: "Samples", in: actionsTable, timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "Generate Smoke Logs", in: actionsTable, timeout: 5))
         XCTAssertTrue(waitForTableEntry(containing: "Open Order", in: actionsTable, timeout: 5))
         captureDocumentationScreenshot(named: "swift-sample-actions")
@@ -323,6 +324,43 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["consoledock.session-archives.empty"].waitForExistence(timeout: 5))
     }
 
+    func testSessionArchiveSharePresentationKeepsAppRunning() throws {
+        let app = XCUIApplication()
+        app.launchArguments.append("--consoledock-ui-smoke")
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["ConsoleDock Swift Sample"].waitForExistence(timeout: 5))
+        let nativeInfoButton = app.buttons["swift-sample.consoledock-info"]
+        XCTAssertTrue(nativeInfoButton.waitForExistence(timeout: 5))
+        nativeInfoButton.tap()
+        let showConsoleButton = app.buttons["swift-sample.show-console"]
+        XCTAssertTrue(showConsoleButton.waitForExistence(timeout: 5))
+        showConsoleButton.tap()
+
+        let shareButton = app.buttons["consoledock.share"]
+        XCTAssertTrue(shareButton.waitForExistence(timeout: 5))
+        shareButton.tap()
+        let saveArchiveButton = app.buttons["consoledock.save-session-archive"]
+        XCTAssertTrue(saveArchiveButton.waitForExistence(timeout: 5))
+        saveArchiveButton.firstMatch.tap()
+
+        let savedAlert = app.alerts["Saved Session Archive"]
+        XCTAssertTrue(savedAlert.waitForExistence(timeout: 5))
+        savedAlert.buttons["View Archives"].tap()
+
+        let archivesTable = app.tables["consoledock.session-archives.table"]
+        XCTAssertTrue(archivesTable.waitForExistence(timeout: 5))
+        XCTAssertTrue(waitForTableEntry(containing: "Session", in: archivesTable, timeout: 5))
+        tableStaticText(containing: "Session", in: archivesTable).tap()
+
+        let archiveShareButton = app.buttons["consoledock.session-archive-detail.share"]
+        XCTAssertTrue(archiveShareButton.waitForExistence(timeout: 5))
+        archiveShareButton.tap()
+        RunLoop.current.run(until: Date().addingTimeInterval(1))
+
+        XCTAssertEqual(app.state, .runningForeground)
+    }
+
     private func waitForTableEntry(in table: XCUIElement, timeout: TimeInterval) -> Bool {
         let deadline = Date().addingTimeInterval(timeout)
         repeat {
@@ -527,6 +565,7 @@ final class ConsoleDockSwiftSampleUITests: XCTestCase {
     }
 
     private func captureDocumentationScreenshot(named name: String) {
+        RunLoop.current.run(until: Date().addingTimeInterval(1.5))
         let screenshot = XCUIScreen.main.screenshot()
         let attachment = XCTAttachment(screenshot: screenshot)
         attachment.name = name

@@ -28,14 +28,27 @@ fi
 
 printf 'Swift sample UI smoke destination: %s\n' "$destination"
 iterations="${CONSOLEDOCK_UI_SMOKE_TEST_ITERATIONS:-2}"
+if [[ ! "$iterations" =~ ^[1-9][0-9]*$ ]]; then
+  echo "error: CONSOLEDOCK_UI_SMOKE_TEST_ITERATIONS must be a positive integer." >&2
+  exit 1
+fi
 printf 'Swift sample UI smoke test iterations: %s\n' "$iterations"
 
 defaults write com.apple.iphonesimulator ConnectHardwareKeyboard -bool false || true
 
-xcodebuild test \
-  -project Examples/SwiftSampleApp/SwiftSampleApp.xcodeproj \
-  -scheme SwiftSampleApp \
-  -destination "$destination" \
-  -test-iterations "$iterations" \
-  -retry-tests-on-failure \
+xcodebuild_arguments=(
+  test
+  -project Examples/SwiftSampleApp/SwiftSampleApp.xcodeproj
+  -scheme SwiftSampleApp
+  -destination "$destination"
   -only-testing:SwiftSampleAppUITests/ConsoleDockSwiftSampleUITests/testConsoleDockPanelSmokeFlow
+  -only-testing:SwiftSampleAppUITests/ConsoleDockSwiftSampleUITests/testSessionArchiveSharePresentationKeepsAppRunning
+)
+if ((iterations > 1)); then
+  xcodebuild_arguments+=(
+    -test-iterations "$iterations"
+    -retry-tests-on-failure
+  )
+fi
+
+xcodebuild "${xcodebuild_arguments[@]}"

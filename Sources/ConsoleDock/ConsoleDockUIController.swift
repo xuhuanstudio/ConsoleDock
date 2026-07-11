@@ -249,6 +249,9 @@
             let navigationController = UINavigationController(rootViewController: panel)
             navigationController.modalPresentationStyle = .overFullScreen
             navigationController.view.backgroundColor = UIColor.black.withAlphaComponent(0.92)
+            if #available(iOS 13.0, *) {
+                navigationController.overrideUserInterfaceStyle = .dark
+            }
             configurePanelNavigationBar(navigationController.navigationBar)
             panelController = panel
             rootViewController.present(navigationController, animated: true)
@@ -319,6 +322,7 @@
                 target: self,
                 action: #selector(close)
             )
+            closeButton.tintColor = ConsoleDockUIColors.primaryText
             closeButton.accessibilityIdentifier = ConsoleDockAccessibilityIdentifiers.closeButton
             navigationItem.leftBarButtonItem = closeButton
 
@@ -372,7 +376,7 @@
         }
 
         private func showLogs() {
-            modeControl.selectedSegmentIndex = 0
+            selectModeIfNeeded(0)
             switchTo(logsViewController)
             timelineViewController.deactivate()
             actionsViewController.deactivateSearch()
@@ -381,7 +385,7 @@
         }
 
         private func showTimeline() {
-            modeControl.selectedSegmentIndex = 1
+            selectModeIfNeeded(1)
             switchTo(timelineViewController)
             logsViewController.deactivateSearch()
             actionsViewController.deactivateSearch()
@@ -391,7 +395,7 @@
         }
 
         private func showActions() {
-            modeControl.selectedSegmentIndex = 2
+            selectModeIfNeeded(2)
             switchTo(actionsViewController)
             logsViewController.deactivateSearch()
             timelineViewController.deactivate()
@@ -401,13 +405,18 @@
         }
 
         private func showContext() {
-            modeControl.selectedSegmentIndex = 3
+            selectModeIfNeeded(3)
             switchTo(contextViewController)
             logsViewController.deactivateSearch()
             timelineViewController.deactivate()
             actionsViewController.deactivateSearch()
             navigationItem.searchController = nil
             contextViewController.activate()
+        }
+
+        private func selectModeIfNeeded(_ index: Int) {
+            guard modeControl.selectedSegmentIndex != index else { return }
+            modeControl.selectedSegmentIndex = index
         }
 
         private func switchTo(_ nextViewController: UIViewController) {

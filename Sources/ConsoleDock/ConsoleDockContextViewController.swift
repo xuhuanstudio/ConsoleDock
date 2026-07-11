@@ -1,7 +1,7 @@
 #if canImport(UIKit)
     import UIKit
 
-    final class ConsoleDockContextViewController: UIViewController, UITableViewDataSource {
+    final class ConsoleDockContextViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
         var navigationItemsDidChange: (([UIBarButtonItem]) -> Void)?
 
         private let tableView = UITableView(frame: .zero, style: .grouped)
@@ -66,6 +66,7 @@
             tableView.backgroundColor = ConsoleDockUIColors.background
             tableView.separatorColor = ConsoleDockUIColors.separator
             tableView.dataSource = self
+            tableView.delegate = self
             tableView.rowHeight = UITableView.automaticDimension
             tableView.estimatedRowHeight = 54
             tableView.tableFooterView = UIView()
@@ -139,6 +140,10 @@
             sections[section].title
         }
 
+        func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+            ConsoleDockTableHeaderStyle.apply(to: view)
+        }
+
         func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
             let reuseIdentifier = "ConsoleDockContextCell"
             let cell =
@@ -149,10 +154,12 @@
             cell.selectionStyle = .none
             cell.textLabel?.text = item.key
             cell.textLabel?.font = .preferredFont(forTextStyle: .body)
+            cell.textLabel?.adjustsFontForContentSizeCategory = true
             cell.textLabel?.textColor = ConsoleDockUIColors.primaryText
             cell.textLabel?.numberOfLines = 0
             cell.detailTextLabel?.text = item.value
             cell.detailTextLabel?.font = ConsoleDockFonts.monospace(size: 11, weight: .regular)
+            cell.detailTextLabel?.adjustsFontForContentSizeCategory = true
             cell.detailTextLabel?.textColor = ConsoleDockUIColors.secondaryText
             cell.detailTextLabel?.numberOfLines = 0
             cell.accessibilityLabel = "\(item.key): \(item.value)"

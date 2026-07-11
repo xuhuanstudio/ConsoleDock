@@ -12,7 +12,7 @@ The sample starts ConsoleDock on launch, enables stdout/stderr capture, shows th
 - Session-only recent parameter reuse and local action execution history
 - App Context snapshots for the bundled Context tab and issue reports
 - Session Timeline rows for markers, Debug Actions, and retained error/fault logs
-- Local Session Archive save/review/delete flows
+- Local Session Archive save/review/share/delete flows
 - Floating trigger controls through `ConsoleDock.showFloatingButton()` and `ConsoleDock.hideFloatingButton()`
 - Manual markers through `ConsoleDock.mark`
 - App-specific logger sink forwarding through `ConsoleDock.LogForwarder`
@@ -48,7 +48,7 @@ From the package root:
 scripts/validate-swift-sample-ui-smoke.sh
 ```
 
-The script chooses an available iPhone simulator unless `CONSOLEDOCK_UI_SMOKE_DESTINATION` is set. It launches the app with `--consoledock-ui-smoke` so the test focuses on native ConsoleDock entries, redaction, the bundled panel, structured Logs search, level filtering, Logs jump controls, log detail, markers, Timeline rows and detail navigation, issue report sharing, Local Session Archive save/detail/delete, Debug Actions, Actions search, parameterized Debug Actions, disabled/destructive action metadata, App Context tab refresh, ConsoleDock Health, Copy Integration Diagnosis, pause/resume, clear refresh, and close behavior without stdout/stderr capture descriptor noise. Unit tests cover structured Logs query parsing, the session-only recent parameter values, local action execution history, Session Timeline building, Integration Diagnosis text, reproduction timeline, temporary issue-report file output, and Local Session Archive persistence boundaries behind the sample flows.
+The script chooses an available iPhone simulator unless `CONSOLEDOCK_UI_SMOKE_DESTINATION` is set. It launches the app with `--consoledock-ui-smoke` so the test focuses on native ConsoleDock entries, redaction, the bundled panel, structured Logs search, level filtering, Logs jump controls, log detail, markers, Timeline rows and detail navigation, issue report sharing, Local Session Archive save/detail/share/delete, Debug Actions, Actions search, parameterized Debug Actions, disabled/destructive action metadata, App Context tab refresh, ConsoleDock Health, Copy Integration Diagnosis, pause/resume, clear refresh, and close behavior without stdout/stderr capture descriptor noise. Unit tests cover structured Logs query parsing, the session-only recent parameter values, local action execution history, Session Timeline building, Integration Diagnosis text, reproduction timeline, temporary issue-report file output, and Local Session Archive persistence boundaries behind the sample flows.
 
 ## Manual Check
 

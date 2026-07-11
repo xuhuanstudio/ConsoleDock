@@ -161,6 +161,10 @@
             sections[section].title
         }
 
+        func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+            ConsoleDockTableHeaderStyle.apply(to: view)
+        }
+
         func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
             let reuseIdentifier = "ConsoleDockActionCell"
             let cell =
@@ -171,9 +175,11 @@
             cell.textLabel?.textColor =
                 action.style == .destructive ? ConsoleDockUIColors.level(.error) : ConsoleDockUIColors.primaryText
             cell.textLabel?.font = .preferredFont(forTextStyle: .body)
+            cell.textLabel?.adjustsFontForContentSizeCategory = true
             cell.textLabel?.text = action.title
             cell.detailTextLabel?.textColor = ConsoleDockUIColors.secondaryText
             cell.detailTextLabel?.font = .preferredFont(forTextStyle: .footnote)
+            cell.detailTextLabel?.adjustsFontForContentSizeCategory = true
             cell.detailTextLabel?.numberOfLines = 0
             cell.detailTextLabel?.text = detailText(for: action)
             cell.contentView.alpha = action.isEnabled ? 1 : 0.5

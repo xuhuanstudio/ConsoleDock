@@ -100,17 +100,32 @@
 
     enum ConsoleDockSegmentedControlStyle {
         static func applyDarkPanelStyle(to control: UISegmentedControl) {
+            let normalTextAttributes: [NSAttributedString.Key: Any] = [
+                .foregroundColor: UIColor(white: 0.86, alpha: 1)
+            ]
+            let selectedTextAttributes: [NSAttributedString.Key: Any] = [
+                .foregroundColor: UIColor.black
+            ]
             control.backgroundColor = UIColor(white: 0.1, alpha: 1)
             if #available(iOS 13.0, *) {
+                control.overrideUserInterfaceStyle = .dark
                 control.selectedSegmentTintColor = UIColor(white: 0.92, alpha: 1)
+                control.tintColor = UIColor(white: 0.86, alpha: 1)
             } else {
                 control.tintColor = UIColor(white: 0.92, alpha: 1)
             }
-            control.setTitleTextAttributes([.foregroundColor: UIColor.black], for: .selected)
-            control.setTitleTextAttributes(
-                [.foregroundColor: UIColor(white: 0.86, alpha: 1)],
-                for: .normal
-            )
+            control.setTitleTextAttributes(normalTextAttributes, for: .normal)
+            control.setTitleTextAttributes(selectedTextAttributes, for: .selected)
+        }
+    }
+
+    enum ConsoleDockTableHeaderStyle {
+        static func apply(to view: UIView) {
+            guard let header = view as? UITableViewHeaderFooterView else { return }
+            header.tintColor = ConsoleDockUIColors.background
+            header.textLabel?.font = .preferredFont(forTextStyle: .footnote)
+            header.textLabel?.adjustsFontForContentSizeCategory = true
+            header.textLabel?.textColor = ConsoleDockUIColors.secondaryText
         }
     }
 

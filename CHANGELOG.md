@@ -13,6 +13,15 @@ The project follows Semantic Versioning for public releases.
 ### Changed
 
 - Tightened README and Chinese README first-screen positioning for iOS, Swift, Objective-C, and Xcode-free testing discovery.
+- Refreshed the bundled panel screenshots and hardened simulator screenshot and UI smoke validation across compact iPhone and iPad layouts.
+- Updated the Objective-C sample to report Local Session Archive cleanup failures.
+
+### Fixed
+
+- Prevented a deadlock when `stop()` is called synchronously from a stdout or stderr entry notification observer.
+- Fixed grouped table header contrast in the bundled dark panel and anchored Local Session Archive sharing correctly on iPad.
+- Redacted standalone and split-fragment `Bearer` credentials consistently with authorization-header values.
+- Removed an incorrect Objective-C designated-initializer annotation that produced analyzer warnings for the supported convenience initializer.
 
 ## v1.0.1 - 2026-06-27
 
