@@ -6,6 +6,10 @@ The project follows Semantic Versioning for public releases.
 
 ## Unreleased
 
+No changes yet.
+
+## v1.1.0 - 2026-07-11
+
 ### Added
 
 - Added a bundled UIKit Support Report composer with 5/10/30/60-minute, all-retained, and custom date-range selection, optional App Context and ConsoleDock Health sections, report summary, full preview, copy, and user-initiated temporary-file sharing.
